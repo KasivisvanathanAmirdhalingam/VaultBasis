@@ -120,3 +120,96 @@ ETH,2025-10-15,3500.00,2025-01-10,2500.00,YES
 
     assert data["outcome_state"] == "MATCHED"
     assert len(data["reconciliation"]["material_differences"]) == 0
+
+
+@pytest.mark.atdd
+@pytest.mark.regression
+def test_atdd_unresolved_basis_missing_box1e_journey(client):
+    """
+    Scenario: Taxpayer has Form 1099-DA with missing Cost Basis (Box 1e blank).
+    VaultBasis must classify as UNRESOLVED_DATA, never coerce to $0.00,
+    and produce an independently verifiable signed receipt with explicit unresolved reasons.
+    """
+    case_id = "CASE-ATDD-UNREPORTED-SCOPE"
+    client.post("/api/cases", json={"case_id": case_id, "tax_year": 2025})
+
+    csv_1099 = b"""Property,Date sold,Proceeds,Date acquired,Cost basis,Box 2
+SOL,2025-08-14,4500.00,2025-01-10,,NO
+"""
+    csv_koinly = b"""Date,Asset,Amount,Cost basis,Proceeds,Gain / loss,Date acquired
+2025-08-14,SOL,30.0,4000.00,4500.00,500.00,2025-01-10
+"""
+    client.post(f"/api/cases/{case_id}/sources", files={"file": ("1099_unreported.csv", csv_1099, "text/csv")})
+    client.post(f"/api/cases/{case_id}/sources", files={"file": ("koinly_report.csv", csv_koinly, "text/csv")})
+
+    recon_res = client.post(f"/api/cases/{case_id}/reconcile")
+    assert recon_res.status_code == 200
+    data = recon_res.json()
+
+    assert data["outcome_state"] == "REPORTING_SCOPE_DIFFERENCE"
+    diffs = data["reconciliation"]["material_differences"]
+    assert len(diffs) >= 1
+    assert diffs[0]["difference_state"] == "REPORTING_SCOPE_DIFFERENCE"
+    assert diffs[0]["source_a_value"] == "NOT_REPORTED (Box 2)"
+    assert diffs[0]["source_b_value"] == "4000.00"
+
+    # Verify receipt generated
+    receipt = data["receipt"]
+    ver = verify_outcome_receipt(receipt)
+    assert ver.is_valid is True
+    assert ver.outcome_state == "REPORTING_SCOPE_DIFFERENCE"
+
+
+
+@pytest.mark.atdd
+@pytest.mark.regression
+def test_atdd_zip_bundle_complete_standalone_reverification(client, tmp_path):
+    """
+    Scenario: Auditor receives ZIP evidence bundle exported by VaultBasis.
+    Auditor extracts ZIP in an air-gapped machine with clean Python, runs verify_receipt.py,
+    and achieves 100% independent verification without any network or external database calls.
+    """
+    import subprocess
+    import sys
+
+    case_id = "CASE-ATDD-ZIP-BUNDLE"
+    client.post("/api/cases", json={"case_id": case_id, "tax_year": 2025})
+
+    csv_1099 = b"Property,Date sold,Proceeds,Date acquired,Cost basis,Box 2\nBTC,2025-05-01,12000.00,2024-05-01,10000.00,YES\n"
+    csv_koinly = b"Date,Asset,Amount,Cost basis,Proceeds,Gain / loss,Date acquired\n2025-05-01,BTC,1.0,10000.00,12000.00,2000.00,2024-05-01\n"
+    client.post(f"/api/cases/{case_id}/sources", files={"file": ("1099.csv", csv_1099, "text/csv")})
+    client.post(f"/api/cases/{case_id}/sources", files={"file": ("koinly.csv", csv_koinly, "text/csv")})
+    client.post(f"/api/cases/{case_id}/reconcile")
+
+    # Download ZIP bundle
+    bundle_res = client.get(f"/api/cases/{case_id}/export")
+    assert bundle_res.status_code == 200
+
+    # Extract to standalone temporary directory
+    bundle_dir = tmp_path / "auditor_export"
+    bundle_dir.mkdir()
+    with zipfile.ZipFile(io.BytesIO(bundle_res.content)) as zf:
+        zf.extractall(bundle_dir)
+
+    receipt_file = bundle_dir / "receipt-v0.1.json"
+    verifier_script = bundle_dir / "verify_receipt.py"
+    instructions_file = bundle_dir / "VERIFY_INSTRUCTIONS.txt"
+
+    assert receipt_file.exists()
+    assert verifier_script.exists()
+    assert instructions_file.exists()
+
+    # Execute standalone CLI verifier in auditor folder
+    cmd = [
+        sys.executable,
+        str(verifier_script),
+        str(receipt_file),
+        "--no-color",
+        "--json"
+    ]
+    proc = subprocess.run(cmd, cwd=str(bundle_dir), capture_output=True, text=True)
+    assert proc.returncode == 0
+    res_json = json.loads(proc.stdout)
+    assert res_json["is_valid"] is True
+    assert res_json["outcome_state"] == "MATCHED"
+

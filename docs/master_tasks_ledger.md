@@ -99,77 +99,81 @@ Golden Test Suite ───> Fuzz Suite ───> Zero-Egress Net Audit ──�
 
 ### Workstream 1: Governance & Evidence Contract Foundation (Slice 1)
 
-| Task ID | Component | Task Description | PRD Ref | Priority | DoD Exit Criterion | Status |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **GOV-01** | Evidence Contract | Draft normative JSON Schema `schemas/receipt/receipt-v0.1.json` specifying all 23 core fields | §13.2, §13.3 | P0 | Strict JSON Schema draft-07 validated | **COMPLETED** |
-| **GOV-02** | Canonicalization | Define `schemas/receipt/canonicalization-v0.1.md` (UTF-8, sorted keys, strict decimal strings, UTC ISO 8601) | §44.1, §13.2 | P0 | Deterministic byte-for-byte serialization spec | **COMPLETED** |
-| **GOV-03** | Signing Spec | Define `schemas/receipt/signing-v0.1.md` for Ed25519 installation key signing over SHA-256 digest | §13.5, §44.3 | P0 | Exact signing and signature verification algorithm | **COMPLETED** |
-| **GOV-04** | Verifier Spec | Define `schemas/receipt/verification-v0.1.md` governing offline, zero-network verification rules | §13.8, §44.7 | P0 | Verifier pass/fail rules & limitation statements | **COMPLETED** |
-| **GOV-05** | Vocabulary Spec | Formalize 13 reconciliation states, 5 assurance levels, and authority classes | §14.3, §7.5 | P0 | Normative enums documented with zero ambiguity | **COMPLETED** |
-| **GOV-06** | Golden Fixtures | Generate initial valid and tampered golden receipts for test automation | §43.2, §51.3 | P0 | At least 3 valid + 3 invalid test fixtures committed | **COMPLETED** |
+| Task ID | Component | Task Description | PRD Ref | Priority | DoD Exit Criterion | Status | Commit ID |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **GOV-01** | Evidence Contract | Draft normative JSON Schema `schemas/receipt/receipt-v0.1.json` specifying all 23 core fields | §13.2, §13.3 | P0 | Strict JSON Schema draft-07 validated | **COMPLETED** | `b5a3e5f` |
+| **GOV-02** | Canonicalization | Define `schemas/receipt/canonicalization-v0.1.md` (UTF-8, sorted keys, strict decimal strings, UTC ISO 8601) | §44.1, §13.2 | P0 | Deterministic byte-for-byte serialization spec | **COMPLETED** | `b5a3e5f` |
+| **GOV-03** | Signing Spec | Define `schemas/receipt/signing-v0.1.md` for Ed25519 installation key signing over SHA-256 digest | §13.5, §44.3 | P0 | Exact signing and signature verification algorithm | **COMPLETED** | `b5a3e5f` |
+| **GOV-04** | Verifier Spec | Define `schemas/receipt/verification-v0.1.md` governing offline, zero-network verification rules | §13.8, §44.7 | P0 | Verifier pass/fail rules & limitation statements | **COMPLETED** | `b5a3e5f` |
+| **GOV-05** | Vocabulary Spec | Formalize 13 reconciliation states, 5 assurance levels, and authority classes | §14.3, §7.5 | P0 | Normative enums documented with zero ambiguity | **COMPLETED** | `b5a3e5f` |
+| **GOV-06** | Golden Fixtures | Generate initial valid and tampered golden receipts for test automation | §43.2, §51.3 | P0 | At least 3 valid + 3 invalid test fixtures committed | **COMPLETED** | `b5a3e5f` |
 
 ### Workstream 2: Core Cryptographic & Verifier Engine (Slice 1)
 
-| Task ID | Component | Task Description | PRD Ref | Priority | DoD Exit Criterion | Status |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **ENG-10A**| Key Management | Implement local Ed25519 keypair generation and secure file-permission storage | §13.5, §23.2 | P0 | Key generated with 0600 permissions, unique installation ID | **COMPLETED** |
-| **ENG-10B**| Canonical Serializer| Implement deterministic JSON canonicalizer conforming to `canonicalization-v0.1.md` | §44.1, §44.5 | P0 | 100% deterministic SHA-256 hash across runs | **COMPLETED** |
-| **ENG-10C**| Receipt Signer | Implement receipt builder and signer producing `receipt-v0.1.json` | §13.3, §13.5 | P0 | Generates compliant signed receipt document | **COMPLETED** |
-| **ENG-11A**| Offline Verifier CLI| Build standalone zero-dependency Python/CLI verifier checking signature, schema, hash | §13.8, §34.3 | P0 | CLI validates valid receipt as PASS, tampered as FAIL | **COMPLETED** |
-| **ENG-11B**| Clean-Machine Test | Verify offline verifier works in disconnected container with no network access | §41 (AC-06) | P0 | 100% pass on clean offline environment | **COMPLETED** |
+| Task ID | Component | Task Description | PRD Ref | Priority | DoD Exit Criterion | Status | Commit ID |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **ENG-10A**| Key Management | Implement local Ed25519 keypair generation and secure file-permission storage | §13.5, §23.2 | P0 | Key generated with 0600 permissions, unique installation ID | **COMPLETED** | `b5a3e5f` |
+| **ENG-10B**| Canonical Serializer| Implement deterministic JSON canonicalizer conforming to `canonicalization-v0.1.md` | §44.1, §44.5 | P0 | 100% deterministic SHA-256 hash across runs | **COMPLETED** | `b5a3e5f` |
+| **ENG-10C**| Receipt Signer | Implement receipt builder and signer producing `receipt-v0.1.json` | §13.3, §13.5 | P0 | Generates compliant signed receipt document | **COMPLETED** | `b5a3e5f` |
+| **ENG-11A**| Offline Verifier CLI| Build standalone zero-dependency Python/CLI verifier checking signature, schema, hash | §13.8, §34.3 | P0 | CLI validates valid receipt as PASS, tampered as FAIL | **COMPLETED** | `b5a3e5f` |
+| **ENG-11B**| Clean-Machine Test | Verify offline verifier works in disconnected container with no network access | §41 (AC-06) | P0 | 100% pass on clean offline environment | **COMPLETED** | `b5a3e5f` |
 
 ### Workstream 3: Intake Parsers & Canonical Data Models (Slice 2)
 
-| Task ID | Component | Task Description | PRD Ref | Priority | DoD Exit Criterion | Status |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **ENG-05A**| Canonical Schema | Implement `CanonicalTransaction` and `CanonicalCase` data models with Decimal math | §17.1, §17.2 | P0 | Pydantic v2 / strict typed schemas with unit tests | **COMPLETED** |
-| **ENG-06A**| Source Hasher | Implement streaming SHA-256 hasher for ingested files with metadata capture | §15.5, §17.1 | P0 | Repeatable SHA-256 digest + byte length tracking | **COMPLETED** |
-| **ENG-03A**| 1099-DA Parser | Build parser for Form 1099-DA representation (proceeds, basis, dates, box 2 indicator) | §14.1, §14.2 | P0 | Golden fixtures for 2025/2026 reporting formats pass | **COMPLETED** |
-| **ENG-04A**| Koinly CSV Adapter | Build adapter for Koinly Capital Gains Report CSV with version detection | §6.4 (A) | P0 | Accurately extracts asset, dates, costs, proceeds, gains | **COMPLETED** |
-| **ENG-04B**| Fallback Adapter | Implement generic `VaultBasis Reconciliation CSV v0.1` fallback adapter | §6.4 (A) | P0 | Documented CSV specification + parser tests | **COMPLETED** |
-| **ENG-03B**| Fail-Closed Intake | Implement malformed input validation rejecting invalid headers or corrupted rows | §41 (AC-04) | P0 | Graceful rejection with explicit error log; zero crashes | **COMPLETED** |
+| Task ID | Component | Task Description | PRD Ref | Priority | DoD Exit Criterion | Status | Commit ID |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **ENG-05A**| Canonical Schema | Implement `CanonicalTransaction` and `CanonicalCase` data models with Decimal math | §17.1, §17.2 | P0 | Pydantic v2 / strict typed schemas with unit tests | **COMPLETED** | `b5a3e5f` |
+| **ENG-06A**| Source Hasher | Implement streaming SHA-256 hasher for ingested files with metadata capture | §15.5, §17.1 | P0 | Repeatable SHA-256 digest + byte length tracking | **COMPLETED** | `b5a3e5f` |
+| **ENG-03A**| 1099-DA Parser | Build parser for Form 1099-DA representation (proceeds, basis, dates, box 2 indicator) | §14.1, §14.2 | P0 | Golden fixtures for 2025/2026 reporting formats pass | **COMPLETED** | `b5a3e5f` |
+| **ENG-04A**| Koinly CSV Adapter | Build adapter for Koinly Capital Gains Report CSV with version detection | §6.4 (A) | P0 | Accurately extracts asset, dates, costs, proceeds, gains | **COMPLETED** | `b5a3e5f` |
+| **ENG-04B**| Fallback Adapter | Implement generic `VaultBasis Reconciliation CSV v0.1` fallback adapter | §6.4 (A) | P0 | Documented CSV specification + parser tests | **COMPLETED** | `b5a3e5f` |
+| **ENG-03B**| Fail-Closed Intake | Implement malformed input validation rejecting invalid headers or corrupted rows | §41 (AC-04) | P0 | Graceful rejection with explicit error log; zero crashes | **COMPLETED** | `b5a3e5f` |
 
 ### Workstream 4: Deterministic Assurance & Reconciliation Engine (Slice 3)
 
-| Task ID | Component | Task Description | PRD Ref | Priority | DoD Exit Criterion | Status |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **ENG-07A**| Bounded Matcher | Implement transaction matching hierarchy (date proximity, asset, quantity, proceeds) | §15.7, §15.4 | P0 | Matcher produces deterministic 1-to-1 or 1-to-N links | **COMPLETED** |
-| **ENG-08A**| Diff Classifier | Build deterministic difference classifier implementing 13 outcome states | §14.3, §15.1 | P0 | Correctly classifies basis diff, proceeds diff, scope diff | **COMPLETED** |
-| **ENG-08B**| Unknown Handler | Implement explicit `UNRESOLVED` state tracking (missing basis/date/price never becomes $0) | §15.8, §15.9 | P0 | Meets AC-03 invariant across all edge cases | **COMPLETED** |
-| **ENG-08C**| Scope Classifier | Implement 2025 vs 2026 reporting scope difference classifier (Box 2 logic) | §14.2, §59.1 | P0 | Differentiates broker omission from basis mismatch | **COMPLETED** |
-| **ENG-09A**| Shallow Provenance | Build provenance linker connecting source hashes, rows, and differences | §16.1, §17.1 | P0 | Traceable graph from receipt to source rows | **COMPLETED** |
+| Task ID | Component | Task Description | PRD Ref | Priority | DoD Exit Criterion | Status | Commit ID |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **ENG-07A**| Bounded Matcher | Implement transaction matching hierarchy (date proximity, asset, quantity, proceeds) | §15.7, §15.4 | P0 | Matcher produces deterministic 1-to-1 or 1-to-N links | **COMPLETED** | `b5a3e5f` |
+| **ENG-08A**| Diff Classifier | Build deterministic difference classifier implementing 13 outcome states | §14.3, §15.1 | P0 | Correctly classifies basis diff, proceeds diff, scope diff | **COMPLETED** | `b5a3e5f` |
+| **ENG-08B**| Unknown Handler | Implement explicit `UNRESOLVED` state tracking (missing basis/date/price never becomes $0) | §15.8, §15.9 | P0 | Meets AC-03 invariant across all edge cases | **COMPLETED** | `b5a3e5f` |
+| **ENG-08C**| Scope Classifier | Implement 2025 vs 2026 reporting scope difference classifier (Box 2 logic) | §14.2, §59.1 | P0 | Differentiates broker omission from basis mismatch | **COMPLETED** | `b5a3e5f` |
+| **ENG-09A**| Shallow Provenance | Build provenance linker connecting source hashes, rows, and differences | §16.1, §17.1 | P0 | Traceable graph from receipt to source rows | **COMPLETED** | `b5a3e5f` |
 
 ### Workstream 5: Edge Runtime & Zero-Egress Local REST API (Slice 4)
 
-| Task ID | Component | Task Description | PRD Ref | Priority | DoD Exit Criterion | Status |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **ENG-01A**| Local FastAPI App | Build Edge REST service with `/cases`, `/sources`, `/reconcile`, `/receipt`, `/verify` | §62.1, §18.1 | P0 | All endpoints typed, documented via OpenAPI, 100% local | **COMPLETED** |
-| **ENG-01B**| SQLite Store | Implement local SQLite database for case metadata, sources, and receipts | §18.2, §22.1 | P0 | ACID persistence, WAL mode, zero remote leakage | **COMPLETED** |
-| **ENG-01C**| Dockerfile | Package single Docker/OCI container image (`vaultbasis-edge:preview`) | §6.1, §18.1 | P0 | Non-root user, slim base, minimal attack surface | Planned |
-| **ENG-02A**| Egress Controls | Configure zero-egress container profile and verify with packet capture tests | §21.1, §41 (AC-07)| P0 | Zero outbound packets detected during execution | Planned |
-| **SEC-01A**| Security Scan | Execute SAST, dependency vulnerability scan, and secret leak detection | §23.1, §64.1 | P0 | 0 critical / 0 high vulnerabilities | **COMPLETED** |
+| Task ID | Component | Task Description | PRD Ref | Priority | DoD Exit Criterion | Status | Commit ID |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **ENG-01A**| Local FastAPI App | Build Edge REST service with `/cases`, `/sources`, `/reconcile`, `/receipt`, `/verify` | §62.1, §18.1 | P0 | All endpoints typed, documented via OpenAPI, 100% local | **COMPLETED** | `b5a3e5f` |
+| **ENG-01B**| SQLite Store | Implement local SQLite database for case metadata, sources, and receipts | §18.2, §22.1 | P0 | ACID persistence, WAL mode, zero remote leakage | **COMPLETED** | `b5a3e5f` |
+| **ENG-01C**| Dockerfile | Package single Docker/OCI container image (`vaultbasis-edge:preview`) | §6.1, §18.1 | P0 | Non-root user, slim base, minimal attack surface | **COMPLETED** | `PENDING_COMMIT` |
+| **ENG-02A**| Egress Controls | Configure zero-egress container profile and verify with packet capture tests | §21.1, §41 (AC-07)| P0 | Zero outbound packets detected during execution | **COMPLETED** | `PENDING_COMMIT` |
+| **SEC-01A**| Security Scan | Execute SAST, dependency vulnerability scan, and secret leak detection | §23.1, §64.1 | P0 | 0 critical / 0 high vulnerabilities | **COMPLETED** | `b5a3e5f` |
 
 ### Workstream 6: Three-Screen Local Dashboard & UI Surfaces (Slice 5 & 6)
 
-| Task ID | Component | Task Description | PRD Ref | Priority | DoD Exit Criterion | Status |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **UX-01A** | Screen 1: Case List | Build Case List view (Create Case, Ingest Status, Case ID, Outcome State) | §34.2, §35.1 | P0 | Clean, industrial UI rendering all local cases | **COMPLETED** |
-| **UX-01B** | Screen 2: Case Review| Build Case Review view (Source Integrity, Differences, Unresolved Items, Provenance) | §34.2, §35.2 | P0 | Displays exact differences without misleading green badges | **COMPLETED** |
-| **UX-01C** | Screen 3: Receipt | Build Receipt & Export view (Receipt ID, Signer ID, Hash, Download Bundle) | §34.2, §13.3 | P0 | One-click ZIP bundle download (Receipt + Evidence + Verifier) | **COMPLETED** |
-| **UX-02A** | Web Verifier | Build client-side standalone HTML/JS verifier (drag-and-drop receipt verification) | §34.3, §13.8 | P0 | Runs 100% in browser client with zero server calls | **COMPLETED** |
-| **WEB-01A**| Preview Marketing | Create single-page preview marketing site explaining trust proposition & receipt demo | §34.1, §50.4 | P0 | Fast, responsive, institutional aesthetics, no hype | Planned |
+| Task ID | Component | Task Description | PRD Ref | Priority | DoD Exit Criterion | Status | Commit ID |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **UX-01A** | Screen 1: Case List | Build Case List view (Create Case, Ingest Status, Case ID, Outcome State) | §34.2, §35.1 | P0 | Clean, industrial UI rendering all local cases | **COMPLETED** | `b5a3e5f` |
+| **UX-01B** | Screen 2: Case Review| Build Case Review view (Source Integrity, Differences, Unresolved Items, Provenance) | §34.2, §35.2 | P0 | Displays exact differences without misleading green badges | **COMPLETED** | `b5a3e5f` |
+| **UX-01C** | Screen 3: Receipt | Build Receipt & Export view (Receipt ID, Signer ID, Hash, Download Bundle) | §34.2, §13.3 | P0 | One-click ZIP bundle download (Receipt + Evidence + Verifier) | **COMPLETED** | `b5a3e5f` |
+| **UX-02A** | Web Verifier | Build client-side standalone HTML/JS verifier (drag-and-drop receipt verification) | §34.3, §13.8 | P0 | Runs 100% in browser client with zero server calls | **COMPLETED** | `b5a3e5f` |
+| **WEB-01A**| Preview Marketing | Create single-page preview marketing site explaining trust proposition & receipt demo | §34.1, §50.4 | P0 | Fast, responsive, institutional aesthetics, no hype | **COMPLETED** | `PENDING_COMMIT` |
 
 ### Workstream 7: Left-Shift QA, Documentation & Launch Certification (Slice 7)
 
-| Task ID | Component | Task Description | PRD Ref | Priority | DoD Exit Criterion | Status |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **QA-01A** | Unit Test Suite | Comprehensive unit tests for math, parsing, serializing, signing, hashing | §43.1, §64.1 | P0 | >90% code coverage on core deterministic engine | Planned |
-| **QA-02A** | Golden Test Suite | Reference test vectors with realistic 1099-DA and Koinly CSV cases | §43.2, §59.1 | P0 | 100% match on all reference scenarios | Planned |
-| **QA-03A** | Differential Tests | Differential testing against independent reference calculation scripts | §43.3, §15.1 | P0 | Zero divergence against ground truth math | Planned |
-| **QA-04A** | Property/Fuzz Tests| Fuzz tests with corrupted, truncated, and random byte inputs | §43.4, §41 (AC-04)| P0 | Zero unhandled exceptions or crashes | Planned |
-| **DOC-01A**| Operator Guide | Write Edge Deployment Guide (`docs/edge_deployment_guide.md`) | §51.3, §63 | P0 | Step-by-step instructions tested on fresh machine | Planned |
-| **DOC-02A**| Verifier Guide | Write Independent Verifier Guide (`docs/verifier_guide.md`) | §51.3, §13.8 | P0 | Detailed third-party verification runbook | Planned |
-| **REL-01A**| Gate Certification | Review and certify all 7 preview gates in `docs/preview_gates_certification.md` | §41, §71 | P0 | All 7 gates signed off with test evidence | Planned |
+| Task ID | Component | Task Description | PRD Ref | Priority | DoD Exit Criterion | Status | Commit ID |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **QA-01A** | Unit Test Suite | Comprehensive unit tests for math, parsing, serializing, signing, hashing | §43.1, §64.1 | P0 | >90% code coverage on core deterministic engine | **COMPLETED** | `b5a3e5f` |
+| **QA-02A** | Golden Test Suite | Reference test vectors with realistic 1099-DA and Koinly CSV cases | §43.2, §59.1 | P0 | 100% match on all reference scenarios | **COMPLETED** | `b5a3e5f` |
+| **QA-ATDD**| Acceptance Suite | End-to-end customer & CPA workflows (`test_atdd_cpa_user_journey.py`) | §4.1, §50.4 | P0 | CPA full reconciliation journey verified | **COMPLETED** | `PENDING_COMMIT` |
+| **QA-BDD** | BDD Feature Suite| Given-When-Then criteria for 7 preview gates (`test_bdd_acceptance_gates.py`)| §41 | P0 | All 7 blocking preview gates verified | **COMPLETED** | `PENDING_COMMIT` |
+| **QA-TDD** | Invariant Suite  | Low-level exact decimal & RFC 8785 tests (`test_tdd_invariants.py`) | §15.1, §44.1 | P0 | Decimal math & canonicalization determinism verified | **COMPLETED** | `PENDING_COMMIT` |
+| **QA-DDD** | Domain Invariants| Entity, value object & case aggregate tests (`test_ddd_domain_models.py`) | §17.1, §17.2 | P0 | Case lifecycle & transaction invariants verified | **COMPLETED** | `PENDING_COMMIT` |
+| **QA-03A** | Differential Tests | Differential testing against independent reference calculation scripts | §43.3, §15.1 | P0 | Zero divergence against ground truth math | **COMPLETED** | `b5a3e5f` |
+| **QA-04A** | Property/Fuzz Tests| Fuzz tests with corrupted, truncated, and random byte inputs | §43.4, §41 (AC-04)| P0 | Zero unhandled exceptions or crashes | **COMPLETED** | `b5a3e5f` |
+| **DOC-01A**| Operator Guide | Write Edge Deployment Guide (`docs/edge_deployment_guide.md`) | §51.3, §63 | P0 | Step-by-step instructions tested on fresh machine | **COMPLETED** | `PENDING_COMMIT` |
+| **DOC-02A**| Verifier Guide | Write Independent Verifier Guide (`docs/verifier_guide.md`) | §51.3, §13.8 | P0 | Detailed third-party verification runbook | **COMPLETED** | `PENDING_COMMIT` |
+| **REL-01A**| Gate Certification | Review and certify all 7 preview gates in `docs/preview_gates_certification.md` | §41, §71 | P0 | All 7 gates signed off with test evidence | **COMPLETED** | `PENDING_COMMIT` |
 
 ---
 

@@ -12,7 +12,7 @@ class SourceDocumentMetadata(BaseModel):
     """Metadata tracking ingested source documents and their cryptographic integrity."""
     source_id: str = Field(..., description="Unique source document identifier")
     filename: str = Field(..., description="Original filename uploaded by user")
-    sha256_hash: str = Field(..., description="SHA-256 hash of the raw uploaded file")
+    sha256_hash: str = Field(..., pattern=r"^[a-fA-F0-9]{64}$", description="SHA-256 hash of the raw uploaded file")
     byte_size: int = Field(..., description="Size of file in bytes")
     schema_id: str = Field(..., description="Adapter schema identifier (e.g. KOINLY_CAPITAL_GAINS_CSV_V1)")
     row_count: int = Field(0, description="Number of parsed transaction rows")

@@ -343,6 +343,7 @@ async def verify_uploaded_receipt(file: UploadFile = File(...)):
 
 WEB_DASHBOARD_DIR = REPO_ROOT / "apps" / "web-dashboard"
 WEB_VERIFIER_DIR = REPO_ROOT / "apps" / "web-verifier"
+WEB_MARKETING_DIR = REPO_ROOT / "apps" / "web-marketing"
 
 if WEB_DASHBOARD_DIR.exists():
     app.mount("/static", StaticFiles(directory=str(WEB_DASHBOARD_DIR)), name="static")
@@ -360,3 +361,10 @@ def serve_verifier():
     if verifier_file.exists():
         return HTMLResponse(content=verifier_file.read_text(), status_code=200)
     return HTMLResponse("<h2>VaultBasis Public Verifier building...</h2>")
+
+@app.get("/about", response_class=HTMLResponse)
+def serve_marketing():
+    mkt_file = WEB_MARKETING_DIR / "index.html"
+    if mkt_file.exists():
+        return HTMLResponse(content=mkt_file.read_text(), status_code=200)
+    return HTMLResponse("<h2>VaultBasis Marketing page building...</h2>")

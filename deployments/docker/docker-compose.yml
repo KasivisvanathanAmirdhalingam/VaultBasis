@@ -1,0 +1,37 @@
+# ==============================================================================
+# VAULTBASIS EDGE COMPOSE — LOCAL ISOLATED ENVIRONMENT
+# Enforces zero-egress posture conforming to PRD §21.1 and §41 (AC-07)
+# ==============================================================================
+
+version: '3.8'
+
+services:
+  vaultbasis-edge:
+    build:
+      context: ../..
+      dockerfile: deployments/docker/Dockerfile
+    image: vaultbasis-edge:preview
+    container_name: vaultbasis-edge
+    restart: unless-stopped
+    ports:
+      # Bind EXCLUSIVELY to loopback interface on host (zero LAN/public exposure)
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - vaultbasis-data:/app/data
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: false
+    networks:
+      - internal-isolated
+
+volumes:
+  vaultbasis-data:
+    driver: local
+
+networks:
+  internal-isolated:
+    driver: bridge
+    # Internal network blocks default internet gateway routing from inside container
+    internal: true

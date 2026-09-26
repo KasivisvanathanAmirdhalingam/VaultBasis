@@ -19,16 +19,54 @@ from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives.asymmetric import ed25519
 import jsonschema
 
-# Add repo root to sys.path if running as script
+from decimal import Decimal
+
+# Self-contained canonicalization engine conforming to RFC 8785 (JCS)
+def canonical_json_bytes(obj: Any) -> bytes:
+    def _normalize(val: Any) -> Any:
+        if isinstance(val, dict):
+            return {k: _normalize(val[k]) for k in sorted(val.keys())}
+        elif isinstance(val, (list, tuple)):
+            return [_normalize(item) for item in val]
+        elif isinstance(val, Decimal):
+            return str(val)
+        else:
+            return val
+
+    normalized = _normalize(obj)
+    json_str = json.dumps(
+        normalized,
+        sort_keys=True,
+        separators=(',', ':'),
+        ensure_ascii=False
+    )
+    return json_str.encode('utf-8')
+
+
+def compute_sha256_digest(data: bytes) -> bytes:
+    return hashlib.sha256(data).digest()
+
+
+def compute_sha256_hex(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
+
+
+def compute_receipt_digest(receipt_dict: Dict[str, Any]) -> bytes:
+    payload = {k: v for k, v in receipt_dict.items() if k != "signature"}
+    raw_canonical_bytes = canonical_json_bytes(payload)
+    return compute_sha256_digest(raw_canonical_bytes)
+
+
+# Intelligent schema path resolution for repo workspace or standalone bundle
 current_dir = Path(__file__).resolve().parent
 repo_root = current_dir.parent.parent
-if str(repo_root) not in sys.path:
-    sys.path.insert(0, str(repo_root))
+possible_schema_paths = [
+    current_dir / "schemas" / "receipt-v0.1.json",
+    current_dir / "receipt-v0.1.json",
+    repo_root / "schemas" / "receipt" / "receipt-v0.1.json"
+]
+SCHEMA_PATH = next((p for p in possible_schema_paths if p.exists()), possible_schema_paths[-1])
 
-from edge.receipts.canonicalizer import compute_receipt_digest, compute_sha256_hex
-
-
-SCHEMA_PATH = repo_root / "schemas" / "receipt" / "receipt-v0.1.json"
 
 
 LIMITATION_NOTICE = """
@@ -65,6 +103,7 @@ class VerificationResult:
     def to_dict(self) -> Dict[str, Any]:
         return {
             "overall_status": "PASS" if self.is_valid else "FAIL",
+            "is_valid": self.is_valid,
             "receipt_id": self.receipt_id,
             "outcome_state": self.outcome_state,
             "assurance_level": self.assurance_level,

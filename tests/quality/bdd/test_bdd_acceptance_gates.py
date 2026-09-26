@@ -163,3 +163,77 @@ def test_bdd_ac07_no_transaction_data_egress(client):
 
     # THEN egress policy confirms strict local only
     assert health["egress_policy"] == "STRICT_LOCAL_ONLY"
+
+
+# ------------------------------------------------------------------------------
+# AC-08 (Extended): Tampered receipt financial value fails verification
+# ------------------------------------------------------------------------------
+@pytest.mark.bdd
+@pytest.mark.regression
+def test_bdd_tampered_receipt_sub_cent_change_fails_verification(client):
+    # GIVEN a valid signed receipt with proceeds $1000.00
+    client.post("/api/cases", json={"case_id": "CASE-BDD-TAMPER-01", "tax_year": 2025})
+    src_a = b"Property,Date sold,Proceeds,Date acquired,Cost basis,Box 2\nETH,2025-02-01,1000.00,2024-02-01,800.00,YES\n"
+    src_b = b"Date,Asset,Amount,Cost basis,Proceeds,Gain / loss,Date acquired\n2025-02-01,ETH,1.0,800.00,1000.00,200.00,2024-02-01\n"
+    client.post("/api/cases/CASE-BDD-TAMPER-01/sources", files={"file": ("a.csv", src_a, "text/csv")})
+    client.post("/api/cases/CASE-BDD-TAMPER-01/sources", files={"file": ("b.csv", src_b, "text/csv")})
+    recon = client.post("/api/cases/CASE-BDD-TAMPER-01/reconcile").json()
+    receipt = dict(recon["receipt"])
+
+    # WHEN an attacker alters a field in the receipt payload
+    receipt["producer_reference"] = "VaultBasis Edge Tampered v0.1"
+
+    # THEN the independent verifier marks the receipt invalid with SIGNATURE_MISMATCH
+    report = verify_outcome_receipt(receipt)
+    assert report.is_valid is False
+    assert report.signature_valid is False
+    assert any("mismatch" in err.lower() or "failed" in err.lower() for err in report.errors)
+
+
+# ------------------------------------------------------------------------------
+# AC-09 (Extended): Tampered outcome state fails verification
+# ------------------------------------------------------------------------------
+@pytest.mark.bdd
+@pytest.mark.regression
+def test_bdd_tampered_outcome_state_fails_verification(client):
+    # GIVEN a case resulting in BASIS_DIFFERENCE
+    client.post("/api/cases", json={"case_id": "CASE-BDD-TAMPER-02", "tax_year": 2025})
+    src_a = b"Property,Date sold,Proceeds,Date acquired,Cost basis,Box 2\nBTC,2025-02-01,5000.00,2024-02-01,3000.00,YES\n"
+    src_b = b"Date,Asset,Amount,Cost basis,Proceeds,Gain / loss,Date acquired\n2025-02-01,BTC,1.0,4000.00,5000.00,1000.00,2024-02-01\n"
+    client.post("/api/cases/CASE-BDD-TAMPER-02/sources", files={"file": ("a.csv", src_a, "text/csv")})
+    client.post("/api/cases/CASE-BDD-TAMPER-02/sources", files={"file": ("b.csv", src_b, "text/csv")})
+    recon = client.post("/api/cases/CASE-BDD-TAMPER-02/reconcile").json()
+    receipt = dict(recon["receipt"])
+    assert receipt["outcome_state"] == "BASIS_DIFFERENCE"
+
+    # WHEN an attacker attempts to greenwash the outcome state to MATCHED
+    receipt["outcome_state"] = "MATCHED"
+
+    # THEN verification categorically fails
+    report = verify_outcome_receipt(receipt)
+    assert report.is_valid is False
+    assert report.signature_valid is False
+
+
+# ------------------------------------------------------------------------------
+# AC-10 (Extended): Idempotent reconciliation
+# ------------------------------------------------------------------------------
+@pytest.mark.bdd
+@pytest.mark.smoke
+def test_bdd_idempotent_reconciliation(client):
+    # GIVEN an ingested case with two sources
+    client.post("/api/cases", json={"case_id": "CASE-BDD-IDEM-01", "tax_year": 2025})
+    src_a = b"Property,Date sold,Proceeds,Date acquired,Cost basis,Box 2\nBTC,2025-03-01,2000.00,2024-03-01,1500.00,YES\n"
+    src_b = b"Date,Asset,Amount,Cost basis,Proceeds,Gain / loss,Date acquired\n2025-03-01,BTC,1.0,1500.00,2000.00,500.00,2024-03-01\n"
+    client.post("/api/cases/CASE-BDD-IDEM-01/sources", files={"file": ("a.csv", src_a, "text/csv")})
+    client.post("/api/cases/CASE-BDD-IDEM-01/sources", files={"file": ("b.csv", src_b, "text/csv")})
+
+    # WHEN reconciled multiple times
+    recon1 = client.post("/api/cases/CASE-BDD-IDEM-01/reconcile").json()
+    recon2 = client.post("/api/cases/CASE-BDD-IDEM-01/reconcile").json()
+
+    # THEN outcome states and material differences are strictly identical
+    assert recon1["outcome_state"] == recon2["outcome_state"]
+    assert recon1["reconciliation"]["material_differences"] == recon2["reconciliation"]["material_differences"]
+
+

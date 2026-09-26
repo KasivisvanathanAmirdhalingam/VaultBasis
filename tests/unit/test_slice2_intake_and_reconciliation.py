@@ -34,6 +34,7 @@ def sample_koinly_csv():
 """
 
 
+@pytest.mark.smoke
 def test_1099da_parser(sample_1099da_csv):
     txs = Form1099DAParser.parse(sample_1099da_csv, "src_1099", "hash123")
     assert len(txs) == 2
@@ -46,6 +47,7 @@ def test_1099da_parser(sample_1099da_csv):
     assert txs[0].is_unresolved is False
 
 
+@pytest.mark.smoke
 def test_koinly_parser(sample_koinly_csv):
     txs = KoinlyCapitalGainsParser.parse(sample_koinly_csv, "src_koinly", "hash456")
     assert len(txs) == 2
@@ -55,6 +57,7 @@ def test_koinly_parser(sample_koinly_csv):
     assert txs[0].gain_loss == Decimal("2100.00")
 
 
+@pytest.mark.regression
 def test_fallback_csv_parser():
     fallback_csv = b"""date,asset,quantity,proceeds,cost_basis,date_acquired,source_ref
 2025-08-10,SOL,10.0,1500.00,1200.00,2025-01-15,CustomLine1
@@ -66,6 +69,7 @@ def test_fallback_csv_parser():
     assert txs[0].proceeds == Decimal("1500.00")
 
 
+@pytest.mark.smoke
 def test_intake_dispatcher_auto_detection(sample_1099da_csv, sample_koinly_csv):
     meta1, txs1 = IntakeDispatcher.ingest_document(sample_1099da_csv, "broker_1099da.csv", "src_1")
     assert meta1.schema_id == Form1099DAParser.SCHEMA_ID
@@ -76,6 +80,7 @@ def test_intake_dispatcher_auto_detection(sample_1099da_csv, sample_koinly_csv):
     assert len(txs2) == 2
 
 
+@pytest.mark.smoke
 def test_deterministic_reconciliation_basis_difference(sample_1099da_csv, sample_koinly_csv):
     meta_a, txs_a = IntakeDispatcher.ingest_document(sample_1099da_csv, "1099da.csv", "src_1099")
     meta_b, txs_b = IntakeDispatcher.ingest_document(sample_koinly_csv, "koinly.csv", "src_koinly")
@@ -104,6 +109,7 @@ def test_deterministic_reconciliation_basis_difference(sample_1099da_csv, sample
     assert len(result.provenance_references) >= 2
 
 
+@pytest.mark.smoke
 def test_unknown_basis_preservation_not_zero():
     # Test PRD Invariant: Missing basis does not become $0
     unres_csv = b"""Property,Date sold,Proceeds,Date acquired,Cost basis,Box 2
@@ -115,6 +121,7 @@ SOL,2025-05-01,500.00,2025-01-01,,YES
     assert txs[0].unresolved_reason == "BASIS_UNAVAILABLE"
 
 
+@pytest.mark.smoke
 def test_fastapi_e2e_endpoints(sample_1099da_csv, sample_koinly_csv):
     client = TestClient(app)
 

@@ -81,3 +81,58 @@ def test_ddd_case_aggregate_lifecycle():
     case.case_status = "RECEIPT_ISSUED"
     assert case.case_status == "RECEIPT_ISSUED"
     assert case.receipt_id is not None
+
+
+@pytest.mark.ddd
+@pytest.mark.regression
+def test_ddd_source_document_hash_invariant():
+    """Validates that SourceDocumentMetadata enforces a 64-character SHA-256 hex string."""
+    # Valid 64-char hex
+    valid_meta = SourceDocumentMetadata(
+        source_id="src_valid",
+        filename="valid.csv",
+        sha256_hash="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        byte_size=10,
+        schema_id="IRS_1099DA_2025_PREVIEW",
+        row_count=1,
+        ingested_at="2026-09-26T12:00:00Z"
+    )
+    assert len(valid_meta.sha256_hash) == 64
+
+    # Invalid short hash should fail pattern / validation if length enforced
+    with pytest.raises(ValidationError):
+        SourceDocumentMetadata(
+            source_id="src_invalid",
+            filename="invalid.csv",
+            sha256_hash="short_hash",
+            byte_size=10,
+            schema_id="IRS_1099DA_2025_PREVIEW",
+            row_count=1,
+            ingested_at="2026-09-26T12:00:00Z"
+        )
+
+
+@pytest.mark.ddd
+@pytest.mark.smoke
+def test_ddd_outcome_receipt_assurance_invariants():
+    """Validates domain assurance levels and permitted outcome state domain definitions."""
+    from schemas.canonical.case import CanonicalCase
+
+    # Allowed outcome states in PRD §14.1
+    allowed_states = {
+        "MATCHED", "PROCEEDS_DIFFERENCE", "BASIS_DIFFERENCE", "ACQUISITION_DATE_DIFFERENCE",
+        "DISPOSITION_DATE_DIFFERENCE", "MISSING_FROM_1099DA", "MISSING_FROM_LEDGER",
+        "AMBIGUOUS_MATCH", "AGGREGATED_LINE", "TRANSFER_RELATED", "REPORTING_SCOPE_DIFFERENCE",
+        "SOURCE_ERROR_SUSPECTED", "UNRESOLVED_DATA"
+    }
+
+    case = CanonicalCase(
+        case_id="CASE-STATES-01",
+        tax_year=2025,
+        jurisdiction="US",
+        outcome_state="BASIS_DIFFERENCE",
+        created_at="2026-09-26T12:00:00Z",
+        updated_at="2026-09-26T12:00:00Z"
+    )
+    assert case.outcome_state in allowed_states
+

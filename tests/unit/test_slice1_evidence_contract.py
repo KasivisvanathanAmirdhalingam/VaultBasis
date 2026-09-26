@@ -31,6 +31,7 @@ def temp_key_dir(tmp_path):
     return key_dir
 
 
+@pytest.mark.smoke
 def test_key_generation_and_permissions(temp_key_dir):
     km = InstallationKeyManager(temp_key_dir)
     priv_key, pub_key = km.ensure_keypair()
@@ -55,6 +56,7 @@ def test_key_generation_and_permissions(temp_key_dir):
     assert km2.get_key_id(pub2) == expected_fingerprint
 
 
+@pytest.mark.smoke
 def test_canonicalization_determinism():
     dict1 = {"b": 2, "a": 1, "nested": {"z": 9, "y": 8}}
     dict2 = {"nested": {"y": 8, "z": 9}, "a": 1, "b": 2}
@@ -66,6 +68,7 @@ def test_canonicalization_determinism():
     assert b1 == b'{"a":1,"b":2,"nested":{"y":8,"z":9}}'
 
 
+@pytest.mark.smoke
 def test_slice1_end_to_end_receipt_flow(tmp_path):
     # 1. Setup Key Manager and Signer
     km = InstallationKeyManager(tmp_path / "keys")
@@ -153,6 +156,7 @@ def test_slice1_end_to_end_receipt_flow(tmp_path):
     assert res.outcome_state == "BASIS_DIFFERENCE"
 
 
+@pytest.mark.regression
 def test_tamper_detection_financial_value(tmp_path):
     km = InstallationKeyManager(tmp_path / "keys")
     priv_key, _ = km.ensure_keypair()
@@ -216,6 +220,7 @@ def test_tamper_detection_financial_value(tmp_path):
     assert any("signature verification FAILED" in e for e in res.errors)
 
 
+@pytest.mark.regression
 def test_tamper_detection_outcome_state(tmp_path):
     km = InstallationKeyManager(tmp_path / "keys")
     priv_key, _ = km.ensure_keypair()
@@ -264,6 +269,7 @@ def test_tamper_detection_outcome_state(tmp_path):
     assert res.signature_valid is False
 
 
+@pytest.mark.smoke
 def test_cli_verifier_execution(tmp_path):
     km = InstallationKeyManager(tmp_path / "keys")
     priv_key, _ = km.ensure_keypair()
