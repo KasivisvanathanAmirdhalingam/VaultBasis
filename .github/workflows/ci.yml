@@ -36,4 +36,5 @@ jobs:
     - name: Execute Left-Shift Validation Pipeline
       run: |
         chmod +x scripts/validate_before_commit.sh
+        chmod 600 tests/fixtures/keys/*.key || true
         ./scripts/validate_before_commit.sh
