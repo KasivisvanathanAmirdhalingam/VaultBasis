@@ -234,7 +234,7 @@
 
   <!-- Standard Enterprise Header -->
   <header>
-    <a href="/" class="brand">
+    <a href="/" id="nav-brand-link" class="brand">
       <div class="brand-logo">V</div>
       <div>
         <div class="brand-name">VaultBasis Verifier</div>
@@ -242,7 +242,7 @@
       <span class="badge badge-info" style="font-size: 0.72rem;">WEB-CRYPTO CLIENT</span>
     </a>
     <nav class="nav-links">
-      <a href="/">← Why VaultBasis?</a>
+      <a href="/" id="nav-back-link">← Why VaultBasis?</a>
       <a href="/schemas/receipt-v0.1.json" target="_blank">Evidence Schema ↗</a>
       <a href="http://127.0.0.1:8000/" target="_blank">Local Edge Dashboard ↗</a>
       <a href="/sample-receipt.json" download="golden_receipt_valid.json">Sample Receipt ⤓</a>
@@ -342,7 +342,7 @@
         <h4>Verification Standard</h4>
         <ul>
           <li><a href="/schemas/receipt-v0.1.json" target="_blank">Normative Schema</a></li>
-          <li><a href="/">Evidence Contract v0.1</a></li>
+          <li><a href="/" id="ft-evidence-link">Evidence Contract v0.1</a></li>
           <li><a href="/sample-receipt.json" download="golden_receipt_valid.json">Sample Golden Receipt</a></li>
           <li><a href="/sample-receipt-tampered.json" download="golden_receipt_tampered.json">Tampered Test Vector</a></li>
         </ul>
@@ -351,7 +351,7 @@
       <div class="footer-col">
         <h4>Tiers & Tools</h4>
         <ul>
-          <li><a href="/">Marketing Portal</a></li>
+          <li><a href="/" id="ft-marketing-link">Marketing Portal</a></li>
           <li><a href="http://127.0.0.1:8000/" target="_blank">Localhost Dashboard</a></li>
           <li><a href="http://127.0.0.1:8000/docs" target="_blank">Local REST API</a></li>
         </ul>
@@ -360,9 +360,9 @@
       <div class="footer-col">
         <h4>Legal & Policy</h4>
         <ul>
-          <li><a href="/">Zero Token Bleed</a></li>
-          <li><a href="/">Statutory Notice §27</a></li>
-          <li><a href="/">Airgap Standard</a></li>
+          <li><a href="/" id="ft-zero-bleed">Zero Token Bleed</a></li>
+          <li><a href="/" id="ft-statutory">Statutory Notice §27</a></li>
+          <li><a href="/" id="ft-airgap">Airgap Standard</a></li>
         </ul>
       </div>
     </div>
@@ -376,6 +376,25 @@
   </footer>
 
   <script>
+    // Dynamic routing for localhost vs Vercel
+    document.addEventListener('DOMContentLoaded', () => {
+      const isLocalhost = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost';
+      const mktBase = isLocalhost ? '/about' : '/';
+      
+      const setHref = (id, suffix) => {
+        const el = document.getElementById(id);
+        if (el) el.href = mktBase + suffix;
+      };
+      
+      setHref('nav-brand-link', '');
+      setHref('nav-back-link', '');
+      setHref('ft-marketing-link', '');
+      setHref('ft-evidence-link', '#evidence-contract');
+      setHref('ft-zero-bleed', '#security');
+      setHref('ft-statutory', '#evidence-contract');
+      setHref('ft-airgap', '#security');
+    });
+
     // Embedded Golden Fixtures for Instant Browser Testing
     const GOLDEN_VALID_RECEIPT = {
       "receipt_version": "v0.1",
