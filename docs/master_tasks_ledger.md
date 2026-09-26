@@ -145,8 +145,8 @@ Golden Test Suite ───> Fuzz Suite ───> Zero-Egress Net Audit ──�
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **ENG-01A**| Local FastAPI App | Build Edge REST service with `/cases`, `/sources`, `/reconcile`, `/receipt`, `/verify` | §62.1, §18.1 | P0 | All endpoints typed, documented via OpenAPI, 100% local | **COMPLETED** | `b5a3e5f` |
 | **ENG-01B**| SQLite Store | Implement local SQLite database for case metadata, sources, and receipts | §18.2, §22.1 | P0 | ACID persistence, WAL mode, zero remote leakage | **COMPLETED** | `b5a3e5f` |
-| **ENG-01C**| Dockerfile | Package single Docker/OCI container image (`vaultbasis-edge:preview`) | §6.1, §18.1 | P0 | Non-root user, slim base, minimal attack surface | **COMPLETED** | `PENDING_COMMIT` |
-| **ENG-02A**| Egress Controls | Configure zero-egress container profile and verify with packet capture tests | §21.1, §41 (AC-07)| P0 | Zero outbound packets detected during execution | **COMPLETED** | `PENDING_COMMIT` |
+| **ENG-01C**| Dockerfile | Package single Docker/OCI container image (`vaultbasis-edge:preview`) | §6.1, §18.1 | P0 | Non-root user, slim base, minimal attack surface | **COMPLETED** | `bf8a795` |
+| **ENG-02A**| Egress Controls | Configure zero-egress container profile and verify with packet capture tests | §21.1, §41 (AC-07)| P0 | Zero outbound packets detected during execution | **COMPLETED** | `bf8a795` |
 | **SEC-01A**| Security Scan | Execute SAST, dependency vulnerability scan, and secret leak detection | §23.1, §64.1 | P0 | 0 critical / 0 high vulnerabilities | **COMPLETED** | `b5a3e5f` |
 
 ### Workstream 6: Three-Screen Local Dashboard & UI Surfaces (Slice 5 & 6)
@@ -157,7 +157,7 @@ Golden Test Suite ───> Fuzz Suite ───> Zero-Egress Net Audit ──�
 | **UX-01B** | Screen 2: Case Review| Build Case Review view (Source Integrity, Differences, Unresolved Items, Provenance) | §34.2, §35.2 | P0 | Displays exact differences without misleading green badges | **COMPLETED** | `b5a3e5f` |
 | **UX-01C** | Screen 3: Receipt | Build Receipt & Export view (Receipt ID, Signer ID, Hash, Download Bundle) | §34.2, §13.3 | P0 | One-click ZIP bundle download (Receipt + Evidence + Verifier) | **COMPLETED** | `b5a3e5f` |
 | **UX-02A** | Web Verifier | Build client-side standalone HTML/JS verifier (drag-and-drop receipt verification) | §34.3, §13.8 | P0 | Runs 100% in browser client with zero server calls | **COMPLETED** | `b5a3e5f` |
-| **WEB-01A**| Preview Marketing | Create single-page preview marketing site explaining trust proposition & receipt demo | §34.1, §50.4 | P0 | Fast, responsive, institutional aesthetics, no hype | **COMPLETED** | `PENDING_COMMIT` |
+| **WEB-01A**| Preview Marketing | Create single-page preview marketing site explaining trust proposition & receipt demo | §34.1, §50.4 | P0 | Fast, responsive, institutional aesthetics, no hype | **COMPLETED** | `bf8a795` |
 
 ### Workstream 7: Left-Shift QA, Documentation & Launch Certification (Slice 7)
 
@@ -165,15 +165,15 @@ Golden Test Suite ───> Fuzz Suite ───> Zero-Egress Net Audit ──�
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **QA-01A** | Unit Test Suite | Comprehensive unit tests for math, parsing, serializing, signing, hashing | §43.1, §64.1 | P0 | >90% code coverage on core deterministic engine | **COMPLETED** | `b5a3e5f` |
 | **QA-02A** | Golden Test Suite | Reference test vectors with realistic 1099-DA and Koinly CSV cases | §43.2, §59.1 | P0 | 100% match on all reference scenarios | **COMPLETED** | `b5a3e5f` |
-| **QA-ATDD**| Acceptance Suite | End-to-end customer & CPA workflows (`test_atdd_cpa_user_journey.py`) | §4.1, §50.4 | P0 | CPA full reconciliation journey verified | **COMPLETED** | `PENDING_COMMIT` |
-| **QA-BDD** | BDD Feature Suite| Given-When-Then criteria for 7 preview gates (`test_bdd_acceptance_gates.py`)| §41 | P0 | All 7 blocking preview gates verified | **COMPLETED** | `PENDING_COMMIT` |
-| **QA-TDD** | Invariant Suite  | Low-level exact decimal & RFC 8785 tests (`test_tdd_invariants.py`) | §15.1, §44.1 | P0 | Decimal math & canonicalization determinism verified | **COMPLETED** | `PENDING_COMMIT` |
-| **QA-DDD** | Domain Invariants| Entity, value object & case aggregate tests (`test_ddd_domain_models.py`) | §17.1, §17.2 | P0 | Case lifecycle & transaction invariants verified | **COMPLETED** | `PENDING_COMMIT` |
+| **QA-ATDD**| Acceptance Suite | End-to-end customer & CPA workflows (`test_atdd_cpa_user_journey.py`) | §4.1, §50.4 | P0 | CPA full reconciliation journey verified | **COMPLETED** | `bf8a795` |
+| **QA-BDD** | BDD Feature Suite| Given-When-Then criteria for 7 preview gates (`test_bdd_acceptance_gates.py`)| §41 | P0 | All 7 blocking preview gates verified | **COMPLETED** | `bf8a795` |
+| **QA-TDD** | Invariant Suite  | Low-level exact decimal & RFC 8785 tests (`test_tdd_invariants.py`) | §15.1, §44.1 | P0 | Decimal math & canonicalization determinism verified | **COMPLETED** | `bf8a795` |
+| **QA-DDD** | Domain Invariants| Entity, value object & case aggregate tests (`test_ddd_domain_models.py`) | §17.1, §17.2 | P0 | Case lifecycle & transaction invariants verified | **COMPLETED** | `bf8a795` |
 | **QA-03A** | Differential Tests | Differential testing against independent reference calculation scripts | §43.3, §15.1 | P0 | Zero divergence against ground truth math | **COMPLETED** | `b5a3e5f` |
 | **QA-04A** | Property/Fuzz Tests| Fuzz tests with corrupted, truncated, and random byte inputs | §43.4, §41 (AC-04)| P0 | Zero unhandled exceptions or crashes | **COMPLETED** | `b5a3e5f` |
-| **DOC-01A**| Operator Guide | Write Edge Deployment Guide (`docs/edge_deployment_guide.md`) | §51.3, §63 | P0 | Step-by-step instructions tested on fresh machine | **COMPLETED** | `PENDING_COMMIT` |
-| **DOC-02A**| Verifier Guide | Write Independent Verifier Guide (`docs/verifier_guide.md`) | §51.3, §13.8 | P0 | Detailed third-party verification runbook | **COMPLETED** | `PENDING_COMMIT` |
-| **REL-01A**| Gate Certification | Review and certify all 7 preview gates in `docs/preview_gates_certification.md` | §41, §71 | P0 | All 7 gates signed off with test evidence | **COMPLETED** | `PENDING_COMMIT` |
+| **DOC-01A**| Operator Guide | Write Edge Deployment Guide (`docs/edge_deployment_guide.md`) | §51.3, §63 | P0 | Step-by-step instructions tested on fresh machine | **COMPLETED** | `bf8a795` |
+| **DOC-02A**| Verifier Guide | Write Independent Verifier Guide (`docs/verifier_guide.md`) | §51.3, §13.8 | P0 | Detailed third-party verification runbook | **COMPLETED** | `bf8a795` |
+| **REL-01A**| Gate Certification | Review and certify all 7 preview gates in `docs/preview_gates_certification.md` | §41, §71 | P0 | All 7 gates signed off with test evidence | **COMPLETED** | `bf8a795` |
 
 ---
 
