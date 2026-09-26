@@ -7,3 +7,5 @@ python-multipart
 pydantic
 starlette
 cryptography
+pyinstaller
+tinyaes
