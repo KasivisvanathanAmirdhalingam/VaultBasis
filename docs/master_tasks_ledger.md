@@ -91,6 +91,10 @@ Client-side Web Verifier ───> Landing Page & Sample Receipt ───> Tru
          ▼
 [Slice 7: Left-Shift QA & Production Readiness]
 Golden Test Suite ───> Fuzz Suite ───> Zero-Egress Net Audit ───> 7 Gates Green Sign-Off
+         │
+         ▼
+[Slice 8: Incremental Cloud Infrastructure & Vercel Production Deployment]
+vercel.json & Packager ───> Localhost Airgap Bridge ───> WebCrypto Verifier ───> Prod Deploy Gates
 ```
 
 ---
@@ -175,6 +179,15 @@ Golden Test Suite ───> Fuzz Suite ───> Zero-Egress Net Audit ──�
 | **DOC-02A**| Verifier Guide | Write Independent Verifier Guide (`docs/verifier_guide.md`) | §51.3, §13.8 | P0 | Detailed third-party verification runbook | **COMPLETED** | `bf8a795` |
 | **DOC-03A**| Manual QA Runbook | Create Manual Validation Scenarios Runbook (`docs/manual_validation_scenarios.md`)| §41, §50.4 | P0 | 10 exhaustive manual scenarios for periodic human auditing | **COMPLETED** | `835a91c` |
 | **REL-01A**| Gate Certification | Review and certify all 7 preview gates in `docs/preview_gates_certification.md` | §41, §71 | P0 | All 7 gates signed off with test evidence | **COMPLETED** | `bf8a795` |
+
+### Workstream 8: Incremental Cloud Infrastructure & Vercel Production Deployment (Slice 8)
+
+| Task ID | Component | Task Description | PRD Ref | Priority | DoD Exit Criterion | Status | Commit ID |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **DEP-01A**| Cloud Config | Define `vercel.json` and `package.json` for incremental static deployment with strict security headers | §34.1, §50.4 | P0 | Validated Vercel config with cleanUrls, rewrites, and security headers | **COMPLETED** | `1424697` |
+| **DEP-02A**| Static Packager | Build deterministic packager `scripts/build_public_web.js` with zero-leakage security audit | §21.1, §41 (AC-07)| P0 | Packages public web distribution with 0 keys and 0 DBs | **COMPLETED** | `1424697` |
+| **DEP-03A**| Public Bridge | Build client-side localhost bridge in marketing site and WebCrypto verifier | §34.1, §34.3 | P0 | Public internet visitor discovers local edge or verifies receipts client-side | **COMPLETED** | `1424697` |
+| **DEP-04A**| Left-Shift CI | Implement automated production deployment test suite (`test_vercel_incremental_build.py`) | §41, §64.1 | P0 | 100% pass on deployment test + pre-commit pipeline step 6 | **COMPLETED** | `1424697` |
 
 ---
 
