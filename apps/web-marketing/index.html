@@ -3,8 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VaultBasis — Independent Outcome Verification & Assurance Edge</title>
-  <meta name="description" content="Independent outcome-verification and assurance edge for U.S. Digital-Asset Financial & Tax Reconciliation. Form 1099-DA broker reporting vs. tax ledger reconciliation with zero token bleed.">
+  <title>VaultBasis by TecTixBase — Independent Outcome Verification Edge</title>
+  <meta name="description" content="VaultBasis by TecTixBase: Independent outcome-verification and assurance edge for U.S. Digital-Asset Financial & Tax Reconciliation. Form 1099-DA broker reporting vs. tax ledger reconciliation with zero token bleed.">
+  <meta name="keywords" content="Form 1099-DA reconciliation, crypto tax reconciliation, CPA digital asset compliance, offline tax verification, Zero-Egress tax software, VaultBasis, TecTixBase, capital gains tax, IRS Form 1099-DA, Ed25519 receipt">
+  <meta name="author" content="TecTixBase">
+  <meta property="og:title" content="VaultBasis — The Zero-Egress Tax Verification Edge">
+  <meta property="og:description" content="Reconcile Form 1099-DA and capital gains with 100% exact math and zero cloud data leaks. Built for elite CPAs.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <!-- Google tag (gtag.js) Placeholder -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-XXXXXXXXXX');
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -273,11 +287,26 @@
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 2rem;
-      transition: transform 0.2s, border-color 0.2s;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    .feature-card::before {
+      content: "";
+      position: absolute;
+      top: 0; left: -100%;
+      width: 50%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.08), transparent);
+      transform: skewX(-20deg);
+      transition: all 0.6s ease;
+    }
+    .feature-card:hover::before {
+      left: 150%;
     }
     .feature-card:hover {
-      border-color: var(--border-accent);
-      transform: translateY(-2px);
+      border-color: rgba(59, 130, 246, 0.5);
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px -10px rgba(59, 130, 246, 0.2);
     }
     .card-icon {
       width: 40px;
@@ -770,7 +799,7 @@
 
     <!-- Footer Copyright & Badges -->
     <div class="footer-bottom">
-      <div>© 2026 VaultBasis Inc. All rights reserved. • MMP-1 Technical Preview</div>
+      <div>© 2026 VaultBasis (A product by TecTixBase). All rights reserved. • MMP-1 Technical Preview</div>
       <div style="display: flex; gap: 1.5rem; font-family: 'JetBrains Mono', monospace; font-size: 0.76rem;">
         <span>PRD v26.1 Reference</span>
         <span>•</span>
