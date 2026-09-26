@@ -191,6 +191,7 @@ vercel.json & Packager ───> Localhost Airgap Bridge ───> WebCrypto V
 | **DEP-05A**| Infra Operations| Comprehensive Operations & Deployment Runbook (`docs/infrastructure_and_deployment_guide.md`) | §6.1, §51.3 | P0 | End-to-end multi-tier infrastructure runbook documented | **COMPLETED** | `3cd422c` |
 | **UX-03A** | Standard Web Nav| Standardized enterprise headers, multi-column footers, live sample receipts & anchor links | §34.1, §34.3 | P0 | 100% working links/buttons with statutory limitation notices | **COMPLETED** | `3cd422c` |
 | **DEP-06A**| Web Link Gates | Regression test suite for web navigation, headers, footers & endpoints (`test_web_navigation_and_links.py`)| §41, §64.1 | P0 | 51 tests green across comprehensive suite | **COMPLETED** | `3cd422c` |
+| **FIX-01A**| Anchor Offset  | Resolve sticky header occlusion using `scroll-padding-top`, `scroll-margin-top` and smooth offset handler | §34.1 | P0 | Headings scroll with full clearance beneath sticky header | **COMPLETED** | `e9500d4` |
 
 ---
 
