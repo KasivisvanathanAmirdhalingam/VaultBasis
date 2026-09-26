@@ -157,7 +157,7 @@ Golden Test Suite ───> Fuzz Suite ───> Zero-Egress Net Audit ──�
 | **UX-01B** | Screen 2: Case Review| Build Case Review view (Source Integrity, Differences, Unresolved Items, Provenance) | §34.2, §35.2 | P0 | Displays exact differences without misleading green badges | **COMPLETED** | `b5a3e5f` |
 | **UX-01C** | Screen 3: Receipt | Build Receipt & Export view (Receipt ID, Signer ID, Hash, Download Bundle) | §34.2, §13.3 | P0 | One-click ZIP bundle download (Receipt + Evidence + Verifier) | **COMPLETED** | `b5a3e5f` |
 | **UX-02A** | Web Verifier | Build client-side standalone HTML/JS verifier (drag-and-drop receipt verification) | §34.3, §13.8 | P0 | Runs 100% in browser client with zero server calls | **COMPLETED** | `b5a3e5f` |
-| **WEB-01A**| Preview Marketing | Create single-page preview marketing site explaining trust proposition & receipt demo | §34.1, §50.4 | P0 | Fast, responsive, institutional aesthetics, no hype | **COMPLETED** | `bf8a795` |
+| **WEB-01A**| Preview Marketing | Create single-page preview marketing site explaining trust proposition & receipt demo | §34.1, §50.4 | P0 | Fast, responsive, institutional aesthetics, no hype | **COMPLETED** | `73a7a75` |
 
 ### Workstream 7: Left-Shift QA, Documentation & Launch Certification (Slice 7)
 
