@@ -32,8 +32,8 @@ fi
 echo "Starting Edge REST API and Web Application on http://${HOST}:${PORT}..."
 export PYTHONPATH="${REPO_ROOT}"
 
-# Start uvicorn
-uvicorn edge.api.app:app --host "${HOST}" --port "${PORT}" --log-level info &
+# Start uvicorn with auto-reload
+uvicorn edge.api.app:app --host "${HOST}" --port "${PORT}" --reload --log-level info &
 SERVER_PID=$!
 
 # Trap signals for graceful shutdown
@@ -67,6 +67,7 @@ if [ ${HEALTH_OK} -eq 1 ]; then
     echo "✅ VAULTBASIS EDGE IS LIVE AND FULLY OPERATIONAL!"
     echo "--------------------------------------------------------------------------------"
     echo "📍 Web Dashboard (Customer UI):   http://${HOST}:${PORT}/"
+    echo "📍 Preview Marketing Page:        http://${HOST}:${PORT}/about"
     echo "📍 Public Offline Verifier Tool:   http://${HOST}:${PORT}/verifier"
     echo "📍 Local REST API Documentation:   http://${HOST}:${PORT}/docs"
     echo "📍 Health & Diagnostic Endpoint:   http://${HOST}:${PORT}/api/health"

@@ -363,6 +363,7 @@ def serve_verifier():
     return HTMLResponse("<h2>VaultBasis Public Verifier building...</h2>")
 
 @app.get("/about", response_class=HTMLResponse)
+@app.get("/marketing", response_class=HTMLResponse)
 def serve_marketing():
     mkt_file = WEB_MARKETING_DIR / "index.html"
     if mkt_file.exists():
