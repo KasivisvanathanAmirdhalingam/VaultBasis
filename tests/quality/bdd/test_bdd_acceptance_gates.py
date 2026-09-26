@@ -257,4 +257,145 @@ def test_bdd_empty_or_zero_byte_file_rejection(client):
     assert "empty" in res.json()["detail"].lower()
 
 
+# ------------------------------------------------------------------------------
+# AC-12 (Extended): Acquisition date divergence (holding period impact)
+# ------------------------------------------------------------------------------
+@pytest.mark.bdd
+@pytest.mark.regression
+def test_bdd_ac_outcome_state_acquisition_date_difference(client):
+    # GIVEN identical proceeds and basis, but diverging acquisition dates
+    case_id = "CASE-BDD-DATE-DIFF"
+    client.post("/api/cases", json={"case_id": case_id, "tax_year": 2025})
+    src_a = b"Property,Date sold,Proceeds,Date acquired,Cost basis,Box 2\nBTC,2025-11-01,15000.00,2024-01-01,10000.00,YES\n"
+    src_b = b"Date,Asset,Amount,Cost basis,Proceeds,Gain / loss,Date acquired\n2025-11-01,BTC,1.0,10000.00,15000.00,5000.00,2025-01-01\n"
+    client.post(f"/api/cases/{case_id}/sources", files={"file": ("a.csv", src_a, "text/csv")})
+    client.post(f"/api/cases/{case_id}/sources", files={"file": ("b.csv", src_b, "text/csv")})
+
+    recon = client.post(f"/api/cases/{case_id}/reconcile").json()
+    assert recon["outcome_state"] == "ACQUISITION_DATE_DIFFERENCE"
+    diffs = recon["reconciliation"]["material_differences"]
+    assert len(diffs) == 1
+    assert diffs[0]["difference_state"] == "ACQUISITION_DATE_DIFFERENCE"
+
+
+# ------------------------------------------------------------------------------
+# AC-13 (Extended): Transaction present on ledger but missing from Form 1099-DA
+# ------------------------------------------------------------------------------
+@pytest.mark.bdd
+@pytest.mark.regression
+def test_bdd_ac_outcome_state_missing_from_1099da(client):
+    case_id = "CASE-BDD-MISSING-1099"
+    client.post("/api/cases", json={"case_id": case_id, "tax_year": 2025})
+    # Source A has only ETH; Source B has ETH and SOL
+    src_a = b"Property,Date sold,Proceeds,Date acquired,Cost basis,Box 2\nETH,2025-05-01,2000.00,2024-05-01,1500.00,YES\n"
+    src_b = b"""Date,Asset,Amount,Cost basis,Proceeds,Gain / loss,Date acquired
+2025-05-01,ETH,1.0,1500.00,2000.00,500.00,2024-05-01
+2025-06-01,SOL,10.0,1000.00,1500.00,500.00,2024-06-01
+"""
+    client.post(f"/api/cases/{case_id}/sources", files={"file": ("a.csv", src_a, "text/csv")})
+    client.post(f"/api/cases/{case_id}/sources", files={"file": ("b.csv", src_b, "text/csv")})
+
+    recon = client.post(f"/api/cases/{case_id}/reconcile").json()
+    diffs = recon["reconciliation"]["material_differences"]
+    missing_diff = next((d for d in diffs if d["asset"] == "SOL"), None)
+    assert missing_diff is not None
+    assert missing_diff["difference_state"] in ["MISSING_FROM_1099DA", "UNMATCHED"]
+
+
+# ------------------------------------------------------------------------------
+# AC-14 (Extended): Transaction on 1099-DA missing from taxpayer ledger
+# ------------------------------------------------------------------------------
+@pytest.mark.bdd
+@pytest.mark.regression
+def test_bdd_ac_outcome_state_missing_from_ledger(client):
+    case_id = "CASE-BDD-MISSING-LEDGER"
+    client.post("/api/cases", json={"case_id": case_id, "tax_year": 2025})
+    # Source A has BTC and DOGE; Source B only has BTC
+    src_a = b"""Property,Date sold,Proceeds,Date acquired,Cost basis,Box 2
+BTC,2025-03-01,5000.00,2024-03-01,3000.00,YES
+DOGE,2025-03-02,500.00,2024-03-01,200.00,YES
+"""
+    src_b = b"Date,Asset,Amount,Cost basis,Proceeds,Gain / loss,Date acquired\n2025-03-01,BTC,1.0,3000.00,5000.00,2000.00,2024-03-01\n"
+    client.post(f"/api/cases/{case_id}/sources", files={"file": ("a.csv", src_a, "text/csv")})
+    client.post(f"/api/cases/{case_id}/sources", files={"file": ("b.csv", src_b, "text/csv")})
+
+    recon = client.post(f"/api/cases/{case_id}/reconcile").json()
+    diffs = recon["reconciliation"]["material_differences"]
+    doge_diff = next((d for d in diffs if d["asset"] == "DOGE"), None)
+    assert doge_diff is not None
+    assert doge_diff["difference_state"] in ["MISSING_FROM_LEDGER", "UNMATCHED"]
+
+
+# ------------------------------------------------------------------------------
+# AC-15 (Extended): Schema structural validation fails on missing required key
+# ------------------------------------------------------------------------------
+@pytest.mark.bdd
+@pytest.mark.regression
+def test_bdd_ac_receipt_schema_structural_validation_failure(client):
+    case_id = "CASE-BDD-SCHEMA-FAIL"
+    client.post("/api/cases", json={"case_id": case_id, "tax_year": 2025})
+    src_a = b"Property,Date sold,Proceeds,Date acquired,Cost basis,Box 2\nBTC,2025-01-01,1000.00,2024-01-01,800.00,YES\n"
+    src_b = b"Date,Asset,Amount,Cost basis,Proceeds,Gain / loss,Date acquired\n2025-01-01,BTC,1.0,800.00,1000.00,200.00,2024-01-01\n"
+    client.post(f"/api/cases/{case_id}/sources", files={"file": ("a.csv", src_a, "text/csv")})
+    client.post(f"/api/cases/{case_id}/sources", files={"file": ("b.csv", src_b, "text/csv")})
+    receipt = client.post(f"/api/cases/{case_id}/reconcile").json()["receipt"]
+
+    corrupted_receipt = dict(receipt)
+    del corrupted_receipt["signer_key_id"]  # Remove mandatory field
+
+    report = verify_outcome_receipt(corrupted_receipt)
+    assert report.is_valid is False
+    assert report.schema_valid is False
+    assert any("signer_key_id" in err for err in report.errors)
+
+
+# ------------------------------------------------------------------------------
+# AC-16 (Extended): Public key substitution detected via key fingerprint check
+# ------------------------------------------------------------------------------
+@pytest.mark.bdd
+@pytest.mark.regression
+def test_bdd_ac_tampered_signer_public_key_fingerprint_mismatch(client):
+    case_id = "CASE-BDD-FP-FAIL"
+    client.post("/api/cases", json={"case_id": case_id, "tax_year": 2025})
+    src_a = b"Property,Date sold,Proceeds,Date acquired,Cost basis,Box 2\nETH,2025-01-01,1000.00,2024-01-01,800.00,YES\n"
+    src_b = b"Date,Asset,Amount,Cost basis,Proceeds,Gain / loss,Date acquired\n2025-01-01,ETH,1.0,800.00,1000.00,200.00,2024-01-01\n"
+    client.post(f"/api/cases/{case_id}/sources", files={"file": ("a.csv", src_a, "text/csv")})
+    client.post(f"/api/cases/{case_id}/sources", files={"file": ("b.csv", src_b, "text/csv")})
+    receipt = client.post(f"/api/cases/{case_id}/reconcile").json()["receipt"]
+
+    # Substitute public key with another 32-byte hex key
+    corrupted_receipt = dict(receipt)
+    corrupted_receipt["signer_public_key"] = "11" * 32
+
+    report = verify_outcome_receipt(corrupted_receipt)
+    assert report.is_valid is False
+    assert any("fingerprint" in err.lower() for err in report.errors)
+
+
+# ------------------------------------------------------------------------------
+# AC-17 (Extended): Zero outbound socket activity during end-to-end execution
+# ------------------------------------------------------------------------------
+@pytest.mark.bdd
+@pytest.mark.regression
+def test_bdd_ac_zero_egress_no_outbound_socket_calls(monkeypatch, client):
+    import socket
+
+    def blocked_connect(*args, **kwargs):
+        raise RuntimeError("SECURITY VIOLATION: Egress network socket initiated!")
+
+    # Guard socket connect to ensure zero egress
+    case_id = "CASE-BDD-SOCKET-GUARD"
+    client.post("/api/cases", json={"case_id": case_id, "tax_year": 2025})
+    src_a = b"Property,Date sold,Proceeds,Date acquired,Cost basis,Box 2\nBTC,2025-01-01,1000.00,2024-01-01,800.00,YES\n"
+    src_b = b"Date,Asset,Amount,Cost basis,Proceeds,Gain / loss,Date acquired\n2025-01-01,BTC,1.0,800.00,1000.00,200.00,2024-01-01\n"
+
+    with monkeypatch.context() as m:
+        m.setattr(socket.socket, "connect", blocked_connect)
+        client.post(f"/api/cases/{case_id}/sources", files={"file": ("a.csv", src_a, "text/csv")})
+        client.post(f"/api/cases/{case_id}/sources", files={"file": ("b.csv", src_b, "text/csv")})
+        recon = client.post(f"/api/cases/{case_id}/reconcile").json()
+        assert recon["outcome_state"] == "MATCHED"
+
+
+
 

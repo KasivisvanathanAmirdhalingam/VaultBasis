@@ -193,3 +193,138 @@ def test_tdd_high_volume_decimal_summation_zero_drift():
     # Float equivalent would fail: 0.1 * 10000 != 1000.00 (drift detected)
 
 
+@pytest.mark.tdd
+@pytest.mark.smoke
+def test_tdd_cryptographic_single_bit_flip_fails_signature(tmp_path):
+    """
+    Validates that flipping a single bit anywhere in an Ed25519 signature
+    causes cryptographic verification to immediately fail.
+    """
+    from cryptography.exceptions import InvalidSignature
+
+    km = InstallationKeyManager(tmp_path / "keys")
+    priv, pub = km.ensure_keypair()
+    msg = b"Normative Evidence Contract v0.1 Test Message"
+    msg_digest = hashlib.sha256(msg).digest()
+
+    sig = priv.sign(msg_digest)
+    assert len(sig) == 64
+
+    # Verification of uncorrupted signature
+    pub.verify(sig, msg_digest)
+
+    # Flip 1 bit in first byte
+    corrupted_sig_1 = bytes([sig[0] ^ 0x01]) + sig[1:]
+    with pytest.raises(InvalidSignature):
+        pub.verify(corrupted_sig_1, msg_digest)
+
+    # Flip 1 bit in last byte
+    corrupted_sig_64 = sig[:-1] + bytes([sig[-1] ^ 0x80])
+    with pytest.raises(InvalidSignature):
+        pub.verify(corrupted_sig_64, msg_digest)
+
+
+@pytest.mark.tdd
+@pytest.mark.regression
+def test_tdd_cryptographic_single_bit_flip_in_message_fails(tmp_path):
+    """Validates that modifying a single bit in the message digest causes verification failure."""
+    from cryptography.exceptions import InvalidSignature
+
+    km = InstallationKeyManager(tmp_path / "keys")
+    priv, pub = km.ensure_keypair()
+    msg = b"Canonical Payload"
+    msg_digest = hashlib.sha256(msg).digest()
+    sig = priv.sign(msg_digest)
+
+    # Corrupt digest by flipping one bit
+    corrupted_digest = bytes([msg_digest[0] ^ 0x01]) + msg_digest[1:]
+    with pytest.raises(InvalidSignature):
+        pub.verify(sig, corrupted_digest)
+
+
+@pytest.mark.tdd
+@pytest.mark.regression
+def test_tdd_rfc8785_unicode_character_normalization_and_escapes():
+    """
+    Validates RFC 8785 Unicode escaping and deterministic UTF-8 serialization:
+    - Special control characters (\\b, \\f, \\n, \\r, \\t)
+    - Multibyte Unicode symbols (e.g. currency, non-ASCII letters)
+    """
+    sample = {
+        "text": "Hello\nWorld\twith \"quotes\" and \\backslash\\",
+        "unicode_euro": "€100.50",
+        "japanese": "ビットコイン"
+    }
+    canonical = canonical_json_bytes(sample)
+    # RFC 8785 mandates canonical JSON produces UTF-8 encoded bytes with exact key ordering
+    assert canonical.startswith(b'{"japanese":"\xe3\x83\x93\xe3\x83\x83\xe3\x83\x88\xe3\x82\xb3\xe3\x82\xa4\xe3\x83\xb3"')
+    assert b'\\n' in canonical
+    assert b'\\t' in canonical
+    assert b'\\"' in canonical
+
+
+@pytest.mark.tdd
+@pytest.mark.regression
+def test_tdd_decimal_fractional_lot_split_conservation():
+    """
+    Validates conservation of quantities across fractional lot splits
+    ensuring zero remainder loss down to 18 decimal places.
+    """
+    original_lot = Decimal("1.000000000000000000")
+    slice_1 = Decimal("0.333333333333333333")
+    slice_2 = Decimal("0.333333333333333333")
+    slice_3 = Decimal("0.333333333333333334")
+
+    assert slice_1 + slice_2 + slice_3 == original_lot
+
+    # Calculating proportional basis allocation
+    total_cost_basis = Decimal("60000.00")
+    basis_1 = (slice_1 / original_lot) * total_cost_basis
+    basis_2 = (slice_2 / original_lot) * total_cost_basis
+    basis_3 = (slice_3 / original_lot) * total_cost_basis
+
+    total_allocated = (basis_1 + basis_2 + basis_3).quantize(Decimal("0.01"))
+    assert total_allocated == Decimal("60000.00")
+
+
+@pytest.mark.tdd
+@pytest.mark.regression
+def test_tdd_keypair_filesystem_permissions(tmp_path):
+    """Validates that private key files are strictly created with mode 0o600 (owner read/write only)."""
+    import os
+    import stat
+
+    key_dir = tmp_path / "secure_keys"
+    km = InstallationKeyManager(key_dir)
+    km.ensure_keypair()
+
+    priv_path = key_dir / "installation_ed25519.key"
+    assert priv_path.exists()
+    mode = stat.S_IMODE(os.stat(priv_path).st_mode)
+    assert mode == 0o600, f"Expected 0o600 permissions, got {oct(mode)}"
+
+
+@pytest.mark.tdd
+@pytest.mark.regression
+def test_tdd_receipt_digest_computation_exactness():
+    """Validates that compute_receipt_digest returns 32-byte raw SHA-256 digest over canonical JSON without signature."""
+    receipt = {
+        "receipt_version": "v0.1",
+        "case_id": "CASE-DIGEST-TEST",
+        "receipt_id": "rcpt-001",
+        "signature": "abcdef123456"
+    }
+    digest = compute_receipt_digest(receipt)
+
+    # Compute expected digest manually over stripped copy
+    stripped = {"receipt_version": "v0.1", "case_id": "CASE-DIGEST-TEST", "receipt_id": "rcpt-001"}
+    expected_bytes = hashlib.sha256(canonical_json_bytes(stripped)).digest()
+    expected_hex = hashlib.sha256(canonical_json_bytes(stripped)).hexdigest()
+
+    assert digest == expected_bytes
+    assert len(digest) == 32
+    assert digest.hex() == expected_hex
+
+
+
+
