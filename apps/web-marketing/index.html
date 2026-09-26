@@ -26,7 +26,15 @@
       --radius: 8px;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 6.5rem;
+    }
+    section[id],
+    .section-container,
+    [id] {
+      scroll-margin-top: 6.5rem;
+    }
     body {
       background-color: var(--bg);
       color: var(--text);
@@ -834,6 +842,46 @@
         }
       });
     }
+
+    // Smooth scrolling with exact sticky header offset
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        const href = this.getAttribute('href');
+        if (href === '#' || href.length < 2) return;
+        const targetId = href.substring(1);
+        const targetEl = document.getElementById(targetId);
+        if (targetEl) {
+          e.preventDefault();
+          const header = document.querySelector('header');
+          const headerHeight = header ? header.offsetHeight : 70;
+          const targetPos = targetEl.getBoundingClientRect().top + window.pageYOffset - (headerHeight + 24);
+          window.scrollTo({
+            top: targetPos,
+            behavior: 'smooth'
+          });
+          history.pushState(null, null, '#' + targetId);
+        }
+      });
+    });
+
+    // Handle direct anchor navigation on page load / reload
+    window.addEventListener('load', () => {
+      if (window.location.hash) {
+        const targetId = window.location.hash.substring(1);
+        const targetEl = document.getElementById(targetId);
+        if (targetEl) {
+          setTimeout(() => {
+            const header = document.querySelector('header');
+            const headerHeight = header ? header.offsetHeight : 70;
+            const targetPos = targetEl.getBoundingClientRect().top + window.pageYOffset - (headerHeight + 24);
+            window.scrollTo({
+              top: targetPos,
+              behavior: 'smooth'
+            });
+          }, 100);
+        }
+      }
+    });
   </script>
 </body>
 </html>

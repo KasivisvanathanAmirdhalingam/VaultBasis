@@ -54,6 +54,11 @@ def test_marketing_site_header_footer_and_anchor_links():
     assert "VaultBasis Inc." in html
     assert "System Status: Edge Runtime Operational" in html
 
+    # 4. Sticky header clearance (scroll-padding-top and scroll-margin-top)
+    assert "scroll-padding-top" in html, "scroll-padding-top required for sticky header anchor clearance"
+    assert "scroll-margin-top" in html, "scroll-margin-top required for section anchor clearance"
+    assert "scrollTo" in html, "smooth scroll offset logic required"
+
 
 @pytest.mark.regression
 def test_web_verifier_interactive_controls_and_footer():
