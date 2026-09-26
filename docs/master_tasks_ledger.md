@@ -175,10 +175,13 @@ vercel.json & Packager ───> Localhost Airgap Bridge ───> WebCrypto V
 | **QA-DDD** | Domain Invariants| Entity, value object & case aggregate tests (`test_ddd_domain_models.py`) | §17.1, §17.2 | P0 | Case lifecycle & transaction invariants verified (5 scenarios) | **COMPLETED** | `835a91c` |
 | **QA-03A** | Differential Tests | Differential testing against independent reference calculation scripts | §43.3, §15.1 | P0 | Zero divergence against ground truth math | **COMPLETED** | `b5a3e5f` |
 | **QA-04A** | Property/Fuzz Tests| Fuzz tests with corrupted, truncated, and random byte inputs | §43.4, §41 (AC-04)| P0 | Zero unhandled exceptions or crashes | **COMPLETED** | `b5a3e5f` |
+| **QA-05A** | Industrial Gates   | Python-based Categorical Runner for 11 validation gates | §64, §71 | P0 | Structured 11-gate execution matrix and summary | **COMPLETED** | `7763c9b` |
+| **QA-06A** | Extended DDD/TDD   | Extended invariant coverage (11 DDD, 14 TDD) for boundary testing | §43.1 | P0 | 100% pass on exactness and edge cases | **COMPLETED** | `7763c9b` |
 | **DOC-01A**| Operator Guide | Write Edge Deployment Guide (`docs/edge_deployment_guide.md`) | §51.3, §63 | P0 | Step-by-step instructions tested on fresh machine | **COMPLETED** | `bf8a795` |
 | **DOC-02A**| Verifier Guide | Write Independent Verifier Guide (`docs/verifier_guide.md`) | §51.3, §13.8 | P0 | Detailed third-party verification runbook | **COMPLETED** | `bf8a795` |
 | **DOC-03A**| Manual QA Runbook | Create Manual Validation Scenarios Runbook (`docs/manual_validation_scenarios.md`)| §41, §50.4 | P0 | 10 exhaustive manual scenarios for periodic human auditing | **COMPLETED** | `835a91c` |
 | **REL-01A**| Gate Certification | Review and certify all 7 preview gates in `docs/preview_gates_certification.md` | §41, §71 | P0 | All 7 gates signed off with test evidence | **COMPLETED** | `bf8a795` |
+| **REL-02A**| ADR Documentation  | Document execution strategy in ADR-006 & Audit Status Updates | §64 | P0 | ADR-006 approved and Audit Status reflects Python matrix | **COMPLETED** | `7763c9b` |
 
 ### Workstream 8: Incremental Cloud Infrastructure & Vercel Production Deployment (Slice 8)
 
