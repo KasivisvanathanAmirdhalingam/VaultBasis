@@ -197,7 +197,7 @@
       <a href="#how-it-works">How It Works</a>
       <a href="#security">Security Boundary</a>
       <a href="/verifier">Public Verifier</a>
-      <a href="/" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem;">Local Dashboard →</a>
+      <a href="javascript:void(0)" onclick="openLocalEdgeApp()" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.85rem;">Local Dashboard →</a>
     </nav>
   </header>
 
@@ -211,7 +211,7 @@
         Run VaultBasis inside your environment to independently reconcile Form 1099-DA broker reporting against tax ledger calculations and produce a signed Outcome Receipt that another machine can verify offline.
       </p>
       <div class="cta-group">
-        <a href="/" class="btn btn-primary">Launch Customer Dashboard</a>
+        <a href="javascript:void(0)" onclick="openLocalEdgeApp()" class="btn btn-primary">Launch Customer Dashboard</a>
         <a href="/verifier" class="btn btn-secondary">Verify a Sample Receipt ↗</a>
       </div>
     </section>
@@ -244,13 +244,66 @@
           Financial systems increasingly produce consequential claims that downstream taxpayers and CPAs must rely upon. VaultBasis provides an independent, local verification checkpoint for the claim and its evidence.
         </p>
       </div>
-      <a href="/" class="btn btn-primary">Open Local Edge Console</a>
+      <a href="javascript:void(0)" onclick="openLocalEdgeApp()" class="btn btn-primary">Open Local Edge Console</a>
     </div>
   </main>
+
+  <!-- Localhost Guidance Modal -->
+  <div id="local-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); backdrop-filter:blur(8px); z-index:999; align-items:center; justify-content:center;">
+    <div style="background:#0e121a; border:1px solid #21293a; border-radius:12px; padding:2.5rem; max-width:540px; width:90%; box-shadow:0 20px 40px rgba(0,0,0,0.5);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+        <h3 style="font-size:1.25rem; color:#fff;">Local Trust Boundary Required</h3>
+        <button onclick="closeLocalModal()" style="background:none; border:none; color:#888; font-size:1.5rem; cursor:pointer;">&times;</button>
+      </div>
+      <p style="color:#94a3b8; font-size:0.95rem; line-height:1.6; margin-bottom:1.5rem;">
+        To guarantee <strong>Zero Token Bleed</strong> and regulatory privacy, sensitive Form 1099-DA broker documents and tax ledger files are processed exclusively on your local machine.
+      </p>
+      <div style="background:#07090e; border:1px solid #21293a; border-radius:6px; padding:1rem; margin-bottom:1.5rem; font-family:'JetBrains Mono', monospace; font-size:0.85rem; color:#60a5fa;">
+        # Start the local Edge service:<br>
+        ./scripts/launch.sh
+      </div>
+      <div style="display:flex; gap:1rem; justify-content:flex-end;">
+        <a href="http://127.0.0.1:8000/" target="_blank" class="btn btn-primary" style="font-size:0.9rem;">Open http://127.0.0.1:8000/ →</a>
+        <button onclick="closeLocalModal()" class="btn btn-secondary" style="font-size:0.9rem;">Close</button>
+      </div>
+    </div>
+  </div>
 
   <footer>
     <div>© 2026 VaultBasis • Independent Outcome Verification & Assurance Edge</div>
     <div>Strict Local Trust Boundary • No Cloud Transmission • IRC §6045 & Rev. Proc. 2024-28 Aligned</div>
   </footer>
+
+  <script>
+    function openLocalEdgeApp() {
+      const isLocalhost = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost';
+      if (isLocalhost) {
+        window.location.href = '/';
+        return;
+      }
+      // On public domain, probe local Edge daemon
+      fetch('http://127.0.0.1:8000/api/health', { mode: 'cors' })
+        .then(res => {
+          if (res.ok) {
+            window.location.href = 'http://127.0.0.1:8000/';
+          } else {
+            showLocalModal();
+          }
+        })
+        .catch(() => {
+          showLocalModal();
+        });
+    }
+
+    function showLocalModal() {
+      const modal = document.getElementById('local-modal');
+      if (modal) modal.style.display = 'flex';
+    }
+
+    function closeLocalModal() {
+      const modal = document.getElementById('local-modal');
+      if (modal) modal.style.display = 'none';
+    }
+  </script>
 </body>
 </html>

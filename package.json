@@ -1,0 +1,22 @@
+{
+  "name": "vaultbasis-web",
+  "version": "0.1.0-preview",
+  "description": "VaultBasis Public Marketing & Independent Verifier Web Distribution",
+  "private": true,
+  "scripts": {
+    "build": "node scripts/build_public_web.js",
+    "validate": "./scripts/validate_before_commit.sh",
+    "start:edge": "./scripts/launch.sh",
+    "deploy:preview": "npx -y vercel@latest deploy",
+    "deploy:prod": "npx -y vercel@latest deploy --prod"
+  },
+  "keywords": [
+    "vaultbasis",
+    "form-1099da",
+    "tax-reconciliation",
+    "offline-verifier",
+    "zero-token-bleed"
+  ],
+  "author": "VaultBasis Core Team",
+  "license": "UNLICENSED"
+}

@@ -184,22 +184,176 @@
   </main>
 
   <script>
+    function hexToBytes(hex) {
+      if (typeof hex !== 'string') return new Uint8Array(0);
+      const cleanHex = hex.trim();
+      const bytes = new Uint8Array(cleanHex.length / 2);
+      for (let i = 0; i < bytes.length; i++) {
+        bytes[i] = parseInt(cleanHex.substr(i * 2, 2), 16);
+      }
+      return bytes;
+    }
+
+    function bytesToHex(bytes) {
+      return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    function canonicalizeJson(obj) {
+      if (obj === null || typeof obj !== 'object') {
+        return JSON.stringify(obj);
+      }
+      if (Array.isArray(obj)) {
+        return '[' + obj.map(canonicalizeJson).join(',') + ']';
+      }
+      const keys = Object.keys(obj).sort();
+      return '{' + keys.map(k => JSON.stringify(k) + ':' + canonicalizeJson(obj[k])).join(',') + '}';
+    }
+
+    async function fetchLocalEdgeVerify(receiptObj) {
+      try {
+        const blob = new Blob([JSON.stringify(receiptObj)], { type: "application/json" });
+        const formData = new FormData();
+        formData.append("file", blob, "receipt.json");
+        
+        const endpoints = ["/api/receipts/verify", "http://127.0.0.1:8000/api/receipts/verify"];
+        for (const ep of endpoints) {
+          try {
+            const res = await fetch(ep, { method: "POST", body: formData });
+            if (res.ok) {
+              return await res.json();
+            }
+          } catch (e) {
+            // try next
+          }
+        }
+      } catch (err) {
+        console.warn("Local Edge bridge verify error:", err);
+      }
+      return null;
+    }
+
+    async function verifyReceiptClientSide(receipt) {
+      const errors = [];
+      const checks = {
+        schema_conformance: "FAIL",
+        version_supported: "FAIL",
+        key_fingerprint: "FAIL",
+        signature_authenticity: "FAIL"
+      };
+
+      // 1. JSON Schema Conformance (Check core required fields per Evidence Contract v0.1)
+      const required = [
+        "receipt_id", "receipt_version", "timestamp_utc", "case_id",
+        "outcome_state", "sources", "reconciliation_summary",
+        "signer_type", "signer_key_id", "signer_public_key", "signature"
+      ];
+      const missing = required.filter(f => !(f in receipt));
+      if (missing.length === 0) {
+        checks.schema_conformance = "PASS";
+      } else {
+        errors.push(`Missing mandatory fields: ${missing.join(', ')}`);
+      }
+
+      // 2. Evidence Contract Version
+      if (receipt.receipt_version === "v0.1") {
+        checks.version_supported = "PASS (v0.1)";
+      } else {
+        errors.push(`Unsupported receipt version: ${receipt.receipt_version}`);
+      }
+
+      // 3. Key Fingerprint Integrity (SHA-256 of public key must equal signer_key_id)
+      try {
+        const pubKeyBytes = hexToBytes(receipt.signer_public_key || '');
+        if (pubKeyBytes.length === 32) {
+          const fpDigest = await crypto.subtle.digest("SHA-256", pubKeyBytes);
+          const computedFp = bytesToHex(new Uint8Array(fpDigest));
+          if (computedFp === receipt.signer_key_id) {
+            checks.key_fingerprint = "PASS";
+          } else {
+            errors.push(`Signer key fingerprint mismatch. Declared: ${receipt.signer_key_id}, Computed: ${computedFp}`);
+          }
+        } else {
+          errors.push("Invalid Ed25519 public key byte length (must be 32 bytes hex)");
+        }
+      } catch (err) {
+        errors.push(`Fingerprint check error: ${err.message}`);
+      }
+
+      // 4. Ed25519 Cryptographic Signature Verification via WebCrypto or Local Edge
+      try {
+        const pubKeyBytes = hexToBytes(receipt.signer_public_key || '');
+        const sigBytes = hexToBytes(receipt.signature || '');
+
+        const clone = { ...receipt };
+        delete clone.signature;
+        const canonicalStr = canonicalizeJson(clone);
+        const enc = new TextEncoder();
+        const canonicalBytes = enc.encode(canonicalStr);
+        const sha256Digest = await crypto.subtle.digest("SHA-256", canonicalBytes);
+
+        let verified = false;
+        if (crypto.subtle && crypto.subtle.importKey) {
+          try {
+            const cryptoKey = await crypto.subtle.importKey(
+              "raw",
+              pubKeyBytes,
+              { name: "Ed25519" },
+              false,
+              ["verify"]
+            );
+            verified = await crypto.subtle.verify(
+              "Ed25519",
+              cryptoKey,
+              sigBytes,
+              new Uint8Array(sha256Digest)
+            );
+          } catch (webCryptoErr) {
+            console.info("WebCrypto Ed25519 direct verify unavailable in browser, trying Localhost Edge daemon:", webCryptoErr.message);
+          }
+        }
+
+        if (verified) {
+          checks.signature_authenticity = "PASS";
+        } else {
+          // Fallback probe to Localhost Edge daemon
+          const localReport = await fetchLocalEdgeVerify(receipt);
+          if (localReport) {
+            return localReport;
+          }
+          errors.push("Cryptographic Ed25519 signature is INVALID (data tampered or corrupted)");
+        }
+      } catch (err) {
+        errors.push(`Signature verification error: ${err.message}`);
+      }
+
+      const overall = (
+        checks.schema_conformance === "PASS" &&
+        checks.version_supported.startsWith("PASS") &&
+        checks.key_fingerprint === "PASS" &&
+        checks.signature_authenticity === "PASS"
+      ) ? "PASS" : "FAIL";
+
+      return {
+        overall_status: overall,
+        receipt_id: receipt.receipt_id,
+        outcome_state: receipt.outcome_state,
+        assurance_level: receipt.assurance_level,
+        checks: checks,
+        errors: errors
+      };
+    }
+
     async function handleReceiptFile(event) {
       const file = event.target.files[0];
       if (!file) return;
 
-      const formData = new FormData();
-      formData.append('file', file);
-
       try {
-        const res = await fetch('/api/receipts/verify', {
-          method: 'POST',
-          body: formData
-        });
-        const report = await res.json();
+        const text = await file.text();
+        const receiptObj = JSON.parse(text);
+        const report = await verifyReceiptClientSide(receiptObj);
         renderReport(report);
       } catch (err) {
-        alert("Verification execution failed: " + err.message);
+        alert("Receipt processing failed: " + err.message);
       }
       event.target.value = '';
     }
@@ -220,7 +374,7 @@
       document.getElementById('rep-schema').className = `badge ${r.checks.schema_conformance === 'PASS' ? 'badge-pass' : 'badge-fail'}`;
       document.getElementById('rep-schema').innerText = r.checks.schema_conformance;
 
-      document.getElementById('rep-version').className = `badge ${r.checks.version_supported === 'PASS' ? 'badge-pass' : 'badge-fail'}`;
+      document.getElementById('rep-version').className = `badge ${r.checks.version_supported && r.checks.version_supported.startsWith('PASS') ? 'badge-pass' : 'badge-fail'}`;
       document.getElementById('rep-version').innerText = r.checks.version_supported;
 
       document.getElementById('rep-fingerprint').className = `badge ${r.checks.key_fingerprint === 'PASS' ? 'badge-pass' : 'badge-fail'}`;

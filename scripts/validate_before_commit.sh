@@ -70,7 +70,7 @@ else
 fi
 
 # Step 5: Security audit (Key permissions and zero plaintext leakage)
-echo "==> [5/5] Performing security posture check..."
+echo "==> [5/6] Performing security posture check..."
 if [ -d "tests/fixtures/keys" ]; then
     find tests/fixtures/keys -name "*.key" -type f | while read -r keyfile; do
         PERMS=$(stat -f "%Lp" "$keyfile" 2>/dev/null || stat -c "%a" "$keyfile" 2>/dev/null || true)
@@ -80,6 +80,17 @@ if [ -d "tests/fixtures/keys" ]; then
     done
 fi
 echo "    ✓ Security posture verified."
+
+# Step 6: Validate incremental Vercel public web build & zero-leakage distribution bundle
+echo "==> [6/6] Validating incremental Vercel public web build & production bundle..."
+node scripts/build_public_web.js > /tmp/vb_build_test.log
+if grep -q "PUBLIC WEB DISTRIBUTION READY FOR VERCEL DEPLOYMENT" /tmp/vb_build_test.log; then
+    echo "    ✓ Incremental Vercel public web bundle built & audited successfully."
+else
+    echo "    ❌ ERROR: Public web build pipeline failed!"
+    cat /tmp/vb_build_test.log
+    exit 1
+fi
 
 echo "--------------------------------------------------------------------------------"
 echo "✅ PRE-COMMIT VALIDATION SUCCESSFUL — ALL GATES GREEN."

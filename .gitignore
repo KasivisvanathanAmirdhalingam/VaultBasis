@@ -22,3 +22,9 @@ data/keys/
 # OS Specific
 .DS_Store
 Thumbs.db
+
+# Web Build & Deployment Artifacts
+dist/
+.vercel/
+node_modules/
+
