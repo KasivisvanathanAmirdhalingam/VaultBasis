@@ -77,6 +77,18 @@ if (fs.existsSync(schemaSourcePath)) {
   console.log('✓ Packaged Evidence Contract Schema -> dist/public-web/schemas/receipt-v0.1.json');
 }
 
+// 5b. Copy Golden Sample Receipts
+const sampleValidSource = path.join(REPO_ROOT, 'tests', 'fixtures', 'golden_receipt_valid.json');
+if (fs.existsSync(sampleValidSource)) {
+  fs.copyFileSync(sampleValidSource, path.join(DIST_DIR, 'sample-receipt.json'));
+  console.log('✓ Packaged Valid Sample Receipt -> dist/public-web/sample-receipt.json');
+}
+const sampleTamperedSource = path.join(REPO_ROOT, 'tests', 'fixtures', 'golden_receipt_tampered.json');
+if (fs.existsSync(sampleTamperedSource)) {
+  fs.copyFileSync(sampleTamperedSource, path.join(DIST_DIR, 'sample-receipt-tampered.json'));
+  console.log('✓ Packaged Tampered Sample Receipt -> dist/public-web/sample-receipt-tampered.json');
+}
+
 // 6. Generate Custom 404 Fallback Page
 const notFoundHtml = `<!DOCTYPE html>
 <html lang="en">

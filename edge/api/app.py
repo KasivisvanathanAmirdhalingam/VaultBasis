@@ -369,3 +369,29 @@ def serve_marketing():
     if mkt_file.exists():
         return HTMLResponse(content=mkt_file.read_text(), status_code=200)
     return HTMLResponse("<h2>VaultBasis Marketing page building...</h2>")
+
+
+@app.get("/schemas/{filename:path}")
+def serve_schema(filename: str):
+    schema_path = REPO_ROOT / "schemas" / "receipt" / filename
+    if schema_path.is_file():
+        return Response(content=schema_path.read_text(), media_type="application/json")
+    raise HTTPException(status_code=404, detail="Schema file not found")
+
+
+@app.get("/sample-receipt.json")
+@app.get("/api/sample-receipt")
+def get_sample_receipt():
+    sample_path = REPO_ROOT / "tests" / "fixtures" / "golden_receipt_valid.json"
+    if sample_path.is_file():
+        return JSONResponse(content=json.loads(sample_path.read_text()))
+    raise HTTPException(status_code=404, detail="Sample receipt not found")
+
+
+@app.get("/sample-receipt-tampered.json")
+def get_sample_receipt_tampered():
+    sample_path = REPO_ROOT / "tests" / "fixtures" / "golden_receipt_tampered.json"
+    if sample_path.is_file():
+        return JSONResponse(content=json.loads(sample_path.read_text()))
+    raise HTTPException(status_code=404, detail="Tampered sample receipt not found")
+
