@@ -41,7 +41,7 @@ if [ "${1:-}" == "--smoke" ]; then
 else
     echo "==> [3/5] Running COMPREHENSIVE test suite (ATDD, BDD, DDD, TDD, Unit)..."
     pytest tests/ -v --no-header
-    echo "    ✓ Complete test suite (28 tests) passed with 100% pass."
+    echo "    ✓ Complete test suite passed with 100% pass."
 fi
 
 # Step 4: Validate standalone verifier CLI against Golden Fixtures

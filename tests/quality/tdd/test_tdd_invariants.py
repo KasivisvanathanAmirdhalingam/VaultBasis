@@ -176,3 +176,20 @@ def test_tdd_receipt_schema_rejection_on_missing_required_field():
     with pytest.raises(jsonschema.ValidationError):
         jsonschema.validate(instance=invalid_receipt, schema=schema)
 
+
+@pytest.mark.tdd
+@pytest.mark.regression
+def test_tdd_high_volume_decimal_summation_zero_drift():
+    """
+    Validates that summing 10,000 fractional transactions preserves exact decimal precision
+    with zero accumulation drift, unlike IEEE 754 floating point arithmetic.
+    """
+    increment = Decimal("0.10")
+    total = Decimal("0.00")
+    for _ in range(10000):
+        total += increment
+
+    assert total == Decimal("1000.00")
+    # Float equivalent would fail: 0.1 * 10000 != 1000.00 (drift detected)
+
+

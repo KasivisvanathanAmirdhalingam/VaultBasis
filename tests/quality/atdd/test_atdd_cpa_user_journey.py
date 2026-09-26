@@ -213,3 +213,43 @@ def test_atdd_zip_bundle_complete_standalone_reverification(client, tmp_path):
     assert res_json["is_valid"] is True
     assert res_json["outcome_state"] == "MATCHED"
 
+
+@pytest.mark.atdd
+@pytest.mark.regression
+def test_atdd_multi_asset_mixed_portfolio_journey(client):
+    """
+    Scenario: CPA handles a client with a multi-asset portfolio (BTC, ETH, SOL).
+    - BTC: Proceeds match, basis differs ($18,400 proceeds, $12,100 vs $16,300 basis) -> BASIS_DIFFERENCE
+    - ETH: 100% matched ($3,200 proceeds, $2,800 basis)
+    - SOL: 2025 non-covered asset (Box 2 NO, basis unrecorded by broker) -> REPORTING_SCOPE_DIFFERENCE
+    """
+    case_id = "CASE-ATDD-MULTI-ASSET"
+    client.post("/api/cases", json={"case_id": case_id, "tax_year": 2025})
+
+    csv_1099 = b"""Property,Date sold,Proceeds,Date acquired,Cost basis,Box 2
+BTC,2025-11-20,18400.00,2025-02-11,12100.00,YES
+ETH,2025-12-05,3200.00,2025-03-01,2800.00,YES
+SOL,2025-08-14,4500.00,2025-01-10,,NO
+"""
+    csv_koinly = b"""Date,Asset,Amount,Cost basis,Proceeds,Gain / loss,Date acquired
+2025-11-20,BTC,1.0,16300.00,18400.00,2100.00,2025-02-11
+2025-12-05,ETH,1.0,2800.00,3200.00,400.00,2025-03-01
+2025-08-14,SOL,30.0,4000.00,4500.00,500.00,2025-01-10
+"""
+    client.post(f"/api/cases/{case_id}/sources", files={"file": ("1099.csv", csv_1099, "text/csv")})
+    client.post(f"/api/cases/{case_id}/sources", files={"file": ("koinly.csv", csv_koinly, "text/csv")})
+
+    recon_res = client.post(f"/api/cases/{case_id}/reconcile")
+    assert recon_res.status_code == 200
+    data = recon_res.json()
+
+    diffs = data["reconciliation"]["material_differences"]
+    diff_types = {d["difference_state"] for d in diffs}
+    assert "BASIS_DIFFERENCE" in diff_types
+    assert "REPORTING_SCOPE_DIFFERENCE" in diff_types
+
+    # Ensure receipt validates offline
+    report = verify_outcome_receipt(data["receipt"])
+    assert report.is_valid is True
+
+

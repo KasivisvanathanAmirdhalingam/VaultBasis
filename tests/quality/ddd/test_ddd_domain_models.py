@@ -136,3 +136,20 @@ def test_ddd_outcome_receipt_assurance_invariants():
     )
     assert case.outcome_state in allowed_states
 
+
+@pytest.mark.ddd
+@pytest.mark.regression
+def test_ddd_canonical_transaction_empty_asset_rejection():
+    """Validates that CanonicalTransaction rejects empty or missing asset symbols."""
+    with pytest.raises(ValidationError):
+        CanonicalTransaction(
+            transaction_id="tx_invalid_asset",
+            source_id="src_1",
+            source_file_hash="a" * 64,
+            source_row_reference="Row:1",
+            transaction_type="SALE",
+            asset="",  # Empty string rejected by min_length=1
+            quantity="1.0"
+        )
+
+

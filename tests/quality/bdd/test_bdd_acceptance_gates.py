@@ -237,3 +237,24 @@ def test_bdd_idempotent_reconciliation(client):
     assert recon1["reconciliation"]["material_differences"] == recon2["reconciliation"]["material_differences"]
 
 
+# ------------------------------------------------------------------------------
+# AC-11 (Extended): Zero-byte empty file upload fails safely
+# ------------------------------------------------------------------------------
+@pytest.mark.bdd
+@pytest.mark.regression
+def test_bdd_empty_or_zero_byte_file_rejection(client):
+    # GIVEN an empty 0-byte file
+    client.post("/api/cases", json={"case_id": "CASE-BDD-EMPTY", "tax_year": 2025})
+
+    # WHEN uploaded
+    res = client.post(
+        "/api/cases/CASE-BDD-EMPTY/sources",
+        files={"file": ("empty.csv", b"", "text/csv")}
+    )
+
+    # THEN system safely rejects with HTTP 400
+    assert res.status_code == 400
+    assert "empty" in res.json()["detail"].lower()
+
+
+

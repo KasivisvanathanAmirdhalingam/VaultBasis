@@ -13,13 +13,13 @@ class CanonicalTransaction(BaseModel):
     Standardized, normalized transaction representation across all input adapters.
     Strictly forbids binary floating point values. All monetary values are Decimals or strings.
     """
-    transaction_id: str = Field(..., description="Unique deterministic transaction identifier")
-    source_id: str = Field(..., description="ID of the ingested source document")
+    transaction_id: str = Field(..., min_length=1, description="Unique deterministic transaction identifier")
+    source_id: str = Field(..., min_length=1, description="ID of the ingested source document")
     source_file_hash: str = Field(..., description="SHA-256 hash of the parent source document")
-    source_row_reference: str = Field(..., description="Source file row/line identifier (e.g. 'Line:5')")
+    source_row_reference: str = Field(..., min_length=1, description="Source file row/line identifier (e.g. 'Line:5')")
     
-    transaction_type: str = Field(..., description="Classification: SALE, DISPOSITION, TRANSFER, ACQUISITION")
-    asset: str = Field(..., description="Normalized asset symbol (e.g. 'BTC', 'ETH')")
+    transaction_type: str = Field(..., min_length=1, description="Classification: SALE, DISPOSITION, TRANSFER, ACQUISITION")
+    asset: str = Field(..., min_length=1, description="Normalized asset symbol (e.g. 'BTC', 'ETH')")
     quantity: Decimal = Field(..., description="Exact asset quantity")
     
     proceeds: Optional[Decimal] = Field(None, description="Exact gross proceeds in USD")
