@@ -1,0 +1,61 @@
+{
+  "receipt_version": "v0.1",
+  "receipt_id": "550e8400-e29b-41d4-a716-446655440000",
+  "case_id": "CASE-2026-US-1099DA-001",
+  "claim_type": "DIGITAL_ASSET_TAX_RECONCILIATION",
+  "claimant_type": "TAXPAYER",
+  "producer_reference": "VaultBasis Edge v0.1.0-preview",
+  "source_ids": [
+    "1099da_broker_coinbase",
+    "koinly_capital_gains_2025"
+  ],
+  "source_hashes": {
+    "1099da_broker_coinbase": "a50c10e34b6204351b98fb24d4f5266921ab70b632a4e1f22b8245e3df9d53f0",
+    "koinly_capital_gains_2025": "6a54096b9d68e6be66a71efc07b1755977bbe528a6cefaa38798e20f1cc93995"
+  },
+  "source_schema_ids": {
+    "1099da_broker_coinbase": "IRS_1099DA_2025_PREVIEW",
+    "koinly_capital_gains_2025": "KOINLY_CAPITAL_GAINS_CSV_V1"
+  },
+  "canonicalization_version": "v0.1",
+  "ruleset_id": "US_IRC_1099DA_2025_2026_V1",
+  "engine_version": "0.1.0",
+  "policy_version": "0.1.0",
+  "assurance_level": "L2_EVIDENCE_RECONCILED",
+  "outcome_state": "BASIS_DIFFERENCE",
+  "material_differences": [
+    {
+      "difference_id": "DIFF-001",
+      "difference_state": "BASIS_DIFFERENCE",
+      "asset": "BTC",
+      "source_a_ref": "1099DA:Box1g",
+      "source_a_value": "12100.00",
+      "source_b_ref": "Koinly:CostBasis",
+      "source_b_value": "16300.00",
+      "variance": "4200.00",
+      "description": "Difference detected: basis differs by ,200. Review source acquisition records and reporting scope."
+    }
+  ],
+  "unresolved_items": [],
+  "provenance_references": [
+    {
+      "reference_id": "PROV-001",
+      "source_id": "1099da_broker_coinbase",
+      "row_ref": "Line:1",
+      "content_hash": "a50c10e34b6204351b98fb24d4f5266921ab70b632a4e1f22b8245e3df9d53f0"
+    },
+    {
+      "reference_id": "PROV-002",
+      "source_id": "koinly_capital_gains_2025",
+      "row_ref": "Row:1",
+      "content_hash": "6a54096b9d68e6be66a71efc07b1755977bbe528a6cefaa38798e20f1cc93995"
+    }
+  ],
+  "human_review_state": "UNREVIEWED",
+  "ai_involvement_level": "NONE",
+  "created_at": "2026-09-26T12:00:00Z",
+  "signer_type": "INSTALLATION_KEY",
+  "signer_key_id": "201d4989be76069f2581faf654390be9492ba9c9bfc8360ad896a057c59ebfb9",
+  "signer_public_key": "828e05df5eafabacf04cc4c7aa64d11d9c6d2e8b2af19f37d75405adb4a902a0",
+  "signature": "308a20655f8404372d36119002af1f67de9c14cb5f4046c749b0a5a07368ee235cbbaddcc974cc70ad7017478d12ca7bdfbe85e29859cae4774f016b2ed83f04"
+}

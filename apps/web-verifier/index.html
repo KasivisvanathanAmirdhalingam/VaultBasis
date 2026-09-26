@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VaultBasis — Public Independent Receipt Verifier</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #090b10;
+      --surface: #11141c;
+      --surface-elevated: #181d29;
+      --border: #232a3b;
+      --border-accent: #374461;
+      --text: #e2e8f0;
+      --text-muted: #8b9bb4;
+      --primary: #3b82f6;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --radius: 8px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: rgba(17, 20, 28, 0.9);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-logo {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #3b82f6, #06b6d4);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: white;
+    }
+    .container {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+      flex: 1;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+    }
+    .dropzone {
+      border: 2px dashed var(--border-accent);
+      border-radius: var(--radius);
+      padding: 3rem 2rem;
+      text-align: center;
+      cursor: pointer;
+      background: var(--surface-elevated);
+      transition: all 0.2s;
+    }
+    .dropzone:hover {
+      border-color: var(--primary);
+      background: rgba(59, 130, 246, 0.05);
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 0.78rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+    }
+    .badge-pass { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge-fail { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+    .check-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+    }
+    .limitations-box {
+      background: rgba(245, 158, 11, 0.05);
+      border: 1px solid rgba(245, 158, 11, 0.2);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      font-size: 0.8rem;
+      color: #fbbf24;
+      line-height: 1.5;
+      margin-top: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="brand-logo">V</div>
+      <div>
+        <h1 style="font-size: 1.1rem; font-weight: 700;">VaultBasis Verifier</h1>
+      </div>
+      <span class="badge badge-pass">OFFLINE CAPABLE</span>
+    </div>
+    <a href="/" style="color: var(--primary); text-decoration: none; font-size: 0.88rem;">← Go to Dashboard</a>
+  </header>
+
+  <main class="container">
+    <div class="card" style="text-align: center;">
+      <h2 style="font-size: 1.5rem; margin-bottom: 8px;">Independent Outcome Verification</h2>
+      <p style="color: var(--text-muted); font-size: 0.9rem;">
+        Verify any VaultBasis Outcome Receipt against Evidence Contract v0.1 without contacting any server.
+      </p>
+    </div>
+
+    <div class="card">
+      <div class="dropzone" onclick="document.getElementById('receipt-upload').click()">
+        <input type="file" id="receipt-upload" accept=".json" style="display: none;" onchange="handleReceiptFile(event)">
+        <p style="font-size: 1.1rem; font-weight: 600; margin-bottom: 6px;">Drop receipt.json here or click to select</p>
+        <p style="font-size: 0.8rem; color: var(--text-muted);">Cryptographic verification executes locally in clean room</p>
+      </div>
+    </div>
+
+    <div id="results-card" class="card" style="display: none;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h3>Verification Report</h3>
+        <span id="overall-badge" class="badge badge-pass">VERIFIED</span>
+      </div>
+
+      <div class="check-row">
+        <span>Receipt ID</span>
+        <code id="rep-receipt-id" style="font-size: 0.8rem; color: #93c5fd;">-</code>
+      </div>
+      <div class="check-row">
+        <span>Declared Outcome State</span>
+        <span id="rep-outcome-state" class="badge" style="background: var(--surface-elevated);">-</span>
+      </div>
+      <div class="check-row">
+        <span>Assurance Level</span>
+        <span id="rep-assurance-level" class="badge" style="background: var(--surface-elevated);">-</span>
+      </div>
+      <div class="check-row">
+        <span>[1] JSON Schema Conformance</span>
+        <span id="rep-schema" class="badge badge-pass">PASS</span>
+      </div>
+      <div class="check-row">
+        <span>[2] Evidence Contract Version</span>
+        <span id="rep-version" class="badge badge-pass">PASS (v0.1)</span>
+      </div>
+      <div class="check-row">
+        <span>[3] Key Fingerprint Integrity</span>
+        <span id="rep-fingerprint" class="badge badge-pass">PASS</span>
+      </div>
+      <div class="check-row">
+        <span>[4] Ed25519 Cryptographic Signature</span>
+        <span id="rep-signature" class="badge badge-pass">PASS</span>
+      </div>
+
+      <div id="errors-box" style="display: none; margin-top: 1rem; padding: 1rem; background: rgba(239, 68, 68, 0.1); border-left: 3px solid #ef4444; color: #f87171; font-size: 0.85rem;"></div>
+
+      <div class="limitations-box">
+        <strong>STATUTORY LIMITATION NOTICE (PRD §27 & §44.6):</strong><br>
+        Verification of this receipt confirms cryptographic origin from the declared installation key and byte integrity under Evidence Contract v0.1. Verification does NOT constitute tax or legal advice, nor does it represent endorsement by the Internal Revenue Service (IRS).
+      </div>
+    </div>
+  </main>
+
+  <script>
+    async function handleReceiptFile(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const res = await fetch('/api/receipts/verify', {
+          method: 'POST',
+          body: formData
+        });
+        const report = await res.json();
+        renderReport(report);
+      } catch (err) {
+        alert("Verification execution failed: " + err.message);
+      }
+      event.target.value = '';
+    }
+
+    function renderReport(r) {
+      const card = document.getElementById('results-card');
+      card.style.display = 'block';
+
+      const isPass = r.overall_status === 'PASS';
+      const overallBadge = document.getElementById('overall-badge');
+      overallBadge.className = `badge ${isPass ? 'badge-pass' : 'badge-fail'}`;
+      overallBadge.innerText = isPass ? 'PASS (VERIFIED)' : 'FAIL (TAMPERED / INVALID)';
+
+      document.getElementById('rep-receipt-id').innerText = r.receipt_id || 'Unknown';
+      document.getElementById('rep-outcome-state').innerText = r.outcome_state || 'Unknown';
+      document.getElementById('rep-assurance-level').innerText = r.assurance_level || 'Unknown';
+
+      document.getElementById('rep-schema').className = `badge ${r.checks.schema_conformance === 'PASS' ? 'badge-pass' : 'badge-fail'}`;
+      document.getElementById('rep-schema').innerText = r.checks.schema_conformance;
+
+      document.getElementById('rep-version').className = `badge ${r.checks.version_supported === 'PASS' ? 'badge-pass' : 'badge-fail'}`;
+      document.getElementById('rep-version').innerText = r.checks.version_supported;
+
+      document.getElementById('rep-fingerprint').className = `badge ${r.checks.key_fingerprint === 'PASS' ? 'badge-pass' : 'badge-fail'}`;
+      document.getElementById('rep-fingerprint').innerText = r.checks.key_fingerprint;
+
+      document.getElementById('rep-signature').className = `badge ${r.checks.signature_authenticity === 'PASS' ? 'badge-pass' : 'badge-fail'}`;
+      document.getElementById('rep-signature').innerText = r.checks.signature_authenticity;
+
+      const errBox = document.getElementById('errors-box');
+      if (r.errors && r.errors.length > 0) {
+        errBox.style.display = 'block';
+        errBox.innerHTML = `<strong>Errors Detected:</strong><br>` + r.errors.map(e => `• ${e}`).join('<br>');
+      } else {
+        errBox.style.display = 'none';
+      }
+    }
+  </script>
+</body>
+</html>

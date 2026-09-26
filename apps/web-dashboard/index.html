@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VaultBasis Edge — Outcome Verification Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #090b10;
+      --surface: #11141c;
+      --surface-elevated: #181d29;
+      --border: #232a3b;
+      --border-accent: #374461;
+      --text: #e2e8f0;
+      --text-muted: #8b9bb4;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --accent: #06b6d4;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --code-bg: #0d1117;
+      --radius: 8px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: rgba(17, 20, 28, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-logo {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #3b82f6, #06b6d4);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: white;
+    }
+    .brand h1 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .brand-badge {
+      background: rgba(59, 130, 246, 0.15);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .nav-links {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+    .nav-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 6px 14px;
+      border-radius: var(--radius);
+      font-size: 0.85rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .nav-btn:hover, .nav-btn.active {
+      background: var(--surface-elevated);
+      color: var(--text);
+      border-color: var(--border-accent);
+    }
+    .nav-btn.primary {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+    .nav-btn.primary:hover {
+      background: var(--primary-hover);
+    }
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 2rem;
+      width: 100%;
+      flex: 1;
+    }
+    .screen {
+      display: none;
+    }
+    .screen.active {
+      display: block;
+      animation: fadeIn 0.25s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .table-container {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+    th {
+      background: var(--surface-elevated);
+      color: var(--text-muted);
+      padding: 10px 14px;
+      font-weight: 600;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+    }
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.015);
+    }
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 500;
+    }
+    .badge-success { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge-warning { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .badge-danger { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+    .badge-info { background: rgba(6, 182, 212, 0.15); color: #38bdf8; border: 1px solid rgba(6, 182, 212, 0.3); }
+    .badge-neutral { background: rgba(148, 163, 184, 0.1); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.2); }
+    
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+    .upload-zone {
+      border: 2px dashed var(--border-accent);
+      border-radius: var(--radius);
+      padding: 2rem;
+      text-align: center;
+      background: rgba(24, 29, 41, 0.5);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .upload-zone:hover {
+      border-color: var(--primary);
+      background: rgba(59, 130, 246, 0.05);
+    }
+    .btn {
+      background: var(--surface-elevated);
+      color: var(--text);
+      border: 1px solid var(--border-accent);
+      padding: 8px 16px;
+      border-radius: var(--radius);
+      font-size: 0.88rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    .btn:hover { background: #232a3b; }
+    .btn-primary { background: var(--primary); border-color: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-success { background: var(--success); border-color: var(--success); color: white; }
+    
+    pre.code-block {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: #93c5fd;
+      overflow-x: auto;
+      max-height: 400px;
+    }
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 1rem 2rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--surface);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="brand-logo">V</div>
+      <div>
+        <h1>VaultBasis Edge</h1>
+      </div>
+      <span class="brand-badge">PREVIEW MMP-1</span>
+      <span class="brand-badge" style="color: #34d399; border-color: rgba(16, 185, 129, 0.3);">ZERO-EGRESS AIRGAP</span>
+    </div>
+    <div class="nav-links">
+      <button class="nav-btn active" onclick="showScreen('screen-cases')">Cases</button>
+      <a href="/verifier" class="nav-btn" target="_blank">Independent Verifier ↗</a>
+      <button class="nav-btn primary" onclick="showCreateCaseModal()">+ New Case</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- SCREEN 1: CASE LIST -->
+    <div id="screen-cases" class="screen active">
+      <div class="header-bar">
+        <div>
+          <h2>Reconciliation Cases</h2>
+          <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 4px;">Local deterministic verification cases running inside this installation boundary.</p>
+        </div>
+        <button class="btn btn-primary" onclick="loadCases()">↻ Refresh</button>
+      </div>
+      <div class="card">
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Case ID</th>
+                <th>Tax Year</th>
+                <th>Status</th>
+                <th>Outcome State</th>
+                <th>Assurance Level</th>
+                <th>Last Modified</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="case-table-body">
+              <tr><td colspan="7" style="text-align: center; color: var(--text-muted);">Loading local cases...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN 2: CASE REVIEW -->
+    <div id="screen-review" class="screen">
+      <div class="header-bar">
+        <div>
+          <button class="btn" onclick="showScreen('screen-cases')" style="margin-bottom: 8px;">← Back to Cases</button>
+          <h2 id="review-case-title">Case Review</h2>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-primary" onclick="triggerReconciliation()">⚡ Run Deterministic Reconciliation</button>
+          <button class="btn" id="btn-view-receipt" onclick="viewReceiptScreen()" style="display: none;">📜 View Receipt</button>
+        </div>
+      </div>
+
+      <!-- INTAKE & SOURCES -->
+      <div class="grid-2">
+        <div class="card">
+          <h3 style="margin-bottom: 12px; font-size: 1rem;">1. Source Document Ingestion</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+            Upload Form 1099-DA (PDF/CSV) and Koinly Capital Gains Report CSV. Files are hashed locally via SHA-256.
+          </p>
+          <div class="upload-zone" onclick="document.getElementById('source-file-input').click()">
+            <input type="file" id="source-file-input" style="display: none;" onchange="handleFileUpload(event)">
+            <p style="font-size: 0.95rem; font-weight: 600;">Click to Upload Source File</p>
+            <p style="font-size: 0.78rem; color: var(--text-muted); margin-top: 4px;">Supports Form 1099-DA CSV/JSON, Koinly CSV, VaultBasis CSV</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 style="margin-bottom: 12px; font-size: 1rem;">Ingested Sources & Cryptographic Integrity</h3>
+          <div id="sources-list" style="font-size: 0.85rem; color: var(--text-muted);">
+            No source documents ingested yet.
+          </div>
+        </div>
+      </div>
+
+      <!-- RECONCILIATION DIFFERENCES & PROVENANCE -->
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <h3>Material Differences & Difference Classification</h3>
+          <span id="review-outcome-badge" class="badge badge-neutral">UNRECONCILED</span>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Diff ID</th>
+                <th>Classification</th>
+                <th>Asset</th>
+                <th>Source A (1099-DA)</th>
+                <th>Source B (Ledger)</th>
+                <th>Variance</th>
+                <th>Explanation & Evidence</th>
+              </tr>
+            </thead>
+            <tbody id="differences-table-body">
+              <tr><td colspan="7" style="text-align: center; color: var(--text-muted);">Run reconciliation to inspect differences.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- UNRESOLVED ITEMS -->
+      <div class="card">
+        <h3 style="margin-bottom: 12px; font-size: 1rem; color: #fbbf24;">Unresolved Items (First-Class Unknown State)</h3>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+          PRD Invariant: Missing facts are never assumed as zero. They remain explicitly recorded.
+        </p>
+        <div id="unresolved-list" style="font-size: 0.85rem; color: var(--text-muted);">
+          No unresolved data items detected.
+        </div>
+      </div>
+    </div>
+
+    <!-- SCREEN 3: RECEIPT & EXPORT -->
+    <div id="screen-receipt" class="screen">
+      <div class="header-bar">
+        <div>
+          <button class="btn" onclick="showScreen('screen-review')" style="margin-bottom: 8px;">← Back to Case Review</button>
+          <h2>Signed Outcome Receipt & Evidence Export</h2>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn btn-success" onclick="downloadExportBundle()">📥 Download Evidence Bundle (.ZIP)</button>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3 style="margin-bottom: 1rem; font-size: 1rem;">Receipt Metadata & Cryptographic Authority</h3>
+          <table style="font-size: 0.85rem;">
+            <tr><td style="color: var(--text-muted);">Receipt ID:</td><td id="rcpt-id" class="badge badge-info">-</td></tr>
+            <tr><td style="color: var(--text-muted);">Outcome State:</td><td id="rcpt-state" class="badge badge-warning">-</td></tr>
+            <tr><td style="color: var(--text-muted);">Assurance Level:</td><td id="rcpt-level" class="badge badge-neutral">-</td></tr>
+            <tr><td style="color: var(--text-muted);">Signer Type:</td><td>INSTALLATION_KEY</td></tr>
+            <tr><td style="color: var(--text-muted);">Signer Key ID:</td><td id="rcpt-key-id" style="font-family: 'JetBrains Mono'; font-size: 0.75rem;">-</td></tr>
+          </table>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom: 1rem; font-size: 1rem;">Independent Verification</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+            This signed receipt can be independently verified on any clean machine using our zero-dependency CLI or web verifier without contacting VaultBasis servers.
+          </p>
+          <a href="/verifier" target="_blank" class="btn btn-primary" style="text-decoration: none;">Launch Verifier Tool ↗</a>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-bottom: 12px; font-size: 1rem;">Canonical Receipt Document (JSON)</h3>
+        <pre id="receipt-json-viewer" class="code-block">Loading receipt...</pre>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div>VaultBasis Edge v0.1.0-preview • Evidence Contract v0.1 • Ed25519 Deterministic Signer</div>
+    <div>Strict Local Trust Boundary • No Cloud Transmission</div>
+  </footer>
+
+  <script>
+    let currentCaseId = null;
+
+    function showScreen(screenId) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(screenId).classList.add('active');
+    }
+
+    async function loadCases() {
+      const res = await fetch('/api/cases');
+      const cases = await res.json();
+      const tbody = document.getElementById('case-table-body');
+      tbody.innerHTML = '';
+      if (cases.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">No cases found. Click '+ New Case' to create your first reconciliation.</td></tr>`;
+        return;
+      }
+      cases.forEach(c => {
+        const tr = document.createElement('tr');
+        const stateBadge = c.outcome_state 
+          ? `<span class="badge ${c.outcome_state === 'MATCHED' ? 'badge-success' : 'badge-warning'}">${c.outcome_state}</span>` 
+          : `<span class="badge badge-neutral">PENDING</span>`;
+        tr.innerHTML = `
+          <td><strong>${c.case_id}</strong></td>
+          <td>${c.tax_year}</td>
+          <td><span class="badge badge-info">${c.case_status}</span></td>
+          <td>${stateBadge}</td>
+          <td>${c.assurance_level || '-'}</td>
+          <td>${new Date(c.updated_at).toLocaleString()}</td>
+          <td>
+            <button class="btn" onclick="openCase('${c.case_id}')">Open Case →</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function showCreateCaseModal() {
+      const caseId = prompt("Enter Case Identifier (e.g. CASE-2025-COINBASE-01):", `CASE-${Date.now().toString().slice(-6)}`);
+      if (!caseId) return;
+      const res = await fetch('/api/cases', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ case_id: caseId, tax_year: 2025, jurisdiction: "US" })
+      });
+      if (res.ok) {
+        await loadCases();
+        openCase(caseId);
+      } else {
+        const err = await res.json();
+        alert("Error: " + err.detail);
+      }
+    }
+
+    async function openCase(caseId) {
+      currentCaseId = caseId;
+      document.getElementById('review-case-title').innerText = `Case: ${caseId}`;
+      showScreen('screen-review');
+      await refreshCaseDetails();
+    }
+
+    async function refreshCaseDetails() {
+      const res = await fetch(`/api/cases/${currentCaseId}`);
+      if (!res.ok) return;
+      const c = await res.json();
+      
+      // Update sources
+      const sourcesDiv = document.getElementById('sources-list');
+      const sources = Object.values(c.sources);
+      if (sources.length === 0) {
+        sourcesDiv.innerHTML = `<p style="color: var(--text-muted);">No source documents uploaded yet.</p>`;
+      } else {
+        sourcesDiv.innerHTML = sources.map(s => `
+          <div style="background: var(--surface-elevated); padding: 10px; border-radius: 6px; margin-bottom: 8px;">
+            <div style="display: flex; justify-content: space-between; font-weight: 600;">
+              <span>${s.filename}</span>
+              <span class="badge badge-info">${s.schema_id}</span>
+            </div>
+            <div style="font-family: 'JetBrains Mono'; font-size: 0.72rem; color: var(--text-muted); margin-top: 4px;">
+              SHA-256: ${s.sha256_hash.slice(0, 16)}...${s.sha256_hash.slice(-8)} | Rows: ${s.row_count}
+            </div>
+          </div>
+        `).join('');
+      }
+
+      // Update outcome badge
+      const outcomeBadge = document.getElementById('review-outcome-badge');
+      if (c.outcome_state) {
+        outcomeBadge.className = `badge ${c.outcome_state === 'MATCHED' ? 'badge-success' : 'badge-warning'}`;
+        outcomeBadge.innerText = c.outcome_state;
+        document.getElementById('btn-view-receipt').style.display = 'inline-flex';
+      } else {
+        outcomeBadge.className = 'badge badge-neutral';
+        outcomeBadge.innerText = 'UNRECONCILED';
+        document.getElementById('btn-view-receipt').style.display = 'none';
+      }
+    }
+
+    async function handleFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('source_type', 'AUTO');
+
+      const res = await fetch(`/api/cases/${currentCaseId}/sources`, {
+        method: 'POST',
+        body: formData
+      });
+      if (res.ok) {
+        await refreshCaseDetails();
+      } else {
+        const err = await res.json();
+        alert("Upload error: " + err.detail);
+      }
+      event.target.value = '';
+    }
+
+    async function triggerReconciliation() {
+      const res = await fetch(`/api/cases/${currentCaseId}/reconcile`, { method: 'POST' });
+      if (!res.ok) {
+        const err = await res.json();
+        alert("Reconciliation error: " + err.detail);
+        return;
+      }
+      const data = await res.json();
+      await refreshCaseDetails();
+
+      // Render differences
+      const tbody = document.getElementById('differences-table-body');
+      tbody.innerHTML = '';
+      const diffs = data.reconciliation.material_differences;
+      if (diffs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #34d399; padding: 1.5rem;">✓ All reported transactions match between sources with zero variance.</td></tr>`;
+      } else {
+        diffs.forEach(d => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><code>${d.difference_id}</code></td>
+            <td><span class="badge badge-warning">${d.difference_state}</span></td>
+            <td><strong>${d.asset}</strong></td>
+            <td>${d.source_a_value ? '$' + d.source_a_value : '-'}</td>
+            <td>${d.source_b_value ? '$' + d.source_b_value : '-'}</td>
+            <td>${d.variance ? '<strong>$' + d.variance + '</strong>' : '-'}</td>
+            <td>${d.description}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      // Render unresolved items
+      const unresDiv = document.getElementById('unresolved-list');
+      const unres = data.reconciliation.unresolved_items;
+      if (unres.length === 0) {
+        unresDiv.innerHTML = `<p style="color: var(--text-muted);">No unresolved data items detected.</p>`;
+      } else {
+        unresDiv.innerHTML = unres.map(u => `
+          <div style="background: rgba(245, 158, 11, 0.1); border-left: 3px solid #f59e0b; padding: 8px 12px; margin-bottom: 6px;">
+            <strong>${u.reason_code}</strong>: ${u.description} (Ref: ${u.affected_row_ref})
+          </div>
+        `).join('');
+      }
+    }
+
+    async function viewReceiptScreen() {
+      const res = await fetch(`/api/cases/${currentCaseId}/receipt`);
+      if (!res.ok) return;
+      const receipt = await res.json();
+      document.getElementById('rcpt-id').innerText = receipt.receipt_id;
+      document.getElementById('rcpt-state').innerText = receipt.outcome_state;
+      document.getElementById('rcpt-level').innerText = receipt.assurance_level;
+      document.getElementById('rcpt-key-id').innerText = receipt.signer_key_id;
+      document.getElementById('receipt-json-viewer').innerText = JSON.stringify(receipt, null, 2);
+      showScreen('screen-receipt');
+    }
+
+    function downloadExportBundle() {
+      window.location.href = `/api/cases/${currentCaseId}/export`;
+    }
+
+    // Auto load on boot
+    loadCases();
+  </script>
+</body>
+</html>

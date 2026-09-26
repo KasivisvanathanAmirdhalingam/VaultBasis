@@ -1,0 +1,24 @@
+# Python & Bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+
+# Pytest & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local Transient Data & DB (keys generated locally)
+data/*.db
+data/*.db-wal
+data/*.db-shm
+data/keys/
+
+# OS Specific
+.DS_Store
+Thumbs.db
