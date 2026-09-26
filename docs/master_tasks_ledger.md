@@ -165,14 +165,15 @@ Golden Test Suite ───> Fuzz Suite ───> Zero-Egress Net Audit ──�
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **QA-01A** | Unit Test Suite | Comprehensive unit tests for math, parsing, serializing, signing, hashing | §43.1, §64.1 | P0 | >90% code coverage on core deterministic engine | **COMPLETED** | `b5a3e5f` |
 | **QA-02A** | Golden Test Suite | Reference test vectors with realistic 1099-DA and Koinly CSV cases | §43.2, §59.1 | P0 | 100% match on all reference scenarios | **COMPLETED** | `b5a3e5f` |
-| **QA-ATDD**| Acceptance Suite | End-to-end customer & CPA workflows (`test_atdd_cpa_user_journey.py`) | §4.1, §50.4 | P0 | CPA full reconciliation journey verified | **COMPLETED** | `bf8a795` |
-| **QA-BDD** | BDD Feature Suite| Given-When-Then criteria for 7 preview gates (`test_bdd_acceptance_gates.py`)| §41 | P0 | All 7 blocking preview gates verified | **COMPLETED** | `bf8a795` |
-| **QA-TDD** | Invariant Suite  | Low-level exact decimal & RFC 8785 tests (`test_tdd_invariants.py`) | §15.1, §44.1 | P0 | Decimal math & canonicalization determinism verified | **COMPLETED** | `bf8a795` |
-| **QA-DDD** | Domain Invariants| Entity, value object & case aggregate tests (`test_ddd_domain_models.py`) | §17.1, §17.2 | P0 | Case lifecycle & transaction invariants verified | **COMPLETED** | `bf8a795` |
+| **QA-ATDD**| Acceptance Suite | End-to-end customer & CPA workflows (`test_atdd_cpa_user_journey.py`) | §4.1, §50.4 | P0 | CPA full reconciliation journey verified (5 scenarios) | **COMPLETED** | `835a91c` |
+| **QA-BDD** | BDD Feature Suite| Given-When-Then criteria for 7 preview gates (`test_bdd_acceptance_gates.py`)| §41 | P0 | All 7 blocking preview gates verified (11 scenarios) | **COMPLETED** | `835a91c` |
+| **QA-TDD** | Invariant Suite  | Low-level exact decimal & RFC 8785 tests (`test_tdd_invariants.py`) | §15.1, §44.1 | P0 | Decimal math & canonicalization determinism verified (8 scenarios) | **COMPLETED** | `835a91c` |
+| **QA-DDD** | Domain Invariants| Entity, value object & case aggregate tests (`test_ddd_domain_models.py`) | §17.1, §17.2 | P0 | Case lifecycle & transaction invariants verified (5 scenarios) | **COMPLETED** | `835a91c` |
 | **QA-03A** | Differential Tests | Differential testing against independent reference calculation scripts | §43.3, §15.1 | P0 | Zero divergence against ground truth math | **COMPLETED** | `b5a3e5f` |
 | **QA-04A** | Property/Fuzz Tests| Fuzz tests with corrupted, truncated, and random byte inputs | §43.4, §41 (AC-04)| P0 | Zero unhandled exceptions or crashes | **COMPLETED** | `b5a3e5f` |
 | **DOC-01A**| Operator Guide | Write Edge Deployment Guide (`docs/edge_deployment_guide.md`) | §51.3, §63 | P0 | Step-by-step instructions tested on fresh machine | **COMPLETED** | `bf8a795` |
 | **DOC-02A**| Verifier Guide | Write Independent Verifier Guide (`docs/verifier_guide.md`) | §51.3, §13.8 | P0 | Detailed third-party verification runbook | **COMPLETED** | `bf8a795` |
+| **DOC-03A**| Manual QA Runbook | Create Manual Validation Scenarios Runbook (`docs/manual_validation_scenarios.md`)| §41, §50.4 | P0 | 10 exhaustive manual scenarios for periodic human auditing | **COMPLETED** | `835a91c` |
 | **REL-01A**| Gate Certification | Review and certify all 7 preview gates in `docs/preview_gates_certification.md` | §41, §71 | P0 | All 7 gates signed off with test evidence | **COMPLETED** | `bf8a795` |
 
 ---
