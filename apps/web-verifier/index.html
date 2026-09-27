@@ -237,7 +237,6 @@
     <nav class="nav-links">
       <a href="/" id="nav-back-link">← Why VaultBasis?</a>
       <a href="/schemas/receipt-v0.1.json" target="_blank">Evidence Schema ↗</a>
-      <a href="http://127.0.0.1:8000/" target="_blank">Local Edge Dashboard ↗</a>
       <a href="/sample-receipt.json" download="golden_receipt_valid.json">Sample Receipt ⤓</a>
     </nav>
   </header>
@@ -246,7 +245,7 @@
     <div class="card" style="text-align: center;">
       <h2 style="font-size: 1.6rem; margin-bottom: 8px; color: #fff;">Independent Outcome Verification</h2>
       <p style="color: var(--text-muted); font-size: 0.95rem; max-width: 680px; margin: 0 auto 1.5rem auto;">
-        Verify any VaultBasis Outcome Receipt against Evidence Contract v0.1. Execution is performed entirely in your browser client using standard WebCrypto with zero server calls.
+        Verify any VaultBasis Outcome Receipt against Evidence Contract v0.1. Receipt verification executes client-side using WebCrypto and does not require receipt contents to be submitted to VaultBasis.
       </p>
 
       <div class="sample-controls">
@@ -268,7 +267,7 @@
         <input type="file" id="receipt-upload" accept=".json" style="display: none;" onchange="handleReceiptFile(event)">
         <p style="font-size: 1.15rem; font-weight: 600; margin-bottom: 6px; color: #fff;">Drop receipt.json here or click to select</p>
         <p style="font-size: 0.85rem; color: var(--text-muted);">
-          Cryptographic Ed25519 & RFC 8785 checks run 100% locally in your browser sandbox
+          Cryptographic verification is performed client-side in your browser.
         </p>
       </div>
     </div>
@@ -301,7 +300,7 @@
         <span id="rep-version" class="badge badge-pass">PASS (v0.1)</span>
       </div>
       <div class="check-row">
-        <span>[3] Key Fingerprint Integrity</span>
+        <span>[3] Declared Key Fingerprint Consistency</span>
         <span id="rep-fingerprint" class="badge badge-pass">PASS</span>
       </div>
       <div class="check-row">
@@ -313,7 +312,7 @@
 
       <div class="limitations-box">
         <strong>STATUTORY LIMITATION NOTICE (PRD §27 & §44.6):</strong><br>
-        Verification of this receipt confirms cryptographic origin from the declared installation key and byte integrity under Evidence Contract v0.1. Verification does NOT constitute tax or legal advice, nor does it represent endorsement by the Internal Revenue Service (IRS).
+        Successful verification confirms that the receipt signature is valid for the declared installation public key and that the signed receipt content has not changed relative to that signature. It does not independently establish tax correctness, source-data accuracy, installation identity, software authenticity, or government endorsement.
       </div>
     </div>
   </main>
@@ -345,8 +344,6 @@
         <h4>Tiers & Tools</h4>
         <ul>
           <li><a href="/" id="ft-marketing-link">Marketing Portal</a></li>
-          <li><a href="http://127.0.0.1:8000/" target="_blank">Localhost Dashboard</a></li>
-          <li><a href="http://127.0.0.1:8000/docs" target="_blank">Local REST API</a></li>
         </ul>
       </div>
 
@@ -479,28 +476,7 @@
       return '{' + keys.map(k => JSON.stringify(k) + ':' + canonicalizeJson(obj[k])).join(',') + '}';
     }
 
-    async function fetchLocalEdgeVerify(receiptObj) {
-      try {
-        const blob = new Blob([JSON.stringify(receiptObj)], { type: "application/json" });
-        const formData = new FormData();
-        formData.append("file", blob, "receipt.json");
-        
-        const endpoints = ["/api/receipts/verify", "http://127.0.0.1:8000/api/receipts/verify"];
-        for (const ep of endpoints) {
-          try {
-            const res = await fetch(ep, { method: "POST", body: formData });
-            if (res.ok) {
-              return await res.json();
-            }
-          } catch (e) {
-            // try next
-          }
-        }
-      } catch (err) {
-        console.warn("Local Edge bridge verify error:", err);
-      }
-      return null;
-    }
+
 
     async function verifyReceiptClientSide(receipt) {
       const errors = [];
@@ -593,11 +569,8 @@
         if (verified) {
           checks.signature_authenticity = "PASS";
         } else {
-          const localReport = await fetchLocalEdgeVerify(receipt);
-          if (localReport) {
-            return localReport;
-          }
-          errors.push("Cryptographic Ed25519 signature is INVALID (data tampered or corrupted)");
+          errors.push("Signature verification failed. The signed receipt bytes do not verify against the declared public key. This may result from modification, corruption, an incorrect key, or an invalid signature.");
+          errors.push("Do not rely on this receipt as cryptographically verified.");
         }
       } catch (err) {
         errors.push(`Signature verification error: ${err.message}`);

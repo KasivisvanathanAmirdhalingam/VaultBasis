@@ -253,7 +253,6 @@
       <a href="/about" class="nav-btn" target="_blank">Why VaultBasis? ↗</a>
       <a href="/verifier" class="nav-btn" target="_blank">Independent Verifier ↗</a>
       <a href="/schemas/receipt-v0.1.json" class="nav-btn" target="_blank">Evidence Schema ↗</a>
-      <a href="/docs" class="nav-btn" target="_blank">REST API Docs ↗</a>
       <button class="nav-btn primary" onclick="showCreateCaseModal()">+ New Case</button>
     </div>
   </header>
@@ -272,18 +271,15 @@
         <div class="table-container">
           <table>
             <thead>
-              <tr>
-                <th>Case ID</th>
-                <th>Tax Year</th>
-                <th>Status</th>
-                <th>Outcome State</th>
-                <th>Assurance Level</th>
-                <th>Last Modified</th>
+                <th>Case</th>
+                <th>Tax year</th>
+                <th>Result</th>
+                <th>Updated</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody id="case-table-body">
-              <tr><td colspan="7" style="text-align: center; color: var(--text-muted);">Loading local cases...</td></tr>
+              <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Loading local cases...</td></tr>
             </tbody>
           </table>
         </div>
@@ -405,10 +401,8 @@
   <footer style="display: flex; flex-direction: column; gap: 1rem; padding: 2rem; background: var(--surface); border-top: 1px solid var(--border); font-size: 0.82rem; color: var(--text-muted); margin-top: auto;">
     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 1.25rem;">
       <div style="display: flex; align-items: center; gap: 1rem;">
-        <strong style="color: #fff; font-size: 0.95rem;">VaultBasis Edge Local Daemon</strong>
-        <span class="brand-badge" style="color: #34d399; border-color: rgba(16, 185, 129, 0.3);">● ACTIVE LOCAL BOUNDARY</span>
-        <span>Storage: <code>data/vaultbasis.db</code></span>
-        <span>Key Isolation: <code>0600 POSIX</code></span>
+        <strong style="color: #fff; font-size: 0.95rem;">Local Edge · Active</strong>
+        <span class="brand-badge" style="color: #34d399; border-color: rgba(16, 185, 129, 0.3);">Customer-controlled assurance processing</span>
       </div>
       <div style="display: flex; gap: 1.5rem;">
         <a href="/about" target="_blank" style="color: var(--text-muted); text-decoration: none;">About</a>
@@ -418,8 +412,8 @@
       </div>
     </div>
     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-      <div>© 2026 VaultBasis Inc. • MMP-1 Production Specification • PRD v26.1 Reference</div>
-      <div style="font-size: 0.76rem; color: #64748b;">Zero Token Bleed Enforced (PRD §21.1) • No Remote Transaction Egress</div>
+      <div>© 2026 VaultBasis Inc. • MMP-1 Design-Partner Preview • PRD v26.1 Reference</div>
+      <div style="font-size: 0.76rem; color: #64748b;">Zero Transaction-Data Egress</div>
     </div>
   </footer>
 
@@ -437,7 +431,7 @@
       const tbody = document.getElementById('case-table-body');
       tbody.innerHTML = '';
       if (cases.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">No cases found. Click '+ New Case' to create your first reconciliation.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 2rem;">No cases found. Click '+ New Case' to create your first reconciliation.</td></tr>`;
         return;
       }
       cases.forEach(c => {
@@ -448,12 +442,10 @@
         tr.innerHTML = `
           <td><strong>${c.case_id}</strong></td>
           <td>${c.tax_year}</td>
-          <td><span class="badge badge-info">${c.case_status}</span></td>
           <td>${stateBadge}</td>
-          <td>${c.assurance_level || '-'}</td>
-          <td>${new Date(c.updated_at).toLocaleString()}</td>
+          <td>${new Date(c.updated_at).toLocaleDateString()}</td>
           <td>
-            <button class="btn" onclick="openCase('${c.case_id}')">Open Case →</button>
+            <button class="btn" onclick="openCase('${c.case_id}')">Open →</button>
           </td>
         `;
         tbody.appendChild(tr);

@@ -32,7 +32,9 @@ DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 # Initialize local key manager and SQLite store
 KEY_DIR = DATA_DIR / "keys"
-DB_PATH = DATA_DIR / "vaultbasis.db"
+import os
+DB_FILE = os.environ.get("VAULTBASIS_DB_FILE", "vaultbasis.db")
+DB_PATH = DATA_DIR / DB_FILE
 
 key_manager = InstallationKeyManager(KEY_DIR)
 priv_key, pub_key = key_manager.ensure_keypair()
