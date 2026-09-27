@@ -69,7 +69,7 @@ class Form1099DAParser:
             basis_str = row.get(basis_col, "") if basis_col else None
             acq_date = row.get(acquisition_date_col, "") if acquisition_date_col else None
             box2_val = row.get(box2_col, "UNSPECIFIED").upper() if box2_col else "UNSPECIFIED"
-            qty_str = row.get(qty_col, "1.0") if qty_col else "1.0"
+            qty_str = row.get(qty_col, "") if qty_col else ""
 
             is_unresolved = False
             unresolved_reason = None
@@ -84,7 +84,7 @@ class Form1099DAParser:
                 source_row_reference=f"Line:{row_idx}",
                 transaction_type="DISPOSITION",
                 asset=asset,
-                quantity=Decimal(qty_str) if qty_str else Decimal("1.0"),
+                quantity=Decimal(qty_str) if qty_str else None,
                 proceeds=Decimal(proceeds_str) if proceeds_str else None,
                 cost_basis=Decimal(basis_str) if basis_str and basis_str != "" else None,
                 acquisition_date=acq_date if acq_date and acq_date != "" else None,
@@ -115,7 +115,7 @@ class Form1099DAParser:
                 source_row_reference=f"Record:{idx}",
                 transaction_type="DISPOSITION",
                 asset=str(rec["asset"]).upper(),
-                quantity=Decimal(str(rec.get("quantity", "1.0"))),
+                quantity=Decimal(str(rec.get("quantity"))) if rec.get("quantity") else None,
                 proceeds=Decimal(str(rec["proceeds"])),
                 cost_basis=Decimal(str(basis)) if not is_unresolved else None,
                 acquisition_date=rec.get("acquisition_date") or rec.get("date_acquired"),

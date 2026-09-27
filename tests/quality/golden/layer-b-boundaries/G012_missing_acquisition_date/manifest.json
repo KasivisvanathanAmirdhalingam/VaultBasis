@@ -10,7 +10,7 @@
     "ledger": "ledger.csv"
   },
   "expected": {
-    "outcome_state": "MATCHED",
+    "outcome_state": "UNRESOLVED_DATA",
     "reason_codes": [],
     "unresolved_fields": []
   },

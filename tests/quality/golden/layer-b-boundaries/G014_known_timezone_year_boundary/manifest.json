@@ -1,7 +1,7 @@
 {
   "fixture_id": "G014_known_timezone_year_boundary",
   "layer": "B",
-  "status": "BLOCKED",
+  "status": "ACTIVE",
   "semantic_spec_version": "0.1",
   "evidence_contract_version": "0.1",
   "description": "Deterministic normalization of offset-aware timestamp to UTC.",

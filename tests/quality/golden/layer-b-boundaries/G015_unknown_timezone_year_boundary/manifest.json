@@ -1,7 +1,7 @@
 {
   "fixture_id": "G015_unknown_timezone_year_boundary",
   "layer": "B",
-  "status": "BLOCKED",
+  "status": "ACTIVE",
   "semantic_spec_version": "0.1",
   "evidence_contract_version": "0.1",
   "description": "Unknown timezone near year boundary should trigger UNRESOLVED_DATA.",

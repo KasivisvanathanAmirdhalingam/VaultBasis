@@ -1,7 +1,7 @@
 {
   "fixture_id": "G010_missing_basis",
   "layer": "B",
-  "status": "BLOCKED",
+  "status": "ACTIVE",
   "semantic_spec_version": "0.1",
   "evidence_contract_version": "0.1",
   "description": "Missing basis should result in UNRESOLVED_DATA.",

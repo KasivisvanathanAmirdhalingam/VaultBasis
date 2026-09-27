@@ -44,7 +44,7 @@ class VaultBasisCSVParser:
 
             basis_str = row.get("cost_basis")
             acq_date = row.get("date_acquired")
-            qty_str = row.get("quantity", "1.0")
+            qty_str = row.get("quantity", "")
             source_ref = row.get("source_ref", f"Row:{row_idx}")
 
             is_unresolved = (basis_str is None or basis_str == "")
@@ -57,7 +57,7 @@ class VaultBasisCSVParser:
                 source_row_reference=source_ref,
                 transaction_type="SALE",
                 asset=asset,
-                quantity=Decimal(qty_str) if qty_str else Decimal("1.0"),
+                quantity=Decimal(qty_str) if qty_str else None,
                 proceeds=Decimal(proceeds_str) if proceeds_str else None,
                 cost_basis=Decimal(basis_str) if not is_unresolved else None,
                 acquisition_date=acq_date if acq_date and acq_date != "" else None,

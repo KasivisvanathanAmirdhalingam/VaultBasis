@@ -1,7 +1,7 @@
 {
   "fixture_id": "G018_exact_duplicate",
   "layer": "B",
-  "status": "BLOCKED",
+  "status": "ACTIVE",
   "semantic_spec_version": "0.1",
   "evidence_contract_version": "0.1",
   "description": "BLOCKED - Engine does not currently implement deterministic duplication indexes.",

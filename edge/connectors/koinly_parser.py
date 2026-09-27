@@ -56,7 +56,7 @@ class KoinlyCapitalGainsParser:
             if not asset or not disp_date:
                 continue
 
-            amount_str = row.get(amount_col, "1.0") if amount_col else "1.0"
+            amount_str = row.get(amount_col, "") if amount_col else ""
             gain_loss_str = row.get(gain_loss_col, "") if gain_loss_col else None
             acq_date = row.get(acq_date_col, "") if acq_date_col else None
 
@@ -74,7 +74,7 @@ class KoinlyCapitalGainsParser:
                 source_row_reference=f"Row:{row_idx}",
                 transaction_type="SALE",
                 asset=asset,
-                quantity=Decimal(amount_str) if amount_str else Decimal("1.0"),
+                quantity=Decimal(amount_str) if amount_str else None,
                 proceeds=Decimal(proceeds_str) if proceeds_str and proceeds_str != "" else None,
                 cost_basis=Decimal(cost_basis_str) if cost_basis_str and cost_basis_str != "" else None,
                 gain_loss=Decimal(gain_loss_str) if gain_loss_str and gain_loss_str != "" else None,

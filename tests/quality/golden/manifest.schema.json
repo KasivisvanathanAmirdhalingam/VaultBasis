@@ -15,7 +15,7 @@
     },
     "status": {
       "type": "string",
-      "enum": ["ACTIVE", "BLOCKED", "DEFERRED"],
+      "enum": ["ACTIVE", "BLOCKED", "DEFERRED", "NONCONFORMING"],
       "description": "Execution status of the fixture"
     },
     "semantic_spec_version": {

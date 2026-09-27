@@ -19,7 +19,14 @@
     "infer_timezone"
   ],
   "references": {
-    "semantic_rules": ["SEM-MATCH-001", "SEM-TIME-002", "SEM-NUM-001"],
-    "acceptance_gates": ["AC-02"]
-  }
+    "semantic_rules": [
+      "SEM-MATCH-001",
+      "SEM-TIME-002",
+      "SEM-NUM-001"
+    ],
+    "acceptance_gates": [
+      "AC-02"
+    ]
+  },
+  "status": "ACTIVE"
 }

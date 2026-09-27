@@ -1,5 +1,17 @@
 {
-  "outcome_state": "UNRESOLVED_DATA",
+  "outcome_state": "MISSING_FROM_1099DA",
   "reason_codes": [],
-  "unresolved_fields": []
+  "unresolved_fields": [],
+  "material_differences": [
+    {
+      "difference_id": "DIFF-000",
+      "difference_state": "MISSING_FROM_1099DA",
+      "asset": "BTC",
+      "source_a_ref": "NOT_FOUND",
+      "source_a_value": null,
+      "source_b_ref": "SRC_LEDGER_01:Row:2",
+      "source_b_value": "42000.00",
+      "variance": "42000.00"
+    }
+  ]
 }

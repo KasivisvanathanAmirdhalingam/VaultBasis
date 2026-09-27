@@ -196,6 +196,16 @@ vercel.json & Packager ───> Localhost Airgap Bridge ───> WebCrypto V
 | **DEP-06A**| Web Link Gates | Regression test suite for web navigation, headers, footers & endpoints (`test_web_navigation_and_links.py`)| §41, §64.1 | P0 | 51 tests green across comprehensive suite | **COMPLETED** | `3cd422c` |
 | **FIX-01A**| Anchor Offset  | Resolve sticky header occlusion using `scroll-padding-top`, `scroll-margin-top` and smooth offset handler | §34.1 | P0 | Headings scroll with full clearance beneath sticky header | **COMPLETED** | `e9500d4` |
 
+### Workstream 9: Commercialization, Paddle Licensing & Cloud Distribution (Slice 9 - Upcoming)
+
+| Task ID | Component | Task Description | PRD Ref | Priority | DoD Exit Criterion | Status | Commit ID |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **COM-01A**| Cloud Object Storage | Configure GCP/AWS/Scaleway bucket to securely store the obfuscated Desktop Executable bundles | Future | P0 | Automated push of `Release.zip` from CI/CD to secure cloud bucket | **NOT STARTED** | |
+| **COM-02A**| Paddle Checkout UI | Integrate Paddle Billing overlay into the Public Marketing Site (`web-marketing`) | Future | P0 | Users can add VaultBasis to cart and trigger a test payment | **NOT STARTED** | |
+| **COM-03A**| License Generator API| Deploy a cloud webhook (Serverless function) to catch Paddle `transaction.completed` events | Future | P0 | Webhook generates and emails a cryptographically signed license key | **NOT STARTED** | |
+| **COM-04A**| Local License Validator | Update VaultBasis Edge (`app.py`) to cryptographically verify the user's purchased license key | Future | P0 | Dashboard requires a valid license key before allowing Case Creation | **NOT STARTED** | |
+| **COM-05A**| Authenticated Download | Implement secure, time-limited, signed download URLs for buyers to download the desktop bundle | Future | P0 | Only verified purchasers can download the actual Desktop Bundle | **NOT STARTED** | |
+
 ---
 
 ## 6. Execution Protocol: Slice 1 Immediate Kickoff

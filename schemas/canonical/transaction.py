@@ -20,7 +20,7 @@ class CanonicalTransaction(BaseModel):
     
     transaction_type: str = Field(..., min_length=1, description="Classification: SALE, DISPOSITION, TRANSFER, ACQUISITION")
     asset: str = Field(..., min_length=1, description="Normalized asset symbol (e.g. 'BTC', 'ETH')")
-    quantity: Decimal = Field(..., description="Exact asset quantity")
+    quantity: Optional[Decimal] = Field(None, description="Exact asset quantity")
     
     proceeds: Optional[Decimal] = Field(None, description="Exact gross proceeds in USD")
     cost_basis: Optional[Decimal] = Field(None, description="Exact cost or other basis in USD")
@@ -58,7 +58,7 @@ class CanonicalTransaction(BaseModel):
             "source_row_reference": self.source_row_reference,
             "transaction_type": self.transaction_type,
             "asset": self.asset,
-            "quantity": str(self.quantity),
+            "quantity": str(self.quantity) if self.quantity is not None else None,
             "proceeds": str(self.proceeds) if self.proceeds is not None else None,
             "cost_basis": str(self.cost_basis) if self.cost_basis is not None else None,
             "gain_loss": str(self.gain_loss) if self.gain_loss is not None else None,

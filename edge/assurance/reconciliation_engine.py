@@ -122,11 +122,31 @@ class DeterministicReconciliationEngine:
             for idx_b, tx_b in enumerate(txs_b):
                 if idx_b in matched_b_indices:
                     continue
-                if tx_b.asset == tx_a.asset and (
-                    tx_b.disposition_date == tx_a.disposition_date
-                    or not tx_a.disposition_date
-                    or not tx_b.disposition_date
-                ):
+                
+                # Check disposition date equality or ISO date equality
+                dates_match = False
+                if not tx_a.disposition_date or not tx_b.disposition_date:
+                    dates_match = True
+                elif tx_a.disposition_date == tx_b.disposition_date:
+                    dates_match = True
+                else:
+                    try:
+                        import dateutil.parser
+                        dt_a = dateutil.parser.isoparse(tx_a.disposition_date)
+                        dt_b = dateutil.parser.isoparse(tx_b.disposition_date)
+                        
+                        if dt_a.tzinfo is None and dt_b.tzinfo is not None:
+                            result.unresolved_items.append({"item_id": "tz_miss_a", "reason_code": "TIMEZONE_CONTEXT_MISSING", "affected_source_id": src_a_id, "affected_row_ref": tx_a.source_row_reference, "description": ""})
+                            dates_match = True # Treat as matched for grouping purposes to expose the unresolved item
+                        elif dt_b.tzinfo is None and dt_a.tzinfo is not None:
+                            result.unresolved_items.append({"item_id": "tz_miss_b", "reason_code": "TIMEZONE_CONTEXT_MISSING", "affected_source_id": src_b_id, "affected_row_ref": tx_b.source_row_reference, "description": ""})
+                            dates_match = True
+                        elif dt_a == dt_b:
+                            dates_match = True
+                    except ValueError:
+                        pass
+                
+                if tx_b.asset == tx_a.asset and dates_match:
                     candidate_match = (idx_b, tx_b)
                     break
 
@@ -148,6 +168,16 @@ class DeterministicReconciliationEngine:
 
             idx_b, tx_b = candidate_match
             matched_b_indices.add(idx_b)
+
+            # 0. Compare Quantity
+            if tx_a.quantity is None or tx_b.quantity is None:
+                result.unresolved_items.append({
+                    "item_id": f"unres_qty_{tx_a.transaction_id}",
+                    "reason_code": "QUANTITY_UNAVAILABLE",
+                    "affected_source_id": src_a_id if tx_a.quantity is None else src_b_id,
+                    "affected_row_ref": tx_a.source_row_reference if tx_a.quantity is None else tx_b.source_row_reference,
+                    "description": "Missing required quantity prevents exact reconciliation."
+                })
 
             # Provenance record for tx_b
             prov_b_id = f"PROV-{src_b_id}-{tx_b.source_row_reference}"
@@ -176,8 +206,8 @@ class DeterministicReconciliationEngine:
                     diff_counter += 1
 
             # 2. Compare Cost Basis & Reporting Scope
-            # Check 2025 reporting scope: If 1099-DA Box 2 indicates not reported or basis is omitted
-            if tx_a.cost_basis is None and tx_a.basis_reported_to_irs in ["NO", "UNSPECIFIED"]:
+            # Check 2025 reporting scope: If 1099-DA Box 2 explicitly indicates not reported
+            if tx_a.cost_basis is None and tx_a.basis_reported_to_irs == "NO":
                 result.material_differences.append(DifferenceRecord(
                     difference_id=f"DIFF-{diff_counter:03d}",
                     difference_state="REPORTING_SCOPE_DIFFERENCE",
@@ -207,19 +237,48 @@ class DeterministicReconciliationEngine:
                     diff_counter += 1
 
             # 3. Compare Dates
-            if tx_a.acquisition_date and tx_b.acquisition_date and tx_a.acquisition_date != tx_b.acquisition_date:
-                result.material_differences.append(DifferenceRecord(
-                    difference_id=f"DIFF-{diff_counter:03d}",
-                    difference_state="ACQUISITION_DATE_DIFFERENCE",
-                    asset=tx_a.asset,
-                    source_a_ref=f"{src_a_id}:{tx_a.source_row_reference}",
-                    source_a_value=tx_a.acquisition_date,
-                    source_b_ref=f"{src_b_id}:{tx_b.source_row_reference}",
-                    source_b_value=tx_b.acquisition_date,
-                    variance=None,
-                    description=f"Acquisition date mismatch: {tx_a.acquisition_date} vs {tx_b.acquisition_date}."
-                ))
-                diff_counter += 1
+            if not tx_a.acquisition_date or not tx_b.acquisition_date:
+                # If one is missing but not both, it is unresolved (missing fact)
+                if tx_a.acquisition_date or tx_b.acquisition_date:
+                    result.unresolved_items.append({
+                        "item_id": f"unres_acq_date_{tx_a.transaction_id}",
+                        "reason_code": "ACQUISITION_DATE_UNAVAILABLE",
+                        "affected_source_id": src_a_id if not tx_a.acquisition_date else src_b_id,
+                        "affected_row_ref": tx_a.source_row_reference if not tx_a.acquisition_date else tx_b.source_row_reference,
+                        "description": "Missing required acquisition date."
+                    })
+            elif tx_a.acquisition_date != tx_b.acquisition_date:
+                # Before checking string equality, attempt normalized parsing if they look like ISO timestamps
+                import dateutil.parser
+                match_dates = False
+                try:
+                    dt_a = dateutil.parser.isoparse(tx_a.acquisition_date)
+                    dt_b = dateutil.parser.isoparse(tx_b.acquisition_date)
+                    
+                    if dt_a.tzinfo is None and dt_b.tzinfo is not None:
+                        result.unresolved_items.append({"item_id": "tz_miss_a", "reason_code": "TIMEZONE_CONTEXT_MISSING", "affected_source_id": src_a_id, "affected_row_ref": tx_a.source_row_reference, "description": ""})
+                        match_dates = True # Prevent ACQ_DATE_DIFF due to tz mismatch
+                    elif dt_b.tzinfo is None and dt_a.tzinfo is not None:
+                        result.unresolved_items.append({"item_id": "tz_miss_b", "reason_code": "TIMEZONE_CONTEXT_MISSING", "affected_source_id": src_b_id, "affected_row_ref": tx_b.source_row_reference, "description": ""})
+                        match_dates = True
+                    elif dt_a == dt_b:
+                        match_dates = True
+                except ValueError:
+                    pass
+
+                if not match_dates:
+                    result.material_differences.append(DifferenceRecord(
+                        difference_id=f"DIFF-{diff_counter:03d}",
+                        difference_state="ACQUISITION_DATE_DIFFERENCE",
+                        asset=tx_a.asset,
+                        source_a_ref=f"{src_a_id}:{tx_a.source_row_reference}",
+                        source_a_value=tx_a.acquisition_date,
+                        source_b_ref=f"{src_b_id}:{tx_b.source_row_reference}",
+                        source_b_value=tx_b.acquisition_date,
+                        variance=None,
+                        description=f"Acquisition date mismatch: {tx_a.acquisition_date} vs {tx_b.acquisition_date}."
+                    ))
+                    diff_counter += 1
 
         # Check for transactions in B missing from A
         for idx_b, tx_b in enumerate(txs_b):
