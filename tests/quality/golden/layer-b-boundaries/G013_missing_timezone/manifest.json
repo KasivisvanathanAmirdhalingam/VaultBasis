@@ -1,0 +1,31 @@
+{
+  "fixture_id": "G013_missing_timezone",
+  "layer": "B",
+  "status": "ACTIVE",
+  "semantic_spec_version": "0.1",
+  "evidence_contract_version": "0.1",
+  "description": "Timestamps without timezones are literally compared without inferring UTC.",
+  "inputs": {
+    "broker": "broker.csv",
+    "ledger": "ledger.csv"
+  },
+  "expected": {
+    "outcome_state": "MATCHED",
+    "reason_codes": [],
+    "unresolved_fields": []
+  },
+  "must_not": [
+    "assume_utc",
+    "assume_system_timezone",
+    "assume_browser_timezone",
+    "assume_taxpayer_timezone"
+  ],
+  "references": {
+    "semantic_rules": [
+      "SEM-TIME-001"
+    ],
+    "acceptance_gates": [
+      "AC-03"
+    ]
+  }
+}

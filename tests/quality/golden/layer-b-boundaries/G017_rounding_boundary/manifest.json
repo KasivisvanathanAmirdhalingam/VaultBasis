@@ -1,0 +1,24 @@
+{
+  "fixture_id": "G017_rounding_boundary",
+  "layer": "B",
+  "status": "BLOCKED",
+  "semantic_spec_version": "0.1",
+  "evidence_contract_version": "0.1",
+  "description": "BLOCKED by SEM-ROUND-002",
+  "inputs": {
+    "broker": "broker.csv",
+    "ledger": "ledger.csv"
+  },
+  "expected": {
+    "outcome_state": "MATCHED",
+    "reason_codes": [],
+    "unresolved_fields": []
+  },
+  "must_not": [],
+  "references": {
+    "semantic_rules": [],
+    "acceptance_gates": [
+      "AC-03"
+    ]
+  }
+}

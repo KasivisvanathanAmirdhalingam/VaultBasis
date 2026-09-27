@@ -1,0 +1,28 @@
+{
+  "fixture_id": "G012_missing_acquisition_date",
+  "layer": "B",
+  "status": "ACTIVE",
+  "semantic_spec_version": "0.1",
+  "evidence_contract_version": "0.1",
+  "description": "Missing acquisition date is unresolved, not a difference.",
+  "inputs": {
+    "broker": "broker.csv",
+    "ledger": "ledger.csv"
+  },
+  "expected": {
+    "outcome_state": "MATCHED",
+    "reason_codes": [],
+    "unresolved_fields": []
+  },
+  "must_not": [
+    "emit_acquisition_date_difference"
+  ],
+  "references": {
+    "semantic_rules": [
+      "SEM-MISS-001"
+    ],
+    "acceptance_gates": [
+      "AC-03"
+    ]
+  }
+}

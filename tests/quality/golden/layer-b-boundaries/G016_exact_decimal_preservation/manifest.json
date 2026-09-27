@@ -1,0 +1,29 @@
+{
+  "fixture_id": "G016_exact_decimal_preservation",
+  "layer": "B",
+  "status": "ACTIVE",
+  "semantic_spec_version": "0.1",
+  "evidence_contract_version": "0.1",
+  "description": "Authoritative financial values must preserve exact decimal precision without floating point error.",
+  "inputs": {
+    "broker": "broker.csv",
+    "ledger": "ledger.csv"
+  },
+  "expected": {
+    "outcome_state": "MATCHED",
+    "reason_codes": [],
+    "unresolved_fields": []
+  },
+  "must_not": [
+    "truncate_precision",
+    "serialize_as_float"
+  ],
+  "references": {
+    "semantic_rules": [
+      "SEM-NUM-001"
+    ],
+    "acceptance_gates": [
+      "AC-03"
+    ]
+  }
+}

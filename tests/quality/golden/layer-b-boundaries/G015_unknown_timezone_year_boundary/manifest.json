@@ -1,0 +1,34 @@
+{
+  "fixture_id": "G015_unknown_timezone_year_boundary",
+  "layer": "B",
+  "status": "BLOCKED",
+  "semantic_spec_version": "0.1",
+  "evidence_contract_version": "0.1",
+  "description": "Unknown timezone near year boundary should trigger UNRESOLVED_DATA.",
+  "inputs": {
+    "broker": "broker.csv",
+    "ledger": "ledger.csv"
+  },
+  "expected": {
+    "outcome_state": "UNRESOLVED_DATA",
+    "reason_codes": [
+      "TIMEZONE_CONTEXT_MISSING"
+    ],
+    "unresolved_fields": []
+  },
+  "must_not": [
+    "assume_utc",
+    "assume_system_timezone",
+    "assume_browser_timezone",
+    "assume_taxpayer_timezone",
+    "emit_reporting_scope_difference"
+  ],
+  "references": {
+    "semantic_rules": [
+      "SEM-TIME-003"
+    ],
+    "acceptance_gates": [
+      "AC-03"
+    ]
+  }
+}

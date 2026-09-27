@@ -1,0 +1,28 @@
+{
+  "fixture_id": "G014_known_timezone_year_boundary",
+  "layer": "B",
+  "status": "BLOCKED",
+  "semantic_spec_version": "0.1",
+  "evidence_contract_version": "0.1",
+  "description": "Deterministic normalization of offset-aware timestamp to UTC.",
+  "inputs": {
+    "broker": "broker.csv",
+    "ledger": "ledger.csv"
+  },
+  "expected": {
+    "outcome_state": "MATCHED",
+    "reason_codes": [],
+    "unresolved_fields": []
+  },
+  "must_not": [
+    "fail_due_to_tz_format_difference"
+  ],
+  "references": {
+    "semantic_rules": [
+      "SEM-TIME-002"
+    ],
+    "acceptance_gates": [
+      "AC-03"
+    ]
+  }
+}

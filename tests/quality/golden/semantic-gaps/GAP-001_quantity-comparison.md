@@ -11,7 +11,7 @@ The frozen MMP-1 reconciliation taxonomy does not define `QUANTITY_DIFFERENCE` a
 
 **Required decision before implementation:**
 - Canonical quantity representation (strings vs decimals)
-- Asset-specific precision (e.g. 8 decimals for BTC, 18 for ETH)
+- Asset/source-specific quantity precision and representation rules.
 - Source precision preservation
 - Normalization rules
 - Aggregation semantics

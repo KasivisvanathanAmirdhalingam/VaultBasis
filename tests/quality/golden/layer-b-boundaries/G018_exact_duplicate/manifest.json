@@ -1,0 +1,26 @@
+{
+  "fixture_id": "G018_exact_duplicate",
+  "layer": "B",
+  "status": "BLOCKED",
+  "semantic_spec_version": "0.1",
+  "evidence_contract_version": "0.1",
+  "description": "BLOCKED - Engine does not currently implement deterministic duplication indexes.",
+  "inputs": {
+    "broker": "broker.csv",
+    "ledger": "ledger.csv"
+  },
+  "expected": {
+    "outcome_state": "MATCHED",
+    "reason_codes": [],
+    "unresolved_fields": []
+  },
+  "must_not": [],
+  "references": {
+    "semantic_rules": [
+      "SEM-DUP-001"
+    ],
+    "acceptance_gates": [
+      "AC-03"
+    ]
+  }
+}

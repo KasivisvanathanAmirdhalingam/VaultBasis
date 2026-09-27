@@ -1,0 +1,7 @@
+{
+  "outcome_state": "UNRESOLVED_DATA",
+  "reason_codes": [
+    "TIMEZONE_CONTEXT_MISSING"
+  ],
+  "unresolved_fields": []
+}

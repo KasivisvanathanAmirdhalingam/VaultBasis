@@ -13,6 +13,11 @@
       "enum": ["A", "B", "C", "D"],
       "description": "The validation layer this fixture belongs to (A=Canonical, B=Boundaries, C=Hostile, D=Verifier)"
     },
+    "status": {
+      "type": "string",
+      "enum": ["ACTIVE", "BLOCKED", "DEFERRED"],
+      "description": "Execution status of the fixture"
+    },
     "semantic_spec_version": {
       "type": "string",
       "description": "Version of the reconciliation semantics tested"
@@ -96,6 +101,7 @@
   "required": [
     "fixture_id",
     "layer",
+    "status",
     "semantic_spec_version",
     "evidence_contract_version",
     "description",

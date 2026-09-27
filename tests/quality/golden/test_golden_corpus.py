@@ -71,7 +71,14 @@ def test_golden_reconciliation_fixture(fixture):
     expected = fixture["expected"]
     fixture_dir = fixture["dir"]
 
-    # 1. SPECIFICATION DRIFT DETECTION
+    # 1. STATUS CHECK
+    status = manifest.get("status", "ACTIVE")
+    if status == "DEFERRED":
+        pytest.skip(f"Fixture {manifest['fixture_id']} is explicitly DEFERRED.")
+    elif status == "BLOCKED":
+        pytest.skip(f"Fixture {manifest['fixture_id']} is BLOCKED due to pending semantics.")
+
+    # 2. SPECIFICATION DRIFT DETECTION
     # Ensure all referenced semantic rules actually exist in the frozen semantics document
     referenced_rules = manifest["references"]["semantic_rules"]
     for rule in referenced_rules:
