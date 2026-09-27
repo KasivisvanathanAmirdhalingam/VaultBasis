@@ -1,0 +1,25 @@
+{
+  "fixture_id": "G003_proceeds_difference",
+  "layer": "A",
+  "semantic_spec_version": "0.1",
+  "evidence_contract_version": "0.1",
+  "description": "Same supported transaction with differing proceeds.",
+  "inputs": {
+    "broker": "broker.csv",
+    "ledger": "ledger.csv"
+  },
+  "expected": {
+    "outcome_state": "PROCEEDS_DIFFERENCE",
+    "reason_codes": [],
+    "unresolved_fields": []
+  },
+  "must_not": [
+    "infer_missing_values",
+    "apply_implicit_tolerance",
+    "infer_timezone"
+  ],
+  "references": {
+    "semantic_rules": ["SEM-MATCH-001"],
+    "acceptance_gates": ["AC-02"]
+  }
+}

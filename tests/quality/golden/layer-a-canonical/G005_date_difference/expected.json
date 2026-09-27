@@ -1,0 +1,13 @@
+{
+  "outcome_state": "ACQUISITION_DATE_DIFFERENCE",
+  "assurance_level": "L2_EVIDENCE_RECONCILED",
+  "material_differences": [
+    {
+      "difference_state": "ACQUISITION_DATE_DIFFERENCE",
+      "asset": "BTC",
+      "source_a_value": "2021-01-01T00:00:00Z",
+      "source_b_value": "2021-02-01T00:00:00Z"
+    }
+  ],
+  "unresolved_items": []
+}

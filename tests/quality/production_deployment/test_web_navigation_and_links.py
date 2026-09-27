@@ -71,7 +71,6 @@ def test_web_verifier_interactive_controls_and_footer():
     assert "VaultBasis Verifier" in html
     assert "← Why VaultBasis?" in html
     assert "Evidence Schema" in html
-    assert "Local Edge Dashboard" in html
 
     # Interactive sample testing controls
     assert "loadSampleGoldenValid" in html
@@ -82,7 +81,7 @@ def test_web_verifier_interactive_controls_and_footer():
     # Results card checklist
     assert "JSON Schema Conformance" in html
     assert "Evidence Contract Version" in html
-    assert "Key Fingerprint Integrity" in html
+    assert "Declared Key Fingerprint Consistency" in html
     assert "Ed25519 Cryptographic Signature" in html
 
     # Standard footer
@@ -102,14 +101,11 @@ def test_web_dashboard_header_and_industrial_footer():
     assert "Why VaultBasis? ↗" in html
     assert "Independent Verifier ↗" in html
     assert "Evidence Schema ↗" in html
-    assert "REST API Docs ↗" in html
 
     # Industrial footer
-    assert "VaultBasis Edge Local Daemon" in html
-    assert "ACTIVE LOCAL BOUNDARY" in html
-    assert "data/vaultbasis.db" in html
-    assert "0600 POSIX" in html
-    assert "Zero Token Bleed Enforced" in html
+    assert "Local Edge · Active" in html
+    assert "Customer-controlled assurance processing" in html
+    assert "Zero Transaction-Data Egress" in html
 
 
 @pytest.mark.regression

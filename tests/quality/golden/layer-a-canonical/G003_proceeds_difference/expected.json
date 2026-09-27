@@ -1,0 +1,14 @@
+{
+  "outcome_state": "PROCEEDS_DIFFERENCE",
+  "assurance_level": "L2_EVIDENCE_RECONCILED",
+  "material_differences": [
+    {
+      "difference_state": "PROCEEDS_DIFFERENCE",
+      "asset": "BTC",
+      "source_a_value": "42000.00",
+      "source_b_value": "41000.00",
+      "variance": "1000.00"
+    }
+  ],
+  "unresolved_items": []
+}
