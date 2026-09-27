@@ -1,0 +1,11 @@
+{
+  "fixture_id": "V005_wrong_public_key",
+  "layer": "D",
+  "status": "ACTIVE",
+  "semantic_spec_version": "0.1",
+  "evidence_contract_version": "0.1",
+  "description": "Verifier test for V005_wrong_public_key",
+  "expected": {
+    "overall_status": "INVALID_SIGNATURE"
+  }
+}

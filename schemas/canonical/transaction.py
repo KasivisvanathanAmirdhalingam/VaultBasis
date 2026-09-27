@@ -45,7 +45,13 @@ class CanonicalTransaction(BaseModel):
         if isinstance(val, (int, str)):
             # Strip dollar signs, commas, and whitespace
             clean = str(val).replace("$", "").replace(",", "").strip()
-            return Decimal(clean)
+            try:
+                d = Decimal(clean)
+            except Exception:
+                raise ValueError(f"NUMERIC_INVALID: Cannot parse '{clean}' as decimal")
+            if not d.is_finite():
+                raise ValueError(f"NUMERIC_NON_FINITE: Non-finite decimal values (NaN, Infinity) are prohibited")
+            return d
         if isinstance(val, Decimal):
             return val
         raise ValueError(f"Floating-point values strictly prohibited for financial fields: got {type(val)}")

@@ -72,9 +72,12 @@
             },
             "required": ["difference_state", "asset", "source_a_value", "source_b_value"]
           }
-        }
-      },
-      "required": ["outcome_state"]
+        },
+        "processing_result": { "type": "string" },
+        "rejection_code": { "type": "string" },
+        "authoritative_outcome_created": { "type": "boolean" },
+        "receipt_issued": { "type": "boolean" }
+      }
     },
     "must_not": {
       "type": "array",

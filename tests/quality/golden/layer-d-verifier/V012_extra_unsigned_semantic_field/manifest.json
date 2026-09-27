@@ -1,0 +1,11 @@
+{
+  "fixture_id": "V012_extra_unsigned_semantic_field",
+  "layer": "D",
+  "status": "ACTIVE",
+  "semantic_spec_version": "0.1",
+  "evidence_contract_version": "0.1",
+  "description": "Verifier test for V012_extra_unsigned_semantic_field",
+  "expected": {
+    "overall_status": "INVALID_SIGNATURE"
+  }
+}

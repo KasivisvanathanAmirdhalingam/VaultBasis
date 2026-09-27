@@ -11,9 +11,17 @@ from edge.connectors.form1099da_parser import Form1099DAParser
 from edge.connectors.hasher import hash_source_bytes
 from edge.connectors.koinly_parser import KoinlyCapitalGainsParser
 from edge.connectors.vaultbasis_csv_parser import VaultBasisCSVParser
-
+from edge.connectors.exceptions import VaultBasisIntakeError
+from pydantic import ValidationError
+import csv
 
 class IntakeDispatcher:
+    MAX_FILE_BYTES = 50 * 1024 * 1024
+    MAX_ROWS_PER_SOURCE = 100_000
+    MAX_ROW_BYTES = 1_048_576
+
+    # Configure CSV limits globally
+    csv.field_size_limit(MAX_ROW_BYTES)
     """
     Validates uploaded source documents, computes cryptographic hashes,
     detects schema type, and parses into canonical transaction representations.
@@ -29,7 +37,13 @@ class IntakeDispatcher:
         declared_schema: str = "AUTO"
     ) -> Tuple[SourceDocumentMetadata, List[CanonicalTransaction]]:
         if not data_bytes or len(data_bytes) == 0:
-            raise ValueError(f"Cannot ingest empty document: '{filename}'")
+            raise VaultBasisIntakeError("INPUT_EMPTY", f"Cannot ingest empty document: '{filename}'")
+            
+        if len(data_bytes) > cls.MAX_FILE_BYTES:
+            raise VaultBasisIntakeError("RESOURCE_EXHAUSTED", f"Document exceeds max file size of {cls.MAX_FILE_BYTES} bytes")
+            
+        if b'\x00' in data_bytes:
+            raise VaultBasisIntakeError("INPUT_ENCODING_UNSUPPORTED", "Input contains prohibited NUL characters")
 
         file_hash, byte_size = hash_source_bytes(data_bytes)
         now_utc = datetime.now(timezone.utc).isoformat()
@@ -39,15 +53,32 @@ class IntakeDispatcher:
         if declared_schema == "AUTO":
             detected_schema = cls._detect_schema(data_bytes, filename)
 
-        # Dispatch to appropriate parser
-        if detected_schema == Form1099DAParser.SCHEMA_ID:
-            transactions = Form1099DAParser.parse(data_bytes, source_id, file_hash)
-        elif detected_schema == KoinlyCapitalGainsParser.SCHEMA_ID:
-            transactions = KoinlyCapitalGainsParser.parse(data_bytes, source_id, file_hash)
-        elif detected_schema == VaultBasisCSVParser.SCHEMA_ID:
-            transactions = VaultBasisCSVParser.parse(data_bytes, source_id, file_hash)
-        else:
-            raise ValueError(f"Unsupported or unrecognized input document schema: '{detected_schema}'")
+        try:
+            if detected_schema == Form1099DAParser.SCHEMA_ID:
+                transactions = Form1099DAParser.parse(data_bytes, source_id, file_hash)
+            elif detected_schema == KoinlyCapitalGainsParser.SCHEMA_ID:
+                transactions = KoinlyCapitalGainsParser.parse(data_bytes, source_id, file_hash)
+            elif detected_schema == VaultBasisCSVParser.SCHEMA_ID:
+                transactions = VaultBasisCSVParser.parse(data_bytes, source_id, file_hash)
+            else:
+                raise VaultBasisIntakeError("SCHEMA_VERSION_UNSUPPORTED", f"Unsupported or unrecognized input document schema: '{detected_schema}'")
+        except ValidationError as e:
+            # Check if any error is our custom NUMERIC_INVALID / NUMERIC_NON_FINITE
+            for err in e.errors():
+                msg = err.get("msg", "")
+                if msg.startswith("NUMERIC_NON_FINITE"):
+                    raise VaultBasisIntakeError("NUMERIC_NON_FINITE", msg)
+                if msg.startswith("NUMERIC_INVALID"):
+                    raise VaultBasisIntakeError("NUMERIC_INVALID", msg)
+                if msg.startswith("Value error, NUMERIC_"):
+                    # pydantic sometimes prefixes with 'Value error, '
+                    code = msg.split(" ")[2].replace(":", "")
+                    raise VaultBasisIntakeError(code, msg)
+            raise VaultBasisIntakeError("SCHEMA_INVALID", f"Schema validation failed: {str(e)}")
+        except csv.Error as e:
+            if "field larger than field limit" in str(e):
+                raise VaultBasisIntakeError("RESOURCE_EXHAUSTED", f"CSV row exceeds limit of {cls.MAX_ROW_BYTES} bytes")
+            raise VaultBasisIntakeError("CSV_MALFORMED", f"CSV parser error: {str(e)}")
 
         meta = SourceDocumentMetadata(
             source_id=source_id,
@@ -81,4 +112,4 @@ class IntakeDispatcher:
         else:
             if filename.endswith(".csv"):
                 return VaultBasisCSVParser.SCHEMA_ID
-            raise ValueError(f"Unable to auto-detect schema for file '{filename}'. Format unrecognized.")
+            raise VaultBasisIntakeError("SCHEMA_VERSION_UNSUPPORTED", f"Unable to auto-detect schema for file '{filename}'. Format unrecognized.")

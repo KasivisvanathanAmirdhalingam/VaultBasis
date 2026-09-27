@@ -1,0 +1,11 @@
+{
+  "fixture_id": "V010_unknown_outcome_state",
+  "layer": "D",
+  "status": "ACTIVE",
+  "semantic_spec_version": "0.1",
+  "evidence_contract_version": "0.1",
+  "description": "Verifier test for V010_unknown_outcome_state",
+  "expected": {
+    "overall_status": "INVALID_SCHEMA"
+  }
+}

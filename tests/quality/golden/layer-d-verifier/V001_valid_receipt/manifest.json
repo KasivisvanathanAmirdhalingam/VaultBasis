@@ -1,0 +1,11 @@
+{
+  "fixture_id": "V001_valid_receipt",
+  "layer": "D",
+  "status": "ACTIVE",
+  "semantic_spec_version": "0.1",
+  "evidence_contract_version": "0.1",
+  "description": "Verifier test for V001_valid_receipt",
+  "expected": {
+    "overall_status": "VALID"
+  }
+}

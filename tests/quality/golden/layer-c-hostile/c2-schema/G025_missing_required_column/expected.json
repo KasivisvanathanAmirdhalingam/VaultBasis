@@ -1,0 +1,6 @@
+{
+  "processing_result": "REJECTED",
+  "rejection_code": "SCHEMA_REQUIRED_FIELD_MISSING",
+  "authoritative_outcome_created": false,
+  "receipt_issued": false
+}

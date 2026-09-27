@@ -1,0 +1,11 @@
+{
+  "fixture_id": "V003_tampered_amount",
+  "layer": "D",
+  "status": "ACTIVE",
+  "semantic_spec_version": "0.1",
+  "evidence_contract_version": "0.1",
+  "description": "Verifier test for V003_tampered_amount",
+  "expected": {
+    "overall_status": "INVALID_SIGNATURE"
+  }
+}

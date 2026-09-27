@@ -1,0 +1,11 @@
+{
+  "fixture_id": "V008_unknown_contract_version",
+  "layer": "D",
+  "status": "ACTIVE",
+  "semantic_spec_version": "0.1",
+  "evidence_contract_version": "0.1",
+  "description": "Verifier test for V008_unknown_contract_version",
+  "expected": {
+    "overall_status": "UNSUPPORTED_CONTRACT"
+  }
+}

@@ -8,6 +8,7 @@ import io
 from decimal import Decimal
 from typing import List
 from schemas.canonical.transaction import CanonicalTransaction
+from edge.connectors.exceptions import VaultBasisIntakeError
 
 
 class VaultBasisCSVParser:
@@ -21,20 +22,24 @@ class VaultBasisCSVParser:
     def parse(cls, data_bytes: bytes, source_id: str, file_hash: str) -> List[CanonicalTransaction]:
         text = data_bytes.decode("utf-8-sig", errors="replace").strip()
         if not text:
-            raise ValueError("CSV file content is empty")
+            raise VaultBasisIntakeError("INPUT_EMPTY", "CSV file content is empty")
 
         reader = csv.DictReader(io.StringIO(text))
         if not reader.fieldnames:
-            raise ValueError("Invalid CSV: Missing header row")
+            raise VaultBasisIntakeError("CSV_MALFORMED", "Invalid CSV: Missing header row")
 
         normalized_headers = {h.strip().lower(): h for h in reader.fieldnames if h}
         required = ["date", "asset", "proceeds"]
         for req in required:
             if req not in normalized_headers:
-                raise ValueError(f"VaultBasis CSV fallback missing mandatory column '{req}'")
+                raise VaultBasisIntakeError("SCHEMA_REQUIRED_FIELD_MISSING", f"VaultBasis CSV fallback missing mandatory column '{req}'")
 
         transactions: List[CanonicalTransaction] = []
         for row_idx, raw_row in enumerate(reader, start=1):
+            if row_idx > 100_000:
+                raise VaultBasisIntakeError("RESOURCE_EXHAUSTED", "Exceeded max row limit of 100000")
+            if None in raw_row or None in raw_row.values():
+                raise VaultBasisIntakeError("CSV_MALFORMED", f"Row {row_idx} is malformed (truncated or excessive columns)")
             row = {k.strip().lower(): v.strip() for k, v in raw_row.items() if k and v is not None}
             asset = row.get("asset", "").upper()
             proceeds_str = row.get("proceeds", "")
@@ -57,9 +62,9 @@ class VaultBasisCSVParser:
                 source_row_reference=source_ref,
                 transaction_type="SALE",
                 asset=asset,
-                quantity=Decimal(qty_str) if qty_str else None,
-                proceeds=Decimal(proceeds_str) if proceeds_str else None,
-                cost_basis=Decimal(basis_str) if not is_unresolved else None,
+                quantity=qty_str if qty_str else None,
+                proceeds=proceeds_str if proceeds_str else None,
+                cost_basis=basis_str if not is_unresolved else None,
                 acquisition_date=acq_date if acq_date and acq_date != "" else None,
                 disposition_date=disp_date,
                 is_unresolved=is_unresolved,
@@ -68,6 +73,6 @@ class VaultBasisCSVParser:
             transactions.append(tx)
 
         if not transactions:
-            raise ValueError("Intake produced zero valid transaction rows")
+            raise VaultBasisIntakeError("INPUT_EMPTY", "Intake produced zero valid transaction rows")
 
         return transactions

@@ -7,6 +7,7 @@ from jsonschema import validate
 
 from edge.assurance.reconciliation_engine import DeterministicReconciliationEngine
 from edge.connectors.validator import IntakeDispatcher
+from edge.connectors.exceptions import VaultBasisIntakeError
 from schemas.canonical.case import CanonicalCase
 
 WORKSPACE_ROOT = Path(__file__).resolve().parent.parent.parent.parent
@@ -38,12 +39,9 @@ def get_golden_fixtures():
     for layer_dir in GOLDEN_DIR.glob("layer-*"):
         if not layer_dir.is_dir():
             continue
-        for fixture_dir in layer_dir.iterdir():
-            if not fixture_dir.is_dir() or fixture_dir.name == "semantic-gaps":
-                continue
-            
-            manifest_path = fixture_dir / "manifest.json"
-            if not manifest_path.exists():
+        for manifest_path in layer_dir.rglob("manifest.json"):
+            fixture_dir = manifest_path.parent
+            if fixture_dir.name == "semantic-gaps" or "semantic-gaps" in fixture_dir.parts:
                 continue
 
             manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
@@ -108,25 +106,33 @@ def test_golden_reconciliation_fixture(fixture):
         updated_at="2026-01-01T00:00:00Z"
     )
 
-    # Ingest Broker (Form 1099-DA schema fallback or AUTO)
-    b_meta, b_txs = IntakeDispatcher.ingest_document(
-        data_bytes=broker_path.read_bytes(),
-        filename=broker_filename,
-        source_id="SRC_BROKER_01",
-        declared_schema="AUTO"
-    )
-    case.sources["SRC_BROKER_01"] = b_meta
-    case.transactions.extend(b_txs)
-
-    # Ingest Ledger (Koinly fallback or AUTO)
-    l_meta, l_txs = IntakeDispatcher.ingest_document(
-        data_bytes=ledger_path.read_bytes(),
-        filename=ledger_filename,
-        source_id="SRC_LEDGER_01",
-        declared_schema="AUTO"
-    )
-    case.sources["SRC_LEDGER_01"] = l_meta
-    case.transactions.extend(l_txs)
+    try:
+        # Ingest Broker (Form 1099-DA schema fallback or AUTO)
+        b_meta, b_txs = IntakeDispatcher.ingest_document(
+            data_bytes=broker_path.read_bytes(),
+            filename=broker_filename,
+            source_id="SRC_BROKER_01",
+            declared_schema="AUTO"
+        )
+        case.sources["SRC_BROKER_01"] = b_meta
+        case.transactions.extend(b_txs)
+    
+        # Ingest Ledger (Koinly fallback or AUTO)
+        l_meta, l_txs = IntakeDispatcher.ingest_document(
+            data_bytes=ledger_path.read_bytes(),
+            filename=ledger_filename,
+            source_id="SRC_LEDGER_01",
+            declared_schema="AUTO"
+        )
+        case.sources["SRC_LEDGER_01"] = l_meta
+        case.transactions.extend(l_txs)
+    except VaultBasisIntakeError as e:
+        if expected.get("processing_result") == "REJECTED":
+            assert e.code == expected["rejection_code"], f"Expected rejection {expected['rejection_code']}, got {e.code}"
+            assert expected.get("authoritative_outcome_created") is False, "Hostile inputs must not create authoritative outcomes"
+            assert expected.get("receipt_issued") is False, "Hostile inputs must not issue receipts"
+            return
+        raise
 
     # 3. RECONCILE
     result = DeterministicReconciliationEngine.reconcile_case(case)
@@ -156,3 +162,38 @@ def test_golden_reconciliation_fixture(fixture):
     # Verify must_not constraints (simulated via checking that the engine didn't mask data)
     # e.g., if 'apply_implicit_tolerance' is forbidden, we check that difference logic fired on 0.01 differences.
     # The pure deterministic logic in the engine currently guarantees these naturally.
+
+def test_poison_failure_isolation():
+    """
+    G045: Proves that an intake failure does not partially corrupt an existing case.
+    A malformed import corrupting previously valid evidence is worse than an incorrect rejection.
+    """
+    case = CanonicalCase(
+        case_id="G045_isolation",
+        tax_year=2025,
+        jurisdiction="US",
+        case_status="CREATED",
+        created_at="2026-01-01T00:00:00Z",
+        updated_at="2026-01-01T00:00:00Z"
+    )
+    
+    # Ingest a valid document first
+    valid_data = b"Asset,Proceeds,Date\nBTC,10,2025-01-01\n"
+    meta, txs = IntakeDispatcher.ingest_document(valid_data, "valid.csv", "SRC_1", "AUTO")
+    case.sources["SRC_1"] = meta
+    case.transactions.extend(txs)
+    
+    initial_tx_count = len(case.transactions)
+    initial_sources = list(case.sources.keys())
+    
+    # Attempt to ingest a poisoned document (e.g., CSV_MALFORMED)
+    poisoned_data = b"Asset,Proceeds,Date\nBTC,10\n" # Truncated row
+    try:
+        IntakeDispatcher.ingest_document(poisoned_data, "poisoned.csv", "SRC_2", "AUTO")
+        pytest.fail("Poisoned document should have raised VaultBasisIntakeError")
+    except VaultBasisIntakeError:
+        pass # Expected
+        
+    # Assert isolation invariant: Case state must be exactly as it was before the failure
+    assert len(case.transactions) == initial_tx_count, "Poisoned document corrupted transactions list"
+    assert list(case.sources.keys()) == initial_sources, "Poisoned document corrupted sources list"

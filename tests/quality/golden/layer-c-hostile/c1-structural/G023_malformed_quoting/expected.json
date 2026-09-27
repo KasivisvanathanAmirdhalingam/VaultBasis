@@ -1,0 +1,6 @@
+{
+  "processing_result": "REJECTED",
+  "rejection_code": "CSV_MALFORMED",
+  "authoritative_outcome_created": false,
+  "receipt_issued": false
+}

@@ -1,0 +1,11 @@
+{
+  "fixture_id": "V004_tampered_evidence_hash",
+  "layer": "D",
+  "status": "ACTIVE",
+  "semantic_spec_version": "0.1",
+  "evidence_contract_version": "0.1",
+  "description": "Verifier test for V004_tampered_evidence_hash",
+  "expected": {
+    "overall_status": "INVALID_SIGNATURE"
+  }
+}

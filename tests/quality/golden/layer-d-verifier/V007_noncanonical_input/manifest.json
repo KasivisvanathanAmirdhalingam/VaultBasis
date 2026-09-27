@@ -1,0 +1,11 @@
+{
+  "fixture_id": "V007_noncanonical_input",
+  "layer": "D",
+  "status": "ACTIVE",
+  "semantic_spec_version": "0.1",
+  "evidence_contract_version": "0.1",
+  "description": "Verifier test for V007_noncanonical_input",
+  "expected": {
+    "overall_status": "VALID"
+  }
+}

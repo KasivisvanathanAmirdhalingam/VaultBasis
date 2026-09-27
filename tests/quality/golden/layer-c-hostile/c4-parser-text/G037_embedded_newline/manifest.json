@@ -1,0 +1,27 @@
+{
+  "fixture_id": "G037_embedded_newline",
+  "layer": "C",
+  "status": "ACTIVE",
+  "semantic_spec_version": "0.1",
+  "evidence_contract_version": "0.1",
+  "description": "Hostile input test for G037: embedded newline",
+  "inputs": {
+    "broker": "broker.csv",
+    "ledger": "ledger.csv"
+  },
+  "expected": {
+    "outcome_state": "MATCHED",
+    "reason_codes": [],
+    "unresolved_fields": [],
+    "material_differences": []
+  },
+  "must_not": [
+    "crash_daemon"
+  ],
+  "references": {
+    "semantic_rules": [],
+    "acceptance_gates": [
+      "AC-04"
+    ]
+  }
+}

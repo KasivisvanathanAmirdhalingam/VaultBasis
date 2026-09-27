@@ -1,0 +1,12 @@
+{
+  "receipt_version": "v0.1",
+  "canonicalization_version": "v0.1",
+  "case_id": "G001",
+  "outcome_state": "MATCHED",
+  "timestamp": "2026-01-01T00:00:00Z",
+  "evidence_hash": "deadbeef",
+  "signer_type": "INSTALLATION_KEY",
+  "signer_key_id": "test_key",
+  "signer_public_key": "8a88e3dd7409f195fd52db2d3cba5d72ca6709bf1d94121bf3748801b40f6f5c",
+  "signature": "0d090e5474b96879057140f5579bb668b78abad868e3242424fd5a2f0e892b36316920ebe2b79361b7018050df18d9360764ea173d5a9e2bf6d0a7aad1fc870c"
+}

@@ -8,6 +8,7 @@ import io
 from decimal import Decimal
 from typing import List
 from schemas.canonical.transaction import CanonicalTransaction
+from edge.connectors.exceptions import VaultBasisIntakeError
 
 
 class KoinlyCapitalGainsParser:
@@ -21,11 +22,11 @@ class KoinlyCapitalGainsParser:
     def parse(cls, data_bytes: bytes, source_id: str, file_hash: str) -> List[CanonicalTransaction]:
         text = data_bytes.decode("utf-8-sig", errors="replace").strip()
         if not text:
-            raise ValueError("Koinly CSV content is empty")
+            raise VaultBasisIntakeError("INPUT_EMPTY", "Koinly CSV content is empty")
 
         reader = csv.DictReader(io.StringIO(text))
         if not reader.fieldnames:
-            raise ValueError("Invalid Koinly CSV: Missing header row")
+            raise VaultBasisIntakeError("CSV_MALFORMED", "Invalid Koinly CSV: Missing header row")
 
         # Normalize header lookup
         normalized_headers = {h.strip().lower(): h for h in reader.fieldnames if h}
@@ -36,7 +37,8 @@ class KoinlyCapitalGainsParser:
         cost_basis_col = cls._find_col(normalized_headers, ["cost basis", "cost", "basis", "cost (usd)"])
         
         if not (date_col and asset_col and proceeds_col and cost_basis_col):
-            raise ValueError(
+            raise VaultBasisIntakeError(
+                "SCHEMA_REQUIRED_FIELD_MISSING",
                 f"Koinly CSV format unrecognized or drifted. Missing required columns. Headers: {list(reader.fieldnames)}"
             )
 
@@ -46,6 +48,10 @@ class KoinlyCapitalGainsParser:
 
         transactions: List[CanonicalTransaction] = []
         for row_idx, raw_row in enumerate(reader, start=1):
+            if row_idx > 100_000:
+                raise VaultBasisIntakeError("RESOURCE_EXHAUSTED", "Exceeded max row limit of 100000")
+            if None in raw_row or None in raw_row.values():
+                raise VaultBasisIntakeError("CSV_MALFORMED", f"Row {row_idx} is malformed (truncated or excessive columns)")
             row = {k.strip().lower(): v.strip() for k, v in raw_row.items() if k and v is not None}
 
             asset = row.get(asset_col, "").upper()
@@ -74,10 +80,10 @@ class KoinlyCapitalGainsParser:
                 source_row_reference=f"Row:{row_idx}",
                 transaction_type="SALE",
                 asset=asset,
-                quantity=Decimal(amount_str) if amount_str else None,
-                proceeds=Decimal(proceeds_str) if proceeds_str and proceeds_str != "" else None,
-                cost_basis=Decimal(cost_basis_str) if cost_basis_str and cost_basis_str != "" else None,
-                gain_loss=Decimal(gain_loss_str) if gain_loss_str and gain_loss_str != "" else None,
+                quantity=amount_str if amount_str else None,
+                proceeds=proceeds_str if proceeds_str and proceeds_str != "" else None,
+                cost_basis=cost_basis_str if cost_basis_str and cost_basis_str != "" else None,
+                gain_loss=gain_loss_str if gain_loss_str and gain_loss_str != "" else None,
                 acquisition_date=acq_date if acq_date and acq_date != "" else None,
                 disposition_date=disp_date,
                 basis_reported_to_irs="NO",
@@ -87,7 +93,7 @@ class KoinlyCapitalGainsParser:
             transactions.append(tx)
 
         if not transactions:
-            raise ValueError("Koinly CSV intake produced zero valid transaction rows")
+            raise VaultBasisIntakeError("INPUT_EMPTY", "Koinly CSV intake produced zero valid transaction rows")
 
         return transactions
 

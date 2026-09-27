@@ -1,0 +1,11 @@
+{
+  "fixture_id": "V006_invalid_signature",
+  "layer": "D",
+  "status": "ACTIVE",
+  "semantic_spec_version": "0.1",
+  "evidence_contract_version": "0.1",
+  "description": "Verifier test for V006_invalid_signature",
+  "expected": {
+    "overall_status": "INVALID_SIGNATURE"
+  }
+}

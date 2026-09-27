@@ -1,0 +1,32 @@
+{
+  "fixture_id": "G025_missing_required_column",
+  "layer": "C",
+  "status": "ACTIVE",
+  "semantic_spec_version": "0.1",
+  "evidence_contract_version": "0.1",
+  "description": "Hostile input test for G025_missing_required_column",
+  "inputs": {
+    "broker": "broker.csv",
+    "ledger": "ledger.csv"
+  },
+  "expected": {
+    "processing_result": "REJECTED",
+    "rejection_code": "SCHEMA_REQUIRED_FIELD_MISSING",
+    "authoritative_outcome_created": false,
+    "receipt_issued": false
+  },
+  "must_not": [
+    "crash_daemon",
+    "emit_MATCHED",
+    "issue_authoritative_receipt",
+    "substitute_zero",
+    "persist_partial_authoritative_state",
+    "alter_existing_case"
+  ],
+  "references": {
+    "semantic_rules": [],
+    "acceptance_gates": [
+      "AC-04"
+    ]
+  }
+}
