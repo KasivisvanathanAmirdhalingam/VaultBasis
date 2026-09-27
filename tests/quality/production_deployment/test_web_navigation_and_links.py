@@ -51,7 +51,7 @@ def test_marketing_site_header_footer_and_anchor_links():
     assert 'class="site-footer"' in html
     assert "STATUTORY LIMITATION NOTICE" in html
     assert "PRD §27" in html or "PRD §44.6" in html
-    assert "VaultBasis Inc." in html
+    assert "TecTixBase" in html
     assert "System Status: Edge Runtime Operational" in html
 
     # 4. Sticky header clearance (scroll-padding-top and scroll-margin-top)
@@ -106,7 +106,7 @@ def test_web_dashboard_header_and_industrial_footer():
 
     # Industrial footer
     assert "VaultBasis Edge Local Daemon" in html
-    assert "ACTIVE AIRGAP" in html
+    assert "ACTIVE LOCAL BOUNDARY" in html
     assert "data/vaultbasis.db" in html
     assert "0600 POSIX" in html
     assert "Zero Token Bleed Enforced" in html
