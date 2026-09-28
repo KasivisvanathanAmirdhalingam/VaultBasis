@@ -97,6 +97,14 @@ jobs:
     - name: Assemble RC3 candidate package
       run: python ${{ matrix.script }}
 
+    - name: ZIP content gate (banned filenames + claims + shell bans in Quick Start)
+      shell: bash
+      run: |
+        for z in dist/VaultBasis-RC3-*.zip; do
+          echo "Inspecting $z"
+          python3 scripts/check_release_content.py "$z"
+        done
+
     - name: Upload RC3 candidate (7-day workflow artifact, NOT a release)
       uses: actions/upload-artifact@v4
       with:

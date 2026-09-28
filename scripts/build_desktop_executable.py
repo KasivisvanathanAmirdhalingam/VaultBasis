@@ -61,10 +61,10 @@ def build():
         with open(binary_path, 'rb') as f:
             zipf.writestr(info, f.read())
             
-        # Include the Quick Start Guide HTML
-        guide_path = "VaultBasis_Quick_Start_Guide.html"
+        # Include the Quick Start Guide HTML (canonical practitioner guide)
+        guide_path = "VaultBasis_Practitioner_Quick_Start.html"
         if os.path.exists(guide_path):
-            zipf.write(guide_path, arcname=guide_path)
+            zipf.write(guide_path, arcname="VaultBasis-Quick-Start.html")
 
         # Include the macOS one-click launcher script (must preserve execute bit)
         launcher_path = "launch_vaultbasis.command"

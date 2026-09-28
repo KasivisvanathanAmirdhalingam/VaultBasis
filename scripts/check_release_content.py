@@ -1,14 +1,18 @@
 #!/usr/bin/env python3
 """
-VaultBasis — Release Content Gate (package-content lint).
+VaultBasis — Release Content Gate (package-content lint + ZIP artifact inspection).
 Fails the pipeline when practitioner-facing content carries superseded claims
 (VB-RC2-UAT-002..005, VB-RC2-UAT-010) or developer shell instructions in the
-primary Quick Start. Contextual terms (localhost, ports) are reviewed by policy,
-not blindly banned: allowed in Troubleshooting/Technical, forbidden as Quick
-Start instructions.
+primary Quick Start. Also inspects RC3 ZIP artifacts for prohibited content/files.
+Contextual terms (localhost, ports) are reviewed by policy, not blindly banned.
 Stdlib only. Exit 0 = PASS, 1 = FAIL.
+
+Usage:
+  python3 scripts/check_release_content.py            # source lint only
+  python3 scripts/check_release_content.py <zip>      # source lint + ZIP inspection
 """
 import sys
+import zipfile
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parent.parent
@@ -89,13 +93,87 @@ def run_checks(repo_root: Path) -> list:
     return failures
 
 
+# Strings that must never appear inside any RC3 ZIP artifact.
+ZIP_BANNED_NAMES = [
+    "VaultBasis-RC1",
+    "preview-macOS",
+    "VaultBasis_Quick_Start_Guide",  # obsolete dark guide — canonical is VaultBasis-Quick-Start.html
+]
+# Hard bans: must not appear in ANY text member of the ZIP
+ZIP_HARD_BANNED_CONTENT = [
+    "Release Candidate 1",
+    "VaultBasis Inc.",
+    "verify standard compliance",
+    "Simulate Audits",
+    "proves you ran",
+]
+
+# Shell/bypass bans: only applied to the canonical Quick Start member
+ZIP_QUICKSTART_MEMBER = "VaultBasis-Quick-Start.html"
+ZIP_QUICKSTART_BANNED_CONTENT = [
+    "xattr",
+    "chmod",
+    "Open Anyway",
+    "Run anyway",
+]
+
+
+def check_zip(zip_path: Path) -> list:
+    """Inspect an RC3 candidate ZIP. Returns failure strings; empty = PASS."""
+    failures = []
+    if not zip_path.is_file():
+        return [f"ZIP not found: {zip_path}"]
+    try:
+        with zipfile.ZipFile(zip_path) as zf:
+            names = zf.namelist()
+            # Banned filenames
+            for name in names:
+                for banned in ZIP_BANNED_NAMES:
+                    if banned in name:
+                        failures.append(f"ZIP-BANNED filename {banned!r} in {name}")
+            # Inspect text members for hard-banned content
+            for name in names:
+                if not any(name.endswith(ext) for ext in (".html", ".txt", ".json", ".md")):
+                    continue
+                try:
+                    text = zf.read(name).decode("utf-8", errors="replace")
+                except Exception:
+                    continue
+                for banned in ZIP_HARD_BANNED_CONTENT:
+                    if banned in text:
+                        failures.append(f"ZIP-BANNED content {banned!r} in {name}")
+                # Shell/bypass bans: Quick Start member only (same policy as source gate)
+                if name.endswith(ZIP_QUICKSTART_MEMBER):
+                    for banned in ZIP_QUICKSTART_BANNED_CONTENT:
+                        if banned in text:
+                            failures.append(
+                                f"ZIP-SHELL-BANNED {banned!r} in Quick Start member {name}"
+                            )
+    except zipfile.BadZipFile as e:
+        failures.append(f"ZIP unreadable: {e}")
+    return failures
+
+
 def main() -> int:
     failures = run_checks(REPO)
+
+    # Optional ZIP inspection when a path is passed as argv[1]
+    if len(sys.argv) > 1:
+        zip_path = Path(sys.argv[1])
+        zip_failures = check_zip(zip_path)
+        if zip_failures:
+            print(f"ZIP-CONTENT-GATE: FAIL ({zip_path.name})")
+            for f in zip_failures:
+                print(f"  - {f}")
+            failures.extend(zip_failures)
+        else:
+            print(f"ZIP-CONTENT-GATE: PASS ({zip_path.name})")
 
     if failures:
         print("RELEASE-CONTENT-GATE: FAIL")
         for f in failures:
-            print(f"  - {f}")
+            if not f.startswith("ZIP"):  # already printed above
+                print(f"  - {f}")
         return 1
     print(f"RELEASE-CONTENT-GATE: PASS ({len(PRACTITIONER_FILES)} files, "
           f"{len(HARD_BANS)} claim bans, {len(QUICKSTART_BANS)} quickstart bans)")
