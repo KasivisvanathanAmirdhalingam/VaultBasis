@@ -113,18 +113,12 @@ def test_slice1_end_to_end_receipt_flow(tmp_path):
                 "source_b_ref": "Koinly:CostBasis",
                 "source_b_value": "16300.00",
                 "variance": "4200.00",
-                "description": "Basis differs by $4,200. Review source acquisition records and reporting scope."
-            }
+                "description": "Basis differs by $4,200. Review source acquisition records and reporting scope.",
+                    "rule_reference": "US_IRC_1099DA_2025_2026_V1",
+                    "provenance_references": []
+                }
         ],
         "unresolved_items": [],
-        "provenance_references": [
-            {
-                "reference_id": "prov_001",
-                "source_id": "src_1099da_coinbase",
-                "row_ref": "Line:1",
-                "content_hash": hash_1099
-            }
-        ],
         "human_review_state": "UNREVIEWED",
         "ai_involvement_level": "NONE",
         "created_at": "2026-09-26T12:00:00Z"
@@ -188,18 +182,12 @@ def test_tamper_detection_financial_value(tmp_path):
                 "source_b_ref": "B:1",
                 "source_b_value": "110.00",
                 "variance": "10.00",
-                "description": "Proceeds variance"
-            }
+                "description": "Proceeds variance",
+                    "rule_reference": "US_IRC_1099DA_2025_2026_V1",
+                    "provenance_references": []
+                }
         ],
         "unresolved_items": [],
-        "provenance_references": [
-            {
-                "reference_id": "ref_1",
-                "source_id": "src_1",
-                "row_ref": "Row 1",
-                "content_hash": hashlib.sha256(b"raw").hexdigest()
-            }
-        ],
         "human_review_state": "UNREVIEWED",
         "ai_involvement_level": "NONE",
         "created_at": "2026-09-26T12:00:00Z"
@@ -249,10 +237,11 @@ def test_tamper_detection_outcome_state(tmp_path):
                 "reason_code": "PRICE_UNAVAILABLE",
                 "affected_source_id": "src_1",
                 "affected_row_ref": "Row 5",
-                "description": "Missing valuation"
-            }
+                "description": "Missing valuation",
+                    "rule_reference": "US_IRC_1099DA_2025_2026_V1",
+                    "provenance_references": []
+                }
         ],
-        "provenance_references": [],
         "human_review_state": "UNREVIEWED",
         "ai_involvement_level": "NONE",
         "created_at": "2026-09-26T12:00:00Z"
@@ -293,7 +282,6 @@ def test_cli_verifier_execution(tmp_path):
         "outcome_state": "MATCHED",
         "material_differences": [],
         "unresolved_items": [],
-        "provenance_references": [],
         "human_review_state": "REVIEWED_ACCEPTED",
         "ai_involvement_level": "NONE",
         "created_at": "2026-09-26T12:00:00Z"

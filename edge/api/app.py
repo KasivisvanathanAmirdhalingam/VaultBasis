@@ -235,7 +235,6 @@ def reconcile_case(case_id: str):
         "outcome_state": recon_result.outcome_state,
         "material_differences": [d.to_dict() for d in recon_result.material_differences],
         "unresolved_items": recon_result.unresolved_items,
-        "provenance_references": recon_result.provenance_references,
         "human_review_state": "UNREVIEWED",
         "ai_involvement_level": "NONE",
         "created_at": datetime.now(timezone.utc).isoformat()

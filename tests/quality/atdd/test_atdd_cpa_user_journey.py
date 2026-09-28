@@ -377,13 +377,12 @@ BTC,2025-11-20,20000.00,2025-02-11,15000.00,YES
     receipt = recon_res.json()["receipt"]
 
     # Provenance references must be present
-    prov = receipt["provenance_references"]
+    prov = receipt["material_differences"][0]["provenance_references"]
     assert len(prov) >= 2
     for p in prov:
-        assert "reference_id" in p
         assert "source_id" in p
-        assert "row_ref" in p
-        assert len(p["content_hash"]) == 64  # valid SHA-256 hex
+        assert "record_locator" in p
+        assert len(p["record_content_hash"]) == 64  # valid SHA-256 hex
 
 
 @pytest.mark.atdd

@@ -20,7 +20,9 @@ class DifferenceRecord:
         source_b_ref: str,
         source_b_value: Optional[str],
         variance: Optional[str],
-        description: str
+        description: str,
+        rule_reference: str = "US_IRC_1099DA_2025_2026_V1",
+        provenance_references: Optional[List[Dict[str, Any]]] = None
     ):
         self.difference_id = difference_id
         self.difference_state = difference_state
@@ -31,6 +33,8 @@ class DifferenceRecord:
         self.source_b_value = source_b_value
         self.variance = variance
         self.description = description
+        self.rule_reference = rule_reference
+        self.provenance_references = provenance_references or []
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -42,7 +46,9 @@ class DifferenceRecord:
             "source_b_ref": self.source_b_ref,
             "source_b_value": self.source_b_value,
             "variance": self.variance,
-            "description": self.description
+            "description": self.description,
+            "rule_reference": self.rule_reference,
+            "provenance_references": self.provenance_references
         }
 
 
@@ -52,15 +58,13 @@ class ReconciliationResult:
         self.assurance_level: str = "L2_EVIDENCE_RECONCILED"
         self.material_differences: List[DifferenceRecord] = []
         self.unresolved_items: List[Dict[str, Any]] = []
-        self.provenance_references: List[Dict[str, Any]] = []
 
     def to_dict(self) -> Dict[str, Any]:
         return {
             "outcome_state": self.outcome_state,
             "assurance_level": self.assurance_level,
             "material_differences": [d.to_dict() for d in self.material_differences],
-            "unresolved_items": self.unresolved_items,
-            "provenance_references": self.provenance_references
+            "unresolved_items": self.unresolved_items
         }
 
 
@@ -74,17 +78,17 @@ class DeterministicReconciliationEngine:
     def reconcile_case(cls, case: CanonicalCase) -> ReconciliationResult:
         result = ReconciliationResult()
 
-        # Separate transactions by source document
         source_ids = list(case.sources.keys())
         if len(source_ids) < 2:
-            # Cannot reconcile without at least 2 sources
             result.outcome_state = "UNRESOLVED_DATA"
             result.unresolved_items.append({
                 "item_id": "unres_insufficient_sources",
                 "reason_code": "AMBIGUOUS_SOURCE_DATA",
                 "affected_source_id": source_ids[0] if source_ids else "none",
                 "affected_row_ref": "Header",
-                "description": "Reconciliation requires at least two source documents (e.g. 1099-DA + Tax Report)."
+                "description": "Reconciliation requires at least two source documents.",
+                "rule_reference": "US_IRC_1099DA_2025_2026_V1",
+                "provenance_references": []
             })
             return result
 
@@ -97,33 +101,34 @@ class DeterministicReconciliationEngine:
         matched_b_indices = set()
         diff_counter = 1
 
-        for tx_a in txs_a:
-            # Provenance record for tx_a
-            prov_a_id = f"PROV-{src_a_id}-{tx_a.source_row_reference}"
-            result.provenance_references.append({
-                "reference_id": prov_a_id,
-                "source_id": src_a_id,
-                "row_ref": tx_a.source_row_reference,
-                "content_hash": tx_a.source_file_hash
-            })
+        def build_prov(tx, src_id):
+            if not tx: return []
+            return [{
+                "source_id": src_id,
+                "source_sha256": tx.source_file_hash,
+                "record_locator": tx.source_row_reference,
+                "record_content_hash": tx.source_file_hash,
+                "field_names_evaluated": ["asset", "proceeds", "cost_basis", "acquisition_date", "disposition_date", "quantity"]
+            }]
 
-            # Check for unresolved state in tx_a
+        for tx_a in txs_a:
+            prov_a = build_prov(tx_a, src_a_id)
+
             if tx_a.is_unresolved and tx_a.basis_reported_to_irs != "NO":
                 result.unresolved_items.append({
                     "item_id": f"unres_{tx_a.transaction_id}",
                     "reason_code": tx_a.unresolved_reason or "BASIS_UNAVAILABLE",
                     "affected_source_id": src_a_id,
                     "affected_row_ref": tx_a.source_row_reference,
-                    "description": f"Missing required fact for asset {tx_a.asset} in {src_a_id}"
+                    "description": f"Missing required fact for asset {tx_a.asset} in {src_a_id}",
+                    "rule_reference": "US_IRC_1099DA_2025_2026_V1",
+                    "provenance_references": prov_a
                 })
 
-            # Find candidate match in Source B by asset and disposition date
-            candidate_match: Optional[Tuple[int, CanonicalTransaction]] = None
+            candidate_match = None
             for idx_b, tx_b in enumerate(txs_b):
-                if idx_b in matched_b_indices:
-                    continue
+                if idx_b in matched_b_indices: continue
                 
-                # Check disposition date equality or ISO date equality
                 dates_match = False
                 if not tx_a.disposition_date or not tx_b.disposition_date:
                     dates_match = True
@@ -134,12 +139,11 @@ class DeterministicReconciliationEngine:
                         import dateutil.parser
                         dt_a = dateutil.parser.isoparse(tx_a.disposition_date)
                         dt_b = dateutil.parser.isoparse(tx_b.disposition_date)
-                        
                         if dt_a.tzinfo is None and dt_b.tzinfo is not None:
-                            result.unresolved_items.append({"item_id": "tz_miss_a", "reason_code": "TIMEZONE_CONTEXT_MISSING", "affected_source_id": src_a_id, "affected_row_ref": tx_a.source_row_reference, "description": ""})
-                            dates_match = True # Treat as matched for grouping purposes to expose the unresolved item
+                            result.unresolved_items.append({"item_id": "tz_miss_a", "reason_code": "TIMEZONE_CONTEXT_MISSING", "affected_source_id": src_a_id, "affected_row_ref": tx_a.source_row_reference, "description": "", "rule_reference": "US_IRC_1099DA_2025_2026_V1", "provenance_references": prov_a})
+                            dates_match = True
                         elif dt_b.tzinfo is None and dt_a.tzinfo is not None:
-                            result.unresolved_items.append({"item_id": "tz_miss_b", "reason_code": "TIMEZONE_CONTEXT_MISSING", "affected_source_id": src_b_id, "affected_row_ref": tx_b.source_row_reference, "description": ""})
+                            result.unresolved_items.append({"item_id": "tz_miss_b", "reason_code": "TIMEZONE_CONTEXT_MISSING", "affected_source_id": src_b_id, "affected_row_ref": tx_b.source_row_reference, "description": "", "rule_reference": "US_IRC_1099DA_2025_2026_V1", "provenance_references": build_prov(tx_b, src_b_id)})
                             dates_match = True
                         elif dt_a == dt_b:
                             dates_match = True
@@ -151,7 +155,6 @@ class DeterministicReconciliationEngine:
                     break
 
             if candidate_match is None:
-                # Missing from Source B (Ledger)
                 result.material_differences.append(DifferenceRecord(
                     difference_id=f"DIFF-{diff_counter:03d}",
                     difference_state="MISSING_FROM_LEDGER",
@@ -161,34 +164,28 @@ class DeterministicReconciliationEngine:
                     source_b_ref="NOT_FOUND",
                     source_b_value=None,
                     variance=str(tx_a.proceeds) if tx_a.proceeds is not None else None,
-                    description=f"Transaction present in {src_a_id} but missing from tax ledger {src_b_id}."
+                    description=f"Transaction present in {src_a_id} but missing from tax ledger {src_b_id}.",
+                    provenance_references=prov_a
                 ))
                 diff_counter += 1
                 continue
 
             idx_b, tx_b = candidate_match
             matched_b_indices.add(idx_b)
+            prov_b = build_prov(tx_b, src_b_id)
+            prov_both = prov_a + prov_b
 
-            # 0. Compare Quantity
             if tx_a.quantity is None or tx_b.quantity is None:
                 result.unresolved_items.append({
                     "item_id": f"unres_qty_{tx_a.transaction_id}",
                     "reason_code": "QUANTITY_UNAVAILABLE",
                     "affected_source_id": src_a_id if tx_a.quantity is None else src_b_id,
                     "affected_row_ref": tx_a.source_row_reference if tx_a.quantity is None else tx_b.source_row_reference,
-                    "description": "Missing required quantity prevents exact reconciliation."
+                    "description": "Missing required quantity prevents exact reconciliation.",
+                    "rule_reference": "US_IRC_1099DA_2025_2026_V1",
+                    "provenance_references": prov_both
                 })
 
-            # Provenance record for tx_b
-            prov_b_id = f"PROV-{src_b_id}-{tx_b.source_row_reference}"
-            result.provenance_references.append({
-                "reference_id": prov_b_id,
-                "source_id": src_b_id,
-                "row_ref": tx_b.source_row_reference,
-                "content_hash": tx_b.source_file_hash
-            })
-
-            # 1. Compare Proceeds
             if tx_a.proceeds is not None and tx_b.proceeds is not None:
                 proceeds_diff = abs(tx_a.proceeds - tx_b.proceeds)
                 if proceeds_diff > Decimal("0.01"):
@@ -201,12 +198,11 @@ class DeterministicReconciliationEngine:
                         source_b_ref=f"{src_b_id}:{tx_b.source_row_reference}",
                         source_b_value=str(tx_b.proceeds),
                         variance=str(proceeds_diff),
-                        description=f"Proceeds differ by ${proceeds_diff:.2f}."
+                        description=f"Proceeds differ by ${proceeds_diff:.2f}.",
+                        provenance_references=prov_both
                     ))
                     diff_counter += 1
 
-            # 2. Compare Cost Basis & Reporting Scope
-            # Check 2025 reporting scope: If 1099-DA Box 2 explicitly indicates not reported
             if tx_a.cost_basis is None and tx_a.basis_reported_to_irs == "NO":
                 result.material_differences.append(DifferenceRecord(
                     difference_id=f"DIFF-{diff_counter:03d}",
@@ -217,7 +213,8 @@ class DeterministicReconciliationEngine:
                     source_b_ref=f"{src_b_id}:{tx_b.source_row_reference}",
                     source_b_value=str(tx_b.cost_basis) if tx_b.cost_basis is not None else None,
                     variance=str(tx_b.cost_basis) if tx_b.cost_basis is not None else None,
-                    description="Reporting scope difference: Broker 1099-DA does not report basis for 2025 non-covered disposition."
+                    description="Reporting scope difference: Broker 1099-DA does not report basis for 2025 non-covered disposition.",
+                    provenance_references=prov_both
                 ))
                 diff_counter += 1
             elif tx_a.cost_basis is not None and tx_b.cost_basis is not None:
@@ -232,34 +229,33 @@ class DeterministicReconciliationEngine:
                         source_b_ref=f"{src_b_id}:{tx_b.source_row_reference}",
                         source_b_value=str(tx_b.cost_basis),
                         variance=str(basis_diff),
-                        description=f"Difference detected: basis differs by ${basis_diff:.2f}. Review source acquisition records and reporting scope."
+                        description=f"Difference detected: basis differs by ${basis_diff:.2f}.",
+                        provenance_references=prov_both
                     ))
                     diff_counter += 1
 
-            # 3. Compare Dates
             if not tx_a.acquisition_date or not tx_b.acquisition_date:
-                # If one is missing but not both, it is unresolved (missing fact)
                 if tx_a.acquisition_date or tx_b.acquisition_date:
                     result.unresolved_items.append({
                         "item_id": f"unres_acq_date_{tx_a.transaction_id}",
                         "reason_code": "ACQUISITION_DATE_UNAVAILABLE",
                         "affected_source_id": src_a_id if not tx_a.acquisition_date else src_b_id,
                         "affected_row_ref": tx_a.source_row_reference if not tx_a.acquisition_date else tx_b.source_row_reference,
-                        "description": "Missing required acquisition date."
+                        "description": "Missing required acquisition date.",
+                        "rule_reference": "US_IRC_1099DA_2025_2026_V1",
+                        "provenance_references": prov_both
                     })
             elif tx_a.acquisition_date != tx_b.acquisition_date:
-                # Before checking string equality, attempt normalized parsing if they look like ISO timestamps
                 import dateutil.parser
                 match_dates = False
                 try:
                     dt_a = dateutil.parser.isoparse(tx_a.acquisition_date)
                     dt_b = dateutil.parser.isoparse(tx_b.acquisition_date)
-                    
                     if dt_a.tzinfo is None and dt_b.tzinfo is not None:
-                        result.unresolved_items.append({"item_id": "tz_miss_a", "reason_code": "TIMEZONE_CONTEXT_MISSING", "affected_source_id": src_a_id, "affected_row_ref": tx_a.source_row_reference, "description": ""})
-                        match_dates = True # Prevent ACQ_DATE_DIFF due to tz mismatch
+                        result.unresolved_items.append({"item_id": "tz_miss_a_acq", "reason_code": "TIMEZONE_CONTEXT_MISSING", "affected_source_id": src_a_id, "affected_row_ref": tx_a.source_row_reference, "description": "", "rule_reference": "US_IRC_1099DA_2025_2026_V1", "provenance_references": prov_a})
+                        match_dates = True
                     elif dt_b.tzinfo is None and dt_a.tzinfo is not None:
-                        result.unresolved_items.append({"item_id": "tz_miss_b", "reason_code": "TIMEZONE_CONTEXT_MISSING", "affected_source_id": src_b_id, "affected_row_ref": tx_b.source_row_reference, "description": ""})
+                        result.unresolved_items.append({"item_id": "tz_miss_b_acq", "reason_code": "TIMEZONE_CONTEXT_MISSING", "affected_source_id": src_b_id, "affected_row_ref": tx_b.source_row_reference, "description": "", "rule_reference": "US_IRC_1099DA_2025_2026_V1", "provenance_references": prov_b})
                         match_dates = True
                     elif dt_a == dt_b:
                         match_dates = True
@@ -276,13 +272,14 @@ class DeterministicReconciliationEngine:
                         source_b_ref=f"{src_b_id}:{tx_b.source_row_reference}",
                         source_b_value=tx_b.acquisition_date,
                         variance=None,
-                        description=f"Acquisition date mismatch: {tx_a.acquisition_date} vs {tx_b.acquisition_date}."
+                        description=f"Acquisition date mismatch: {tx_a.acquisition_date} vs {tx_b.acquisition_date}.",
+                        provenance_references=prov_both
                     ))
                     diff_counter += 1
 
-        # Check for transactions in B missing from A
         for idx_b, tx_b in enumerate(txs_b):
             if idx_b not in matched_b_indices:
+                prov_b = build_prov(tx_b, src_b_id)
                 result.material_differences.append(DifferenceRecord(
                     difference_id=f"DIFF-{diff_counter:03d}",
                     difference_state="MISSING_FROM_1099DA",
@@ -292,11 +289,11 @@ class DeterministicReconciliationEngine:
                     source_b_ref=f"{src_b_id}:{tx_b.source_row_reference}",
                     source_b_value=str(tx_b.proceeds) if tx_b.proceeds is not None else None,
                     variance=str(tx_b.proceeds) if tx_b.proceeds is not None else None,
-                    description=f"Transaction present in tax ledger {src_b_id} but missing from broker Form 1099-DA."
+                    description=f"Transaction present in tax ledger {src_b_id} but missing from broker Form 1099-DA.",
+                    provenance_references=prov_b
                 ))
                 diff_counter += 1
 
-        # Determine consolidated outcome_state
         diff_states = [d.difference_state for d in result.material_differences]
         if result.unresolved_items:
             result.outcome_state = "UNRESOLVED_DATA"

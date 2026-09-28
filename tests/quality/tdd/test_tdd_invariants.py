@@ -157,7 +157,6 @@ def test_tdd_receipt_schema_rejection_on_missing_required_field():
         "outcome_state": "MATCHED",
         "material_differences": [],
         "unresolved_items": [],
-        "provenance_references": [],
         "human_review_state": "UNREVIEWED",
         "ai_involvement_level": "NONE",
         "signer_type": "INSTALLATION_KEY",

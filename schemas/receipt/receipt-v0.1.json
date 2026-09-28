@@ -22,7 +22,6 @@
     "outcome_state",
     "material_differences",
     "unresolved_items",
-    "provenance_references",
     "human_review_state",
     "ai_involvement_level",
     "signer_type",
@@ -35,7 +34,9 @@
   "properties": {
     "receipt_version": {
       "type": "string",
-      "enum": ["v0.1"],
+      "enum": [
+        "v0.1"
+      ],
       "description": "Normative receipt specification version."
     },
     "receipt_id": {
@@ -76,7 +77,9 @@
     },
     "source_ids": {
       "type": "array",
-      "items": { "type": "string" },
+      "items": {
+        "type": "string"
+      },
       "minItems": 1,
       "uniqueItems": true,
       "description": "Identifiers of all input documents included in this case."
@@ -91,12 +94,16 @@
     },
     "source_schema_ids": {
       "type": "object",
-      "additionalProperties": { "type": "string" },
+      "additionalProperties": {
+        "type": "string"
+      },
       "description": "Map of source_id to the schema identifier used to parse it."
     },
     "canonicalization_version": {
       "type": "string",
-      "enum": ["v0.1"],
+      "enum": [
+        "v0.1"
+      ],
       "description": "Specification version used for canonical deterministic byte serialization."
     },
     "ruleset_id": {
@@ -142,7 +149,7 @@
         "SOURCE_ERROR_SUSPECTED",
         "UNRESOLVED_DATA"
       ],
-      "description": "The deterministic reconciliation outcome state defined in PRD §14.3."
+      "description": "The deterministic reconciliation outcome state defined in PRD \u00a714.3."
     },
     "material_differences": {
       "type": "array",
@@ -157,11 +164,15 @@
           "source_b_ref",
           "source_b_value",
           "variance",
-          "description"
+          "description",
+          "rule_reference",
+          "provenance_references"
         ],
         "additionalProperties": false,
         "properties": {
-          "difference_id": { "type": "string" },
+          "difference_id": {
+            "type": "string"
+          },
           "difference_state": {
             "type": "string",
             "enum": [
@@ -178,13 +189,76 @@
               "SOURCE_ERROR_SUSPECTED"
             ]
           },
-          "asset": { "type": "string" },
-          "source_a_ref": { "type": "string" },
-          "source_a_value": { "type": ["string", "null"] },
-          "source_b_ref": { "type": "string" },
-          "source_b_value": { "type": ["string", "null"] },
-          "variance": { "type": ["string", "null"] },
-          "description": { "type": "string" }
+          "asset": {
+            "type": "string"
+          },
+          "source_a_ref": {
+            "type": "string"
+          },
+          "source_a_value": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "source_b_ref": {
+            "type": "string"
+          },
+          "source_b_value": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "variance": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "rule_reference": {
+            "type": "string"
+          },
+          "provenance_references": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "source_id",
+                "source_sha256",
+                "record_locator",
+                "record_content_hash",
+                "field_names_evaluated"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "source_id": {
+                  "type": "string"
+                },
+                "source_sha256": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "record_locator": {
+                  "type": "string"
+                },
+                "record_content_hash": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "field_names_evaluated": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "description": "Shallow provenance trace linking conclusions to source rows and row digests."
+          }
         }
       },
       "description": "Itemized list of material differences discovered between sources."
@@ -198,11 +272,15 @@
           "reason_code",
           "affected_source_id",
           "affected_row_ref",
-          "description"
+          "description",
+          "rule_reference",
+          "provenance_references"
         ],
         "additionalProperties": false,
         "properties": {
-          "item_id": { "type": "string" },
+          "item_id": {
+            "type": "string"
+          },
           "reason_code": {
             "type": "string",
             "enum": [
@@ -214,30 +292,58 @@
               "AMBIGUOUS_SOURCE_DATA"
             ]
           },
-          "affected_source_id": { "type": "string" },
-          "affected_row_ref": { "type": "string" },
-          "description": { "type": "string" }
-        }
-      },
-      "description": "Itemized list of required facts that could not be determined without assumption."
-    },
-    "provenance_references": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["reference_id", "source_id", "row_ref", "content_hash"],
-        "additionalProperties": false,
-        "properties": {
-          "reference_id": { "type": "string" },
-          "source_id": { "type": "string" },
-          "row_ref": { "type": "string" },
-          "content_hash": {
-            "type": "string",
-            "pattern": "^[0-9a-f]{64}$"
+          "affected_source_id": {
+            "type": "string"
+          },
+          "affected_row_ref": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "rule_reference": {
+            "type": "string"
+          },
+          "provenance_references": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "source_id",
+                "source_sha256",
+                "record_locator",
+                "record_content_hash",
+                "field_names_evaluated"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "source_id": {
+                  "type": "string"
+                },
+                "source_sha256": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "record_locator": {
+                  "type": "string"
+                },
+                "record_content_hash": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "field_names_evaluated": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "description": "Shallow provenance trace linking conclusions to source rows and row digests."
           }
         }
       },
-      "description": "Shallow provenance trace linking conclusions to source rows and row digests."
+      "description": "Itemized list of required facts that could not be determined without assumption."
     },
     "human_review_state": {
       "type": "string",
@@ -251,12 +357,16 @@
     },
     "ai_involvement_level": {
       "type": "string",
-      "enum": ["NONE"],
+      "enum": [
+        "NONE"
+      ],
       "description": "Level of AI involvement in this outcome. Strictly NONE for MMP-1."
     },
     "signer_type": {
       "type": "string",
-      "enum": ["INSTALLATION_KEY"],
+      "enum": [
+        "INSTALLATION_KEY"
+      ],
       "description": "The authority class of the signing key. Strictly INSTALLATION_KEY in MMP-1."
     },
     "signer_key_id": {

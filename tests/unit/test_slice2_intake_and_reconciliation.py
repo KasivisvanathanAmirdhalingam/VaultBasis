@@ -106,7 +106,7 @@ def test_deterministic_reconciliation_basis_difference(sample_1099da_csv, sample
     assert diff.difference_state == "BASIS_DIFFERENCE"
     assert diff.asset == "BTC"
     assert diff.variance == "4200.00"
-    assert len(result.provenance_references) >= 2
+    assert len(diff.provenance_references) >= 2
 
 
 @pytest.mark.smoke
