@@ -164,9 +164,7 @@
           "source_b_ref",
           "source_b_value",
           "variance",
-          "description",
-          "rule_reference",
-          "provenance_references"
+          "description"
         ],
         "additionalProperties": false,
         "properties": {
@@ -272,9 +270,7 @@
           "reason_code",
           "affected_source_id",
           "affected_row_ref",
-          "description",
-          "rule_reference",
-          "provenance_references"
+          "description"
         ],
         "additionalProperties": false,
         "properties": {
@@ -388,6 +384,35 @@
       "type": "string",
       "pattern": "^[0-9a-fA-F]{128}$",
       "description": "Hex-encoded 64-byte Ed25519 signature over the canonical SHA-256 digest of the receipt (excluding the signature field itself)."
+    },
+    "provenance_references": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "reference_id",
+          "source_id",
+          "row_ref",
+          "content_hash"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "reference_id": {
+            "type": "string"
+          },
+          "source_id": {
+            "type": "string"
+          },
+          "row_ref": {
+            "type": "string"
+          },
+          "content_hash": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        }
+      },
+      "description": "Legacy shallow provenance trace (RC1)."
     }
   }
 }
