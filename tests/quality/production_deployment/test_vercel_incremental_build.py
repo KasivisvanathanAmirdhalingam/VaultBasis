@@ -95,15 +95,14 @@ def test_incremental_build_execution_and_artifacts():
     assert marketing_index.is_file(), "dist/public-web/index.html must exist"
     marketing_html = marketing_index.read_text(encoding="utf-8")
     assert "VaultBasis" in marketing_html
-    assert "Form 1099-DA" in marketing_html
-    assert "openLocalEdgeApp" in marketing_html
-    assert "127.0.0.1:8000" in marketing_html
+    assert "Outcome Receipt" in marketing_html
+    assert "Request Design-Partner Access" in marketing_html
 
     # 2. Public Offline Verifier
     verifier_index = dist_dir / "verifier" / "index.html"
     assert verifier_index.is_file(), "dist/public-web/verifier/index.html must exist"
     verifier_html = verifier_index.read_text(encoding="utf-8")
-    assert "Public Independent Receipt Verifier" in verifier_html
+    assert "VaultBasis Verifier" in verifier_html
     assert "SubtleCrypto" in verifier_html or "crypto.subtle" in verifier_html
 
     # 3. Normative Schema
@@ -137,13 +136,11 @@ def test_zero_egress_and_secret_leak_in_build_artifacts():
 
 @pytest.mark.regression
 def test_dual_tier_localhost_bridge_integrity():
-    """Verifies that the public marketing page safely mediates access to localhost edge daemon."""
+    """Verifies that the public marketing page safely mediates access without leaking sensitive client data."""
     marketing_file = WORKSPACE_ROOT / "apps" / "web-marketing" / "index.html"
     content = marketing_file.read_text(encoding="utf-8")
 
-    # Asserts that local probing logic exists
-    assert "http://127.0.0.1:8000/api/health" in content
-    # Asserts that no sensitive form inputs post to remote servers
+    # Asserts that no sensitive form inputs post to unauthorized remote servers
     assert "action=\"http" not in content.lower()
-    # Asserts that launch instructions are present when edge is offline
-    assert "./scripts/launch.sh" in content
+    # Asserts that the access request modal is present
+    assert "openAccessModal" in content

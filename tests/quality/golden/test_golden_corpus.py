@@ -29,14 +29,15 @@ KNOWN_SEMANTIC_RULES = get_known_semantic_rules()
 
 
 def get_golden_fixtures():
-    """Dynamically loads all golden test fixtures across all layers."""
+    """Dynamically loads all golden test fixtures across engine layers (A, B, C)."""
     fixtures = []
     # Load the JSON schema for manifest validation
     schema_path = GOLDEN_DIR / "manifest.schema.json"
     assert schema_path.exists(), "Manifest schema missing"
     schema = json.loads(schema_path.read_text(encoding="utf-8"))
 
-    for layer_dir in GOLDEN_DIR.glob("layer-*"):
+    for layer_name in ["layer-a-canonical", "layer-b-boundaries", "layer-c-hostile"]:
+        layer_dir = GOLDEN_DIR / layer_name
         if not layer_dir.is_dir():
             continue
         for manifest_path in layer_dir.rglob("manifest.json"):

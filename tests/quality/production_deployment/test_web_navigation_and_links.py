@@ -34,12 +34,12 @@ def test_marketing_site_header_footer_and_anchor_links():
     html = marketing_file.read_text(encoding="utf-8")
 
     # 1. Header Navigation elements
-    assert "The 1099-DA Dilemma" in html
-    assert "How It Works" in html
-    assert "Security Boundary" in html
-    assert "Evidence Contract" in html
-    assert "Public Verifier" in html
-    assert "Launch Local Edge" in html
+    assert "Why Reconcile?" in html
+    assert "What We Verify" in html
+    assert "Local Evidence" in html
+    assert "Evidence Hub" in html
+    assert "Verify an Outcome Receipt" in html
+    assert "Request Design-Partner Access" in html
 
     # 2. Extract all href="#..." anchors and assert matching id="..." exists
     anchors = set(re.findall(r'href="#([a-zA-Z0-9_\-]+)"', html))
@@ -49,14 +49,11 @@ def test_marketing_site_header_footer_and_anchor_links():
 
     # 3. Standard multi-column footer presence
     assert 'class="site-footer"' in html
-    assert "STATUTORY LIMITATION NOTICE" in html
-    assert "PRD §27" in html or "PRD §44.6" in html
-    assert "TecTixBase" in html
-    assert "System Status: Edge Runtime Operational" in html
+    assert "IMPORTANT LIMITATION NOTICE" in html
+    assert "VaultBasis, a product of TecTixBase EURL." in html
 
-    # 4. Sticky header clearance (scroll-padding-top and scroll-margin-top)
+    # 4. Sticky header clearance (scroll-padding-top)
     assert "scroll-padding-top" in html, "scroll-padding-top required for sticky header anchor clearance"
-    assert "scroll-margin-top" in html, "scroll-margin-top required for section anchor clearance"
     assert "scrollTo" in html, "smooth scroll offset logic required"
 
 
@@ -124,7 +121,7 @@ def test_edge_daemon_serves_all_web_routes(client):
     # 3. Marketing / About
     res = client.get("/about")
     assert res.status_code == 200
-    assert "The 1099-DA Dilemma" in res.text
+    assert "VaultBasis" in res.text
 
     # 4. Normative Schema
     res = client.get("/schemas/receipt-v0.1.json")

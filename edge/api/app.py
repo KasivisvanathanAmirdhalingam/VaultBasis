@@ -364,13 +364,16 @@ def serve_verifier():
         return HTMLResponse(content=verifier_file.read_text(), status_code=200)
     return HTMLResponse("<h2>VaultBasis Public Verifier building...</h2>")
 
+
 @app.get("/about", response_class=HTMLResponse)
 @app.get("/marketing", response_class=HTMLResponse)
 def serve_marketing():
-    mkt_file = WEB_MARKETING_DIR / "index.html"
-    if mkt_file.exists():
-        return HTMLResponse(content=mkt_file.read_text(), status_code=200)
-    return HTMLResponse("<h2>VaultBasis Marketing page building...</h2>")
+    marketing_file = WEB_MARKETING_DIR / "index.html"
+    if marketing_file.exists():
+        return HTMLResponse(content=marketing_file.read_text(), status_code=200)
+    return HTMLResponse("<h2>VaultBasis Marketing building...</h2>")
+
+
 
 
 @app.get("/schemas/{filename:path}")

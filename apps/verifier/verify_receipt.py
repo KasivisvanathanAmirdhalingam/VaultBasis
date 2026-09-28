@@ -242,28 +242,49 @@ def verify_outcome_receipt(
     return res
 
 
-def print_cli_report(res: VerificationResult, use_color: bool = True):
+def print_cli_report(res: VerificationResult, receipt_data: Optional[Dict[str, Any]] = None, use_color: bool = True):
     if use_color:
-        status_str = "\033[92mPASS\033[0m" if res.is_valid else "\033[91mFAIL\033[0m"
+        pass_str = "\033[92mVALID\033[0m"
+        fail_str = "\033[91mFAIL\033[0m"
+        compat_str = "\033[92mCOMPATIBLE\033[0m"
+        unsupported_str = "\033[91mUNSUPPORTED\033[0m"
+        not_det_str = "\033[93mNOT DETERMINED BY VAULTBASIS\033[0m"
+        overall_str = "\033[92mPAYLOAD & SIGNATURE VERIFIED\033[0m" if res.is_valid else "\033[91mVERIFICATION FAILED\033[0m"
     else:
-        status_str = "PASS" if res.is_valid else "FAIL"
+        pass_str = "VALID"
+        fail_str = "FAIL"
+        compat_str = "COMPATIBLE"
+        unsupported_str = "UNSUPPORTED"
+        not_det_str = "NOT DETERMINED BY VAULTBASIS"
+        overall_str = "PAYLOAD & SIGNATURE VERIFIED" if res.is_valid else "VERIFICATION FAILED"
+
     print("\n" + "="*80)
-    print(f"      VAULTBASIS INDEPENDENT OUTCOME VERIFICATION REPORT — {status_str}")
+    print(f"      VAULTBASIS INDEPENDENT OUTCOME VERIFICATION REPORT — {overall_str}")
     print("="*80)
-    print(f"Receipt ID:       {res.receipt_id}")
-    print(f"Outcome State:    {res.outcome_state}")
-    print(f"Assurance Level:  {res.assurance_level}")
-    print(f"Signer Key ID:    {res.signer_key_id}")
+    print(f"Receipt Identifier:       {res.receipt_id}")
+    print(f"Outcome State:            {res.outcome_state}")
+    print(f"Assurance Level:          {res.assurance_level}")
+    print(f"Signer Key Fingerprint:   {res.signer_key_id}")
     print("-" * 80)
-    print(f"  [1] JSON Schema Conformance:   {'PASS' if res.schema_valid else 'FAIL'}")
-    print(f"  [2] Evidence Contract Version: {'PASS (v0.1)' if res.version_supported else 'FAIL'}")
-    print(f"  [3] Key Fingerprint Match:     {'PASS' if res.key_fingerprint_valid else 'FAIL'}")
-    print(f"  [4] Ed25519 Signature Match:   {'PASS' if res.signature_valid else 'FAIL'}")
+    print(f"  [1] PAYLOAD INTEGRITY:       {pass_str if res.signature_valid else fail_str} (Digest matches canonical envelope)")
+    print(f"  [2] SIGNATURE AUTHENTICITY:  {pass_str if res.signature_valid else fail_str} (Ed25519 signature verified)")
+    print(f"  [3] CONTRACT COMPATIBILITY:  {compat_str if res.version_supported and res.schema_valid else unsupported_str} (Evidence Contract v0.1 valid)")
+    print(f"  [4] TAX CORRECTNESS:         {not_det_str} (Outside verification scope)")
     if res.source_hashes_valid is not None:
-        print(f"  [5] Source Hashes Match:       {'PASS' if res.source_hashes_valid else 'FAIL'}")
-    else:
-        print("  [5] Source Hashes Match:       (NOT CHECKED - NO EVIDENCE DIR SUPPLIED)")
+        print(f"  [5] SOURCE FILE HASHES:      {pass_str if res.source_hashes_valid else fail_str} (Matched local evidence directory)")
     print("-" * 80)
+
+    if receipt_data:
+        diffs = receipt_data.get("material_differences", [])
+        unresolved = receipt_data.get("unresolved_items", [])
+        sources = receipt_data.get("source_ids", [])
+        print("\n--- WORKPAPER SUMMARY ---")
+        print(f"  Case ID:                {receipt_data.get('case_id')}")
+        print(f"  Evaluation Timestamp:   {receipt_data.get('created_at')}")
+        print(f"  Evaluated Sources:      {', '.join(sources)}")
+        print(f"  Material Differences:   {len(diffs)}")
+        print(f"  Unresolved Items:       {len(unresolved)}")
+        print("-------------------------")
 
     if res.errors:
         print("\nERRORS ENCOUNTERED:")
@@ -322,7 +343,7 @@ def main():
     if args.json:
         print(json.dumps(result.to_dict(), indent=2))
     else:
-        print_cli_report(result, use_color=not args.no_color)
+        print_cli_report(result, receipt_data=receipt_data, use_color=not args.no_color)
 
     sys.exit(0 if result.is_valid else 1)
 

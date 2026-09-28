@@ -42,6 +42,7 @@ if (fs.existsSync(DIST_DIR)) {
 fs.mkdirSync(DIST_DIR, { recursive: true });
 fs.mkdirSync(path.join(DIST_DIR, 'verifier'), { recursive: true });
 fs.mkdirSync(path.join(DIST_DIR, 'schemas'), { recursive: true });
+fs.mkdirSync(path.join(DIST_DIR, 'api', 'data'), { recursive: true });
 
 // 3. Build Marketing Landing Page (dist/public-web/index.html)
 const marketingSourcePath = path.join(APPS_DIR, 'web-marketing', 'index.html');
@@ -77,7 +78,7 @@ if (fs.existsSync(schemaSourcePath)) {
   console.log('✓ Packaged Evidence Contract Schema -> dist/public-web/schemas/receipt-v0.1.json');
 }
 
-// 5b. Copy Golden Sample Receipts
+// 5b. Copy Golden Sample Receipts and Documentation
 const sampleValidSource = path.join(REPO_ROOT, 'tests', 'fixtures', 'golden_receipt_valid.json');
 if (fs.existsSync(sampleValidSource)) {
   fs.copyFileSync(sampleValidSource, path.join(DIST_DIR, 'sample-receipt.json'));
@@ -87,6 +88,38 @@ const sampleTamperedSource = path.join(REPO_ROOT, 'tests', 'fixtures', 'golden_r
 if (fs.existsSync(sampleTamperedSource)) {
   fs.copyFileSync(sampleTamperedSource, path.join(DIST_DIR, 'sample-receipt-tampered.json'));
   console.log('✓ Packaged Tampered Sample Receipt -> dist/public-web/sample-receipt-tampered.json');
+}
+
+fs.mkdirSync(path.join(DIST_DIR, 'docs'), { recursive: true });
+const scopeDocSource = path.join(REPO_ROOT, 'docs', 'scope_and_limitations_v0.1.md');
+if (fs.existsSync(scopeDocSource)) {
+  fs.copyFileSync(scopeDocSource, path.join(DIST_DIR, 'docs', 'scope_and_limitations_v0.1.md'));
+  console.log('✓ Packaged Scope & Limitations Doc -> dist/public-web/docs/scope_and_limitations_v0.1.md');
+}
+
+// 5c. Package Backend API Functions and Secure Artifacts
+const apiSourceDir = path.join(APPS_DIR, 'web-marketing', 'api');
+if (fs.existsSync(apiSourceDir)) {
+  fs.cpSync(apiSourceDir, path.join(DIST_DIR, 'api'), { recursive: true });
+  console.log('✓ Packaged Backend API Functions -> dist/public-web/api/');
+  
+  const pkgJson = {
+    name: "vaultbasis-web",
+    version: "1.0.0",
+    dependencies: {
+      "nodemailer": "^6.9.13"
+    }
+  };
+  fs.writeFileSync(path.join(DIST_DIR, 'package.json'), JSON.stringify(pkgJson, null, 2), 'utf8');
+  console.log('✓ Packaged Serverless package.json -> dist/public-web/package.json');
+}
+
+const artifactSourcePath = path.join(REPO_ROOT, 'dist', 'artifacts', 'VaultBasis-RC1-DesignPartner.zip');
+if (fs.existsSync(artifactSourcePath)) {
+  fs.copyFileSync(artifactSourcePath, path.join(DIST_DIR, 'api', 'data', 'VaultBasis-RC1-DesignPartner.zip'));
+  console.log('✓ Packaged Secure Artifact for Distribution -> dist/public-web/api/data/VaultBasis-RC1-DesignPartner.zip');
+} else {
+  console.warn('⚠️ WARNING: VaultBasis-RC1-DesignPartner.zip not found in dist/artifacts/. Vercel API download will fail in prod.');
 }
 
 // 6. Generate Custom 404 Fallback Page
@@ -147,6 +180,38 @@ const notFoundHtml = `<!DOCTYPE html>
 </html>`;
 fs.writeFileSync(path.join(DIST_DIR, '404.html'), notFoundHtml, 'utf8');
 console.log('✓ Generated Custom 404 Page -> dist/public-web/404.html');
+
+// 6.5. Generate Vercel Edge Middleware for Free Tier Password Protection
+const middlewareJs = `
+export const config = {
+  matcher: '/',
+};
+
+export default function middleware(req) {
+  const basicAuth = req.headers.get('authorization');
+  const url = req.url;
+
+  if (basicAuth) {
+    const authValue = basicAuth.split(' ')[1];
+    const [user, pwd] = atob(authValue).split(':');
+
+    if (user === 'cpa' && pwd === 'CPA-PREVIEW-2026') {
+      return new Response(null, {
+        headers: { 'x-middleware-next': '1' }
+      });
+    }
+  }
+
+  return new Response('Auth required', {
+    status: 401,
+    headers: {
+      'WWW-Authenticate': 'Basic realm="VaultBasis Design Partner Preview"'
+    }
+  });
+}
+`;
+fs.writeFileSync(path.join(DIST_DIR, 'middleware.js'), middlewareJs, 'utf8');
+console.log('✓ Generated Vercel Edge Middleware for Password Protection -> dist/public-web/middleware.js');
 
 // 7. Security Invariant Audit (Zero Leakage Check)
 console.log('--------------------------------------------------------------------------------');

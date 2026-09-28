@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VaultBasis Edge — Quick Start Guide</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #07090e;
+      --surface: #0e121a;
+      --primary: #3b82f6;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --border: #1e293b;
+      --success: #10b981;
+      --warning: #f59e0b;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 3rem 2rem;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 4rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 2rem;
+    }
+    .header h1 {
+      font-size: 2.5rem;
+      margin: 0 0 0.5rem 0;
+      background: linear-gradient(to right, #60a5fa, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .header p {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      margin: 0;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+    }
+    .card h2 {
+      margin-top: 0;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .card h2 span {
+      background: var(--primary);
+      color: #fff;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      font-size: 0.9rem;
+    }
+    .alert {
+      background: rgba(245, 158, 11, 0.1);
+      border-left: 4px solid var(--warning);
+      padding: 1rem 1.5rem;
+      border-radius: 0 8px 8px 0;
+      margin: 1.5rem 0;
+    }
+    .alert h4 {
+      color: var(--warning);
+      margin: 0 0 0.5rem 0;
+    }
+    .alert p {
+      margin: 0;
+      color: #cbd5e1;
+      font-size: 0.95rem;
+    }
+    .terminal {
+      background: #000;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 1rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+      color: #4ade80;
+      margin: 1rem 0;
+      overflow-x: auto;
+    }
+    ul {
+      padding-left: 1.2rem;
+    }
+    li {
+      margin-bottom: 0.5rem;
+      color: #cbd5e1;
+    }
+    strong {
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <h1>VaultBasis Edge</h1>
+      <p>Design Partner Preview (Release Candidate 1) — Quick Start Guide</p>
+    </div>
+
+    <div class="card">
+      <h2><span>1</span> What to Expect (Zero Data Egress)</h2>
+      <p>VaultBasis is not a traditional cloud application. It is a <strong>local Edge Daemon</strong>.</p>
+      <p>Because you are processing highly sensitive financial ledgers (Form 1099-DAs, tax lot histories), the VaultBasis Edge application runs <strong>entirely inside your local machine</strong>. It never transmits your transaction data or API keys to our servers. The output is a cryptographically signed "Outcome Receipt" that proves you ran the software locally.</p>
+    </div>
+
+    <div class="card">
+      <h2><span>2</span> Launching the Application</h2>
+      <p>The file you extracted is a native, pre-compiled terminal executable. Because this is an early Design Partner preview, it is not yet published on official app stores, meaning your operating system's security gatekeeper will intentionally block it at first.</p>
+
+      <div class="alert">
+        <h4>🍎 macOS Users (Gatekeeper Bypass)</h4>
+        <p>If you double-click the file and see an error saying <strong>"Apple could not verify..."</strong>:</p>
+        <ul style="margin-top: 0.5rem; margin-bottom: 0;">
+          <li>Click <strong>Done</strong> on the popup.</li>
+          <li>Open your Mac's <strong>System Settings</strong>.</li>
+          <li>Navigate to <strong>Privacy & Security</strong>.</li>
+          <li>Scroll down to the "Security" section and click the <strong>"Open Anyway"</strong> button next to VaultBasis.</li>
+          <li>Enter your Mac password. The application will instantly launch.</li>
+        </ul>
+      </div>
+
+      <div class="alert">
+        <h4>🪟 Windows Users (SmartScreen Bypass)</h4>
+        <p>If you double-click the .exe and see a blue <strong>"Windows protected your PC"</strong> screen:</p>
+        <ul style="margin-top: 0.5rem; margin-bottom: 0;">
+          <li>Click the underlined <strong>"More info"</strong> text.</li>
+          <li>Click the <strong>"Run anyway"</strong> button that appears at the bottom.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span>3</span> Operating the Dashboard</h2>
+      <p>Once successfully launched, a black terminal window will open on your screen showing the boot sequence. After 1-2 seconds, it will automatically open your default web browser (Chrome, Safari, Edge) to:</p>
+      
+      <div class="terminal">
+        VaultBasis Edge active on http://127.0.0.1:8000
+      </div>
+
+      <p>This is your local Command Center. From here you can:</p>
+      <ul>
+        <li><strong>Import Ledgers:</strong> Drag and drop your Koinly or generic CSV tax ledgers.</li>
+        <li><strong>Simulate Audits:</strong> Run the deterministic reconciliation engine to verify standard compliance.</li>
+        <li><strong>Generate Evidence:</strong> Cryptographically sign the outputs into an Evidence Contract (Outcome Receipt).</li>
+      </ul>
+      <p style="margin-top: 1.5rem; font-size: 0.9rem; color: var(--text-muted);">
+        <em>Note: Do not close the black terminal window while using the dashboard in your browser. Closing the terminal will shut down the local server.</em>
+      </p>
+    </div>
+
+    <div style="text-align: center; color: var(--text-muted); font-size: 0.85rem; margin-top: 4rem;">
+      &copy; 2026 VaultBasis, a product of TecTixBase EURL. All rights reserved. Strictly Confidential.
+    </div>
+  </div>
+
+</body>
+</html>

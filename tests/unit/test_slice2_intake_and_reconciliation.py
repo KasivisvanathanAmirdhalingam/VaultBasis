@@ -20,9 +20,9 @@ from schemas.canonical.case import CanonicalCase
 
 @pytest.fixture
 def sample_1099da_csv():
-    return b"""Property,Date sold,Proceeds,Date acquired,Cost basis,Box 2
-BTC,2025-11-20,18400.00,2025-02-11,12100.00,YES
-ETH,2025-12-05,3200.00,2025-03-01,2800.00,YES
+    return b"""Property,Units,Date sold,Proceeds,Date acquired,Cost basis,Box 2
+BTC,1.0,2025-11-20,18400.00,2025-02-11,12100.00,YES
+ETH,1.0,2025-12-05,3200.00,2025-03-01,2800.00,YES
 """
 
 

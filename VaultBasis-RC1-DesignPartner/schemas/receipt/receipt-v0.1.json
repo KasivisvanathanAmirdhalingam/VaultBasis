@@ -1,0 +1,283 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://vaultbasis.io/schemas/receipt/receipt-v0.1.json",
+  "title": "VaultBasis Outcome Receipt v0.1",
+  "description": "Normative schema for an independent outcome verification receipt issued by VaultBasis Edge under Evidence Contract v0.1.",
+  "type": "object",
+  "required": [
+    "receipt_version",
+    "receipt_id",
+    "case_id",
+    "claim_type",
+    "claimant_type",
+    "producer_reference",
+    "source_ids",
+    "source_hashes",
+    "source_schema_ids",
+    "canonicalization_version",
+    "ruleset_id",
+    "engine_version",
+    "policy_version",
+    "assurance_level",
+    "outcome_state",
+    "material_differences",
+    "unresolved_items",
+    "provenance_references",
+    "human_review_state",
+    "ai_involvement_level",
+    "signer_type",
+    "signer_key_id",
+    "signer_public_key",
+    "created_at",
+    "signature"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "receipt_version": {
+      "type": "string",
+      "enum": ["v0.1"],
+      "description": "Normative receipt specification version."
+    },
+    "receipt_id": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+      "description": "Unique UUIDv4 identifier for this receipt."
+    },
+    "case_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Identifier of the local reconciliation case."
+    },
+    "claim_type": {
+      "type": "string",
+      "enum": [
+        "DIGITAL_ASSET_TAX_RECONCILIATION",
+        "FORM_1099DA_PROCEEDS_RECONCILIATION",
+        "COST_BASIS_VERIFICATION",
+        "GENERIC_FINANCIAL_RECONCILIATION"
+      ],
+      "description": "Category of financial claim being independently verified."
+    },
+    "claimant_type": {
+      "type": "string",
+      "enum": [
+        "TAXPAYER",
+        "TAX_PREPARER",
+        "CPA_FIRM",
+        "BROKER",
+        "ENTERPRISE_CLIENT"
+      ],
+      "description": "Role of the entity requesting or owning the verification."
+    },
+    "producer_reference": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Identifier of the software agent/runtime issuing this receipt."
+    },
+    "source_ids": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1,
+      "uniqueItems": true,
+      "description": "Identifiers of all input documents included in this case."
+    },
+    "source_hashes": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{64}$"
+      },
+      "description": "Map of source_id to cryptographic SHA-256 hash (hex encoded) of the raw ingested file."
+    },
+    "source_schema_ids": {
+      "type": "object",
+      "additionalProperties": { "type": "string" },
+      "description": "Map of source_id to the schema identifier used to parse it."
+    },
+    "canonicalization_version": {
+      "type": "string",
+      "enum": ["v0.1"],
+      "description": "Specification version used for canonical deterministic byte serialization."
+    },
+    "ruleset_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Versioned rule identifier applied during comparison."
+    },
+    "engine_version": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Version of the deterministic assurance engine."
+    },
+    "policy_version": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Version of the boundary and verification policy."
+    },
+    "assurance_level": {
+      "type": "string",
+      "enum": [
+        "L1_CANONICAL_CONSISTENCY",
+        "L2_EVIDENCE_RECONCILED",
+        "L3_INDEPENDENTLY_RECOMPUTED",
+        "L4_ATTESTED_RECORD",
+        "L5_FORMALLY_VERIFIED"
+      ],
+      "description": "Level of assurance established by the verification process."
+    },
+    "outcome_state": {
+      "type": "string",
+      "enum": [
+        "MATCHED",
+        "PROCEEDS_DIFFERENCE",
+        "BASIS_DIFFERENCE",
+        "ACQUISITION_DATE_DIFFERENCE",
+        "DISPOSITION_DATE_DIFFERENCE",
+        "MISSING_FROM_1099DA",
+        "MISSING_FROM_LEDGER",
+        "AMBIGUOUS_MATCH",
+        "AGGREGATED_LINE",
+        "TRANSFER_RELATED",
+        "REPORTING_SCOPE_DIFFERENCE",
+        "SOURCE_ERROR_SUSPECTED",
+        "UNRESOLVED_DATA"
+      ],
+      "description": "The deterministic reconciliation outcome state defined in PRD §14.3."
+    },
+    "material_differences": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "difference_id",
+          "difference_state",
+          "asset",
+          "source_a_ref",
+          "source_a_value",
+          "source_b_ref",
+          "source_b_value",
+          "variance",
+          "description"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "difference_id": { "type": "string" },
+          "difference_state": {
+            "type": "string",
+            "enum": [
+              "PROCEEDS_DIFFERENCE",
+              "BASIS_DIFFERENCE",
+              "ACQUISITION_DATE_DIFFERENCE",
+              "DISPOSITION_DATE_DIFFERENCE",
+              "MISSING_FROM_1099DA",
+              "MISSING_FROM_LEDGER",
+              "AMBIGUOUS_MATCH",
+              "AGGREGATED_LINE",
+              "TRANSFER_RELATED",
+              "REPORTING_SCOPE_DIFFERENCE",
+              "SOURCE_ERROR_SUSPECTED"
+            ]
+          },
+          "asset": { "type": "string" },
+          "source_a_ref": { "type": "string" },
+          "source_a_value": { "type": ["string", "null"] },
+          "source_b_ref": { "type": "string" },
+          "source_b_value": { "type": ["string", "null"] },
+          "variance": { "type": ["string", "null"] },
+          "description": { "type": "string" }
+        }
+      },
+      "description": "Itemized list of material differences discovered between sources."
+    },
+    "unresolved_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "item_id",
+          "reason_code",
+          "affected_source_id",
+          "affected_row_ref",
+          "description"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "item_id": { "type": "string" },
+          "reason_code": {
+            "type": "string",
+            "enum": [
+              "PRECISION_UNRESOLVED",
+              "PRICE_UNAVAILABLE",
+              "BASIS_UNAVAILABLE",
+              "DATE_UNAVAILABLE",
+              "INVENTORY_DEFICIT",
+              "AMBIGUOUS_SOURCE_DATA"
+            ]
+          },
+          "affected_source_id": { "type": "string" },
+          "affected_row_ref": { "type": "string" },
+          "description": { "type": "string" }
+        }
+      },
+      "description": "Itemized list of required facts that could not be determined without assumption."
+    },
+    "provenance_references": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["reference_id", "source_id", "row_ref", "content_hash"],
+        "additionalProperties": false,
+        "properties": {
+          "reference_id": { "type": "string" },
+          "source_id": { "type": "string" },
+          "row_ref": { "type": "string" },
+          "content_hash": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        }
+      },
+      "description": "Shallow provenance trace linking conclusions to source rows and row digests."
+    },
+    "human_review_state": {
+      "type": "string",
+      "enum": [
+        "UNREVIEWED",
+        "REVIEWED_ACCEPTED",
+        "REVIEWED_DISPUTED",
+        "REVIEWED_ANNOTATED"
+      ],
+      "description": "Status of human review disposition."
+    },
+    "ai_involvement_level": {
+      "type": "string",
+      "enum": ["NONE"],
+      "description": "Level of AI involvement in this outcome. Strictly NONE for MMP-1."
+    },
+    "signer_type": {
+      "type": "string",
+      "enum": ["INSTALLATION_KEY"],
+      "description": "The authority class of the signing key. Strictly INSTALLATION_KEY in MMP-1."
+    },
+    "signer_key_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$",
+      "description": "SHA-256 fingerprint (hex) of the Ed25519 public key that signed this receipt."
+    },
+    "signer_public_key": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{64}$",
+      "description": "Hex-encoded 32-byte Ed25519 public key."
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Normalized ISO 8601 UTC timestamp of receipt creation."
+    },
+    "signature": {
+      "type": "string",
+      "pattern": "^[0-9a-fA-F]{128}$",
+      "description": "Hex-encoded 64-byte Ed25519 signature over the canonical SHA-256 digest of the receipt (excluding the signature field itself)."
+    }
+  }
+}

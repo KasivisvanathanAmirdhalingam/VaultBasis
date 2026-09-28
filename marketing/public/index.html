@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VaultBasis | Crypto Tax Evidence Assurance</title>
+    <meta name="description" content="VaultBasis independently compares supported broker information with supported tax-ledger output, identifies agreements and differences, and produces a signed Outcome Receipt.">
+    <link rel="stylesheet" href="styles.css">
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- JSON-LD Structured Data per WEB-DISCOVERY Directive -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "VaultBasis",
+      "applicationCategory": "FinanceApplication",
+      "operatingSystem": "macOS, Docker",
+      "description": "VaultBasis is an independent evidence assurance platform for supported digital-asset tax reconciliation workflows."
+    }
+    </script>
+</head>
+<body>
+    <nav class="glass-nav">
+        <div class="logo">VaultBasis</div>
+        <div class="nav-links">
+            <a href="#what-is-vaultbasis">How It Works</a>
+            <a href="verifier.html">Independent Verifier</a>
+            <a href="#security">Security</a>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="hero-content">
+            <h1>Don't trust the system that made the claim. <span class="highlight">Verify the outcome.</span></h1>
+            <p class="subtitle">VaultBasis independently compares supported broker information (1099-DA) with supported tax-ledger output, identifies agreements, differences and unresolved facts, and produces a signed Outcome Receipt that can be independently verified.</p>
+            <div class="cta-group">
+                <a href="request-access.html" class="primary-btn">Request Design-Partner Access</a>
+                <a href="verifier.html" class="secondary-btn">Open Web Verifier</a>
+            </div>
+            <p class="subtext">Requires macOS 14+. Strict local-only execution.</p>
+        </div>
+        <div class="hero-graphic">
+            <div class="glass-card">
+                <div class="status-indicator pass"></div>
+                <h3>Receipt Integrity: VALID</h3>
+                <p>Outcome: BASIS_DIFFERENCE</p>
+                <code class="hash">SHA256: 8a4b...91f2</code>
+            </div>
+        </div>
+    </header>
+
+    <section id="what-is-vaultbasis" class="features">
+        <h2>What is VaultBasis?</h2>
+        <div class="grid">
+            <div class="feature-card">
+                <h3>Deterministic Reconciliation</h3>
+                <p>We mathematically compare your CSV exports. No AI guesses, no cloud databases. Just clean, deterministic comparison.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Unresolved Data Safety</h3>
+                <p>Missing basis is explicitly marked as UNRESOLVED_DATA. We never coerce missing data to $0.00, preventing artificial taxable events.</p>
+            </div>
+            <div class="feature-card">
+                <h3>Independent Verification</h3>
+                <p>The system producing a result and the mechanism verifying the resulting evidence should not have to be the same system. Drag your receipt into the offline verifier to prove its integrity.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="security" class="security-banner">
+        <h2>Trust Boundary</h2>
+        <p>Transaction/evidence payloads remain within the declared VaultBasis Edge boundary during the tested MMP-1 assurance workflow.</p>
+        <p>No telemetry. No tracking. No cloud egress.</p>
+    </section>
+
+    <footer>
+        <p>VaultBasis is a deterministic comparison tool. VaultBasis does not hold itself out as providing tax or legal advice. Whether VaultBasis, its activities, or particular service arrangements implicate tax-return-preparer or related obligations is reserved for counsel determination.</p>
+        <p>&copy; 2026 VaultBasis. All rights reserved.</p>
+    </footer>
+</body>
+</html>

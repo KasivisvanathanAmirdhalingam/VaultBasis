@@ -6,7 +6,7 @@
   <title>VaultBasis Edge — Outcome Verification Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #090b10;
@@ -64,9 +64,10 @@
       color: white;
     }
     .brand h1 {
-      font-size: 1.1rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.35rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
     }
     .brand-badge {
       background: rgba(59, 130, 246, 0.15);
@@ -211,6 +212,10 @@
       transition: all 0.2s;
     }
     .btn:hover { background: #232a3b; }
+    .btn:focus-visible, input:focus-visible, .nav-btn:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
+    }
     .btn-primary { background: var(--primary); border-color: var(--primary); color: white; }
     .btn-primary:hover { background: var(--primary-hover); }
     .btn-success { background: var(--success); border-color: var(--success); color: white; }
@@ -239,9 +244,9 @@
   </style>
 </head>
 <body>
-  <header>
-    <div class="brand">
-      <div class="brand-logo">V</div>
+  <header role="banner">
+    <div class="brand" aria-label="VaultBasis Home">
+      <div class="brand-logo" aria-hidden="true">V</div>
       <div>
         <h1>VaultBasis Edge</h1>
       </div>
@@ -257,7 +262,7 @@
     </div>
   </header>
 
-  <main class="container">
+  <main class="container" role="main">
     <!-- SCREEN 1: CASE LIST -->
     <div id="screen-cases" class="screen active">
       <div class="header-bar">
@@ -278,7 +283,7 @@
                 <th>Actions</th>
               </tr>
             </thead>
-            <tbody id="case-table-body">
+            <tbody id="case-table-body" aria-live="polite">
               <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Loading local cases...</td></tr>
             </tbody>
           </table>
@@ -398,7 +403,7 @@
     </div>
   </main>
 
-  <footer style="display: flex; flex-direction: column; gap: 1rem; padding: 2rem; background: var(--surface); border-top: 1px solid var(--border); font-size: 0.82rem; color: var(--text-muted); margin-top: auto;">
+  <footer role="contentinfo" style="display: flex; flex-direction: column; gap: 1rem; padding: 2rem; background: var(--surface); border-top: 1px solid var(--border); font-size: 0.82rem; color: var(--text-muted); margin-top: auto;">
     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 1.25rem;">
       <div style="display: flex; align-items: center; gap: 1rem;">
         <strong style="color: #fff; font-size: 0.95rem;">Local Edge · Active</strong>
@@ -412,7 +417,7 @@
       </div>
     </div>
     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-      <div>© 2026 VaultBasis Inc. • MMP-1 Design-Partner Preview • PRD v26.1 Reference</div>
+      <div>© 2026 VaultBasis, a product of TecTixBase EURL. • MMP-1 Design-Partner Preview • PRD v26.1 Reference</div>
       <div style="font-size: 0.76rem; color: #64748b;">Zero Transaction-Data Egress</div>
     </div>
   </footer>

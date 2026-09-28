@@ -1,0 +1,140 @@
+{
+  "specification": "VaultBasis Canonical JSON v0.1 (VB-CJCS-0.1)",
+  "version": "v0.1",
+  "vectors": [
+    {
+      "id": "TC-CANON-01",
+      "description": "Flat object ASCII keys lexicographical ordering",
+      "input": { "z": 1, "a": 2, "m": 3 },
+      "expected_canonical_json": "{\"a\":2,\"m\":3,\"z\":1}",
+      "expected_sha256": "ebba85cfdc0a724b6cc327ecc545faeb38b9fe02eca603b430eb872f5cf75370"
+    },
+    {
+      "id": "TC-CANON-02",
+      "description": "Nested dictionary recursive key ordering",
+      "input": { "beta": { "y": "second", "x": "first" }, "alpha": { "b": 2, "a": 1 } },
+      "expected_canonical_json": "{\"alpha\":{\"a\":1,\"b\":2},\"beta\":{\"x\":\"first\",\"y\":\"second\"}}",
+      "expected_sha256": "768e5d553e3a1e80d8507ab5804808197cc391b2cf9279d98e9216af4b1d348f"
+    },
+    {
+      "id": "TC-CANON-03",
+      "description": "Array sequence preservation with canonicalized child objects",
+      "input": { "items": [{ "id": "b", "val": 2 }, { "id": "a", "val": 1 }], "count": 2 },
+      "expected_canonical_json": "{\"count\":2,\"items\":[{\"id\":\"b\",\"val\":2},{\"id\":\"a\",\"val\":1}]}",
+      "expected_sha256": "b0f905d8de82c1a6dcb5b3bb663e156c31e0a8bab107d665a34cf435cc26f8a3"
+    },
+    {
+      "id": "TC-CANON-04",
+      "description": "Decimal string quantities and monetary representations",
+      "input": { "cost_basis": "1842.17", "proceeds": "2104.93", "quantity": "0.500000000000000000", "zero_val": "0.00" },
+      "expected_canonical_json": "{\"cost_basis\":\"1842.17\",\"proceeds\":\"2104.93\",\"quantity\":\"0.500000000000000000\",\"zero_val\":\"0.00\"}",
+      "expected_sha256": "b8281863d68708af45fa356242f83384d11976bc0837ad80ae903bdff55997c3"
+    },
+    {
+      "id": "TC-CANON-05",
+      "description": "Booleans, integers, zero, and null value handling",
+      "input": { "active": true, "count": 1427, "deleted": false, "optional_note": null, "zero_int": 0 },
+      "expected_canonical_json": "{\"active\":true,\"count\":1427,\"deleted\":false,\"optional_note\":null,\"zero_int\":0}",
+      "expected_sha256": "5adf47651c2c347c851491004ae4e81b302b1adfef23c00b1ac4d97b4008b7db"
+    },
+    {
+      "id": "TC-CANON-06",
+      "description": "Escaped control characters, quotes, and slashes",
+      "input": { "backslash": "C:\\Users", "escapes": "line1\nline2\ttab", "quote": "hello \"world\"", "slash": "path/to/file" },
+      "expected_canonical_json": "{\"backslash\":\"C:\\\\Users\",\"escapes\":\"line1\\nline2\\ttab\",\"quote\":\"hello \\\"world\\\"\",\"slash\":\"path/to/file\"}",
+      "expected_sha256": "1cdbfb8ab1acc30e17f99323ba6c39e571645b5f7f8b152ef829126c2d08b7ba"
+    },
+    {
+      "id": "TC-CANON-07",
+      "description": "Empty objects, empty arrays, and empty strings",
+      "input": { "empty_arr": [], "empty_obj": {}, "empty_str": "" },
+      "expected_canonical_json": "{\"empty_arr\":[],\"empty_obj\":{},\"empty_str\":\"\"}",
+      "expected_sha256": "2a8781af9ac37e30b45f58e83894528acb1472c33bdf4c2ef0d6b6d86e4f190f"
+    },
+    {
+      "id": "TC-CANON-08",
+      "description": "Unicode accented characters in keys and values (UTF-8)",
+      "input": { "zebra": "Savannah", "apple": "Cupertino", "café": "Paris", "résumé": "Document" },
+      "expected_canonical_json": "{\"apple\":\"Cupertino\",\"café\":\"Paris\",\"résumé\":\"Document\",\"zebra\":\"Savannah\"}",
+      "expected_sha256": "d2365099518d86c5812430f2248c083692ed17b07e5829efff9acc5bc1c8ca71"
+    },
+    {
+      "id": "TC-CANON-09",
+      "description": "Supplementary Plane Unicode (Emojis & Multibyte characters)",
+      "input": { "tag": "Audit 🛡️", "lock": "Key 🔐", "alpha": "Start" },
+      "expected_canonical_json": "{\"alpha\":\"Start\",\"lock\":\"Key 🔐\",\"tag\":\"Audit 🛡️\"}",
+      "expected_sha256": "264db028d37fcda954b89bde497e41c0df1582d2de6f0baf8042e2ad18e23ab4"
+    },
+    {
+      "id": "TC-CANON-10",
+      "description": "ISO 8601 UTC timestamp format",
+      "input": { "created_at": "2026-09-28T14:32:01Z", "case_id": "CASE-1099DA-001" },
+      "expected_canonical_json": "{\"case_id\":\"CASE-1099DA-001\",\"created_at\":\"2026-09-28T14:32:01Z\"}",
+      "expected_sha256": "3afabd2f24276654f0a1a946173f3905b00f4a619cfd644f276465d6cde799d3"
+    },
+    {
+      "id": "TC-CANON-11",
+      "description": "Null values in array items versus omitted keys",
+      "input": { "records": [{ "basis": null, "id": "rec-1" }, { "basis": "100.00", "id": "rec-2" }] },
+      "expected_canonical_json": "{\"records\":[{\"basis\":null,\"id\":\"rec-1\"},{\"basis\":\"100.00\",\"id\":\"rec-2\"}]}",
+      "expected_sha256": "885bdd923293742c865bb6394320693a7c141dbe5889d7f0681c9699d88211ad"
+    },
+    {
+      "id": "TC-CANON-12",
+      "description": "Full 24-Field Evidence Contract v0.1 Outcome Receipt Payload",
+      "input": {
+        "receipt_version": "v0.1",
+        "receipt_id": "8f3c2b1a-4d5e-6f7a-8b9c-0d1e2f3a4b5c",
+        "case_id": "VB-CASE-2026-001",
+        "claim_type": "DIGITAL_ASSET_TAX_RECONCILIATION",
+        "claimant_type": "CPA_FIRM",
+        "producer_reference": "VaultBasis-Edge-v0.1.0-RC2",
+        "source_ids": ["Supported Form 1099-DA CSV profile v0.1", "koinly_capital_gains_2025"],
+        "source_hashes": {
+          "Supported Form 1099-DA CSV profile v0.1": "a50c10e34b6204351b98fb24d4f5266921ab70b632a4e1f22b8245e3df9d53f0",
+          "koinly_capital_gains_2025": "6a54096b9d68e6be66a71efc07b1755977bbe528a6cefaa38798e20f1cc93995"
+        },
+        "source_schema_ids": {
+          "Supported Form 1099-DA CSV profile v0.1": "IRS_1099DA_2025_PREVIEW",
+          "koinly_capital_gains_2025": "KOINLY_CAPITAL_GAINS_CSV_V1"
+        },
+        "canonicalization_version": "v0.1",
+        "ruleset_id": "US_IRC_1099DA_2025_2026_V1",
+        "engine_version": "0.1.0-RC2",
+        "policy_version": "0.1.0",
+        "assurance_level": "L2_EVIDENCE_RECONCILED",
+        "outcome_state": "BASIS_DIFFERENCE",
+        "material_differences": [
+          {
+            "difference_id": "DIFF-001",
+            "difference_state": "BASIS_DIFFERENCE",
+            "asset": "BTC",
+            "source_a_ref": "1099DA:Line:1",
+            "source_a_value": "12100.00",
+            "source_b_ref": "Koinly:Row:1",
+            "source_b_value": "16300.00",
+            "variance": "4200.00",
+            "description": "Basis differs by $4200.00."
+          }
+        ],
+        "unresolved_items": [],
+        "provenance_references": [
+          {
+            "reference_id": "PROV-001",
+            "source_id": "Supported Form 1099-DA CSV profile v0.1",
+            "row_ref": "Line:1",
+            "content_hash": "a50c10e34b6204351b98fb24d4f5266921ab70b632a4e1f22b8245e3df9d53f0"
+          }
+        ],
+        "human_review_state": "UNREVIEWED",
+        "ai_involvement_level": "NONE",
+        "signer_type": "INSTALLATION_KEY",
+        "signer_key_id": "201d4989be76069f2581faf654390be9492ba9c9bfc8360ad896a057c59ebfb9",
+        "signer_public_key": "828e05df5eafabacf04cc4c7aa64d11d9c6d2e8b2af19f37d75405adb4a902a0",
+        "created_at": "2026-09-28T14:32:01Z"
+      },
+      "expected_canonical_json": "{\"ai_involvement_level\":\"NONE\",\"assurance_level\":\"L2_EVIDENCE_RECONCILED\",\"canonicalization_version\":\"v0.1\",\"case_id\":\"VB-CASE-2026-001\",\"claim_type\":\"DIGITAL_ASSET_TAX_RECONCILIATION\",\"claimant_type\":\"CPA_FIRM\",\"created_at\":\"2026-09-28T14:32:01Z\",\"engine_version\":\"0.1.0-RC2\",\"human_review_state\":\"UNREVIEWED\",\"material_differences\":[{\"asset\":\"BTC\",\"description\":\"Basis differs by $4200.00.\",\"difference_id\":\"DIFF-001\",\"difference_state\":\"BASIS_DIFFERENCE\",\"source_a_ref\":\"1099DA:Line:1\",\"source_a_value\":\"12100.00\",\"source_b_ref\":\"Koinly:Row:1\",\"source_b_value\":\"16300.00\",\"variance\":\"4200.00\"}],\"outcome_state\":\"BASIS_DIFFERENCE\",\"policy_version\":\"0.1.0\",\"producer_reference\":\"VaultBasis-Edge-v0.1.0-RC2\",\"provenance_references\":[{\"content_hash\":\"a50c10e34b6204351b98fb24d4f5266921ab70b632a4e1f22b8245e3df9d53f0\",\"reference_id\":\"PROV-001\",\"row_ref\":\"Line:1\",\"source_id\":\"Supported Form 1099-DA CSV profile v0.1\"}],\"receipt_id\":\"8f3c2b1a-4d5e-6f7a-8b9c-0d1e2f3a4b5c\",\"receipt_version\":\"v0.1\",\"ruleset_id\":\"US_IRC_1099DA_2025_2026_V1\",\"signer_key_id\":\"201d4989be76069f2581faf654390be9492ba9c9bfc8360ad896a057c59ebfb9\",\"signer_public_key\":\"828e05df5eafabacf04cc4c7aa64d11d9c6d2e8b2af19f37d75405adb4a902a0\",\"signer_type\":\"INSTALLATION_KEY\",\"source_hashes\":{\"Supported Form 1099-DA CSV profile v0.1\":\"a50c10e34b6204351b98fb24d4f5266921ab70b632a4e1f22b8245e3df9d53f0\",\"koinly_capital_gains_2025\":\"6a54096b9d68e6be66a71efc07b1755977bbe528a6cefaa38798e20f1cc93995\"},\"source_ids\":[\"Supported Form 1099-DA CSV profile v0.1\",\"koinly_capital_gains_2025\"],\"source_schema_ids\":{\"Supported Form 1099-DA CSV profile v0.1\":\"IRS_1099DA_2025_PREVIEW\",\"koinly_capital_gains_2025\":\"KOINLY_CAPITAL_GAINS_CSV_V1\"},\"unresolved_items\":[]}",
+      "expected_sha256": "ba52a90fadb080c7a6901dd2a72cb8e60f1106d0e941dbaf0c19ea0e923e04b4"
+    }
+  ]
+}

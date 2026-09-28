@@ -24,6 +24,14 @@ def build():
         "--onefile",
         "--clean",
         "--noconfirm",
+        "--exclude-module", "matplotlib",
+        "--exclude-module", "IPython",
+        "--exclude-module", "tkinter",
+        "--exclude-module", "sphinx",
+        "--exclude-module", "numpy",
+        "--exclude-module", "pandas",
+        "--exclude-module", "scipy",
+        "--exclude-module", "docutils",
         "--add-data", f"apps{os.pathsep}apps",
         "--add-data", f"schemas{os.pathsep}schemas",
         "main.py"
@@ -43,7 +51,19 @@ def build():
     # Zip the binary for release distribution
     import zipfile
     with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
-        zipf.write(binary_path, arcname=os.path.basename(binary_path))
+        info = zipfile.ZipInfo(os.path.basename(binary_path))
+        
+        # Read original file permissions (e.g. 0o755) and embed them in the ZIP
+        st = os.stat(binary_path)
+        info.external_attr = (st.st_mode & 0xFFFF) << 16
+        
+        with open(binary_path, 'rb') as f:
+            zipf.writestr(info, f.read())
+            
+        # Include the Quick Start Guide HTML
+        guide_path = "VaultBasis_Quick_Start_Guide.html"
+        if os.path.exists(guide_path):
+            zipf.write(guide_path, arcname=guide_path)
 
     print(f"==> SUCCESS: Created deployable artifact -> {zip_path}")
 

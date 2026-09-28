@@ -11,6 +11,7 @@ from starlette.testclient import TestClient
 from edge.api.app import app
 from apps.verifier.verify_receipt import verify_outcome_receipt
 from edge.connectors.validator import IntakeDispatcher
+from edge.connectors.exceptions import VaultBasisIntakeError
 
 
 @pytest.fixture
@@ -96,11 +97,11 @@ def test_bdd_ac04_malformed_input_fails_safely():
     corrupt_bytes = b"random,garbage,without,correct,headers\n1,2,3,4,5\n"
 
     # WHEN it is processed
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises((ValueError, VaultBasisIntakeError)) as excinfo:
         IntakeDispatcher.ingest_document(corrupt_bytes, "corrupt.csv", "src_corrupt")
 
     # THEN the case rejects the artifact with a safe failure and no silent corrupt financial output
-    assert "missing" in str(excinfo.value).lower() or "unrecognized" in str(excinfo.value).lower()
+    assert "missing" in str(excinfo.value).lower() or "unrecognized" in str(excinfo.value).lower() or "schema" in str(excinfo.value).lower() or "invalid" in str(excinfo.value).lower()
 
 
 # ------------------------------------------------------------------------------

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VaultBasis | Request Design-Partner Access</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        .form-container {
+            max-width: 600px;
+            margin: 6rem auto;
+            text-align: left;
+            padding: 3rem;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--card-border);
+            border-radius: 6px;
+            color: white;
+        }
+        .warning-box {
+            background: rgba(220, 38, 38, 0.1);
+            border-left: 4px solid #dc2626;
+            padding: 1rem;
+            margin: 2rem 0;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <nav class="glass-nav">
+        <div class="logo">VaultBasis</div>
+        <div class="nav-links">
+            <a href="index.html">Back to Home</a>
+        </div>
+    </nav>
+
+    <div class="form-container glass-card">
+        <h2>Request Preview Access</h2>
+        <p>Register below to receive an entitlement for the VaultBasis RC1 Design-Partner Preview.</p>
+        
+        <form action="terms.html" method="GET">
+            <div class="form-group">
+                <label>Name</label>
+                <input type="text" name="name" required>
+            </div>
+            <div class="form-group">
+                <label>Professional Email</label>
+                <input type="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label>Organization / Firm</label>
+                <input type="text" name="org" required>
+            </div>
+            <div class="form-group">
+                <label>Role</label>
+                <input type="text" name="role" required>
+            </div>
+            <div class="form-group">
+                <label>Intended Use (Briefly describe)</label>
+                <input type="text" name="use" required>
+            </div>
+
+            <div class="warning-box">
+                <strong>CRITICAL:</strong> Do not upload or submit taxpayer records, Form 1099-DA files, tax-ledger exports, wallet information, Outcome Receipts containing customer information, or other client tax data through this website.
+            </div>
+
+            <button type="submit" class="primary-btn" style="width: 100%; border:none; cursor:pointer;">Continue to Preview Terms</button>
+        </form>
+    </div>
+</body>
+</html>

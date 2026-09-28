@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+jsonschema
+pytest
+httpx
+python-multipart
+pydantic
+starlette
+cryptography
+pyinstaller
+tinyaes

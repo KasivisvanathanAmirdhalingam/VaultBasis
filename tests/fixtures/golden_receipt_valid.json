@@ -6,15 +6,15 @@
   "claimant_type": "TAXPAYER",
   "producer_reference": "VaultBasis Edge v0.1.0-preview",
   "source_ids": [
-    "1099da_broker_coinbase",
+    "Supported Form 1099-DA CSV profile v0.1",
     "koinly_capital_gains_2025"
   ],
   "source_hashes": {
-    "1099da_broker_coinbase": "a50c10e34b6204351b98fb24d4f5266921ab70b632a4e1f22b8245e3df9d53f0",
+    "Supported Form 1099-DA CSV profile v0.1": "a50c10e34b6204351b98fb24d4f5266921ab70b632a4e1f22b8245e3df9d53f0",
     "koinly_capital_gains_2025": "6a54096b9d68e6be66a71efc07b1755977bbe528a6cefaa38798e20f1cc93995"
   },
   "source_schema_ids": {
-    "1099da_broker_coinbase": "IRS_1099DA_2025_PREVIEW",
+    "Supported Form 1099-DA CSV profile v0.1": "IRS_1099DA_2025_PREVIEW",
     "koinly_capital_gains_2025": "KOINLY_CAPITAL_GAINS_CSV_V1"
   },
   "canonicalization_version": "v0.1",
@@ -40,7 +40,7 @@
   "provenance_references": [
     {
       "reference_id": "PROV-001",
-      "source_id": "1099da_broker_coinbase",
+      "source_id": "Supported Form 1099-DA CSV profile v0.1",
       "row_ref": "Line:1",
       "content_hash": "a50c10e34b6204351b98fb24d4f5266921ab70b632a4e1f22b8245e3df9d53f0"
     },

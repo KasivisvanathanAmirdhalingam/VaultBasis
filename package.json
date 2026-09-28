@@ -18,5 +18,9 @@
     "zero-token-bleed"
   ],
   "author": "VaultBasis Core Team",
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "dependencies": {
+    "express": "^5.2.1",
+    "nodemailer": "^10.0.11"
+  }
 }

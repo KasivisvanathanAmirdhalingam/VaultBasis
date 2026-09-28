@@ -3,52 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VaultBasis by TecTixBase — Independent Outcome Verification Edge</title>
-  <meta name="description" content="VaultBasis by TecTixBase: Independent outcome-verification and assurance edge for U.S. Digital-Asset Financial & Tax Reconciliation. Form 1099-DA broker reporting vs. tax ledger reconciliation with zero token bleed.">
-  <meta name="keywords" content="Form 1099-DA reconciliation, crypto tax reconciliation, CPA digital asset compliance, offline tax verification, Zero-Egress tax software, VaultBasis, TecTixBase, capital gains tax, IRS Form 1099-DA, Ed25519 receipt">
-  <meta name="author" content="TecTixBase">
-  <meta property="og:title" content="VaultBasis — The Zero-Egress Tax Verification Edge">
-  <meta property="og:description" content="Reconcile Form 1099-DA and capital gains with 100% exact math and zero cloud data leaks. Built for elite CPAs.">
-  <meta property="og:type" content="website">
-  <meta name="twitter:card" content="summary_large_image">
-  <!-- Google tag (gtag.js) Placeholder -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-XXXXXXXXXX');
-  </script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <title>VaultBasis — Independent Reconciliation for Broker &amp; Tax-Ledger Outcomes</title>
+  <meta name="description" content="VaultBasis deterministically compares supported broker information with supported tax-ledger output, identifies agreements, differences, and unresolved information, and produces a signed Outcome Receipt that can be independently verified.">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #07090e;
-      --surface: #0e121a;
-      --surface-elevated: #161c28;
-      --border: #21293a;
-      --border-accent: #334155;
-      --text: #f1f5f9;
-      --text-muted: #94a3b8;
-      --primary: #3b82f6;
-      --primary-hover: #2563eb;
-      --accent: #06b6d4;
-      --success: #10b981;
-      --warning: #f59e0b;
-      --danger: #ef4444;
-      --radius: 8px;
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --surface-elevated: #f1f5f9;
+      --border: #e2e8f0;
+      --border-accent: #cbd5e1;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --accent: #0284c7;
+      --success: #059669;
+      --radius: 12px;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html {
-      scroll-behavior: smooth;
-      scroll-padding-top: 6.5rem;
-    }
-    section[id],
-    .section-container,
-    [id] {
-      scroll-margin-top: 6.5rem;
-    }
+    html { scroll-behavior: smooth; scroll-padding-top: 6.5rem; }
     body {
       background-color: var(--bg);
       color: var(--text);
@@ -59,7 +33,7 @@
       min-height: 100vh;
     }
     header {
-      background: rgba(14, 18, 26, 0.92);
+      background: rgba(255, 255, 255, 0.92);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border);
       padding: 1rem 2rem;
@@ -69,810 +43,445 @@
       position: sticky;
       top: 0;
       z-index: 100;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.03);
     }
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      text-decoration: none;
-      color: inherit;
-    }
+    .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: inherit; }
     .brand-logo {
-      width: 36px;
-      height: 36px;
-      background: linear-gradient(135deg, #3b82f6, #06b6d4);
+      width: 38px; height: 38px;
+      background: linear-gradient(135deg, #2563eb, #0284c7);
       border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 800;
-      font-size: 1.15rem;
-      color: white;
-      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 1.25rem; color: white;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
     }
-    .brand-info {
-      display: flex;
-      flex-direction: column;
-    }
-    .brand-name {
-      font-size: 1.15rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-    }
-    .brand-tag {
-      font-size: 0.68rem;
-      color: var(--accent);
-      font-family: 'JetBrains Mono', monospace;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-    }
-    nav.nav-main {
-      display: flex;
-      gap: 1.5rem;
-      align-items: center;
-    }
-    nav.nav-main a {
-      color: var(--text-muted);
-      text-decoration: none;
-      font-size: 0.88rem;
-      font-weight: 500;
-      transition: color 0.2s;
-    }
-    nav.nav-main a:hover { color: var(--text); }
-    .header-actions {
-      display: flex;
-      gap: 0.75rem;
-      align-items: center;
-    }
-    .btn {
-      padding: 10px 20px;
-      border-radius: var(--radius);
-      font-size: 0.88rem;
-      font-weight: 600;
-      text-decoration: none;
-      transition: all 0.2s;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      border: 1px solid transparent;
-    }
-    .btn-primary {
-      background: var(--primary);
-      color: white;
-      border-color: var(--primary);
-      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
-    }
-    .btn-primary:hover { background: var(--primary-hover); }
-    .btn-secondary {
-      background: var(--surface-elevated);
-      color: var(--text);
-      border-color: var(--border-accent);
-    }
-    .btn-secondary:hover { background: #1e2638; border-color: #475569; }
-    .btn-sm {
-      padding: 6px 14px;
-      font-size: 0.82rem;
-    }
+    .brand-info { display: flex; flex-direction: column; }
+    .brand-name { font-family: 'Outfit', sans-serif; font-size: 1.35rem; font-weight: 800; letter-spacing: -0.01em; color: #0f172a; }
     
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--success);
-      display: inline-block;
-      box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
-      animation: pulse 2s infinite;
+    nav.nav-main { display: flex; gap: 2rem; align-items: center; }
+    nav.nav-main a { color: var(--text-muted); text-decoration: none; font-size: 0.95rem; font-weight: 600; transition: color 0.2s; }
+    nav.nav-main a:hover { color: var(--text); }
+    
+    .header-actions { display: flex; gap: 1rem; align-items: center; }
+    .btn {
+      padding: 10px 22px; border-radius: 8px; font-size: 0.95rem; font-weight: 600; text-decoration: none;
+      transition: all 0.2s; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; border: 1px solid transparent;
     }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
-    }
-
-    /* Hero Section */
-    .hero {
-      max-width: 1120px;
-      margin: 4.5rem auto 3rem auto;
-      text-align: center;
-      padding: 0 1.5rem;
-    }
+    .btn-primary { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
+    .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
+    .btn-secondary { background: #fff; color: var(--text); border-color: var(--border-accent); box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+    .btn-secondary:hover { background: var(--surface-elevated); }
+    .btn-sm { padding: 8px 16px; font-size: 0.88rem; }
+    
+    .hero { max-width: 1000px; margin: 5rem auto 3rem auto; text-align: center; padding: 0 1.5rem; }
     .hero-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(59, 130, 246, 0.1);
-      border: 1px solid rgba(59, 130, 246, 0.25);
-      color: #60a5fa;
-      padding: 5px 16px;
-      border-radius: 999px;
-      font-size: 0.78rem;
-      font-family: 'JetBrains Mono', monospace;
-      margin-bottom: 1.5rem;
+      display: inline-flex; align-items: center; gap: 8px; background: rgba(37, 99, 235, 0.08); border: 1px solid rgba(37, 99, 235, 0.2);
+      color: var(--primary); padding: 6px 18px; border-radius: 999px; font-size: 0.85rem; font-family: 'JetBrains Mono', monospace; margin-bottom: 2rem; font-weight: 600;
     }
-    .hero h1 {
-      font-size: 3.2rem;
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      line-height: 1.15;
-      margin-bottom: 1.5rem;
-      background: linear-gradient(180deg, #ffffff 0%, #94a3b8 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    .hero p {
-      font-size: 1.2rem;
-      color: var(--text-muted);
-      max-width: 820px;
-      margin: 0 auto 2.5rem auto;
-    }
-    .cta-group {
-      display: flex;
-      justify-content: center;
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
+    .hero h1 { font-size: 3.2rem; font-weight: 800; letter-spacing: -0.04em; line-height: 1.15; margin-bottom: 1.5rem; color: #0f172a; }
+    .hero p { font-size: 1.2rem; color: var(--text-muted); max-width: 820px; margin: 0 auto 2.5rem auto; line-height: 1.7; }
+    .cta-group { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
 
-    /* Value Pillars Bar */
-    .value-pillars {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 1rem;
-      max-width: 1180px;
-      margin: 3rem auto;
-      padding: 0 1.5rem;
-    }
-    .pillar-item {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.25rem;
-      text-align: center;
-    }
-    .pillar-item strong {
-      display: block;
-      font-size: 1.1rem;
-      color: #fff;
-      margin-bottom: 4px;
-      font-family: 'JetBrains Mono', monospace;
-    }
-    .pillar-item span {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-    }
+    .section-container { max-width: 1200px; margin: 5rem auto; padding: 0 1.5rem; }
+    .section-header { text-align: center; margin-bottom: 3.5rem; }
+    .section-header .section-tag { font-size: 0.85rem; font-family: 'JetBrains Mono', monospace; color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; display: block; font-weight: 700; }
+    .section-header h2 { font-size: 2.6rem; font-weight: 800; letter-spacing: -0.03em; color: var(--text); margin-bottom: 1rem; }
+    .section-header p { font-size: 1.15rem; color: var(--text-muted); max-width: 750px; margin: 0 auto; }
 
-    /* Section styling */
-    .section-container {
-      max-width: 1180px;
-      margin: 5rem auto;
-      padding: 0 1.5rem;
-    }
-    .section-header {
-      text-align: center;
-      margin-bottom: 3rem;
-    }
-    .section-header .section-tag {
-      font-size: 0.8rem;
-      font-family: 'JetBrains Mono', monospace;
-      color: var(--accent);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 8px;
-      display: block;
-    }
-    .section-header h2 {
-      font-size: 2.2rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      color: #fff;
-    }
-    .section-header p {
-      font-size: 1.05rem;
-      color: var(--text-muted);
-      max-width: 680px;
-      margin: 0.75rem auto 0 auto;
-    }
-
-    .grid-3 {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1.5rem;
-    }
-    .grid-2 {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1.5rem;
-    }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; }
+    
     .feature-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 2rem;
-      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      position: relative;
-      overflow: hidden;
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 2.2rem;
+      transition: all 0.3s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.02);
     }
-    .feature-card::before {
-      content: "";
-      position: absolute;
-      top: 0; left: -100%;
-      width: 50%; height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.08), transparent);
-      transform: skewX(-20deg);
-      transition: all 0.6s ease;
-    }
-    .feature-card:hover::before {
-      left: 150%;
-    }
-    .feature-card:hover {
-      border-color: rgba(59, 130, 246, 0.5);
-      transform: translateY(-5px);
-      box-shadow: 0 10px 30px -10px rgba(59, 130, 246, 0.2);
-    }
+    .feature-card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.05); border-color: var(--border-accent); }
     .card-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 8px;
-      background: rgba(59, 130, 246, 0.1);
-      border: 1px solid rgba(59, 130, 246, 0.25);
-      color: var(--primary);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.1rem;
-      margin-bottom: 1.25rem;
-      font-weight: 700;
+      width: 44px; height: 44px; border-radius: 10px; background: rgba(37, 99, 235, 0.08); border: 1px solid rgba(37, 99, 235, 0.2);
+      color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; margin-bottom: 1.25rem; font-weight: 800; font-family: 'Outfit', sans-serif;
     }
-    .feature-card h3 {
-      font-size: 1.2rem;
-      margin-bottom: 0.75rem;
-      color: #ffffff;
-    }
-    .feature-card p {
-      font-size: 0.92rem;
-      color: var(--text-muted);
-      line-height: 1.6;
-    }
+    .feature-card h3 { font-size: 1.25rem; margin-bottom: 0.75rem; color: var(--text); font-weight: 700; }
+    .feature-card p { font-size: 1rem; color: var(--text-muted); line-height: 1.6; }
 
-    /* Banner */
+    /* Comparison Table / Grid */
+    .boundary-box {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+    }
+    .boundary-header-row {
+      display: grid; grid-template-columns: 1fr 1fr; border-bottom: 2px solid var(--border);
+    }
+    .boundary-header-cell {
+      padding: 1.5rem; font-weight: 800; font-size: 1.1rem;
+    }
+    .boundary-header-cell.verifies { background: #f0fdf4; color: #166534; border-right: 1px solid var(--border); }
+    .boundary-header-cell.not-determined { background: #fef2f2; color: #991b1b; }
+    .boundary-row {
+      display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--border);
+    }
+    .boundary-row:last-child { border-bottom: none; }
+    .boundary-cell { padding: 1.5rem; font-size: 0.95rem; }
+    .boundary-cell:first-child { border-right: 1px solid var(--border); }
+    .boundary-cell h4 { font-size: 1.05rem; margin-bottom: 0.4rem; color: var(--text); }
+    .boundary-cell p { color: var(--text-muted); line-height: 1.5; margin: 0; }
+
     .banner {
-      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(6, 182, 212, 0.08));
-      border: 1px solid rgba(59, 130, 246, 0.25);
-      border-radius: var(--radius);
-      padding: 3rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 2rem;
+      background: linear-gradient(135deg, #0f172a, #1e293b); border: 1px solid #334155; border-radius: var(--radius);
+      padding: 3.5rem; display: flex; justify-content: space-between; align-items: center; gap: 2.5rem; color: white;
     }
+    .banner h3 { font-size: 1.9rem; color: white; margin-bottom: 0.5rem; font-weight: 800; letter-spacing: -0.02em; }
+    .banner p { color: #94a3b8; font-size: 1.1rem; }
 
-    /* Modal */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.8);
-      backdrop-filter: blur(8px);
-      z-index: 999;
-      align-items: center;
-      justify-content: center;
-    }
-    .modal-card {
-      background: var(--surface);
-      border: 1px solid var(--border-accent);
-      border-radius: 12px;
-      padding: 2.5rem;
-      max-width: 580px;
-      width: 90%;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
-    }
-    .code-box {
-      background: #05070b;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 1rem;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.85rem;
-      color: #60a5fa;
-      margin: 1.25rem 0;
-      position: relative;
-    }
-
-    /* Industrial Footer */
-    footer.site-footer {
-      border-top: 1px solid var(--border);
-      background: #080b11;
-      margin-top: auto;
-      padding: 4rem 2rem 2rem 2rem;
-    }
-    .footer-grid {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
-      gap: 3rem;
-      padding-bottom: 3rem;
-      border-bottom: 1px solid var(--border);
-    }
-    .footer-col h4 {
-      font-size: 0.85rem;
-      font-family: 'JetBrains Mono', monospace;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: #fff;
-      margin-bottom: 1.25rem;
-    }
-    .footer-col ul {
-      list-style: none;
-    }
-    .footer-col ul li {
-      margin-bottom: 0.75rem;
-    }
-    .footer-col ul li a {
-      color: var(--text-muted);
-      text-decoration: none;
-      font-size: 0.88rem;
-      transition: color 0.2s;
-    }
-    .footer-col ul li a:hover {
-      color: #fff;
-    }
-    .footer-bottom {
-      max-width: 1200px;
-      margin: 2rem auto 0 auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.82rem;
-      color: #64748b;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-    .disclaimer-box {
-      max-width: 1200px;
-      margin: 2rem auto 0 auto;
-      padding: 1.25rem;
-      background: rgba(14, 18, 26, 0.6);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      font-size: 0.76rem;
-      color: #64748b;
-      line-height: 1.5;
-    }
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(8px); z-index: 999; align-items: center; justify-content: center; }
+    .modal-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 2.5rem; max-width: 550px; width: 90%; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
+    
+    footer.site-footer { border-top: 1px solid var(--border); background: var(--surface); margin-top: auto; padding: 4rem 2rem 2rem 2rem; }
+    .footer-grid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 3rem; padding-bottom: 3rem; border-bottom: 1px solid var(--border); }
+    .footer-col h4 { font-size: 0.88rem; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text); margin-bottom: 1.25rem; font-weight: 700; }
+    .footer-col ul { list-style: none; }
+    .footer-col ul li { margin-bottom: 0.85rem; }
+    .footer-col ul li a { color: var(--text-muted); text-decoration: none; font-size: 0.92rem; transition: color 0.2s; font-weight: 500; }
+    .footer-col ul li a:hover { color: var(--primary); }
+    
+    .disclaimer-box { max-width: 1200px; margin: 2.5rem auto 0 auto; padding: 1.5rem; background: var(--surface-elevated); border: 1px solid var(--border); border-radius: 8px; font-size: 0.82rem; color: var(--text-muted); line-height: 1.6; }
+    .footer-bottom { max-width: 1200px; margin: 2rem auto 0 auto; display: flex; justify-content: space-between; align-items: center; font-size: 0.88rem; color: var(--text-muted); }
 
     @media (max-width: 900px) {
-      .grid-3, .grid-2, .value-pillars { grid-template-columns: 1fr; }
-      .footer-grid { grid-template-columns: 1fr 1fr; }
-      nav.nav-main { display: none; }
-      .hero h1 { font-size: 2.4rem; }
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+      .boundary-header-row, .boundary-row { grid-template-columns: 1fr; }
+      .boundary-cell:first-child { border-right: none; border-bottom: 1px solid var(--border); }
+      .footer-grid { grid-template-columns: 1fr; }
       .banner { flex-direction: column; text-align: center; }
+      .hero h1 { font-size: 2.5rem; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Standard Enterprise Header -->
-  <header>
+  <header role="banner">
     <a href="#hero" class="brand">
       <div class="brand-logo">V</div>
       <div class="brand-info">
         <span class="brand-name">VaultBasis</span>
-        <span class="brand-tag">Verifiable Outcome Edge</span>
       </div>
     </a>
     <nav class="nav-main">
-      <a href="#problem">The 1099-DA Dilemma</a>
-      <a href="#how-it-works">How It Works</a>
-      <a href="#security">Security Boundary</a>
-      <a href="#evidence-contract">Evidence Contract</a>
-      <a href="/verifier">Public Verifier</a>
-      <a href="#documentation">Documentation</a>
+      <a href="#problem">Why Reconcile?</a>
+      <a href="#comparison">What We Verify</a>
+      <a href="#security">Local Evidence</a>
+      <a href="#trust">Evidence Hub</a>
     </nav>
     <div class="header-actions">
-      <a href="/verifier" class="btn btn-secondary btn-sm">Verify Receipt ↗</a>
-      <button onclick="openLocalEdgeApp()" class="btn btn-primary btn-sm">
-        <span class="status-dot"></span> Launch Local Edge
-      </button>
+      <a href="/verifier" class="btn btn-secondary btn-sm">Verify an Outcome Receipt ↗</a>
+      <button onclick="openAccessModal()" class="btn btn-primary btn-sm">Request Design-Partner Access</button>
     </div>
   </header>
 
-  <main>
-    <!-- HERO SECTION -->
+  <main role="main">
     <section id="hero" class="hero">
-      <div class="hero-badge">
-        <span>●</span> MMP-1 PRODUCTION SPECIFICATION • ZERO TOKEN BLEED
-      </div>
-      <h1>Don't trust the system that made the claim.<br>Verify the outcome.</h1>
-      <p>
-        Run VaultBasis inside your declared trust boundary to independently reconcile Form 1099-DA broker reports against tax ledger outputs and produce portable, Ed25519-signed Outcome Receipts that any third party can verify offline.
-      </p>
+      <div class="hero-badge">INDEPENDENT EVIDENCE ASSURANCE</div>
+      <h1>Independently Reconcile Broker and Tax-Ledger Outcomes</h1>
+      <p>VaultBasis deterministically compares supported broker information with supported tax-ledger output, identifies agreements, differences, and unresolved information, and produces a signed Outcome Receipt that can be independently verified.</p>
       <div class="cta-group">
-        <button onclick="openLocalEdgeApp()" class="btn btn-primary" style="padding: 14px 28px; font-size: 1rem;">
-          Launch Customer Dashboard →
-        </button>
-        <a href="/verifier" class="btn btn-secondary" style="padding: 14px 28px; font-size: 1rem;">
-          Open Web Verifier ↗
-        </a>
+        <button onclick="openAccessModal()" class="btn btn-primary" style="padding: 15px 30px; font-size: 1.05rem;">Request Design-Partner Access</button>
+        <a href="/verifier" class="btn btn-secondary" style="padding: 15px 30px; font-size: 1.05rem;">Verify an Outcome Receipt</a>
       </div>
     </section>
 
-    <!-- VALUE PILLARS -->
-    <div class="value-pillars">
-      <div class="pillar-item">
-        <strong>100% Deterministic</strong>
-        <span>Zero heuristic guessing or drift</span>
-      </div>
-      <div class="pillar-item">
-        <strong>Exact Decimal Math</strong>
-        <span>Zero floating-point inaccuracies</span>
-      </div>
-      <div class="pillar-item">
-        <strong>Ed25519 Signed</strong>
-        <span>Portable cryptographic receipts</span>
-      </div>
-      <div class="pillar-item">
-        <strong>Zero Token Bleed</strong>
-        <span>0 data ever leaves your machine</span>
-      </div>
-    </div>
-
-    <!-- PROBLEM STATEMENT -->
+    <!-- Why Independently Reconcile Section -->
     <section id="problem" class="section-container">
       <div class="section-header">
-        <span class="section-tag">Market Reality</span>
-        <h2>The Form 1099-DA Reconciliation Crisis</h2>
-        <p>
-          Brokers and tax engines generate diverging gain/loss statements, cost basis allocations, and proceeds figures. CPAs cannot blindly file unverified claims.
-        </p>
+        <span class="section-tag">Architecture Category</span>
+        <h2>Why Independently Reconcile?</h2>
+        <p>Tax software and broker reporting systems are sources of information. VaultBasis is deliberately separate from both. It compares supported outputs under declared rules so the system producing the tax ledger is not the same system independently evaluating agreement with broker information.</p>
       </div>
       <div class="grid-3">
         <div class="feature-card">
           <div class="card-icon">1</div>
-          <h3>Broker vs. Ledger Divergence</h3>
-          <p>
-            Brokers report gross proceeds (Box 1d) with phased cost basis reporting (Box 1e/Box 2). Tax software calculates alternative basis, creating massive reconciliation backlogs for taxpayers.
-          </p>
+          <h3>Separate Evaluator</h3>
+          <p>The calculation engine that prepared a tax return cannot independently audit itself against third-party broker disclosures.</p>
         </div>
         <div class="feature-card">
           <div class="card-icon">2</div>
-          <h3>The Cloud Privacy Trap</h3>
-          <p>
-            Traditional SaaS and cloud AI engines require uploading entire unredacted financial histories, violating enterprise confidentiality and increasing regulatory liability under IRC §7216.
-          </p>
+          <h3>Visible Uncertainty</h3>
+          <p>When source data contains gaps or missing dates, VaultBasis preserves them as unresolved facts rather than inventing assumptions.</p>
         </div>
         <div class="feature-card">
           <div class="card-icon">3</div>
-          <h3>Silent Fallback Errors</h3>
-          <p>
-            Most tools silently replace missing cost basis or acquisition dates with $0.00, triggering artificial capital gains and inaccurate tax assessments.
-          </p>
+          <h3>Portable Workpapers</h3>
+          <p>Produces clean, signed workpaper artifacts that can be independently checked by reviewers or auditors without VaultBasis runtime.</p>
         </div>
       </div>
     </section>
 
-    <!-- HOW IT WORKS -->
-    <section id="how-it-works" class="section-container">
+    <!-- Canonical Scope & Contrast Matrix -->
+    <section id="comparison" class="section-container">
       <div class="section-header">
-        <span class="section-tag">Core Methodology</span>
-        <h2>Deterministic 3-Stage Assurance Pipeline</h2>
-        <p>
-          VaultBasis provides a mathematically bounded comparison edge operating inside your environment.
-        </p>
+        <span class="section-tag">Evaluation Scope</span>
+        <h2>Canonical Evaluation Boundary</h2>
+        <p>VaultBasis enforces an unmistakable boundary between deterministic machine reconciliation and the filing practitioner's professional tax judgment.</p>
+      </div>
+
+      <div class="boundary-box">
+        <div class="boundary-header-row">
+          <div class="boundary-header-cell verifies">✓ WHAT VAULTBASIS VERIFIES</div>
+          <div class="boundary-header-cell not-determined">✗ WHAT VAULTBASIS DOES NOT DETERMINE</div>
+        </div>
+        <div class="boundary-row">
+          <div class="boundary-cell">
+            <h4>Source Agreement</h4>
+            <p>Whether supported information from two declared sources agrees under the declared reconciliation semantics.</p>
+          </div>
+          <div class="boundary-cell">
+            <h4>Tax Correctness</h4>
+            <p>VaultBasis does not determine whether a taxpayer's tax position is legally correct, optimal, or acceptable to the IRS.</p>
+          </div>
+        </div>
+        <div class="boundary-row">
+          <div class="boundary-cell">
+            <h4>Declared Differences</h4>
+            <p>Surfaces exact material variances in proceeds, cost basis, or dates without deciding which source is "correct."</p>
+          </div>
+          <div class="boundary-cell">
+            <h4>Legal Compliance</h4>
+            <p>VaultBasis does not determine compliance with the Internal Revenue Code (IRC §1012, §1221, §6045) or state tax laws.</p>
+          </div>
+        </div>
+        <div class="boundary-row">
+          <div class="boundary-cell">
+            <h4>Unresolved Information</h4>
+            <p>Flags missing facts without inventing or substituting default dates, zero values, or arbitrary pricing assumptions.</p>
+          </div>
+          <div class="boundary-cell">
+            <h4>Source Truth</h4>
+            <p>A successful comparison does not establish that either source file is authentic, complete, or factually accurate.</p>
+          </div>
+        </div>
+        <div class="boundary-row">
+          <div class="boundary-cell">
+            <h4>Payload Integrity &amp; Signature</h4>
+            <p>Cryptographically verifies that the Outcome Receipt has not been altered since signing and matches the installation key.</p>
+          </div>
+          <div class="boundary-cell">
+            <h4>Professional Judgment</h4>
+            <p>VaultBasis never replaces the CPA, EA, or tax attorney's legal interpretation, due diligence, and final signature.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Local Processing Architecture -->
+    <section id="security" class="section-container">
+      <div class="section-header">
+        <span class="section-tag">Deployment Boundary</span>
+        <h2>Local-First Evidence Processing</h2>
+        <p>During the tested MMP-1 assurance workflow, transaction and evidence payloads remained strictly within the declared local desktop boundary. Documented in the MMP-1 Local Processing Test Summary.</p>
       </div>
       <div class="grid-3">
         <div class="feature-card">
-          <div class="card-icon">A</div>
-          <h3>1. Local Intake & Hashing</h3>
-          <p>
-            Ingest IRS Form 1099-DA documents and Koinly Capital Gains CSVs locally. Files are assigned streaming SHA-256 digests and parsed into strictly typed canonical schemas.
-          </p>
+          <div class="card-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+          </div>
+          <h3>Local Processing</h3>
+          <p>Supported evidence intake and reconciliation execute entirely within the local VaultBasis Edge process.</p>
         </div>
         <div class="feature-card">
-          <div class="card-icon">B</div>
-          <h3>2. Bounded Reconciliation</h3>
-          <p>
-            Exact integer/decimal arithmetic compares proceeds and basis across 13 bounded outcome states. Missing values remain explicitly <code>UNRESOLVED</code> and are never zeroed.
-          </p>
+          <div class="card-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+          </div>
+          <h3>Local Signing</h3>
+          <p>Outcome Receipts are signed using a locally generated persistent Ed25519 installation key.</p>
         </div>
         <div class="feature-card">
-          <div class="card-icon">C</div>
-          <h3>3. Cryptographic Outcome Receipt</h3>
-          <p>
-            Emits an RFC 8785 canonicalized JSON receipt signed with a local Ed25519 installation key. Any recipient can independently verify the signature and digest offline.
-          </p>
+          <div class="card-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path><line x1="12" y1="2" x2="12" y2="12"></line></svg>
+          </div>
+          <h3>Clean-Machine Verification</h3>
+          <p>Receipt verification executes independently with zero network dependencies or VaultBasis accounts.</p>
         </div>
       </div>
     </section>
 
-    <!-- SECURITY & TRUST BOUNDARY -->
-    <section id="security" class="section-container">
+    <!-- Public Evidence-Backed Trust Hub -->
+    <section id="trust" class="section-container">
       <div class="section-header">
-        <span class="section-tag">PRD §21.1 Standard</span>
-        <h2>Zero Transaction-Data Egress</h2>
-        <p>
-          Sensitive transaction evidence is never sent to a VaultBasis processing cloud. Your assurance workload stays 100% local within your trust boundary.
-        </p>
+        <span class="section-tag">Public Evidence Hub</span>
+        <h2>Evidence-Backed Trust</h2>
+        <p>We do not rely on unverified marketing badges. Every architectural and cryptographic claim is backed by public, downloadable artifacts and test vectors.</p>
       </div>
       <div class="grid-2">
         <div class="feature-card">
-          <h3>Local Machine Execution</h3>
-          <p>
-            The VaultBasis Edge daemon runs locally via Docker or Python on <code>127.0.0.1:8000</code>. No transaction rows, account numbers, or taxpayer data are ever transmitted to any external server or AI API.
-          </p>
+          <h3>Public Evidence Contract v0.1</h3>
+          <p style="margin-bottom: 1.25rem;">The normative JSON Schema defining the 24 bound envelope fields, deterministic outcome states, and Ed25519 signature format.</p>
+          <a href="/schemas/receipt-v0.1.json" target="_blank" class="btn btn-secondary btn-sm">View Evidence Schema ↗</a>
         </div>
         <div class="feature-card">
-          <h3>Cryptographic Key Isolation</h3>
-          <p>
-            Installation Ed25519 keypairs are generated locally on first boot with POSIX <code>0600</code> permissions. Keys are never escrowed, backed up to cloud providers, or accessible remotely.
-          </p>
+          <h3>Independent Web Verifier</h3>
+          <p style="margin-bottom: 1.25rem;">Clean-machine browser verification tool powered by WebCrypto. Validates payload integrity, key fingerprint, and Ed25519 signatures.</p>
+          <a href="/verifier" class="btn btn-secondary btn-sm">Open Web Verifier ↗</a>
+        </div>
+        <div class="feature-card">
+          <h3>Golden Test Vectors</h3>
+          <p style="margin-bottom: 1.25rem;">Download authentic valid and tampered receipt test vectors to independently verify rejection mechanics on clean systems.</p>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <a href="/sample-receipt.json" download class="btn btn-secondary btn-sm">Valid Sample Receipt ⤓</a>
+            <a href="/sample-receipt-tampered.json" download class="btn btn-secondary btn-sm">Tampered Vector ⤓</a>
+          </div>
+        </div>
+        <div class="feature-card">
+          <h3>MMP-1 Local Processing Summary</h3>
+          <p style="margin-bottom: 1.25rem;">Summary of local execution boundary testing under AC-07, validating zero network egress during evidence intake and signing.</p>
+          <a href="/docs/scope_and_limitations_v0.1.md" target="_blank" class="btn btn-secondary btn-sm">Scope &amp; Limitations ↗</a>
         </div>
       </div>
     </section>
 
-    <!-- EVIDENCE CONTRACT & SCHEMAS -->
-    <section id="evidence-contract" class="section-container">
-      <div class="section-header">
-        <span class="section-tag">Open Specification</span>
-        <h2>Evidence Contract v0.1</h2>
-        <p>
-          A normative, machine-verifiable standard for cryptographic financial reconciliation assurance.
-        </p>
-      </div>
-      <div class="grid-3">
-        <div class="feature-card">
-          <h3>Normative JSON Schema</h3>
-          <p>
-            Strict Draft-07 JSON Schema governing all 23 core fields of the Outcome Receipt, including provenance, outcome states, and cryptographic signatures.
-          </p>
-          <div style="margin-top: 1rem;">
-            <a href="/schemas/receipt-v0.1.json" target="_blank" class="btn btn-secondary btn-sm">Inspect Schema JSON ↗</a>
-          </div>
-        </div>
-        <div class="feature-card">
-          <h3>Canonicalization Spec</h3>
-          <p>
-            Conforms strictly to RFC 8785 (JSON Canonicalization Scheme). Eliminates whitespace ambiguity, key-order variances, and floating-point rounding errors.
-          </p>
-          <div style="margin-top: 1rem;">
-            <a href="/sample-receipt.json" download="golden_receipt_valid.json" class="btn btn-secondary btn-sm">Download Sample Receipt ⤓</a>
-          </div>
-        </div>
-        <div class="feature-card">
-          <h3>Independent Offline Verifier</h3>
-          <p>
-            Universal standalone verification available via command-line Python script or pure client-side WebCrypto in any modern browser.
-          </p>
-          <div style="margin-top: 1rem;">
-            <a href="/verifier" class="btn btn-primary btn-sm">Open Web Verifier →</a>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- CALL TO ACTION BANNER -->
+    <!-- UAT Banner -->
     <div class="section-container">
       <div class="banner">
         <div>
-          <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem; color: #fff;">Deploy the Edge Inside Your Infrastructure</h3>
-          <p style="color: var(--text-muted); font-size: 1rem; max-width: 650px;">
-            Experience deterministic reconciliation for Tax Year 2025/2026 digital asset reporting today. Launch the local edge with zero network exposure.
-          </p>
+          <h3>Participate in Design-Partner UAT</h3>
+          <p>Access the RC-2 preview bundle and evaluate independent reconciliation on your sample workpapers.</p>
         </div>
-        <button onclick="openLocalEdgeApp()" class="btn btn-primary" style="padding: 12px 24px;">
-          Launch Local Edge →
+        <button onclick="openAccessModal()" class="btn btn-primary" style="padding: 14px 28px; background: white; color: #0f172a; border: none; font-size: 1.05rem;">
+          Request Design-Partner Access
         </button>
       </div>
     </div>
-
-    <!-- DOCUMENTATION SECTION -->
-    <section id="documentation" class="section-container">
-      <div class="section-header">
-        <span class="section-tag">Resources & Guides</span>
-        <h2>Industrial Reference Documentation</h2>
-        <p>
-          Complete guides and specifications committed to the open standard repository.
-        </p>
-      </div>
-      <div class="grid-3">
-        <div class="feature-card">
-          <h3>Deployment Guide</h3>
-          <p>Step-by-step instructions for running VaultBasis locally via native shell script or isolated Docker container.</p>
-          <div style="margin-top: 1rem;">
-            <a href="#security" class="btn btn-secondary btn-sm">View Egress Specs →</a>
-          </div>
-        </div>
-        <div class="feature-card">
-          <h3>Verifier Guide</h3>
-          <p>Independent runbook for auditors and third parties verifying signed receipts on disconnected, clean machines.</p>
-          <div style="margin-top: 1rem;">
-            <a href="/verifier" class="btn btn-secondary btn-sm">Test Verifier Now →</a>
-          </div>
-        </div>
-        <div class="feature-card">
-          <h3>Evidence Contract v0.1</h3>
-          <p>Normative byte-level specification for JSON canonicalization, Ed25519 signing, and outcome taxonomy.</p>
-          <div style="margin-top: 1rem;">
-            <a href="/schemas/receipt-v0.1.json" target="_blank" class="btn btn-secondary btn-sm">View Schema v0.1 ↗</a>
-          </div>
-        </div>
-      </div>
-    </section>
   </main>
 
-  <!-- Interactive Localhost Edge Modal -->
-  <div id="local-modal" class="modal-overlay">
+  <div id="access-modal" class="modal-overlay">
     <div class="modal-card">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-        <h3 style="font-size:1.3rem; color:#fff;">Local Trust Boundary Required</h3>
-        <button onclick="closeLocalModal()" style="background:none; border:none; color:#888; font-size:1.6rem; cursor:pointer;">&times;</button>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+        <h3 style="font-size:1.4rem; color:#0f172a; font-weight:800;">Request VaultBasis Access</h3>
+        <button onclick="closeAccessModal()" style="background:none; border:none; color:#94a3b8; font-size:1.8rem; cursor:pointer;">&times;</button>
       </div>
-      <p style="color:#94a3b8; font-size:0.95rem; line-height:1.6; margin-bottom:1rem;">
-        To guarantee <strong>Zero Token Bleed</strong> (PRD §21.1), sensitive Form 1099-DA documents and tax ledgers are processed strictly inside your local environment.
+      <p style="color:#475569; font-size:1rem; margin-bottom:1.75rem;">
+        VaultBasis runs as a local offline executable. Enter your details to receive the secure download link for the testing bundle.
       </p>
-      <div style="margin-bottom: 0.75rem; display: flex; justify-content: space-between; align-items: center;">
-        <span style="font-size: 0.82rem; color: #cbd5e1;">Run in terminal to start your local edge:</span>
-        <button onclick="copyLaunchCmd()" id="btn-copy" class="btn btn-secondary btn-sm" style="padding: 2px 8px; font-size: 0.75rem;">Copy Command</button>
-      </div>
-      <div class="code-box" id="launch-cmd-text">./scripts/launch.sh</div>
-      
-      <div id="probe-status" style="margin-bottom: 1.5rem; font-size: 0.85rem; color: #94a3b8; display: flex; align-items: center; gap: 8px;">
-        <span class="status-dot" style="background:#eab308;"></span> Checking local edge status at http://127.0.0.1:8000...
+
+      <div id="request-form-container">
+        <div style="margin-bottom: 1.25rem;">
+          <label style="display:block; color:#334155; font-size:0.88rem; margin-bottom:0.5rem; font-weight:600;">Full Name</label>
+          <input type="text" id="req-name" placeholder="Jane Doe" style="width:100%; padding:12px; border-radius:8px; background:#f8fafc; border:1px solid #cbd5e1; color:#0f172a; font-family:inherit; font-size:1rem;">
+        </div>
+        <div style="margin-bottom: 1.75rem;">
+          <label style="display:block; color:#334155; font-size:0.88rem; margin-bottom:0.5rem; font-weight:600;">Contact Email</label>
+          <input type="email" id="req-email" placeholder="jane@cpa-firm.com" style="width:100%; padding:12px; border-radius:8px; background:#f8fafc; border:1px solid #cbd5e1; color:#0f172a; font-family:inherit; font-size:1rem;">
+        </div>
+        <button onclick="submitAccessRequest()" id="btn-submit-req" class="btn btn-primary" style="width:100%; justify-content:center; padding:13px; font-size:1.05rem;">Request Email Dispatch</button>
       </div>
 
-      <div style="display:flex; gap:1rem; justify-content:flex-end;">
-        <button onclick="retryLocalProbe()" class="btn btn-secondary" style="font-size:0.88rem;">↻ Re-check Connection</button>
-        <a href="http://127.0.0.1:8000/" target="_blank" class="btn btn-primary" style="font-size:0.88rem;">Open http://127.0.0.1:8000/ →</a>
+      <div id="request-success" style="display:none; padding:1.5rem; background:#ecfdf5; border:1px solid #a7f3d0; border-radius:12px; text-align:center;">
+        <h4 style="color:#059669; margin-bottom:0.5rem; font-size:1.15rem; font-weight:700;">Check Your Inbox</h4>
+        <p style="color:#064e3b; font-size:1rem; margin-bottom:1.25rem;">Your secure download link has been dispatched.</p>
+        <div style="background:#ffffff; padding:16px; border-radius:8px; border:1px solid #e2e8f0; text-align:left;">
+          <span style="display:block; font-family:'JetBrains Mono', monospace; font-size:0.82rem; color:#2563eb; margin-bottom:6px; font-weight:700;">TESTING INSTRUCTION:</span>
+          To simulate checking your inbox, open this generated email:
+          <a id="uat-email-link" href="#" target="_blank" style="display:block; margin:10px 0; font-weight:bold; color:#2563eb; font-size:1rem;">Open Ethereal Inbox ↗</a>
+          <span style="display:block; font-size: 0.85rem; color: #64748b; border-top: 1px solid #e2e8f0; padding-top: 10px; margin-top:10px;">
+            <strong>macOS Users:</strong> To bypass Gatekeeper on preview builds, go to <strong>System Settings > Privacy & Security</strong> and click <strong>"Open Anyway"</strong>.
+          </span>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Standard Enterprise Multi-Column Footer -->
   <footer class="site-footer">
     <div class="footer-grid">
-      <!-- Col 1: Brand & Status -->
       <div class="footer-col">
-        <div class="brand" style="margin-bottom: 1rem;">
+        <div class="brand" style="margin-bottom: 1.25rem;">
           <div class="brand-logo" style="width: 30px; height: 30px; font-size: 0.95rem;">V</div>
-          <span class="brand-name">VaultBasis</span>
+          <span class="brand-name" style="font-size: 1.15rem;">VaultBasis</span>
         </div>
-        <p style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 1.5rem; max-width: 320px;">
-          Independent outcome-verification and assurance edge operating inside the customer's declared trust boundary.
-        </p>
-        <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.25); padding: 4px 12px; border-radius: 999px; font-size: 0.76rem; font-family: 'JetBrains Mono', monospace; color: #34d399;">
-          <span class="status-dot"></span> System Status: Edge Runtime Operational
-        </div>
+        <p style="color: var(--text-muted); margin-bottom: 1.25rem; line-height: 1.6; font-size: 0.9rem;">Deterministic, independent evidence reconciliation of supported digital-asset information sources.</p>
+        <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="btn btn-secondary btn-sm" style="font-size: 0.8rem; padding: 6px 12px;">↑ Back to Top</button>
       </div>
-
-      <!-- Col 2: Product -->
       <div class="footer-col">
-        <h4>Product</h4>
+        <h4>Overview</h4>
         <ul>
-          <li><a href="javascript:void(0)" onclick="openLocalEdgeApp()">Local Edge Dashboard</a></li>
-          <li><a href="#how-it-works">1099-DA Ingestion</a></li>
-          <li><a href="#how-it-works">Koinly CSV Reconciliation</a></li>
-          <li><a href="#problem">13 Bounded Outcome States</a></li>
-          <li><a href="#security">Zero Transaction Egress</a></li>
+          <li><a href="#hero">Introduction</a></li>
+          <li><a href="#problem">Why Independently Reconcile?</a></li>
+          <li><a href="#comparison">What VaultBasis Verifies</a></li>
+          <li><a href="#security">Local Evidence Boundary</a></li>
         </ul>
       </div>
-
-      <!-- Col 3: Evidence & Specs -->
       <div class="footer-col">
-        <h4>Assurance & Evidence</h4>
+        <h4>Verification &amp; Trust</h4>
         <ul>
-          <li><a href="#evidence-contract">Evidence Contract v0.1</a></li>
-          <li><a href="/schemas/receipt-v0.1.json" target="_blank">Normative JSON Schema</a></li>
-          <li><a href="#evidence-contract">RFC 8785 Canonicalization</a></li>
-          <li><a href="#security">Ed25519 Signing Standard</a></li>
-          <li><a href="/sample-receipt.json" download="golden_receipt_valid.json">Sample Golden Receipt</a></li>
+          <li><a href="/verifier">Independent Web Verifier</a></li>
+          <li><a href="/schemas/receipt-v0.1.json" target="_blank">Evidence Schema v0.1</a></li>
+          <li><a href="/docs/scope_and_limitations_v0.1.md" target="_blank">Scope &amp; Limitations</a></li>
+          <li><a href="/sample-receipt.json" download>Sample Outcome Receipt</a></li>
+          <li><a href="/sample-receipt-tampered.json" download>Tampered Test Vector</a></li>
         </ul>
       </div>
-
-      <!-- Col 4: Verification Tools -->
       <div class="footer-col">
-        <h4>Verification Tools</h4>
+        <h4>Contact &amp; Access</h4>
         <ul>
-          <li><a href="/verifier">Public Web Verifier</a></li>
-          <li><a href="#documentation">Standalone CLI Verifier</a></li>
-          <li><a href="/sample-receipt.json" target="_blank">Golden Fixture Valid</a></li>
-          <li><a href="/sample-receipt-tampered.json" target="_blank">Golden Fixture Tampered</a></li>
-          <li><a href="#evidence-contract">Clean-Machine Verification</a></li>
-        </ul>
-      </div>
-
-      <!-- Col 5: Trust & Boundaries -->
-      <div class="footer-col">
-        <h4>Trust & Legal</h4>
-        <ul>
-          <li><a href="#security">Zero Token Bleed Policy</a></li>
-          <li><a href="#security">Local Trust Boundary</a></li>
-          <li><a href="#problem">IRC §6045 Compliance</a></li>
-          <li><a href="#problem">Rev. Proc. 2024-28 Scope</a></li>
-          <li><a href="#documentation">Audit Trail Integrity</a></li>
+          <li><a href="#" onclick="openAccessModal(); return false;">Request Design-Partner Access</a></li>
+          <li><a href="mailto:contact@vaultbasis.com">General Enquiries</a></li>
+          <li><a href="mailto:security@vaultbasis.com">Security Disclosure</a></li>
         </ul>
       </div>
     </div>
-
-    <!-- Statutory Limitation Notice (PRD §27 & §44.6) -->
     <div class="disclaimer-box">
-      <strong>STATUTORY LIMITATION NOTICE (PRD §27 & §44.6):</strong><br>
-      VaultBasis is an independent outcome-verification and assurance edge designed to compare, recompute, and evidence consequential financial calculations. VaultBasis does not provide tax, legal, accounting, or investment advice. Verification of an Outcome Receipt confirms cryptographic origin from the declared installation key and byte integrity under Evidence Contract v0.1; it does not constitute an endorsement, determination, or ruling by the Internal Revenue Service (IRS) or any government authority.
+      <strong>IMPORTANT LIMITATION NOTICE:</strong> VaultBasis performs bounded, deterministic reconciliation of supported sources against declared semantics. It does not assess tax correctness, establish legal compliance, or evaluate whether source information is complete or accurate. An Outcome Receipt confirms that the declared reconciliation was performed and that the receipt signature is authentic. It does not constitute a professional opinion, legal finding, or endorsement by the IRS or any government authority. The filing practitioner remains solely responsible for the interpretation and application of applicable law.
     </div>
-
-    <!-- Footer Copyright & Badges -->
     <div class="footer-bottom">
-      <div>© 2026 VaultBasis (A product by TecTixBase). All rights reserved. • MMP-1 Technical Preview</div>
-      <div style="display: flex; gap: 1.5rem; font-family: 'JetBrains Mono', monospace; font-size: 0.76rem;">
-        <span>PRD v26.1 Reference</span>
-        <span>•</span>
-        <span>Schema v0.1</span>
-        <span>•</span>
-        <span>Zero Data Egress</span>
-      </div>
+      <div>© 2026 VaultBasis, a product of TecTixBase EURL. All rights reserved.</div>
     </div>
   </footer>
 
   <script>
-    function openLocalEdgeApp() {
-      const isLocalhost = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost';
-      if (isLocalhost) {
-        window.location.href = '/';
-        return;
-      }
-      // On public domain, probe local Edge daemon
-      probeLocalEdge(true);
+    function openAccessModal() {
+      const modal = document.getElementById('access-modal');
+      modal.style.display = 'flex';
+      document.getElementById('req-name').focus();
     }
 
-    function probeLocalEdge(openOnSuccess) {
-      const statusEl = document.getElementById('probe-status');
-      if (statusEl) {
-        statusEl.innerHTML = '<span class="status-dot" style="background:#eab308;"></span> Probing local edge at http://127.0.0.1:8000/api/health...';
-      }
+    function closeAccessModal() {
+      const modal = document.getElementById('access-modal');
+      modal.style.display = 'none';
+      document.getElementById('request-form-container').style.display = 'block';
+      document.getElementById('request-success').style.display = 'none';
+      document.getElementById('req-name').value = '';
+      document.getElementById('req-email').value = '';
+    }
 
-      fetch('http://127.0.0.1:8000/api/health', { mode: 'cors' })
-        .then(res => {
-          if (res.ok) {
-            if (statusEl) {
-              statusEl.innerHTML = '<span class="status-dot" style="background:#10b981;"></span> Local Edge is LIVE & Operational (127.0.0.1:8000)';
-            }
-            if (openOnSuccess) {
-              window.location.href = 'http://127.0.0.1:8000/';
-            }
-          } else {
-            showLocalModal();
-          }
-        })
-        .catch(() => {
-          if (statusEl) {
-            statusEl.innerHTML = '<span class="status-dot" style="background:#ef4444;"></span> Local Edge Offline (Run ./scripts/launch.sh to start)';
-          }
-          showLocalModal();
+    async function submitAccessRequest() {
+      const name = document.getElementById('req-name').value;
+      const email = document.getElementById('req-email').value;
+      const btn = document.getElementById('btn-submit-req');
+
+      if (!name || !email) { alert('Please provide a name and email.'); return; }
+
+      btn.innerText = 'Sending...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch('/api/request-access', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email })
         });
-    }
-
-    function retryLocalProbe() {
-      probeLocalEdge(true);
-    }
-
-    function showLocalModal() {
-      const modal = document.getElementById('local-modal');
-      if (modal) modal.style.display = 'flex';
-    }
-
-    function closeLocalModal() {
-      const modal = document.getElementById('local-modal');
-      if (modal) modal.style.display = 'none';
-    }
-
-    function copyLaunchCmd() {
-      navigator.clipboard.writeText('./scripts/launch.sh').then(() => {
-        const btn = document.getElementById('btn-copy');
-        if (btn) {
-          btn.innerText = 'Copied!';
-          setTimeout(() => { btn.innerText = 'Copy Command'; }, 2000);
+        const data = await res.json();
+        
+        if (res.ok && data.uatPreviewUrl) {
+          document.getElementById('request-form-container').style.display = 'none';
+          const successDiv = document.getElementById('request-success');
+          successDiv.style.display = 'block';
+          document.getElementById('uat-email-link').href = data.uatPreviewUrl;
+        } else {
+          alert(data.error || 'Failed to request access.');
         }
-      });
+      } catch (err) {
+        alert('A network error occurred.');
+      } finally {
+        btn.innerText = 'Request Email Dispatch';
+        btn.disabled = false;
+      }
     }
 
-    // Smooth scrolling with exact sticky header offset
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
       anchor.addEventListener('click', function(e) {
         const href = this.getAttribute('href');
@@ -884,32 +493,10 @@
           const header = document.querySelector('header');
           const headerHeight = header ? header.offsetHeight : 70;
           const targetPos = targetEl.getBoundingClientRect().top + window.pageYOffset - (headerHeight + 24);
-          window.scrollTo({
-            top: targetPos,
-            behavior: 'smooth'
-          });
+          window.scrollTo({ top: targetPos, behavior: 'smooth' });
           history.pushState(null, null, '#' + targetId);
         }
       });
-    });
-
-    // Handle direct anchor navigation on page load / reload
-    window.addEventListener('load', () => {
-      if (window.location.hash) {
-        const targetId = window.location.hash.substring(1);
-        const targetEl = document.getElementById(targetId);
-        if (targetEl) {
-          setTimeout(() => {
-            const header = document.querySelector('header');
-            const headerHeight = header ? header.offsetHeight : 70;
-            const targetPos = targetEl.getBoundingClientRect().top + window.pageYOffset - (headerHeight + 24);
-            window.scrollTo({
-              top: targetPos,
-              behavior: 'smooth'
-            });
-          }, 100);
-        }
-      }
     });
   </script>
 </body>

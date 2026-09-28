@@ -312,5 +312,10 @@ def test_cli_verifier_execution(tmp_path):
     )
 
     assert proc.returncode == 0
-    assert "VAULTBASIS INDEPENDENT OUTCOME VERIFICATION REPORT — PASS" in proc.stdout
+    assert "VAULTBASIS INDEPENDENT OUTCOME VERIFICATION REPORT" in proc.stdout
+    assert "PAYLOAD & SIGNATURE VERIFIED" in proc.stdout
+    assert "[1] PAYLOAD INTEGRITY:       VALID" in proc.stdout
+    assert "[2] SIGNATURE AUTHENTICITY:  VALID" in proc.stdout
+    assert "[3] CONTRACT COMPATIBILITY:  COMPATIBLE" in proc.stdout
+    assert "[4] TAX CORRECTNESS:         NOT DETERMINED BY VAULTBASIS" in proc.stdout
     assert "LIMITATION NOTICE" in proc.stdout
