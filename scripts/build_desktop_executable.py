@@ -62,7 +62,7 @@ def build():
             zipf.writestr(info, f.read())
             
         # Include the Quick Start Guide HTML
-        guide_path = "VaultBasis_Quick_Start_Guide.html"
+        guide_path = "VaultBasis_Practitioner_Quick_Start.html"
         if os.path.exists(guide_path):
             zipf.write(guide_path, arcname=guide_path)
 
