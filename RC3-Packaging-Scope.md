@@ -149,17 +149,12 @@ secrets in the binary at all.
 
 Same canonical input → Mac result vs Windows result → byte/semantic comparison.
 Never compare whole receipts byte-for-byte: installation-specific material legitimately
-differs. Instead each platform MUST produce identical canonical bytes and SHA-256 digest
-for the normative equivalence projection:
-
-- receipt_version, canonicalization_version, ruleset_id, engine_version, policy_version
-- case_id, claim_type, source_ids, source_hashes, source_schema_ids
-- assurance_level, outcome_state, material_differences (all records, exact decimals),
-  unresolved_items
-- canonical representation of the above per `schemas/receipt/canonicalization-v0.1.md`
-
-Excluded from comparison (per-install / per-environment by design): `signature`,
-`signer_key_id`, `signer_public_key`, `receipt_id`, `created_at`, local paths.
+differs. The normative projection is frozen at
+`schemas/receipt/equivalence-projection-v0.1.json` — both platform artifacts MUST
+produce identical canonical bytes and SHA-256 digest over exactly its projected fields
+(deterministic outcome material); its excluded fields (per-install/per-environment)
+are never compared. Any projection change requires a version bump in release history
+and full re-qualification of both artifacts.
 Equivalence failures fail RC3 regardless of install/launch success.
 
 ## Packaging invariance (binding discipline)
@@ -202,6 +197,14 @@ Detected during qualification, never by a tester afterward:
 Passing macOS arm64 + Windows x64 means exactly the declared and tested configurations
 are supported — never "works on all major operating systems." Intel Mac, Windows ARM,
 Linux, and tablets remain separate qualification decisions with their own gates.
+
+## Implementation triage rule (frozen with scope)
+RC3 implements and proves the frozen packaging contract; it does not redesign it.
+A requirement discovered during implementation is classified before adoption:
+necessary to satisfy an existing RC3 criterion → implementation detail, proceed;
+changes product capability, semantics, supported scope, or architecture → outside RC3,
+unless genuinely release-blocking (then scope is formally amended, never silently
+extended). No further criteria will be added; implementation evidence from here on.
 
 ## Evidence preserved
 RC2 → automated PASS → clean-machine FAIL (UAT-MAC-003) → root cause → packaging

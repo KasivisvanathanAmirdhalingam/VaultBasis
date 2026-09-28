@@ -1,0 +1,31 @@
+{
+  "projection_name": "VaultBasis RC3 Cross-Platform Equivalence Projection",
+  "projection_version": "v0.1",
+  "status": "FROZEN",
+  "canonicalization": "schemas/receipt/canonicalization-v0.1.md",
+  "rule": "Both platform artifacts MUST produce identical canonical bytes and SHA-256 digest over exactly these fields. Installation-specific fields MUST be excluded, never compared.",
+  "projected_fields": [
+    "receipt_version",
+    "canonicalization_version",
+    "ruleset_id",
+    "engine_version",
+    "policy_version",
+    "case_id",
+    "claim_type",
+    "source_ids",
+    "source_hashes",
+    "source_schema_ids",
+    "assurance_level",
+    "outcome_state",
+    "material_differences",
+    "unresolved_items"
+  ],
+  "excluded_fields": [
+    "signature",
+    "signer_key_id",
+    "signer_public_key",
+    "receipt_id",
+    "created_at"
+  ],
+  "change_policy": "Any change to projected/excluded sets requires a projection version bump (v0.2, ...) recorded in release history and full re-qualification of both platform artifacts. Narrowing or widening the projection to make a mismatch pass is forbidden without re-qualification."
+}
