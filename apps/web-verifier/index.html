@@ -247,7 +247,7 @@
       <div>
         <div class="brand-name">VaultBasis Verifier</div>
       </div>
-      <span class="badge badge-info" style="font-size: 0.72rem;">WEB-CRYPTO CLIENT</span>
+      
     </a>
     <nav class="nav-links">
       <a href="/" id="nav-back-link">← Why VaultBasis?</a>
@@ -260,7 +260,7 @@
     <div class="card" style="text-align: center;">
       <h2 style="font-size: 1.6rem; margin-bottom: 8px; color: #0f172a;">Independent Outcome Verification</h2>
       <p style="color: var(--text-muted); font-size: 0.95rem; max-width: 680px; margin: 0 auto 1.5rem auto;">
-        Verify any VaultBasis Outcome Receipt against Evidence Contract v0.1. Receipt verification executes client-side using WebCrypto and does not require receipt contents to be submitted to VaultBasis.
+        Upload a VaultBasis Outcome Receipt to check that it has not been changed since it was signed and that its signature is valid. Verification runs entirely in your browser — nothing is uploaded to VaultBasis.
       </p>
 
       <div class="sample-controls">
@@ -290,7 +290,7 @@
     <!-- Results Card -->
     <div id="results-card" class="card" style="display: none;" aria-live="polite">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-        <h3 style="font-size: 1.2rem; color: #0f172a;">Verification Assurance Report</h3>
+        <h3 style="font-size: 1.2rem; color: #0f172a;">Verification Report</h3>
         <span id="overall-badge" class="badge badge-pass" style="font-size: 0.9rem;">PASS (VERIFIED)</span>
       </div>
 
@@ -326,7 +326,7 @@
       <div id="errors-box" style="display: none; margin-top: 1rem; padding: 1rem; background: rgba(239, 68, 68, 0.1); border-left: 3px solid #ef4444; color: #f87171; font-size: 0.85rem; border-radius: 4px;"></div>
 
       <div class="limitations-box">
-        <strong>STATUTORY LIMITATION NOTICE (PRD §27 & §44.6):</strong><br>
+        <strong>IMPORTANT NOTICE:</strong><br>
         Successful verification confirms that the receipt signature is valid for the declared installation public key and that the signed receipt content has not changed relative to that signature. It does not independently establish tax correctness, source-data accuracy, installation identity, software authenticity, or government endorsement.
       </div>
     </div>
@@ -341,41 +341,41 @@
           <span class="brand-name" style="font-size: 1rem;">VaultBasis</span>
         </div>
         <p style="font-size: 0.82rem; color: #94a3b8; max-width: 260px;">
-          Clean-machine verification runtime for Evidence Contract v0.1 receipts.
+          Verify Outcome Receipts independently, directly in your browser.
         </p>
       </div>
 
       <div class="footer-col">
-        <h4>Verification Standard</h4>
+        <h4>Verification</h4>
         <ul>
           <li><a href="/schemas/receipt-v0.1.json" target="_blank">Normative Schema</a></li>
-          <li><a href="/" id="ft-evidence-link">Evidence Contract v0.1</a></li>
+          <li><a href="/docs/scope_and_limitations_v0.1.md" target="_blank" id="ft-evidence-link">Scope &amp; Limitations</a></li>
           <li><a href="/sample-receipt.json" download="golden_receipt_valid.json">Sample Golden Receipt</a></li>
           <li><a href="/sample-receipt-tampered.json" download="golden_receipt_tampered.json">Tampered Test Vector</a></li>
         </ul>
       </div>
 
       <div class="footer-col">
-        <h4>Tiers & Tools</h4>
+        <h4>Resources</h4>
         <ul>
-          <li><a href="/" id="ft-marketing-link">Marketing Portal</a></li>
+          <li><a href="/" id="ft-marketing-link">VaultBasis Home</a></li>
         </ul>
       </div>
 
       <div class="footer-col">
         <h4>Legal & Policy</h4>
         <ul>
-          <li><a href="/" id="ft-zero-bleed">Zero Token Bleed</a></li>
-          <li><a href="/" id="ft-statutory">Statutory Notice §27</a></li>
-          <li><a href="/" id="ft-airgap">Data Egress Standard</a></li>
+          <li><a href="/#security" id="ft-zero-bleed">Local Processing</a></li>
+          <li><a href="/docs/scope_and_limitations_v0.1.md" target="_blank" id="ft-statutory">Scope &amp; Limitations §27</a></li>
+          <li><a href="/privacy-policy" target="_blank" id="ft-airgap">Privacy Policy</a></li>
         </ul>
       </div>
     </div>
 
     <div class="footer-bottom">
-      <div>© 2026 VaultBasis, a product of TecTixBase EURL. All rights reserved. • Public Offline Verifier</div>
+      <div>© 2026 VaultBasis. All rights reserved.</div>
       <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;">
-        Ed25519 WebCrypto • RFC 8785 Canonicalization
+        Verification runs entirely in your browser. No data is uploaded.
       </div>
     </div>
   </footer>

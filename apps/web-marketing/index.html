@@ -259,7 +259,7 @@
         <div class="boundary-row">
           <div class="boundary-cell">
             <h4>Payload Integrity &amp; Signature</h4>
-            <p>Verifies the integrity of the signed receipt payload and validates its Ed25519 signature against the associated verification key.</p>
+            <p>Verifies that an Outcome Receipt has not been changed since it was signed, and confirms the signature is valid for the key that produced it.</p>
           </div>
           <div class="boundary-cell">
             <h4>Professional Judgment</h4>
@@ -274,7 +274,7 @@
       <div class="section-header">
         <span class="section-tag">Deployment Boundary</span>
         <h2>Local-First Evidence Processing</h2>
-        <p>During the tested MMP-1 assurance workflow, transaction and evidence payloads remained within the declared VaultBasis Edge boundary. Documented in the MMP-1 Local Processing Test Summary.</p>
+        <p>VaultBasis processes your information locally on your device. No data is sent to external servers during reconciliation or signing.</p>
       </div>
       <div class="grid-3">
         <div class="feature-card">
@@ -311,12 +311,12 @@
       <div class="grid-2">
         <div class="feature-card">
           <h3>Public Evidence Contract v0.1</h3>
-          <p style="margin-bottom: 1.25rem;">The normative JSON Schema defining the 24 bound envelope fields, deterministic outcome states, and Ed25519 signature format.</p>
+          <p style="margin-bottom: 1.25rem;">The published schema defining the structure of a VaultBasis Outcome Receipt, including outcome states and signature format.</p>
           <a href="/schemas/receipt-v0.1.json" target="_blank" class="btn btn-secondary btn-sm">View Evidence Schema ↗</a>
         </div>
         <div class="feature-card">
           <h3>Independent Web Verifier</h3>
-          <p style="margin-bottom: 1.25rem;">Clean-machine browser verification tool powered by WebCrypto. Validates payload integrity, key fingerprint, and Ed25519 signatures.</p>
+          <p style="margin-bottom: 1.25rem;">Browser-based verification tool. Checks that a receipt has not been altered and that its signature is valid. Runs entirely in your browser — no data is uploaded.</p>
           <a href="/verifier" class="btn btn-secondary btn-sm">Open Web Verifier ↗</a>
         </div>
         <div class="feature-card">
@@ -328,8 +328,8 @@
           </div>
         </div>
         <div class="feature-card">
-          <h3>MMP-1 Local Processing Summary</h3>
-          <p style="margin-bottom: 1.25rem;">Summary of AC-07 testing in which transaction and evidence payloads remained within the declared VaultBasis Edge boundary during the tested MMP-1 assurance workflow.</p>
+          <h3>Local Processing Verification</h3>
+          <p style="margin-bottom: 1.25rem;">Independent test confirming that reconciliation and signing ran entirely on the local device, with no data leaving the machine during the process.</p>
           <a href="/docs/scope_and_limitations_v0.1.md" target="_blank" class="btn btn-secondary btn-sm">Scope &amp; Limitations ↗</a>
         </div>
       </div>
@@ -340,7 +340,7 @@
       <div class="banner">
         <div>
           <h3>Participate in the Design-Partner Preview</h3>
-          <p>Evaluate VaultBasis using supported sample or appropriately sanitised information and provide feedback on the reconciliation and verification workflow.</p>
+          <p>Evaluate VaultBasis using sample data and share your feedback on the reconciliation and verification experience.</p>
         </div>
         <button onclick="openAccessModal()" class="btn btn-primary" style="padding: 14px 28px; background: white; color: #0f172a; border: none; font-size: 1.05rem;">
           Request Design-Partner Access
@@ -432,7 +432,7 @@
       </div>
     </div>
     <div class="disclaimer-box">
-      <strong>IMPORTANT LIMITATION NOTICE:</strong> VaultBasis performs bounded, deterministic reconciliation of supported sources under declared semantics. It does not assess tax correctness, establish legal compliance, or determine whether source information is complete or accurate. An Outcome Receipt records the declared reconciliation outcome and can be cryptographically verified for payload integrity and signature validity. It does not constitute a professional opinion, legal finding, government approval, or endorsement by the IRS or any other government authority. The practitioner remains responsible for professional interpretation and application of applicable law.
+      <strong>IMPORTANT LIMITATION NOTICE:</strong> VaultBasis independently compares supported sources under fixed, published rules. It does not assess tax correctness, establish legal compliance, or determine whether source information is complete or accurate. An Outcome Receipt records the declared reconciliation outcome and can be cryptographically verified for payload integrity and signature validity. It does not constitute a professional opinion, legal finding, government approval, or endorsement by the IRS or any other government authority. The practitioner remains responsible for professional interpretation and application of applicable law.
     </div>
     <div class="footer-bottom">
       <div>© 2026 VaultBasis. All rights reserved.</div>
