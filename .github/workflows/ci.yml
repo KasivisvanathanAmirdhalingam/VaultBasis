@@ -112,15 +112,10 @@ jobs:
         path: dist/VaultBasis-RC3-*
         retention-days: 7
 
-  promote-rc3:
-    name: Promote RC3 to UAT Pre-Release
+  inspect-rc3:
+    name: RC3 Candidate Inspection (BUILD_VERIFIED — not UAT-READY)
     needs: [rc3-candidates]
     runs-on: ubuntu-latest
-    concurrency:
-      group: promote-rc3
-      cancel-in-progress: true
-    permissions:
-      contents: write
 
     steps:
     - name: Checkout repository
@@ -138,96 +133,141 @@ jobs:
         name: vaultbasis-rc3-candidate-windows-latest
         path: downloaded/windows
 
-    - name: Compute SHA-256 and locate ZIPs
-      id: hashes
-      run: |
-        MAC_ZIP=$(find downloaded/macos -name "VaultBasis-RC3-macOS-arm64.zip" | head -1)
-        WIN_ZIP=$(find downloaded/windows -name "VaultBasis-RC3-Windows-x64.zip" | head -1)
-        if [ -z "$MAC_ZIP" ]; then echo "❌ macOS ZIP not found"; exit 1; fi
-        if [ -z "$WIN_ZIP" ]; then echo "❌ Windows ZIP not found"; exit 1; fi
-        echo "mac_zip=$MAC_ZIP" >> $GITHUB_OUTPUT
-        echo "win_zip=$WIN_ZIP" >> $GITHUB_OUTPUT
-        MAC_SHA=$(python3 -c "
-        import hashlib, sys
-        h = hashlib.sha256()
-        with open(sys.argv[1], 'rb') as f:
-            for chunk in iter(lambda: f.read(1 << 20), b''):
-                h.update(chunk)
-        print(h.hexdigest())
-        " "$MAC_ZIP")
-        WIN_SHA=$(python3 -c "
-        import hashlib, sys
-        h = hashlib.sha256()
-        with open(sys.argv[1], 'rb') as f:
-            for chunk in iter(lambda: f.read(1 << 20), b''):
-                h.update(chunk)
-        print(h.hexdigest())
-        " "$WIN_ZIP")
-        echo "mac_sha=$MAC_SHA" >> $GITHUB_OUTPUT
-        echo "win_sha=$WIN_SHA" >> $GITHUB_OUTPUT
-        echo "MAC SHA-256: $MAC_SHA"
-        echo "WIN SHA-256: $WIN_SHA"
-
-    - name: ZIP content gate — macOS
-      run: python3 scripts/check_release_content.py "${{ steps.hashes.outputs.mac_zip }}"
-
-    - name: ZIP content gate — Windows
-      run: python3 scripts/check_release_content.py "${{ steps.hashes.outputs.win_zip }}"
-
-    - name: Create or replace GitHub pre-release rc3-uat-candidate
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        if gh release view rc3-uat-candidate --repo ${{ github.repository }} > /dev/null 2>&1; then
-          gh release delete rc3-uat-candidate --repo ${{ github.repository }} --yes --cleanup-tag
-        fi
-        gh release create rc3-uat-candidate \
-          --repo ${{ github.repository }} \
-          --title "RC3 UAT Candidate (Internal — Not for Distribution)" \
-          --notes "Automated pre-release from CI run ${{ github.run_id }}, commit ${{ github.sha }}. Design-partner UAT only. UNSIGNED / NOT FOR PUBLIC DISTRIBUTION." \
-          --prerelease \
-          "${{ steps.hashes.outputs.mac_zip }}#VaultBasis-RC3-macOS-arm64.zip" \
-          "${{ steps.hashes.outputs.win_zip }}#VaultBasis-RC3-Windows-x64.zip"
-
-    - name: Write and commit rc3-uat-manifest.json
-      env:
-        MAC_SHA: ${{ steps.hashes.outputs.mac_sha }}
-        WIN_SHA: ${{ steps.hashes.outputs.win_sha }}
+    - name: Inspect both candidates and emit build-verified report
       run: |
         python3 - <<'PYEOF'
-        import json, os
-        manifest = {
-          "release_tag": "rc3-uat-candidate",
-          "source_commit": os.environ["GITHUB_SHA"],
-          "ci_run_id": os.environ["GITHUB_RUN_ID"],
-          "artifacts": [
-            {
-              "filename": "VaultBasis-RC3-macOS-arm64.zip",
-              "os": "macos",
-              "architecture": "arm64",
-              "sha256": os.environ["MAC_SHA"],
-              "content_gate": "PASS",
-              "qualification": "UAT-READY"
-            },
-            {
-              "filename": "VaultBasis-RC3-Windows-x64.zip",
-              "os": "windows",
-              "architecture": "x64",
-              "sha256": os.environ["WIN_SHA"],
-              "content_gate": "PASS",
-              "qualification": "UAT-READY"
-            }
-          ]
-        }
-        with open("schemas/release/rc3-uat-manifest.json", "w") as f:
-            json.dump(manifest, f, indent=2)
-            f.write("\n")
-        print("Manifest written.")
+        import hashlib, json, os, subprocess, sys, zipfile
+        from pathlib import Path
+
+        def sha256(path):
+            h = hashlib.sha256()
+            with open(path, 'rb') as f:
+                for chunk in iter(lambda: f.read(1 << 20), b''):
+                    h.update(chunk)
+            return h.hexdigest()
+
+        def find_zip(root, pattern):
+            for p in Path(root).rglob(pattern):
+                return p
+            return None
+
+        mac_zip = find_zip('downloaded/macos', 'VaultBasis-RC3-macOS-arm64.zip')
+        win_zip = find_zip('downloaded/windows', 'VaultBasis-RC3-Windows-x64.zip')
+
+        results = []
+        for label, zpath, expected_arch in [
+            ('macOS arm64', mac_zip, 'arm64'),
+            ('Windows x64', win_zip, 'x64'),
+        ]:
+            if not zpath:
+                results.append({'target': label, 'status': 'MISSING', 'error': 'ZIP not found in artifact'})
+                continue
+
+            r = {'target': label, 'filename': zpath.name, 'sha256': sha256(zpath)}
+
+            # ZIP content gate
+            gate = subprocess.run(
+                [sys.executable, 'scripts/check_release_content.py', str(zpath)],
+                capture_output=True, text=True
+            )
+            r['content_gate'] = 'PASS' if gate.returncode == 0 else 'FAIL'
+            r['content_gate_output'] = (gate.stdout + gate.stderr).strip()
+
+            # ZIP member inspection
+            with zipfile.ZipFile(zpath) as zf:
+                names = zf.namelist()
+                r['has_quick_start'] = any('VaultBasis-Quick-Start.html' in n for n in names)
+                r['has_obsolete_guide'] = any('VaultBasis_Quick_Start_Guide' in n for n in names)
+                r['has_rc1_content'] = any('RC1' in n or 'preview-macOS' in n for n in names)
+                r['has_troubleshooting'] = any('Troubleshooting' in n for n in names)
+                r['has_release_txt'] = any('RELEASE.txt' in n for n in names)
+
+                # Architecture check
+                if expected_arch == 'arm64':
+                    binary_members = [n for n in names if n.endswith('/MacOS/VaultBasis')]
+                    r['has_app_bundle'] = any('.app/Contents/MacOS/VaultBasis' in n for n in names)
+                    if binary_members:
+                        data = zf.read(binary_members[0])
+                        # Mach-O arm64: magic 0xFEEDFACF, cpu_type 0x0100000C
+                        r['arch_check'] = 'arm64' if data[:4] == b'\xcf\xfa\xed\xfe' and data[4:8] == b'\x0c\x00\x00\x01' else 'UNEXPECTED'
+                    else:
+                        r['arch_check'] = 'BINARY_NOT_FOUND'
+                elif expected_arch == 'x64':
+                    exe_members = [n for n in names if n.endswith('VaultBasis.exe')]
+                    r['has_exe'] = bool(exe_members)
+                    if exe_members:
+                        data = zf.read(exe_members[0])
+                        # PE x64: MZ header + PE signature + machine 0x8664
+                        try:
+                            pe_offset = int.from_bytes(data[0x3C:0x40], 'little')
+                            machine = int.from_bytes(data[pe_offset+4:pe_offset+6], 'little')
+                            r['arch_check'] = 'x64' if machine == 0x8664 else f'UNEXPECTED_MACHINE_{hex(machine)}'
+                        except Exception as e:
+                            r['arch_check'] = f'PE_PARSE_ERROR: {e}'
+                    else:
+                        r['arch_check'] = 'EXE_NOT_FOUND'
+
+            # Overall candidate state
+            gate_ok = r['content_gate'] == 'PASS'
+            arch_ok = r.get('arch_check') == expected_arch
+            qs_ok = r['has_quick_start'] and not r['has_obsolete_guide'] and not r['has_rc1_content']
+            r['qualification'] = 'BUILD_VERIFIED' if (gate_ok and arch_ok and qs_ok) else 'BLOCKED'
+            if not gate_ok: r.setdefault('blockers', []).append('content gate FAIL')
+            if not arch_ok: r.setdefault('blockers', []).append(f'arch check: {r.get("arch_check")}')
+            if not r['has_quick_start']: r.setdefault('blockers', []).append('canonical Quick Start missing')
+            if r['has_obsolete_guide']: r.setdefault('blockers', []).append('obsolete dark guide present')
+            if r['has_rc1_content']: r.setdefault('blockers', []).append('RC1/preview-macOS content present')
+
+            results.append(r)
+
+        # Emit GitHub Step Summary
+        summary = ['# RC3 Candidate Inspection Report', '',
+                   f'Source commit: `{os.environ["GITHUB_SHA"]}`',
+                   f'CI run: `{os.environ["GITHUB_RUN_ID"]}`', '',
+                   '> **Classification: BUILD_VERIFIED** — content gate and architecture checks passed.',
+                   '> UAT-READY requires additional human-verified qualification gates (launch, smoke, clean-machine).',
+                   '']
+        for r in results:
+            s = r.get('qualification', 'MISSING')
+            icon = '✅' if s == 'BUILD_VERIFIED' else '❌'
+            summary.append(f'## {icon} {r["target"]} — {s}')
+            if 'filename' in r:
+                summary.append(f'- **File:** `{r["filename"]}`')
+                summary.append(f'- **SHA-256:** `{r["sha256"]}`')
+                summary.append(f'- **Content gate:** {r["content_gate"]}')
+                summary.append(f'- **Architecture:** {r.get("arch_check", "N/A")}')
+                summary.append(f'- **App bundle (.app):** {r.get("has_app_bundle", "N/A")}')
+                summary.append(f'- **Exe present:** {r.get("has_exe", "N/A")}')
+                summary.append(f'- **Canonical Quick Start:** {r["has_quick_start"]}')
+                summary.append(f'- **Obsolete guide absent:** {not r["has_obsolete_guide"]}')
+                summary.append(f'- **RC1 content absent:** {not r["has_rc1_content"]}')
+                summary.append(f'- **Troubleshooting present:** {r["has_troubleshooting"]}')
+                summary.append(f'- **RELEASE.txt present:** {r["has_release_txt"]}')
+            if r.get('blockers'):
+                summary.append(f'- **BLOCKERS:** {", ".join(r["blockers"])}')
+            summary.append('')
+
+        summary.append('## Next required gates before UAT-READY')
+        summary.append('- [ ] Clean-machine launch (no developer intervention)')
+        summary.append('- [ ] Sample case → finding → receipt → verification')
+        summary.append('- [ ] No CWD/repository dependency')
+        summary.append('- [ ] Signing/notarization state explicitly recorded')
+        summary.append('- [ ] Human review of this report → explicit UAT-READY promotion decision')
+
+        step_summary = os.environ.get('GITHUB_STEP_SUMMARY')
+        if step_summary:
+            with open(step_summary, 'w') as f:
+                f.write('\n'.join(summary))
+
+        # Print to log too
+        print('\n'.join(summary))
+
+        # Exit non-zero if any candidate is BLOCKED or MISSING
+        blocked = [r for r in results if r.get('qualification') not in ('BUILD_VERIFIED',)]
+        if blocked:
+            print(f'\n❌ {len(blocked)} candidate(s) BLOCKED — see report above')
+            sys.exit(1)
+
+        print('\n✅ Both candidates BUILD_VERIFIED. Retrieve artifacts from this run for human review and UAT qualification.')
         PYEOF
-        git config user.name "github-actions[bot]"
-        git config user.email "github-actions[bot]@users.noreply.github.com"
-        git add schemas/release/rc3-uat-manifest.json
-        git diff --cached --quiet && echo "No manifest change." || \
-          git commit -m "ci: update rc3-uat-manifest for run ${{ github.run_id }} [skip ci]"
-        git push
 
