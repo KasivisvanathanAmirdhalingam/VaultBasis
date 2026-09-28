@@ -400,9 +400,9 @@
         <h4>Overview</h4>
         <ul>
           <li><a href="#hero">Introduction</a></li>
-          <li><a href="#problem">Why Independently Reconcile?</a></li>
-          <li><a href="#comparison">What VaultBasis Verifies</a></li>
-          <li><a href="#security">Local Evidence Boundary</a></li>
+          <li><a href="#problem">When Sources Diverge</a></li>
+          <li><a href="#comparison">How It Works</a></li>
+          <li><a href="#security">Local Evidence Processing</a></li>
         </ul>
       </div>
       <div class="footer-col">
@@ -410,8 +410,7 @@
         <ul>
           <li><a href="/verifier">Independent Web Verifier</a></li>
           <li><a href="/schemas/receipt-v0.1.json" target="_blank">Evidence Schema v0.1</a></li>
-          <li><a href="/docs/scope_and_limitations_v0.1.md" target="_blank">Scope &amp; Limitations</a></li>
-          <li><a href="/sample-receipt.json" download>Sample Outcome Receipt</a></li>
+                    <li><a href="/sample-receipt.json" download>Sample Outcome Receipt</a></li>
           <li><a href="/sample-receipt-tampered.json" download>Tampered Test Vector</a></li>
         </ul>
       </div>
@@ -419,8 +418,16 @@
         <h4>Contact &amp; Access</h4>
         <ul>
           <li><a href="#" onclick="openAccessModal(); return false;">Request Design-Partner Access</a></li>
-          <li><a href="mailto:contact@vaultbasis.com">General Enquiries</a></li>
-          <li><a href="mailto:security@vaultbasis.com">Security Disclosure</a></li>
+          <li><a href="#" onclick="openAccessModal('general'); return false;">General Enquiries</a></li>
+          <li><a href="#" onclick="openAccessModal('security'); return false;">Security Disclosure</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Legal &amp; Privacy</h4>
+        <ul>
+          <li><a href="/docs/scope_and_limitations_v0.1.md" target="_blank">Scope &amp; Limitations</a></li>
+          <li><a href="/privacy-policy" target="_blank">Privacy Policy</a></li>
+          <li><a href="/terms-of-service" target="_blank">Terms of Service</a></li>
         </ul>
       </div>
     </div>
@@ -433,7 +440,7 @@
   </footer>
 
   <script>
-    function openAccessModal() {
+    function openAccessModal(type) {
       const modal = document.getElementById('access-modal');
       modal.style.display = 'flex';
       document.getElementById('req-name').focus();
