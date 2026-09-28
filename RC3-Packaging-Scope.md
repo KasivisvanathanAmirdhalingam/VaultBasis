@@ -258,6 +258,25 @@ changes product capability, semantics, supported scope, or architecture → outs
 unless genuinely release-blocking (then scope is formally amended, never silently
 extended). No further criteria will be added; implementation evidence from here on.
 
+## First-run practitioner acceptance (UX-MAC-001 / UX-WIN-001)
+Uncoached participant on a supported machine, given only the design-partner email.
+Journey: Email → Download → correct artifact → Install → Open → branded workspace →
+Sample Case → finding → Outcome Receipt → verify. PASS only with: no Terminal, no
+shell command, no typed localhost address, no "Choose Application", no security-bypass
+tutorial, no developer terminology, no founder intervention, no stale wording, no
+incorrect legal/assurance claims, visual continuity with VaultBasis marketing, and the
+user understands what to do next. Comprehension test afterward: "What do you think
+VaultBasis just verified?" — answering "that my taxes are correct" fails the UX even
+if installation succeeded. Time both platform runs.
+
+## RC3-minimum visual consistency (full design system → MMP-1.1)
+RC3 is not a redesign: minimum is VaultBasis branding, light professional presentation
+matching the marketing site (bg #f8fafc, Outfit/Plus Jakarta Sans, 12px radius language),
+consistent buttons, clean startup/error states ("VaultBasis couldn't start. Your files
+have not been changed. Troubleshoot · Contact Support"), and no terminal-facing normal
+workflow. MMP-1.1 owns the full design system, accessibility depth, and commercial
+onboarding.
+
 ## Evidence preserved
 RC2 → automated PASS → clean-machine FAIL (UAT-MAC-003) → root cause → packaging
 requirements → RC3 (mac + win tracks) → per-platform qualification. Retain UAT-MAC-003

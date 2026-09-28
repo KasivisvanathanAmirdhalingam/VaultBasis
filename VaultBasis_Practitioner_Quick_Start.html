@@ -3,123 +3,83 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VaultBasis Edge — Quick Start</title>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <title>Welcome to VaultBasis Edge</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #07090e; --surface: #0e121a; --surface2: #141b27;
-      --primary: #3b82f6; --text: #f1f5f9; --text-muted: #94a3b8;
-      --border: #1e293b; --success: #10b981; --warning: #f59e0b;
+      --bg: #f8fafc; --surface: #ffffff; --surface-elevated: #f1f5f9;
+      --border: #e2e8f0; --border-accent: #cbd5e1;
+      --text: #0f172a; --text-muted: #475569;
+      --primary: #2563eb; --primary-hover: #1d4ed8; --accent: #0284c7;
+      --radius: 12px;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; line-height: 1.7; }
+    body { background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; line-height: 1.7; }
     .container { max-width: 720px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
-    .header { text-align: center; margin-bottom: 2.5rem; }
-    .header h1 { font-size: 2.2rem; margin-bottom: 0.5rem; background: linear-gradient(to right, #60a5fa, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .header .subtitle { color: var(--text-muted); font-size: 1rem; }
-    .badge { display: inline-block; margin-top: 0.5rem; padding: 2px 10px; background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.3); color: #60a5fa; border-radius: 99px; font-size: 0.75rem; font-weight: 600; letter-spacing: 0.05em; }
-    .step { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.75rem; margin-bottom: 1.5rem; }
-    .step h2 { margin: 0 0 1rem 0; color: #fff; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; }
-    .step-num { background: var(--primary); color: #fff; width: 28px; height: 28px; min-width: 28px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 0.85rem; font-weight: 700; }
-    p { color: #cbd5e1; margin-bottom: 0.75rem; }
-    .alert { border-radius: 8px; padding: 0.875rem 1.125rem; margin: 1rem 0; font-size: 0.9rem; }
-    .alert-info { background: rgba(56,189,248,0.08); border: 1px solid rgba(56,189,248,0.25); }
-    .alert-info strong { color: #38bdf8; }
-    .alert-success { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.25); }
-    .alert-success strong { color: #10b981; }
-    ol { padding-left: 1.25rem; }
-    ol li { color: #cbd5e1; margin-bottom: 0.5rem; }
-    ol li strong { color: #fff; }
-    .divider { border: none; border-top: 1px solid var(--border); margin: 1.25rem 0; }
-    .url-box { background: #000; border: 1px solid #1e3a5f; border-radius: 8px; padding: 0.875rem 1.125rem; font-family: monospace; font-size: 0.95rem; color: #4ade80; text-align: center; margin: 1rem 0; }
-    .footer { text-align: center; color: var(--text-muted); font-size: 0.78rem; margin-top: 3rem; border-top: 1px solid var(--border); padding-top: 1.5rem; }
-    .supported { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.25rem; margin-top: 1.5rem; font-size: 0.85rem; }
-    .supported strong { color: #fff; display: block; margin-bottom: 0.5rem; }
-    .pill { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; margin-right: 6px; margin-bottom: 6px; }
-    .pill-blue { background: rgba(59,130,246,0.15); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); }
-    .pill-green { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
-    @media (max-width: 480px) { .container { padding: 1.5rem 1rem 3rem; } .header h1 { font-size: 1.75rem; } }
+    header.brand { display: flex; align-items: center; gap: 12px; margin-bottom: 2.5rem; }
+    .brand-logo { width: 36px; height: 36px; background: linear-gradient(135deg, #2563eb, #0284c7); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.2rem; color: #fff; font-family: 'Outfit', sans-serif; }
+    .brand-name { font-family: 'Outfit', sans-serif; font-size: 1.35rem; font-weight: 800; letter-spacing: -0.01em; }
+    .badge { display: inline-block; padding: 4px 14px; border: 1px solid rgba(37,99,235,.3); background: rgba(37,99,235,.08); color: var(--primary); border-radius: 999px; font-size: .75rem; font-weight: 600; letter-spacing: .05em; }
+    h1 { font-family: 'Outfit', sans-serif; font-size: 2rem; font-weight: 800; letter-spacing: -0.02em; margin: 1rem 0 .75rem; }
+    .lede { font-size: 1.1rem; color: var(--text-muted); margin-bottom: 2rem; }
+    .step { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.75rem; margin-bottom: 1.25rem; }
+    .step h2 { font-size: 1.15rem; font-weight: 700; margin-bottom: .6rem; display: flex; align-items: center; gap: 10px; }
+    .step-num { background: var(--primary); color: #fff; width: 28px; height: 28px; min-width: 28px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; font-size: .85rem; font-weight: 700; }
+    .step p { color: #334155; margin-bottom: .5rem; }
+    .step p:last-child { margin-bottom: 0; }
+    .help { background: var(--surface-elevated); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem 1.75rem; margin: 1.5rem 0; }
+    .help strong { display: block; margin-bottom: .4rem; }
+    .help p { color: var(--text-muted); font-size: .93rem; }
+    .help a { color: var(--primary); font-weight: 600; }
+    .limitation { border-left: 3px solid var(--border-accent); padding: .75rem 1.25rem; margin: 1.5rem 0; color: var(--text-muted); font-size: .88rem; background: var(--surface); border-radius: 0 8px 8px 0; }
+    .limitation strong { color: var(--text); }
+    footer { margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border); color: var(--text-muted); font-size: .8rem; text-align: center; }
   </style>
 </head>
 <body>
 <div class="container">
 
-  <div class="header">
-    <h1>VaultBasis Edge</h1>
-    <p class="subtitle">Design Partner Preview — Quick Start</p>
-    <span class="badge">CONFIDENTIAL · DESIGN PARTNER ONLY</span>
-  </div>
+  <header class="brand">
+    <div class="brand-logo">V</div>
+    <span class="brand-name">VaultBasis</span>
+  </header>
 
-  <!-- Step 1 -->
+  <span class="badge">DESIGN PARTNER PREVIEW</span>
+  <h1>Welcome to VaultBasis Edge</h1>
+  <p class="lede">VaultBasis independently compares supported broker information with supported tax-ledger information and shows what agrees, what differs, and what remains unresolved.</p>
+
   <div class="step">
-    <h2><span class="step-num">1</span> Download</h2>
-    <p>Open the download link you received by email. Save the file to your <strong>Downloads</strong> folder.</p>
-    <p>The download contains:</p>
-    <ul style="color: #cbd5e1; padding-left: 1.5rem; margin-bottom: 0.5rem;">
-      <li>VaultBasis application</li>
-      <li>This Quick Start guide</li>
-    </ul>
+    <h2><span class="step-num">1</span> Install VaultBasis</h2>
+    <p>Open the VaultBasis installer you downloaded and follow the onscreen instructions.</p>
+    <p><strong>macOS:</strong> open the installer, then open VaultBasis from Applications.</p>
+    <p><strong>Windows:</strong> open the installer, then open VaultBasis from the Start menu.</p>
   </div>
 
-  <!-- Step 2 -->
   <div class="step">
-    <h2><span class="step-num">2</span> Install</h2>
-    <p><strong>Current preview (RC2):</strong> Open your <strong>Downloads</strong> folder. You will see the VaultBasis application file and a launcher called <code>launch_vaultbasis.command</code> in the same folder. Keep them together. Double-click the launcher to start. If macOS blocks it, see the Troubleshooting guide — Section A — for the one-time approval for your macOS version.</p>
-    <p><strong>Target experience (RC3 forward):</strong> Double-click the VaultBasis installer, follow the on-screen instructions, then open VaultBasis from Applications. The VaultBasis workspace opens automatically. No Terminal steps, no addresses to type.</p>
+    <h2><span class="step-num">2</span> Open VaultBasis</h2>
+    <p>VaultBasis opens your local workspace automatically.</p>
   </div>
 
-  <!-- Step 3 -->
   <div class="step">
-    <h2><span class="step-num">3</span> Open VaultBasis</h2>
-    <p><strong>Current preview (RC2 workaround):</strong> Double-click <code>launch_vaultbasis.command</code>. Leave the small black window open — closing it stops VaultBasis.</p>
-    <p>Then open Chrome, Safari, or Edge yourself and go to:</p>
-    <div class="url-box" style="background:#000;border:1px solid #1e3a5f;border-radius:8px;padding:.875rem;font-family:monospace;color:#4ade80;text-align:center;margin:1rem 0;">http://127.0.0.1:8000</div>
-    <div class="alert alert-success">
-      <strong>What happens next:</strong> Your VaultBasis dashboard appears in the browser. Manual open at the address above is a temporary RC2 workaround only — RC3 target is automatic workspace open with no address to type.
-    </div>
+    <h2><span class="step-num">3</span> Try the Sample Case</h2>
+    <p>Start with the included sample case to see how VaultBasis identifies agreements, differences, and unresolved information.</p>
   </div>
 
-  <!-- Step 4 -->
   <div class="step">
-    <h2><span class="step-num">4</span> Start with the sample case</h2>
-    <p>Use the included sample data first to become familiar with reconciliation, findings, and the Outcome Receipt before using real case information.</p>
-    <ol>
-      <li><strong>Open the sample case</strong> from the dashboard</li>
-      <li><strong>Run the comparison</strong> — Click <strong>"Run Deterministic Reconciliation"</strong></li>
-      <li><strong>Review results</strong> — See what matches, what differs, and what cannot be resolved</li>
-      <li><strong>Download the Evidence Bundle</strong> — A signed receipt (.zip) you can share with your reviewer</li>
-    </ol>
-    <p style="color:var(--text-muted);font-size:.85rem;">Your information stays local during the supported Edge reconciliation workflow. See the MMP-1 Local Processing Test Summary for the exact tested boundary.</p>
+    <h2><span class="step-num">4</span> Review your Outcome Receipt</h2>
+    <p>When reconciliation is complete, VaultBasis can produce a signed Outcome Receipt. Its payload integrity and signature can be independently verified.</p>
   </div>
 
-  <!-- Key Concept -->
-  <div class="step" style="border-color: rgba(59,130,246,0.4);">
-    <h2 style="color: #60a5fa;">How It Works</h2>
-    <p>VaultBasis processes your files <strong>on your own computer</strong> during the reconciliation workflow — your browser talks to VaultBasis at a local address on your machine, not to a cloud service. You control the signed receipt and decide who sees it. It records what was compared, what matched, what differed, and what was left unresolved. It does not determine tax or legal compliance — your reviewer does.</p>
-    <p>The receipt can be independently verified by anyone — without contacting VaultBasis — using the included offline verifier tool.</p>
+  <div class="help">
+    <strong>Need help?</strong>
+    <p>Open the <a href="VaultBasis_Troubleshooting.html">Troubleshooting Guide</a> — installation and startup help for your operating system. If VaultBasis couldn't start, your files have not been changed.</p>
   </div>
 
-  <!-- Supported Systems -->
-  <div class="supported">
-    <strong>Supported Systems (Design Partner Preview)</strong>
-    <span class="pill-blue">macOS 14+ (Sonoma)</span>
-    <span class="pill-blue">macOS 15 (Sequoia)</span>
-    <span class="pill-blue">Apple Silicon (M1/M2/M3/M4)</span>
-    <br>
-    <span class="pill-green">Windows 11 (x64)</span> — <em>qualification in progress</em>
-    <br>
-    <span style="color: var(--text-muted); font-size: 0.75rem;">Not currently supported: Intel Macs, Linux, iPadOS, Android, ChromeOS</span>
+  <div class="limitation">
+    <strong>Important limitation:</strong> VaultBasis performs bounded deterministic reconciliation of supported information under declared semantics. It does not determine tax correctness, legal compliance, or whether source information is complete or factually accurate.
   </div>
 
-  <hr class="divider">
-
-  <p style="text-align: center; color: var(--text-muted); font-size: 0.85rem;">
-    <strong>Need help?</strong> Reply to the email that contained your download link. Include your operating system and version.
-  </p>
-
-  <div class="footer">
-    © 2026 VaultBasis. All rights reserved. · Design Partner Preview · Strictly Confidential
-  </div>
+  <footer>© 2026 VaultBasis. All rights reserved. &middot; Design Partner Preview &middot; Strictly Confidential</footer>
 
 </div>
 </body>

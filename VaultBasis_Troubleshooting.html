@@ -6,58 +6,67 @@
   <title>VaultBasis Edge — Troubleshooting</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    :root { --bg:#07090e; --surface:#0e121a; --surface2:#141b27; --primary:#3b82f6; --text:#f1f5f9; --text-muted:#94a3b8; --border:#1e293b; --success:#10b981; --warning:#f59e0b; --danger:#ef4444; --info:#38bdf8; }
+    :root { --bg:#f8fafc; --surface:#ffffff; --surface-elevated:#f1f5f9; --border:#e2e8f0; --border-accent:#cbd5e1; --primary:#2563eb; --text:#0f172a; --text-muted:#475569; --success:#059669; --warning:#b45309; --danger:#dc2626; --info:#0284c7; --radius:12px; }
     * { box-sizing:border-box; margin:0; padding:0; }
-    body { background:var(--bg); color:var(--text); font-family:'Plus Jakarta Sans',sans-serif; line-height:1.7; }
+    body { background:var(--bg); color:var(--text); font-family:'Plus Jakarta Sans',-apple-system,sans-serif; line-height:1.7; }
     .container { max-width:760px; margin:0 auto; padding:2.5rem 1.5rem 4rem; }
-    .header { text-align:center; margin-bottom:2.5rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border); }
-    .header h1 { font-size:2rem; margin-bottom:.4rem; }
+    .brandbar { display:flex; align-items:center; gap:10px; margin-bottom:1.75rem; }
+    .brand-logo { width:32px; height:32px; background:linear-gradient(135deg,#2563eb,#0284c7); border-radius:8px; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:1rem; color:#fff; font-family:'Outfit',sans-serif; }
+    .brand-name { font-family:'Outfit',sans-serif; font-size:1.2rem; font-weight:800; letter-spacing:-0.01em; }
+    .header { margin-bottom:2rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border); }
+    .header h1 { font-family:'Outfit',sans-serif; font-size:1.9rem; font-weight:800; letter-spacing:-0.02em; margin-bottom:.4rem; }
     .header p { color:var(--text-muted); }
-    .badge { display:inline-block; margin-top:.5rem; padding:2px 10px; background:rgba(59,130,246,.15); border:1px solid rgba(59,130,246,.3); color:#60a5fa; border-radius:99px; font-size:.75rem; font-weight:600; }
-    .card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:1.75rem; margin-bottom:1.5rem; }
-    .card h2 { font-size:1.05rem; color:#fff; margin-bottom:.8rem; }
-    .card h3 { font-size:.95rem; color:#fff; margin:1.2rem 0 .5rem; }
-    p, li { color:#cbd5e1; font-size:.93rem; }
+    .badge { display:inline-block; margin-top:.5rem; padding:2px 10px; background:rgba(37,99,235,.08); border:1px solid rgba(37,99,235,.3); color:var(--primary); border-radius:99px; font-size:.75rem; font-weight:600; }
+    .card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:1.75rem; margin-bottom:1.25rem; box-shadow:0 1px 3px rgba(15,23,42,.05); }
+    .card h2 { font-size:1.05rem; color:var(--text); margin-bottom:.8rem; }
+    .card h3 { font-size:.95rem; color:var(--text); margin:1.2rem 0 .5rem; }
+    p, li { color:#334155; font-size:.93rem; }
     p { margin-bottom:.7rem; }
     ol, ul { padding-left:1.4rem; margin-bottom:.7rem; }
     li { margin-bottom:.45rem; }
-    .alert { border-radius:8px; padding:.875rem 1.125rem; margin:1rem 0; font-size:.88rem; }
-    .alert-warning { background:rgba(245,158,11,.08); border:1px solid rgba(245,158,11,.25); }
+    .alert { border-radius:8px; padding:.875rem 1.125rem; margin:1rem 0; font-size:.88rem; background:var(--surface-elevated); border:1px solid var(--border); }
+    .alert-warning { background:#fffbeb; border:1px solid #fcd34d; }
     .alert-warning strong { color:var(--warning); }
-    .alert-info { background:rgba(56,189,248,.08); border:1px solid rgba(56,189,248,.25); }
+    .alert-info { background:#f0f9ff; border:1px solid #7dd3fc; }
     .alert-info strong { color:var(--info); }
-    .alert-danger { background:rgba(239,68,68,.08); border:1px solid rgba(239,68,68,.25); }
+    .alert-danger { background:#fef2f2; border:1px solid #fca5a5; }
     .alert-danger strong { color:var(--danger); }
-    .terminal { background:#000; border:1px solid #1e3a5f; border-radius:8px; padding:1rem 1.25rem; font-family:'JetBrains Mono',monospace; font-size:.84rem; color:#4ade80; margin:1rem 0; overflow-x:auto; position:relative; }
+    .terminal { background:#0f172a; border:1px solid #1e293b; border-radius:8px; padding:1rem 1.25rem; font-family:'JetBrains Mono',monospace; font-size:.84rem; color:#4ade80; margin:1rem 0; overflow-x:auto; position:relative; }
     .terminal .prompt { color:#60a5fa; user-select:none; }
     .copy-btn { position:absolute; top:8px; right:10px; background:#1e3a5f; border:none; color:#94a3b8; cursor:pointer; border-radius:5px; font-size:.72rem; padding:3px 9px; font-family:inherit; }
-    details { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:.8rem 1rem; margin:.8rem 0; }
-    details summary { cursor:pointer; font-weight:600; color:#fff; font-size:.9rem; }
+    details { background:var(--surface-elevated); border:1px solid var(--border); border-radius:8px; padding:.8rem 1rem; margin:.8rem 0; }
+    details summary { cursor:pointer; font-weight:600; color:var(--text); font-size:.9rem; }
     details .body { margin-top:.8rem; }
     .divider { border:none; border-top:1px solid var(--border); margin:1.25rem 0; }
     .footer { text-align:center; color:var(--text-muted); font-size:.78rem; margin-top:3rem; border-top:1px solid var(--border); padding-top:1.5rem; }
-    code.inline { background:var(--surface2); padding:1px 6px; border-radius:4px; font-family:'JetBrains Mono',monospace; font-size:.82rem; color:#93c5fd; }
+    code.inline { background:var(--surface-elevated); padding:1px 6px; border-radius:4px; font-family:'JetBrains Mono',monospace; font-size:.82rem; color:#1d4ed8; border:1px solid var(--border); }
   </style>
 </head>
 <body>
 <div class="container">
+  <div class="brandbar"><div class="brand-logo">V</div><span class="brand-name">VaultBasis</span></div>
   <div class="header">
-    <h1>VaultBasis Edge — Troubleshooting</h1>
-    <p>Design Partner Preview &middot; Only open this guide if the Quick Start did not work</p>
+    <h1>Troubleshooting</h1>
+    <p>VaultBasis Edge &middot; Design Partner Preview &middot; Start with what happened below</p>
     <span class="badge">CONFIDENTIAL &middot; DESIGN PARTNER ONLY</span>
   </div>
 
   <div class="card">
-    <h2>Start here — What do you see?</h2>
-    <p>Find the description below that matches your screen, then follow that section only.</p>
+    <h2>What happened?</h2>
     <ol>
+      <li><strong>macOS says there is no application to open the document</strong> → Section A0</li>
       <li><strong>macOS says the app "cannot be verified" or "cannot be opened"</strong> → Section A</li>
-      <li><strong>VaultBasis starts but the browser does not open</strong> → Section B</li>
-      <li><strong>Browser says "cannot connect" at 127.0.0.1:8000</strong> → Section C</li>
+      <li><strong>VaultBasis starts but the workspace does not appear</strong> → Section B</li>
+      <li><strong>Browser says "cannot connect"</strong> → Section C</li>
       <li><strong>Windows SmartScreen blue screen</strong> → Section D</li>
       <li><strong>Receipt will not download or will not verify</strong> → Section E</li>
     </ol>
-    <div class="alert alert-info"><strong>Rule:</strong> Do not close the small black terminal window while you are working. Closing it stops VaultBasis. The browser alone is not the application.</div>
+  </div>
+
+  <div class="card">
+    <h2>A0. macOS treats the file as a Document — "no application to open"</h2>
+    <div class="alert alert-danger"><strong>Do not use "Choose Application" to force it to run.</strong> A file macOS cannot recognize as an application is not a qualified VaultBasis installer. Forcing it open is not the practitioner journey and may leave your machine in an unknown state.</div>
+    <p>Stop here and reply to your download email with a screenshot. You have encountered a packaging defect: the distributed file is not a launchable macOS application. Your files have not been changed.</p>
   </div>
 
   <div class="card">
@@ -129,8 +138,8 @@
   <div class="card">
     <h2>Advanced — one-time Terminal fix (macOS, all versions)</h2>
     <p>Only use this if the sections above did not work. This takes about 30 seconds.</p>
-    <details open>
-      <summary>Show the Terminal step</summary>
+    <details>
+      <summary>Advanced diagnostics (for technical support)</summary>
       <div class="body">
         <ol>
           <li>Open <strong>Terminal</strong> (press ⌘ Space, type <strong>Terminal</strong>, press Enter).</li>

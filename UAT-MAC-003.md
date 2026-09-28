@@ -91,10 +91,31 @@
 
 ---
 
-## Next Steps
+## Mac 3 Finder document-association finding (2026-09-28, screenshot on file)
 
-1. **Do NOT modify vaultbasis-mmp1-rc2** — Keep RC2 immutable
-2. **Root-cause the packaging defects** — Determine if documentation-only or requires package change
-3. **If package change required → Cut RC3** — Then test systematically across declared OS matrix
-4. **Declare supported platforms explicitly** — e.g., macOS 14+ Apple Silicon only for MMP-1
-5. **Rewrite Quick Start as three artifacts** — Practitioner Quick Start, Troubleshooting, Technical Guide
+- **Served package name (visible in Finder):** `VaultBasis-RC1-DesignPartner` — the live
+  endpoint still distributes the stale RC1 assembly, not RC2.
+- **Observed:** Finder identifies `VaultBasis-Edge-v0.1.0-preview-macOS` as a **Document**,
+  not a launchable application. Double-click produces "There is no application set to
+  open the document…" with a "Choose Application…" prompt. The user never reaches
+  VaultBasis — before any Gatekeeper dialog, terminal, or browser step.
+- **Expected:** correct qualified Mac artifact that opens normally with no Terminal,
+  shell commands, application-choosing, or localhost address.
+- **Do NOT work around via "Choose Application"** — forcing execution proves a developer
+  can rescue a broken distribution, the opposite of the acceptance criterion.
+
+## Verdict on this exact distributed package
+
+**NOT QUALIFIED / DO NOT RETEST.** Package name, obsolete guide, and non-launchable
+artifact are each independently disqualifying. Preserve screenshots + download.
+Next Mac test starts only after the RC3-MAC artifact passes assembly and publication
+verification (hash-compared, not CI output).
+
+## Superseded interim notes (kept for history; governed by RC3 scope now)
+
+~~1. Do NOT modify vaultbasis-mmp1-rc2 — Keep RC2 immutable~~ — affirmed: RC2 sealed.
+~~2. Root-cause the packaging defects~~ — done: raw unsigned executable + stale assembly.
+~~3. If package change required → Cut RC3~~ — decided: RC3 multi-platform packaging baseline.
+~~4. Declare supported platforms explicitly~~ — done in RC3 scope target matrix.
+~~5. Rewrite Quick Start as three artifacts~~ — done: practitioner Quick Start (two-click,
+zero commands), Troubleshooting (choice-first), Technical Guide (admin-only).
