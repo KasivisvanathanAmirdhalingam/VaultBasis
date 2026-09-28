@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VaultBasis Edge — Troubleshooting</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg:#07090e; --surface:#0e121a; --surface2:#141b27; --primary:#3b82f6; --text:#f1f5f9; --text-muted:#94a3b8; --border:#1e293b; --success:#10b981; --warning:#f59e0b; --danger:#ef4444; --info:#38bdf8; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { background:var(--bg); color:var(--text); font-family:'Plus Jakarta Sans',sans-serif; line-height:1.7; }
+    .container { max-width:760px; margin:0 auto; padding:2.5rem 1.5rem 4rem; }
+    .header { text-align:center; margin-bottom:2.5rem; padding-bottom:1.5rem; border-bottom:1px solid var(--border); }
+    .header h1 { font-size:2rem; margin-bottom:.4rem; }
+    .header p { color:var(--text-muted); }
+    .badge { display:inline-block; margin-top:.5rem; padding:2px 10px; background:rgba(59,130,246,.15); border:1px solid rgba(59,130,246,.3); color:#60a5fa; border-radius:99px; font-size:.75rem; font-weight:600; }
+    .card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:1.75rem; margin-bottom:1.5rem; }
+    .card h2 { font-size:1.05rem; color:#fff; margin-bottom:.8rem; }
+    .card h3 { font-size:.95rem; color:#fff; margin:1.2rem 0 .5rem; }
+    p, li { color:#cbd5e1; font-size:.93rem; }
+    p { margin-bottom:.7rem; }
+    ol, ul { padding-left:1.4rem; margin-bottom:.7rem; }
+    li { margin-bottom:.45rem; }
+    .alert { border-radius:8px; padding:.875rem 1.125rem; margin:1rem 0; font-size:.88rem; }
+    .alert-warning { background:rgba(245,158,11,.08); border:1px solid rgba(245,158,11,.25); }
+    .alert-warning strong { color:var(--warning); }
+    .alert-info { background:rgba(56,189,248,.08); border:1px solid rgba(56,189,248,.25); }
+    .alert-info strong { color:var(--info); }
+    .alert-danger { background:rgba(239,68,68,.08); border:1px solid rgba(239,68,68,.25); }
+    .alert-danger strong { color:var(--danger); }
+    .terminal { background:#000; border:1px solid #1e3a5f; border-radius:8px; padding:1rem 1.25rem; font-family:'JetBrains Mono',monospace; font-size:.84rem; color:#4ade80; margin:1rem 0; overflow-x:auto; position:relative; }
+    .terminal .prompt { color:#60a5fa; user-select:none; }
+    .copy-btn { position:absolute; top:8px; right:10px; background:#1e3a5f; border:none; color:#94a3b8; cursor:pointer; border-radius:5px; font-size:.72rem; padding:3px 9px; font-family:inherit; }
+    details { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:.8rem 1rem; margin:.8rem 0; }
+    details summary { cursor:pointer; font-weight:600; color:#fff; font-size:.9rem; }
+    details .body { margin-top:.8rem; }
+    .divider { border:none; border-top:1px solid var(--border); margin:1.25rem 0; }
+    .footer { text-align:center; color:var(--text-muted); font-size:.78rem; margin-top:3rem; border-top:1px solid var(--border); padding-top:1.5rem; }
+    code.inline { background:var(--surface2); padding:1px 6px; border-radius:4px; font-family:'JetBrains Mono',monospace; font-size:.82rem; color:#93c5fd; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>VaultBasis Edge — Troubleshooting</h1>
+    <p>Design Partner Preview &middot; Only open this guide if the Quick Start did not work</p>
+    <span class="badge">CONFIDENTIAL &middot; DESIGN PARTNER ONLY</span>
+  </div>
+
+  <div class="card">
+    <h2>Start here — What do you see?</h2>
+    <p>Find the description below that matches your screen, then follow that section only.</p>
+    <ol>
+      <li><strong>macOS says the app "cannot be verified" or "cannot be opened"</strong> → Section A</li>
+      <li><strong>VaultBasis starts but the browser does not open</strong> → Section B</li>
+      <li><strong>Browser says "cannot connect" at 127.0.0.1:8000</strong> → Section C</li>
+      <li><strong>Windows SmartScreen blue screen</strong> → Section D</li>
+      <li><strong>Receipt will not download or will not verify</strong> → Section E</li>
+    </ol>
+    <div class="alert alert-info"><strong>Rule:</strong> Do not close the small black terminal window while you are working. Closing it stops VaultBasis. The browser alone is not the application.</div>
+  </div>
+
+  <div class="card">
+    <h2>A. macOS — security message on first launch</h2>
+    <p>This preview build is distributed outside the Mac App Store and is not yet Apple-notarized. macOS Gatekeeper will block it the first time. That block is expected.</p>
+
+    <h3>If you have macOS 14 Sonoma or 13 Ventura</h3>
+    <ol>
+      <li>In Finder, <strong>right-click</strong> (or Control-click) the file <code class="inline">VaultBasis-Edge-v0.1.0-preview-macOS</code>.</li>
+      <li>Choose <strong>Open</strong>.</li>
+      <li>In the dialog, click <strong>Open</strong> again.</li>
+      <li>Enter your Mac password if asked. Do this once — macOS remembers.</li>
+    </ol>
+    <p>If no dialog appears, double-click the file once to trigger the block, then immediately open <strong>System Settings → Privacy &amp; Security</strong>, scroll to Security, and click <strong>Open Anyway</strong>.</p>
+
+    <h3>If you have macOS 15 Sequoia</h3>
+    <div class="alert alert-warning"><strong>Sequoia note (observed):</strong> On the tested Mac 3 / macOS 15 environment, the "Open Anyway" button did not appear for this quarantined standalone executable. We make no universal claim about all Sequoia systems — if you do not see it, use the launcher or the Terminal step below.</div>
+    <ol>
+      <li>Double-click <code class="inline">launch_vaultbasis.command</code> (included in the same folder as the application). If prompted, right-click it and choose <strong>Open</strong>.</li>
+      <li>The launcher clears the security flag and starts VaultBasis automatically.</li>
+    </ol>
+    <p>If the launcher itself is blocked, use the one-time Terminal step under "Advanced" below. It works on all macOS versions.</p>
+  </div>
+
+  <div class="card">
+    <h2>B. VaultBasis starts but the browser does not open</h2>
+    <p>The current preview build does <strong>not</strong> auto-open the browser on all machines. This is a known preview limitation, not a failure.</p>
+    <ol>
+      <li>Leave the black terminal window open.</li>
+      <li>Open Chrome, Safari, or Edge manually.</li>
+      <li>Type this address exactly:</li>
+    </ol>
+    <div class="terminal">http://127.0.0.1:8000</div>
+    <p>If the dashboard loads, continue with your case. No further fix is needed.</p>
+  </div>
+
+  <div class="card">
+    <h2>C. Browser says "cannot connect" or "refused to connect"</h2>
+    <ol>
+      <li>Check the black terminal window is still open. If it is closed, restart VaultBasis.</li>
+      <li>Wait 5 seconds after launch, then refresh the browser.</li>
+      <li>If another program already uses port 8000, quit that program and restart VaultBasis.</li>
+      <li>Try a different browser (Chrome → Safari, or Safari → Chrome).</li>
+    </ol>
+    <div class="alert alert-info"><strong>What this address means:</strong> <code class="inline">127.0.0.1:8000</code> is your own computer talking to itself. Nothing is sent over the internet. If your firewall asks, allow local connections only.</div>
+  </div>
+
+  <div class="card">
+    <h2>D. Windows — "Windows protected your PC" blue screen</h2>
+    <div class="alert alert-danger"><strong>Status:</strong> The Windows build is still under qualification. Only follow this section if you were explicitly given a Windows installer. The macOS file does not run on Windows.</div>
+    <ol>
+      <li>Click the underlined <strong>"More info"</strong> text.</li>
+      <li>Click <strong>"Run anyway"</strong> at the bottom.</li>
+      <li>Click <strong>Yes</strong> if Windows asks for permission.</li>
+    </ol>
+    <p>You only do this once. If Windows still blocks it after these steps, stop and reply to your download email — do not disable SmartScreen or antivirus globally.</p>
+  </div>
+
+  <div class="card">
+    <h2>E. Receipt will not download or will not verify</h2>
+    <ol>
+      <li>A receipt is only produced <strong>after</strong> a reconciliation run completes. Run <strong>"Run Deterministic Reconciliation"</strong> first, then open the Receipt screen.</li>
+      <li>The Evidence Bundle (.zip) contains the signed receipt, the source files you uploaded, the schema, and an offline verifier. All four must stay together for independent verification.</li>
+      <li>To verify on a clean machine, use the included <code class="inline">verify_receipt.py</code> or the web verifier — no VaultBasis account or network connection is required.</li>
+    </ol>
+    <div class="alert alert-warning"><strong>What the signature means — and does not mean:</strong> The signature proves the receipt content has not been altered since it was signed by your local installation key, under the verification scheme in the bundle. It does not by itself prove where the software was run, and it does not determine tax or legal compliance. VaultBasis reports what matches, what differs, and what is unresolved. Your reviewer makes the compliance determination.</div>
+  </div>
+
+  <div class="card">
+    <h2>Advanced — one-time Terminal fix (macOS, all versions)</h2>
+    <p>Only use this if the sections above did not work. This takes about 30 seconds.</p>
+    <details open>
+      <summary>Show the Terminal step</summary>
+      <div class="body">
+        <ol>
+          <li>Open <strong>Terminal</strong> (press ⌘ Space, type <strong>Terminal</strong>, press Enter).</li>
+          <li>Paste the following line, then press Enter. Enter your Mac password when asked (nothing appears while typing — that is normal):</li>
+        </ol>
+        <div class="terminal"><button class="copy-btn" onclick="copyCmd(this)">Copy</button><span class="prompt">$ </span>xattr -d com.apple.quarantine ~/Downloads/VaultBasis-Edge-v0.1.0-preview-macOS</div>
+        <p>If you see <em>No such xattr</em>, the flag is already cleared — skip ahead.</p>
+        <ol start="3">
+          <li>Double-click <code class="inline">VaultBasis-Edge-v0.1.0-preview-macOS</code> in Finder. It will launch.</li>
+        </ol>
+        <div class="alert alert-info"><strong>Different folder?</strong> Replace <code class="inline">~/Downloads/</code> with the folder path. Tip: drag the file from Finder into the Terminal window to paste its path automatically.</div>
+        <hr class="divider">
+        <p><strong>Terminal closes immediately?</strong> The file may be missing execute permission. Run:</p>
+        <div class="terminal"><button class="copy-btn" onclick="copyCmd(this)">Copy</button><span class="prompt">$ </span>chmod +x ~/Downloads/VaultBasis-Edge-v0.1.0-preview-macOS &amp;&amp; ~/Downloads/VaultBasis-Edge-v0.1.0-preview-macOS</div>
+      </div>
+    </details>
+  </div>
+
+  <div class="card">
+    <h2>Still blocked? Send this</h2>
+    <p>Reply to the email that contained your download link and include:</p>
+    <ol>
+      <li>Your operating system and version (Apple menu → About This Mac, or Windows Settings → System → About).</li>
+      <li>Your chip: Apple Silicon M1/M2/M3/M4, Intel, or Windows x64/ARM.</li>
+      <li>The exact message on screen (screenshot if possible).</li>
+      <li>Which section of this guide you followed.</li>
+    </ol>
+    <div class="alert alert-warning"><strong>Not supported in this preview:</strong> Intel Macs (untested), Linux desktop, iPadOS / iOS, Android, ChromeOS. The macOS preview binary is Apple Silicon (arm64) only. Running it on any other architecture will fail.</div>
+  </div>
+
+  <div class="footer">© 2026 VaultBasis. All rights reserved. &middot; Design Partner Preview &middot; Strictly Confidential</div>
+</div>
+<script>
+  function copyCmd(btn) {
+    const t = btn.closest('.terminal');
+    const text = t.innerText.replace('Copy','').replace(/^\$\s+/,'').trim();
+    navigator.clipboard.writeText(text).then(() => { btn.textContent='Copied!'; setTimeout(()=>btn.textContent='Copy',2000); });
+  }
+</script>
+</body>
+</html>

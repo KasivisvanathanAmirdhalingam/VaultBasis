@@ -65,6 +65,15 @@ def build():
         if os.path.exists(guide_path):
             zipf.write(guide_path, arcname=guide_path)
 
+        # Include the macOS one-click launcher script (must preserve execute bit)
+        launcher_path = "launch_vaultbasis.command"
+        if os.path.exists(launcher_path):
+            launcher_info = zipfile.ZipInfo(launcher_path)
+            lst = os.stat(launcher_path)
+            launcher_info.external_attr = (lst.st_mode & 0xFFFF) << 16
+            with open(launcher_path, 'rb') as lf:
+                zipf.writestr(launcher_info, lf.read())
+
     print(f"==> SUCCESS: Created deployable artifact -> {zip_path}")
 
 if __name__ == "__main__":

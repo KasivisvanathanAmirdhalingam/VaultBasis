@@ -33,11 +33,12 @@ def test_marketing_site_header_footer_and_anchor_links():
     assert marketing_file.is_file(), "apps/web-marketing/index.html must exist"
     html = marketing_file.read_text(encoding="utf-8")
 
-    # 1. Header Navigation elements
+    # 1. Header Navigation elements (current regulatory-approved copy;
+    # "What We Verify"/"Evidence Hub" renamed in P0/P1 fixes e3e63b9 + 9e68178)
     assert "Why Reconcile?" in html
-    assert "What We Verify" in html
+    assert "Evaluation Boundary" in html
     assert "Local Evidence" in html
-    assert "Evidence Hub" in html
+    assert "Assurance Evidence" in html
     assert "Verify an Outcome Receipt" in html
     assert "Request Design-Partner Access" in html
 
@@ -47,10 +48,12 @@ def test_marketing_site_header_footer_and_anchor_links():
     for anchor in anchors:
         assert f'id="{anchor}"' in html, f"Broken link: href='#{anchor}' found but id='{anchor}' does not exist in DOM"
 
-    # 3. Standard multi-column footer presence
+    # 3. Standard multi-column footer presence (entity fix 9e68178:
+    # "TecTixBase EURL" attribution intentionally removed — must not reappear)
     assert 'class="site-footer"' in html
     assert "IMPORTANT LIMITATION NOTICE" in html
-    assert "VaultBasis, a product of TecTixBase EURL." in html
+    assert "© 2026 VaultBasis" in html
+    assert "TecTixBase" not in html
 
     # 4. Sticky header clearance (scroll-padding-top)
     assert "scroll-padding-top" in html, "scroll-padding-top required for sticky header anchor clearance"
@@ -81,9 +84,10 @@ def test_web_verifier_interactive_controls_and_footer():
     assert "Declared Key Fingerprint Consistency" in html
     assert "Ed25519 Cryptographic Signature" in html
 
-    # Standard footer
+    # Standard footer (jargon-removal fix 9e68178 renamed
+    # "STATUTORY LIMITATION NOTICE (PRD §27 & §44.6)" to plain-language notice)
     assert 'class="site-footer"' in html
-    assert "STATUTORY LIMITATION NOTICE" in html
+    assert "IMPORTANT NOTICE:" in html
 
 
 @pytest.mark.regression

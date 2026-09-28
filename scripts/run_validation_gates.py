@@ -228,7 +228,7 @@ def check_gate_offline_verifier() -> GateResult:
         "tests/fixtures/golden_receipt_valid.json",
         "--no-color",
     ])
-    valid_ok = (code_valid == 0) and ("VERIFICATION REPORT — PASS" in out_valid)
+    valid_ok = (code_valid == 0) and ("PAYLOAD & SIGNATURE VERIFIED" in out_valid)
 
     # 7b: Tampered Golden Receipt
     code_tamper, out_tamper, _ = run_cmd([
@@ -237,7 +237,7 @@ def check_gate_offline_verifier() -> GateResult:
         "tests/fixtures/golden_receipt_tampered.json",
         "--no-color",
     ])
-    tamper_ok = (code_tamper != 0) and ("VERIFICATION REPORT — FAIL" in out_tamper)
+    tamper_ok = (code_tamper != 0) and ("VERIFICATION FAILED" in out_tamper)
 
     dur = time.time() - t0
     if valid_ok and tamper_ok:
