@@ -17,7 +17,8 @@ def build():
     print(f"==> Initiating VaultBasis Desktop Build for {system}")
     print(f"==> Target Binary: {binary_name}")
 
-    # 3. PyInstaller strict compilation (onefile, hidden console, stripped, encrypted)
+    # 3. PyInstaller onefile bundle (console kept for preview diagnostics;
+    # signing/notarization/hardening tracked in RC3 scope, not claimed here)
     cmd = [
         sys.executable, "-m", "PyInstaller",
         "--name", binary_name,

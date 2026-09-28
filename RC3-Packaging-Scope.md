@@ -12,10 +12,32 @@ inspect or decompile.
 
 ## Release pipeline (CI green ≠ release)
 
-GitHub Actions GREEN → build artifacts exist → NOT YET A QUALIFIED RELEASE →
-RC3 packaging → sign (+ notarize macOS) → kernel-equivalence regression →
-clean-machine qualification per platform → freeze/tag/hash → publish immutable
-artifact → website download endpoint serves that exact hash → distributed UAT.
+```
+         Qualified MMP-1 Assurance Kernel
+                      │
+            RC3 Packaging Baseline
+                      │
+      ┌───────────────┴───────────────┐
+      ▼                               ▼
+ RC3-MAC arm64                   RC3-WIN x64
+ signed/notarized                signed installer
+ clean-machine                   clean-machine
+ qualification                   qualification
+      │                               │
+      └───────────────┬───────────────┘
+                      ▼
+         Cross-Platform Equivalence
+                      ↓
+             Release Qualification
+                      ↓
+             Freeze / Tag / Hash
+                      ↓
+         Exact Artifact Publication
+                      ↓
+            Distributed Blind UAT
+                      ↓
+                 CPA-001 Gate
+```
 
 No artifact is "supported" until it passes its own distribution gate. A CI-generated
 Windows ZIP is not automatically a supported Windows release. Vercel deployments and
@@ -107,6 +129,12 @@ stripping; debug-metadata removal; release-only builds; package integrity checks
 secrets externalization; secure local key storage; dependency minimization (+SBOM/
 scanning); reproducible release manifests; OS-native signing above all.
 
+Security-evidence rule (frozen): a control counts only when IMPLEMENTED, automatically
+tested where feasible, and evidenced against the frozen release artifact. The release
+manifest MUST label every claimed control IMPLEMENTED, VERIFIED, PLANNED, or
+NOT APPLICABLE. Mentions in architecture docs or code comments are not evidence.
+(PyArmor/Cython are PLANNED until they exist in the build + a gate checks them.)
+
 Current baseline (honest): plain PyInstaller onefile, unsigned, unnotarized
 (`scripts/build_desktop_executable.py` comment claims "stripped, encrypted" — no `--key`
 or strip step exists; do not repeat that claim). PyArmor/Cython appear in task-ledger
@@ -120,11 +148,19 @@ secrets in the binary at all.
 ## Computational equivalence (cross-platform)
 
 Same canonical input → Mac result vs Windows result → byte/semantic comparison.
-Precision required: byte-identical for canonical payloads, digests, difference records,
-and outcome states; semantically equivalent (not byte-identical) where platform-local
-material differs by design — installation signatures/fingerprints (per-install keys),
-timestamps, installation-specific paths. Equivalence failures fail RC3 regardless of
-install/launch success.
+Never compare whole receipts byte-for-byte: installation-specific material legitimately
+differs. Instead each platform MUST produce identical canonical bytes and SHA-256 digest
+for the normative equivalence projection:
+
+- receipt_version, canonicalization_version, ruleset_id, engine_version, policy_version
+- case_id, claim_type, source_ids, source_hashes, source_schema_ids
+- assurance_level, outcome_state, material_differences (all records, exact decimals),
+  unresolved_items
+- canonical representation of the above per `schemas/receipt/canonicalization-v0.1.md`
+
+Excluded from comparison (per-install / per-environment by design): `signature`,
+`signer_key_id`, `signer_public_key`, `receipt_id`, `created_at`, local paths.
+Equivalence failures fail RC3 regardless of install/launch success.
 
 ## Packaging invariance (binding discipline)
 Packaging must not become a new computational build. Every RC3 commit traceable to
@@ -150,6 +186,22 @@ account, install → launch → sample → receipt → hosted/offline verify →
 uninstall/reinstall → tampered negative.
 Windows: 11 x64 machine A, machine B, one with meaningful security enforcement
 (Smart App Control), non-developer account, same journey, no PowerShell/CMD.
+
+## Architecture-leakage gate (fails the build)
+Detected during qualification, never by a tester afterward:
+- macOS arm64 artifact containing x86-only dependencies (verify with `file`/`lipo`;
+  fail on wrong-arch Mach-O objects).
+- Windows package requiring a locally installed Python (must launch on a clean machine
+  with no Python present; fail on interpreter-not-found).
+- Either artifact depending on Docker, developer tooling, or a build-machine path
+  (fail on docker-socket/client imports in the packaged app, absolute build paths,
+  or missing bundled resources).
+- Dependency audit against the frozen artifact (SBOM diff vs approved set).
+
+## Platform claims stay narrow
+Passing macOS arm64 + Windows x64 means exactly the declared and tested configurations
+are supported — never "works on all major operating systems." Intel Mac, Windows ARM,
+Linux, and tablets remain separate qualification decisions with their own gates.
 
 ## Evidence preserved
 RC2 → automated PASS → clean-machine FAIL (UAT-MAC-003) → root cause → packaging
