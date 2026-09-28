@@ -5,6 +5,9 @@ Conforms to PRD §14.3 (13 Outcome States), §15.1 (Exact Decimal Arithmetic), �
 
 from decimal import Decimal
 from typing import Any, Dict, List, Optional, Tuple
+
+from dateutil import parser as dateutil_parser
+
 from schemas.canonical.case import CanonicalCase
 from schemas.canonical.transaction import CanonicalTransaction
 
@@ -136,9 +139,8 @@ class DeterministicReconciliationEngine:
                     dates_match = True
                 else:
                     try:
-                        import dateutil.parser
-                        dt_a = dateutil.parser.isoparse(tx_a.disposition_date)
-                        dt_b = dateutil.parser.isoparse(tx_b.disposition_date)
+                        dt_a = dateutil_parser.isoparse(tx_a.disposition_date)
+                        dt_b = dateutil_parser.isoparse(tx_b.disposition_date)
                         if dt_a.tzinfo is None and dt_b.tzinfo is not None:
                             result.unresolved_items.append({"item_id": "tz_miss_a", "reason_code": "TIMEZONE_CONTEXT_MISSING", "affected_source_id": src_a_id, "affected_row_ref": tx_a.source_row_reference, "description": "", "rule_reference": "US_IRC_1099DA_2025_2026_V1", "provenance_references": prov_a})
                             dates_match = True
@@ -246,11 +248,10 @@ class DeterministicReconciliationEngine:
                         "provenance_references": prov_both
                     })
             elif tx_a.acquisition_date != tx_b.acquisition_date:
-                import dateutil.parser
                 match_dates = False
                 try:
-                    dt_a = dateutil.parser.isoparse(tx_a.acquisition_date)
-                    dt_b = dateutil.parser.isoparse(tx_b.acquisition_date)
+                    dt_a = dateutil_parser.isoparse(tx_a.acquisition_date)
+                    dt_b = dateutil_parser.isoparse(tx_b.acquisition_date)
                     if dt_a.tzinfo is None and dt_b.tzinfo is not None:
                         result.unresolved_items.append({"item_id": "tz_miss_a_acq", "reason_code": "TIMEZONE_CONTEXT_MISSING", "affected_source_id": src_a_id, "affected_row_ref": tx_a.source_row_reference, "description": "", "rule_reference": "US_IRC_1099DA_2025_2026_V1", "provenance_references": prov_a})
                         match_dates = True
