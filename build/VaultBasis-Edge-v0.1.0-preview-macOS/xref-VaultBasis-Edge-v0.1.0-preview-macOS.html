@@ -23893,6 +23893,7 @@ imports:
  &#8226;   <a href="#edge.connectors.exceptions">edge.connectors.exceptions</a>
  &#8226;   <a href="#io">io</a>
  &#8226;   <a href="#json">json</a>
+ &#8226;   <a href="#pydantic">pydantic</a>
  &#8226;   <a href="#schemas.canonical.transaction">schemas.canonical.transaction</a>
  &#8226;   <a href="#typing">typing</a>
 
@@ -23933,6 +23934,8 @@ imports:
  &#8226;   <a href="#edge.connectors">edge.connectors</a>
  &#8226;   <a href="#edge.connectors.exceptions">edge.connectors.exceptions</a>
  &#8226;   <a href="#io">io</a>
+ &#8226;   <a href="#json">json</a>
+ &#8226;   <a href="#pydantic">pydantic</a>
  &#8226;   <a href="#schemas.canonical.transaction">schemas.canonical.transaction</a>
  &#8226;   <a href="#typing">typing</a>
 
@@ -23960,6 +23963,7 @@ imports:
  &#8226;   <a href="#edge.connectors.vaultbasis_csv_parser">edge.connectors.vaultbasis_csv_parser</a>
  &#8226;   <a href="#pydantic">pydantic</a>
  &#8226;   <a href="#schemas.canonical.case">schemas.canonical.case</a>
+ &#8226;   <a href="#schemas.canonical.preflight">schemas.canonical.preflight</a>
  &#8226;   <a href="#schemas.canonical.transaction">schemas.canonical.transaction</a>
  &#8226;   <a href="#typing">typing</a>
 
@@ -27419,6 +27423,7 @@ imported by:
  &#8226;   <a href="#re">re</a>
  &#8226;   <a href="#rich.color">rich.color</a>
  &#8226;   <a href="#rich.segment">rich.segment</a>
+ &#8226;   <a href="#schemas.canonical.preflight">schemas.canonical.preflight</a>
  &#8226;   <a href="#setuptools._vendor.packaging._elffile">setuptools._vendor.packaging._elffile</a>
  &#8226;   <a href="#signal">signal</a>
  &#8226;   <a href="#socket">socket</a>
@@ -38452,6 +38457,7 @@ imported by:
  &#8226;   <a href="#debugpy.common.json">debugpy.common.json</a>
  &#8226;   <a href="#edge.api.app">edge.api.app</a>
  &#8226;   <a href="#edge.connectors.form1099da_parser">edge.connectors.form1099da_parser</a>
+ &#8226;   <a href="#edge.connectors.koinly_parser">edge.connectors.koinly_parser</a>
  &#8226;   <a href="#edge.receipts.canonicalizer">edge.receipts.canonicalizer</a>
  &#8226;   <a href="#edge.storage.sqlite_store">edge.storage.sqlite_store</a>
  &#8226;   <a href="#fastapi.openapi.docs">fastapi.openapi.docs</a>
@@ -48501,6 +48507,8 @@ imports:
   <div class="import">
 imported by:
     <a href="#edge.api.app">edge.api.app</a>
+ &#8226;   <a href="#edge.connectors.form1099da_parser">edge.connectors.form1099da_parser</a>
+ &#8226;   <a href="#edge.connectors.koinly_parser">edge.connectors.koinly_parser</a>
  &#8226;   <a href="#edge.connectors.validator">edge.connectors.validator</a>
  &#8226;   <a href="#fastapi._compat.shared">fastapi._compat.shared</a>
  &#8226;   <a href="#fastapi._compat.v2">fastapi._compat.v2</a>
@@ -48564,6 +48572,7 @@ imported by:
  &#8226;   <a href="#pydantic.version">pydantic.version</a>
  &#8226;   <a href="#pydantic.warnings">pydantic.warnings</a>
  &#8226;   <a href="#schemas.canonical.case">schemas.canonical.case</a>
+ &#8226;   <a href="#schemas.canonical.preflight">schemas.canonical.preflight</a>
  &#8226;   <a href="#schemas.canonical.transaction">schemas.canonical.transaction</a>
 
   </div>
@@ -48591,6 +48600,7 @@ imported by:
  &#8226;   <a href="#pydantic._internal._typing_extra">pydantic._internal._typing_extra</a>
  &#8226;   <a href="#pydantic.deprecated.copy_internals">pydantic.deprecated.copy_internals</a>
  &#8226;   <a href="#schemas.canonical.case">schemas.canonical.case</a>
+ &#8226;   <a href="#schemas.canonical.preflight">schemas.canonical.preflight</a>
  &#8226;   <a href="#schemas.canonical.transaction">schemas.canonical.transaction</a>
 
   </div>
@@ -64697,6 +64707,7 @@ imports:
   <div class="import">
 imported by:
     <a href="#schemas.canonical.case">schemas.canonical.case</a>
+ &#8226;   <a href="#schemas.canonical.preflight">schemas.canonical.preflight</a>
  &#8226;   <a href="#schemas.canonical.transaction">schemas.canonical.transaction</a>
 
   </div>
@@ -64721,6 +64732,26 @@ imported by:
  &#8226;   <a href="#edge.assurance.reconciliation_engine">edge.assurance.reconciliation_engine</a>
  &#8226;   <a href="#edge.connectors.validator">edge.connectors.validator</a>
  &#8226;   <a href="#edge.storage.sqlite_store">edge.storage.sqlite_store</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="schemas.canonical.preflight"></a>
+  <a target="code" href="/Users/kasivisvanathanamirdhalingam/Downloads/VaultBasis/schemas/canonical/preflight.py" type="text/plain"><tt>schemas.canonical.preflight</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#enum">enum</a>
+ &#8226;   <a href="#pydantic">pydantic</a>
+ &#8226;   <a href="#pydantic.BaseModel">pydantic.BaseModel</a>
+ &#8226;   <a href="#schemas.canonical">schemas.canonical</a>
+ &#8226;   <a href="#typing">typing</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#edge.connectors.validator">edge.connectors.validator</a>
 
   </div>
 
@@ -73710,6 +73741,7 @@ imported by:
  &#8226;   <a href="#rich.theme">rich.theme</a>
  &#8226;   <a href="#rich.traceback">rich.traceback</a>
  &#8226;   <a href="#schemas.canonical.case">schemas.canonical.case</a>
+ &#8226;   <a href="#schemas.canonical.preflight">schemas.canonical.preflight</a>
  &#8226;   <a href="#schemas.canonical.transaction">schemas.canonical.transaction</a>
  &#8226;   <a href="#setuptools">setuptools</a>
  &#8226;   <a href="#setuptools._distutils._modified">setuptools._distutils._modified</a>
