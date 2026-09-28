@@ -17,6 +17,9 @@ from fastapi.responses import HTMLResponse, JSONResponse, Response, StreamingRes
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
+import os
+import sys
+
 from apps.verifier.verify_receipt import verify_outcome_receipt
 from edge.assurance.reconciliation_engine import DeterministicReconciliationEngine
 from edge.connectors.validator import IntakeDispatcher
@@ -26,13 +29,48 @@ from edge.storage.sqlite_store import SQLiteStore
 from schemas.canonical.case import CanonicalCase
 
 
+def _resource_base() -> Path:
+    # Dev/CI: repository checkout layout. Frozen (PyInstaller .app / .exe):
+    # probe candidate roots for the bundled resources instead of trusting CWD,
+    # so the app behaves identically wherever the user launches it from.
+    if getattr(sys, "frozen", False):
+        exe_dir = Path(sys.executable).resolve().parent
+        candidates = []
+        meipass = getattr(sys, "_MEIPASS", None)
+        if meipass:
+            candidates.append(Path(meipass))
+        candidates += [
+            exe_dir,
+            exe_dir / "Resources",
+            exe_dir.parent / "Resources",  # macOS Contents/MacOS -> Contents/Resources
+            exe_dir.parent,
+        ]
+        for cand in candidates:
+            if (cand / "apps" / "web-dashboard" / "index.html").is_file():
+                return cand
+        return candidates[0]
+    return Path(__file__).resolve().parent.parent.parent
+
+
+def _user_data_dir() -> Path:
+    # Frozen apps must never write beside the bundle: per-OS user data location.
+    if getattr(sys, "frozen", False):
+        if sys.platform == "darwin":
+            return Path.home() / "Library" / "Application Support" / "VaultBasis"
+        if sys.platform == "win32":
+            base = os.environ.get("LOCALAPPDATA", str(Path.home() / "AppData" / "Local"))
+            return Path(base) / "VaultBasis"
+        return Path.home() / ".local" / "share" / "vaultbasis"
+    return Path(__file__).resolve().parent.parent.parent / "data"
+
+
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
-DATA_DIR = REPO_ROOT / "data"
+RESOURCE_BASE = _resource_base()
+DATA_DIR = _user_data_dir()
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 # Initialize local key manager and SQLite store
 KEY_DIR = DATA_DIR / "keys"
-import os
 DB_FILE = os.environ.get("VAULTBASIS_DB_FILE", "vaultbasis.db")
 DB_PATH = DATA_DIR / DB_FILE
 
@@ -292,11 +330,11 @@ def export_evidence_bundle(case_id: str):
             json.dumps(receipt, indent=2)
         )
         # 2. Standalone offline verifier script
-        verifier_cli_path = REPO_ROOT / "apps" / "verifier" / "verify_receipt.py"
+        verifier_cli_path = RESOURCE_BASE / "apps" / "verifier" / "verify_receipt.py"
         if verifier_cli_path.exists():
             zip_file.writestr("verify_receipt.py", verifier_cli_path.read_text())
         # 3. Normative Schema
-        schema_path = REPO_ROOT / "schemas" / "receipt" / "receipt-v0.1.json"
+        schema_path = RESOURCE_BASE / "schemas" / "receipt" / "receipt-v0.1.json"
         if schema_path.exists():
             zip_file.writestr("schemas/receipt-v0.1.json", schema_path.read_text())
         # 4. Source Files
@@ -342,9 +380,9 @@ async def verify_uploaded_receipt(file: UploadFile = File(...)):
 # Mount Dashboard and Verifier Web UI
 # ------------------------------------------------------------------------------
 
-WEB_DASHBOARD_DIR = REPO_ROOT / "apps" / "web-dashboard"
-WEB_VERIFIER_DIR = REPO_ROOT / "apps" / "web-verifier"
-WEB_MARKETING_DIR = REPO_ROOT / "apps" / "web-marketing"
+WEB_DASHBOARD_DIR = RESOURCE_BASE / "apps" / "web-dashboard"
+WEB_VERIFIER_DIR = RESOURCE_BASE / "apps" / "web-verifier"
+WEB_MARKETING_DIR = RESOURCE_BASE / "apps" / "web-marketing"
 
 if WEB_DASHBOARD_DIR.exists():
     app.mount("/static", StaticFiles(directory=str(WEB_DASHBOARD_DIR)), name="static")
@@ -377,7 +415,7 @@ def serve_marketing():
 
 @app.get("/schemas/{filename:path}")
 def serve_schema(filename: str):
-    schema_path = REPO_ROOT / "schemas" / "receipt" / filename
+    schema_path = RESOURCE_BASE / "schemas" / "receipt" / filename
     if schema_path.is_file():
         return Response(content=schema_path.read_text(), media_type="application/json")
     raise HTTPException(status_code=404, detail="Schema file not found")
@@ -388,7 +426,7 @@ def serve_scope_and_limitations():
     # Rendered via the single stdlib renderer (scripts/md_to_html.py), same as
     # the Vercel bundle — practitioners never receive raw markdown.
     from scripts.md_to_html import render_page
-    doc_path = REPO_ROOT / "docs" / "scope_and_limitations_v0.1.md"
+    doc_path = RESOURCE_BASE / "docs" / "scope_and_limitations_v0.1.md"
     if not doc_path.is_file():
         raise HTTPException(status_code=404, detail="Scope & Limitations document not found")
     return HTMLResponse(
@@ -398,10 +436,17 @@ def serve_scope_and_limitations():
     )
 
 
+def _sample_path(name: str) -> Path:
+    bundled = RESOURCE_BASE / "sample" / name
+    if bundled.is_file():
+        return bundled
+    return REPO_ROOT / "tests" / "fixtures" / name
+
+
 @app.get("/sample-receipt.json")
 @app.get("/api/sample-receipt")
 def get_sample_receipt():
-    sample_path = REPO_ROOT / "tests" / "fixtures" / "golden_receipt_valid.json"
+    sample_path = _sample_path("golden_receipt_valid.json")
     if sample_path.is_file():
         return JSONResponse(content=json.loads(sample_path.read_text()))
     raise HTTPException(status_code=404, detail="Sample receipt not found")
@@ -409,7 +454,7 @@ def get_sample_receipt():
 
 @app.get("/sample-receipt-tampered.json")
 def get_sample_receipt_tampered():
-    sample_path = REPO_ROOT / "tests" / "fixtures" / "golden_receipt_tampered.json"
+    sample_path = _sample_path("golden_receipt_tampered.json")
     if sample_path.is_file():
         return JSONResponse(content=json.loads(sample_path.read_text()))
     raise HTTPException(status_code=404, detail="Tampered sample receipt not found")

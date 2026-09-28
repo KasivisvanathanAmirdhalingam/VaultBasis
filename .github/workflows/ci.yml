@@ -71,3 +71,36 @@ jobs:
         path: dist/*-Release.zip
         retention-days: 7
 
+  rc3-candidates:
+    name: RC3 Candidate Packages (NOT qualified releases)
+    needs: validate
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+            script: scripts/build_rc3_macos.py
+          - os: windows-latest
+            script: scripts/build_rc3_windows.py
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.10"
+
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+
+    - name: Assemble RC3 candidate package
+      run: python ${{ matrix.script }}
+
+    - name: Upload RC3 candidate (7-day workflow artifact, NOT a release)
+      uses: actions/upload-artifact@v4
+      with:
+        name: vaultbasis-rc3-candidate-${{ matrix.os }}
+        path: dist/VaultBasis-RC3-*
+        retention-days: 7
+
