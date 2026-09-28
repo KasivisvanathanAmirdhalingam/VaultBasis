@@ -182,6 +182,48 @@ uninstall/reinstall → tampered negative.
 Windows: 11 x64 machine A, machine B, one with meaningful security enforcement
 (Smart App Control), non-developer account, same journey, no PowerShell/CMD.
 
+## Platform-aware distribution gate (VB-RC2-UAT-009)
+Detection RECOMMENDS; it never silently decides alone. Flow: Download Edge →
+platform detection → OS + architecture resolution → qualified-artifact allowlist →
+download page shows "Recommended for this device" + explicit manual selector
+("Not your device? Choose another platform"). Browser/HTTP detection is incomplete,
+spoofable, privacy-reduced, and weak on CPU arch — when uncertain, show supported
+choices instead of guessing. Unknown or unqualified combinations resolve to:
+"This platform is not currently included in the VaultBasis Design-Partner Preview."
+The distributor understands arbitrary OS/arch pairs but serves ONLY built + qualified
+ones (macOS-arm64, Windows-x64 initially; Intel/ARM64/Linux/tablets only after their
+own gates). Reference matrix: macOS+ARM64 → RC3-MAC; Windows+x64 → RC3-WIN;
+macOS+Intel, Windows+ARM64, Linux, iPadOS, Android, Unknown → chooser/unavailable,
+never a guessed artifact.
+
+## Release manifest + version binding (VB-RC2-UAT-010)
+One deterministic assembly pipeline, never a hand-maintained ZIP: frozen commit
+(source + practitioner Quick Start + Troubleshooting + metadata + config) → CI build
+per platform → sign/notarize → platform tests → equivalence → package assembly
+(correct binary + current guides + metadata, per platform) → hashes + manifest →
+qualification → publication. Machine-readable release metadata
+(version/release/platform/arch/guide-revision/contract) travels with every artifact;
+CI asserts binary RC == guide RC == manifest RC == package RC == download metadata RC,
+else BUILD/PUBLISH FAIL. The website resolves release + OS + arch → exact immutable
+qualified artifact. No artifact enters the manifest before its OS/arch distribution
+qualification passes.
+
+## Package-content gate (automated)
+`scripts/check_release_content.py` runs in CI (wired into `.github/workflows/ci.yml`):
+hard bans (`Release Candidate 1`, `VaultBasis Inc.`, `verify standard compliance`,
+`Simulate Audits`, `proves you ran`) across all practitioner-facing files, plus
+shell/bypass-instruction bans (`xattr`, `chmod`, `PowerShell`, `Open Anyway`,
+`Run anyway`) in the primary Quick Start. The primary Quick Start contains ZERO shell
+commands by requirement — double-click to running workspace; ports, daemons, Terminal,
+localhost addresses live in Troubleshooting/Technical only. Verified passing + proven
+to fail on poisoned input before merge.
+
+## Publication verification (fourth state)
+BUILD GREEN → ASSEMBLY VERIFIED → RELEASE QUALIFIED → PUBLICATION VERIFIED. The last
+transition requires a post-deployment test acting as a practitioner per platform:
+hit the live download endpoint, download, hash, inspect contents, compare against the
+frozen manifest. This is what catches wrong-platform and stale-guide defects.
+
 ## Architecture-leakage gate (fails the build)
 Detected during qualification, never by a tester afterward:
 - macOS arm64 artifact containing x86-only dependencies (verify with `file`/`lipo`;
@@ -192,6 +234,11 @@ Detected during qualification, never by a tester afterward:
   (fail on docker-socket/client imports in the packaged app, absolute build paths,
   or missing bundled resources).
 - Dependency audit against the frozen artifact (SBOM diff vs approved set).
+- Distribution leakage (VB-RC2-UAT-009): Windows request MUST NOT → macOS artifact;
+  macOS request MUST NOT → Windows artifact; arch request MUST NOT → wrong-arch
+  artifact without declared qualified compatibility; unknown platform MUST NOT →
+  guessed artifact; unqualified CI artifact MUST NOT → public/design-partner
+  download; stale RC1/RC2 artifact MUST NOT → RC3 download endpoint.
 
 ## Platform claims stay narrow
 Passing macOS arm64 + Windows x64 means exactly the declared and tested configurations
