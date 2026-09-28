@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>VaultBasis — Independent Reconciliation for Broker &amp; Tax-Ledger Outcomes</title>
-  <meta name="description" content="VaultBasis deterministically compares supported broker information with supported tax-ledger output, identifies agreements, differences, and unresolved information, and produces a signed Outcome Receipt that can be independently verified.">
+  <meta name="description" content="VaultBasis deterministically compares supported broker information with supported tax-ledger information, identifies agreements, differences, and unresolved information, and produces a signed Outcome Receipt that can be independently verified.">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -135,7 +135,7 @@
     .modal-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 2.5rem; max-width: 550px; width: 90%; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
     
     footer.site-footer { border-top: 1px solid var(--border); background: var(--surface); margin-top: auto; padding: 4rem 2rem 2rem 2rem; }
-    .footer-grid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 3rem; padding-bottom: 3rem; border-bottom: 1px solid var(--border); }
+    .footer-grid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; gap: 2rem; padding-bottom: 3rem; border-bottom: 1px solid var(--border); }
     .footer-col h4 { font-size: 0.88rem; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text); margin-bottom: 1.25rem; font-weight: 700; }
     .footer-col ul { list-style: none; }
     .footer-col ul li { margin-bottom: 0.85rem; }
@@ -166,9 +166,9 @@
     </a>
     <nav class="nav-main">
       <a href="#problem">Why Reconcile?</a>
-      <a href="#comparison">What We Verify</a>
+      <a href="#comparison">Evaluation Boundary</a>
       <a href="#security">Local Evidence</a>
-      <a href="#trust">Evidence Hub</a>
+      <a href="#trust">Assurance Evidence</a>
     </nav>
     <div class="header-actions">
       <a href="/verifier" class="btn btn-secondary btn-sm">Verify an Outcome Receipt ↗</a>
@@ -180,7 +180,7 @@
     <section id="hero" class="hero">
       <div class="hero-badge">INDEPENDENT EVIDENCE ASSURANCE</div>
       <h1>Independently Reconcile Broker and Tax-Ledger Outcomes</h1>
-      <p>VaultBasis deterministically compares supported broker information with supported tax-ledger output, identifies agreements, differences, and unresolved information, and produces a signed Outcome Receipt that can be independently verified.</p>
+      <p>VaultBasis deterministically compares supported broker information with supported tax-ledger information, identifies agreements, differences, and unresolved information, and produces a signed Outcome Receipt that can be independently verified.</p>
       <div class="cta-group">
         <button onclick="openAccessModal()" class="btn btn-primary" style="padding: 15px 30px; font-size: 1.05rem;">Request Design-Partner Access</button>
         <a href="/verifier" class="btn btn-secondary" style="padding: 15px 30px; font-size: 1.05rem;">Verify an Outcome Receipt</a>
@@ -192,13 +192,13 @@
       <div class="section-header">
         <span class="section-tag">Architecture Category</span>
         <h2>Why Independently Reconcile?</h2>
-        <p>Tax software and broker reporting systems are sources of information. VaultBasis is deliberately separate from both. It compares supported outputs under declared rules so the system producing the tax ledger is not the same system independently evaluating agreement with broker information.</p>
+        <p>Tax software and broker reporting systems each produce information used in the tax workflow. VaultBasis is deliberately separate from both. It independently compares supported information under declared deterministic rules, without deciding which source is legally or factually correct.</p>
       </div>
       <div class="grid-3">
         <div class="feature-card">
           <div class="card-icon">1</div>
           <h3>Separate Evaluator</h3>
-          <p>The calculation engine that prepared a tax return cannot independently audit itself against third-party broker disclosures.</p>
+          <p>The system producing a tax-ledger outcome is not independent of that outcome. VaultBasis provides a separate deterministic comparison against supported broker information.</p>
         </div>
         <div class="feature-card">
           <div class="card-icon">2</div>
@@ -207,8 +207,8 @@
         </div>
         <div class="feature-card">
           <div class="card-icon">3</div>
-          <h3>Portable Workpapers</h3>
-          <p>Produces clean, signed workpaper artifacts that can be independently checked by reviewers or auditors without VaultBasis runtime.</p>
+          <h3>Portable Evidence Artifact</h3>
+          <p>Produces a signed Outcome Receipt that can be independently checked by reviewers without the VaultBasis Edge runtime.</p>
         </div>
       </div>
     </section>
@@ -223,7 +223,7 @@
 
       <div class="boundary-box">
         <div class="boundary-header-row">
-          <div class="boundary-header-cell verifies">✓ WHAT VAULTBASIS VERIFIES</div>
+          <div class="boundary-header-cell verifies">✓ WHAT VAULTBASIS DETERMINES</div>
           <div class="boundary-header-cell not-determined">✗ WHAT VAULTBASIS DOES NOT DETERMINE</div>
         </div>
         <div class="boundary-row">
@@ -239,11 +239,11 @@
         <div class="boundary-row">
           <div class="boundary-cell">
             <h4>Declared Differences</h4>
-            <p>Surfaces exact material variances in proceeds, cost basis, or dates without deciding which source is "correct."</p>
+            <p>Surfaces exact observed differences in proceeds, cost basis, or dates without deciding which source is correct.</p>
           </div>
           <div class="boundary-cell">
             <h4>Legal Compliance</h4>
-            <p>VaultBasis does not determine compliance with the Internal Revenue Code (IRC §1012, §1221, §6045) or state tax laws.</p>
+            <p>VaultBasis does not determine compliance with federal, state, or other applicable tax law.</p>
           </div>
         </div>
         <div class="boundary-row">
@@ -259,11 +259,11 @@
         <div class="boundary-row">
           <div class="boundary-cell">
             <h4>Payload Integrity &amp; Signature</h4>
-            <p>Cryptographically verifies that the Outcome Receipt has not been altered since signing and matches the installation key.</p>
+            <p>Verifies the integrity of the signed receipt payload and validates its Ed25519 signature against the associated verification key.</p>
           </div>
           <div class="boundary-cell">
             <h4>Professional Judgment</h4>
-            <p>VaultBasis never replaces the CPA, EA, or tax attorney's legal interpretation, due diligence, and final signature.</p>
+            <p>VaultBasis does not replace the practitioner's professional judgment, due diligence, or responsibility for the resulting tax position or filing.</p>
           </div>
         </div>
       </div>
@@ -274,7 +274,7 @@
       <div class="section-header">
         <span class="section-tag">Deployment Boundary</span>
         <h2>Local-First Evidence Processing</h2>
-        <p>During the tested MMP-1 assurance workflow, transaction and evidence payloads remained strictly within the declared local desktop boundary. Documented in the MMP-1 Local Processing Test Summary.</p>
+        <p>During the tested MMP-1 assurance workflow, transaction and evidence payloads remained within the declared VaultBasis Edge boundary. Documented in the MMP-1 Local Processing Test Summary.</p>
       </div>
       <div class="grid-3">
         <div class="feature-card">
@@ -296,7 +296,7 @@
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path><line x1="12" y1="2" x2="12" y2="12"></line></svg>
           </div>
           <h3>Clean-Machine Verification</h3>
-          <p>Receipt verification executes independently with zero network dependencies or VaultBasis accounts.</p>
+          <p>The offline verifier can validate supported Outcome Receipts without a network connection or VaultBasis account. The hosted Web Verifier provides browser-based verification using WebCrypto.</p>
         </div>
       </div>
     </section>
@@ -304,9 +304,9 @@
     <!-- Public Evidence-Backed Trust Hub -->
     <section id="trust" class="section-container">
       <div class="section-header">
-        <span class="section-tag">Public Evidence Hub</span>
+        <span class="section-tag">Assurance Evidence</span>
         <h2>Evidence-Backed Trust</h2>
-        <p>We do not rely on unverified marketing badges. Every architectural and cryptographic claim is backed by public, downloadable artifacts and test vectors.</p>
+        <p>VaultBasis publishes inspectable evidence for key assurance claims, including the Evidence Contract, verifier, test vectors, and local-processing test summary. Design-partner access is required to retrieve these resources during the preview phase.</p>
       </div>
       <div class="grid-2">
         <div class="feature-card">
@@ -321,7 +321,7 @@
         </div>
         <div class="feature-card">
           <h3>Golden Test Vectors</h3>
-          <p style="margin-bottom: 1.25rem;">Download authentic valid and tampered receipt test vectors to independently verify rejection mechanics on clean systems.</p>
+          <p style="margin-bottom: 1.25rem;">Download valid and intentionally tampered sample receipts to independently test verification and rejection behavior.</p>
           <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
             <a href="/sample-receipt.json" download class="btn btn-secondary btn-sm">Valid Sample Receipt ⤓</a>
             <a href="/sample-receipt-tampered.json" download class="btn btn-secondary btn-sm">Tampered Vector ⤓</a>
@@ -329,7 +329,7 @@
         </div>
         <div class="feature-card">
           <h3>MMP-1 Local Processing Summary</h3>
-          <p style="margin-bottom: 1.25rem;">Summary of local execution boundary testing under AC-07, validating zero network egress during evidence intake and signing.</p>
+          <p style="margin-bottom: 1.25rem;">Summary of AC-07 testing in which transaction and evidence payloads remained within the declared VaultBasis Edge boundary during the tested MMP-1 assurance workflow.</p>
           <a href="/docs/scope_and_limitations_v0.1.md" target="_blank" class="btn btn-secondary btn-sm">Scope &amp; Limitations ↗</a>
         </div>
       </div>
@@ -339,8 +339,8 @@
     <div class="section-container">
       <div class="banner">
         <div>
-          <h3>Participate in Design-Partner UAT</h3>
-          <p>Access the RC-2 preview bundle and evaluate independent reconciliation on your sample workpapers.</p>
+          <h3>Participate in the Design-Partner Preview</h3>
+          <p>Evaluate VaultBasis using supported sample or appropriately sanitised information and provide feedback on the reconciliation and verification workflow.</p>
         </div>
         <button onclick="openAccessModal()" class="btn btn-primary" style="padding: 14px 28px; background: white; color: #0f172a; border: none; font-size: 1.05rem;">
           Request Design-Partner Access
@@ -432,10 +432,10 @@
       </div>
     </div>
     <div class="disclaimer-box">
-      <strong>IMPORTANT LIMITATION NOTICE:</strong> VaultBasis performs bounded, deterministic reconciliation of supported sources against declared semantics. It does not assess tax correctness, establish legal compliance, or evaluate whether source information is complete or accurate. An Outcome Receipt confirms that the declared reconciliation was performed and that the receipt signature is authentic. It does not constitute a professional opinion, legal finding, or endorsement by the IRS or any government authority. The filing practitioner remains solely responsible for the interpretation and application of applicable law.
+      <strong>IMPORTANT LIMITATION NOTICE:</strong> VaultBasis performs bounded, deterministic reconciliation of supported sources under declared semantics. It does not assess tax correctness, establish legal compliance, or determine whether source information is complete or accurate. An Outcome Receipt records the declared reconciliation outcome and can be cryptographically verified for payload integrity and signature validity. It does not constitute a professional opinion, legal finding, government approval, or endorsement by the IRS or any other government authority. The practitioner remains responsible for professional interpretation and application of applicable law.
     </div>
     <div class="footer-bottom">
-      <div>© 2026 VaultBasis, a product of TecTixBase EURL. All rights reserved.</div>
+      <div>© 2026 VaultBasis. All rights reserved.</div>
     </div>
   </footer>
 
