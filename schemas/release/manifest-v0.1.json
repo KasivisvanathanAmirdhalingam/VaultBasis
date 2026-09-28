@@ -1,0 +1,117 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "VaultBasis Release Manifest v0.1",
+  "description": "Frozen machine-readable chain for one qualified platform artifact: release identity through post-publication verification. The strongest publication assertion is: the bytes downloaded by the practitioner are the bytes that were qualified.",
+  "type": "object",
+  "required": [
+    "manifest_version",
+    "release",
+    "platform_artifact",
+    "source_identity",
+    "signing",
+    "documentation",
+    "equivalence",
+    "qualification",
+    "publication",
+    "post_publication"
+  ],
+  "properties": {
+    "manifest_version": { "const": "v0.1" },
+    "release": {
+      "type": "object",
+      "required": ["tag", "commit", "candidate"],
+      "properties": {
+        "tag": { "type": "string" },
+        "commit": { "type": "string", "minLength": 40 },
+        "candidate": { "type": "string", "enum": ["RC3-MAC", "RC3-WIN"] }
+      }
+    },
+    "platform_artifact": {
+      "type": "object",
+      "required": ["os", "architecture", "artifact_filename", "sha256"],
+      "properties": {
+        "os": { "type": "string", "enum": ["macos", "windows"] },
+        "architecture": { "type": "string", "enum": ["arm64", "x64"] },
+        "artifact_filename": { "type": "string" },
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      }
+    },
+    "source_identity": {
+      "type": "object",
+      "required": ["frozen_commit", "equivalence_projection", "evidence_contract"],
+      "properties": {
+        "frozen_commit": { "type": "string", "minLength": 40 },
+        "equivalence_projection": { "const": "schemas/receipt/equivalence-projection-v0.1.json" },
+        "evidence_contract": { "const": "v0.1" }
+      }
+    },
+    "signing": {
+      "type": "object",
+      "required": ["status", "controls"],
+      "properties": {
+        "status": { "type": "string", "enum": ["SIGNED", "SIGNED_NOTARIZED", "UNSIGNED"] },
+        "notarization_ticket": { "type": ["string", "null"] },
+        "controls": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["control", "state"],
+            "properties": {
+              "control": { "type": "string" },
+              "state": { "type": "string", "enum": ["IMPLEMENTED", "VERIFIED", "PLANNED", "NOT_APPLICABLE"] },
+              "evidence": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "documentation": {
+      "type": "object",
+      "required": ["quickstart_revision", "quickstart_sha256", "troubleshooting_revision", "troubleshooting_sha256", "content_gate"],
+      "properties": {
+        "quickstart_revision": { "type": "string" },
+        "quickstart_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "troubleshooting_revision": { "type": "string" },
+        "troubleshooting_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "content_gate": { "const": "PASS" }
+      }
+    },
+    "equivalence": {
+      "type": "object",
+      "required": ["projection_version", "projection_digest_mac", "projection_digest_win", "result"],
+      "properties": {
+        "projection_version": { "const": "v0.1" },
+        "projection_digest_mac": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "projection_digest_win": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "result": { "const": "EQUIVALENT" }
+      }
+    },
+    "qualification": {
+      "type": "object",
+      "required": ["distribution", "usability", "leakage_gate", "result"],
+      "properties": {
+        "distribution": { "type": "string", "enum": ["PASS", "FAIL"] },
+        "usability": { "type": "string", "enum": ["PASS", "FAIL"] },
+        "leakage_gate": { "type": "string", "enum": ["PASS", "FAIL"] },
+        "result": { "const": "QUALIFIED" }
+      }
+    },
+    "publication": {
+      "type": "object",
+      "required": ["endpoint", "published_artifact_sha256"],
+      "properties": {
+        "endpoint": { "type": "string" },
+        "published_artifact_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      }
+    },
+    "post_publication": {
+      "type": "object",
+      "required": ["downloaded_sha256", "matches_qualified", "result"],
+      "properties": {
+        "downloaded_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "matches_qualified": { "type": "boolean" },
+        "result": { "const": "PUBLICATION_VERIFIED" }
+      }
+    }
+  }
+}

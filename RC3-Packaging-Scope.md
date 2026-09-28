@@ -223,6 +223,11 @@ BUILD GREEN → ASSEMBLY VERIFIED → RELEASE QUALIFIED → PUBLICATION VERIFIED
 transition requires a post-deployment test acting as a practitioner per platform:
 hit the live download endpoint, download, hash, inspect contents, compare against the
 frozen manifest. This is what catches wrong-platform and stale-guide defects.
+The chain is recorded per artifact in the frozen format
+`schemas/release/manifest-v0.1.json` (release/tag/commit → platform+arch →
+binary SHA-256 → signing/notarization → guide hashes → equivalence result →
+qualification → published hash → post-publication downloaded hash). Only the fourth
+state means "a design partner can download this release."
 
 ## Architecture-leakage gate (fails the build)
 Detected during qualification, never by a tester afterward:

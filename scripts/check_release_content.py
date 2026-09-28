@@ -43,11 +43,12 @@ QUICKSTART_BANS = [
 ]
 
 
-def main() -> int:
+def run_checks(repo_root: Path) -> list:
+    """Returns a list of failure strings; empty means PASS. Pure stdlib."""
     failures = []
 
     for rel in PRACTITIONER_FILES:
-        p = REPO / rel
+        p = repo_root / rel
         if not p.is_file():
             failures.append(f"MISSING practitioner file: {rel}")
             continue
@@ -56,12 +57,18 @@ def main() -> int:
             if banned in text:
                 failures.append(f"BANNED {banned!r} in {rel}")
 
-    qs = REPO / QUICKSTART_FILE
+    qs = repo_root / QUICKSTART_FILE
     if qs.is_file():
         text = qs.read_text(encoding="utf-8")
         for banned in QUICKSTART_BANS:
             if banned in text:
                 failures.append(f"SHELL/BYPASS {banned!r} in primary Quick Start {QUICKSTART_FILE}")
+
+    return failures
+
+
+def main() -> int:
+    failures = run_checks(REPO)
 
     if failures:
         print("RELEASE-CONTENT-GATE: FAIL")
