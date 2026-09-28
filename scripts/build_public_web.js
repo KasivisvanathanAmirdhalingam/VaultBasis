@@ -123,12 +123,41 @@ if (fs.existsSync(apiSourceDir)) {
   console.log('✓ Packaged Serverless package.json -> dist/public-web/package.json');
 }
 
-const artifactSourcePath = path.join(REPO_ROOT, 'dist', 'artifacts', 'VaultBasis-RC1-DesignPartner.zip');
-if (fs.existsSync(artifactSourcePath)) {
-  fs.copyFileSync(artifactSourcePath, path.join(DIST_DIR, 'api', 'data', 'VaultBasis-RC1-DesignPartner.zip'));
-  console.log('✓ Packaged Secure Artifact for Distribution -> dist/public-web/api/data/VaultBasis-RC1-DesignPartner.zip');
-} else {
-  console.warn('⚠️ WARNING: VaultBasis-RC1-DesignPartner.zip not found in dist/artifacts/. Vercel API download will fail in prod.');
+// 5d. Fetch RC3 UAT artifacts from GitHub Release (manifest-driven, SHA-verified).
+// Fails the build explicitly if the manifest or any artifact is missing — no RC1 fallback.
+const MANIFEST_SOURCE = path.join(REPO_ROOT, 'schemas', 'release', 'rc3-uat-manifest.json');
+const RELEASE_BASE_URL = 'https://github.com/KasivisvanathanAmirdhalingam/VaultBasis/releases/download/rc3-uat-candidate';
+
+if (!fs.existsSync(MANIFEST_SOURCE)) {
+  console.error('❌ ERROR: schemas/release/rc3-uat-manifest.json not found. Run promote-rc3 CI job first.');
+  process.exit(1);
+}
+
+const releaseManifest = JSON.parse(fs.readFileSync(MANIFEST_SOURCE, 'utf8'));
+
+// Copy manifest into api/ so download.js can read it at serverless runtime
+fs.copyFileSync(MANIFEST_SOURCE, path.join(DIST_DIR, 'api', 'manifest.json'));
+console.log('✓ Copied RC3 UAT manifest -> dist/public-web/api/manifest.json');
+
+for (const artifact of releaseManifest.artifacts) {
+  const url = `${RELEASE_BASE_URL}/${artifact.filename}`;
+  const destPath = path.join(DIST_DIR, 'api', 'data', artifact.filename);
+  console.log(`⬇ Downloading ${artifact.filename} ...`);
+  try {
+    execSync(`curl -fsSL -o "${destPath}" "${url}"`, { stdio: 'inherit' });
+  } catch (e) {
+    console.error(`❌ ERROR: Failed to download ${artifact.filename} from GitHub Release.`);
+    process.exit(1);
+  }
+  // SHA-256 verification
+  const actualSha = require('crypto').createHash('sha256').update(fs.readFileSync(destPath)).digest('hex');
+  if (actualSha !== artifact.sha256) {
+    console.error(`❌ SHA-256 MISMATCH for ${artifact.filename}`);
+    console.error(`   Expected: ${artifact.sha256}`);
+    console.error(`   Actual:   ${actualSha}`);
+    process.exit(1);
+  }
+  console.log(`✓ ${artifact.filename} verified (SHA-256: ${actualSha})`);
 }
 
 // 6. Generate Custom 404 Fallback Page

@@ -112,3 +112,122 @@ jobs:
         path: dist/VaultBasis-RC3-*
         retention-days: 7
 
+  promote-rc3:
+    name: Promote RC3 to UAT Pre-Release
+    needs: [rc3-candidates]
+    runs-on: ubuntu-latest
+    concurrency:
+      group: promote-rc3
+      cancel-in-progress: true
+    permissions:
+      contents: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Download macOS RC3 candidate
+      uses: actions/download-artifact@v4
+      with:
+        name: vaultbasis-rc3-candidate-macos-latest
+        path: downloaded/macos
+
+    - name: Download Windows RC3 candidate
+      uses: actions/download-artifact@v4
+      with:
+        name: vaultbasis-rc3-candidate-windows-latest
+        path: downloaded/windows
+
+    - name: Compute SHA-256 and locate ZIPs
+      id: hashes
+      run: |
+        MAC_ZIP=$(find downloaded/macos -name "VaultBasis-RC3-macOS-arm64.zip" | head -1)
+        WIN_ZIP=$(find downloaded/windows -name "VaultBasis-RC3-Windows-x64.zip" | head -1)
+        if [ -z "$MAC_ZIP" ]; then echo "❌ macOS ZIP not found"; exit 1; fi
+        if [ -z "$WIN_ZIP" ]; then echo "❌ Windows ZIP not found"; exit 1; fi
+        echo "mac_zip=$MAC_ZIP" >> $GITHUB_OUTPUT
+        echo "win_zip=$WIN_ZIP" >> $GITHUB_OUTPUT
+        MAC_SHA=$(python3 -c "
+        import hashlib, sys
+        h = hashlib.sha256()
+        with open(sys.argv[1], 'rb') as f:
+            for chunk in iter(lambda: f.read(1 << 20), b''):
+                h.update(chunk)
+        print(h.hexdigest())
+        " "$MAC_ZIP")
+        WIN_SHA=$(python3 -c "
+        import hashlib, sys
+        h = hashlib.sha256()
+        with open(sys.argv[1], 'rb') as f:
+            for chunk in iter(lambda: f.read(1 << 20), b''):
+                h.update(chunk)
+        print(h.hexdigest())
+        " "$WIN_ZIP")
+        echo "mac_sha=$MAC_SHA" >> $GITHUB_OUTPUT
+        echo "win_sha=$WIN_SHA" >> $GITHUB_OUTPUT
+        echo "MAC SHA-256: $MAC_SHA"
+        echo "WIN SHA-256: $WIN_SHA"
+
+    - name: ZIP content gate — macOS
+      run: python3 scripts/check_release_content.py "${{ steps.hashes.outputs.mac_zip }}"
+
+    - name: ZIP content gate — Windows
+      run: python3 scripts/check_release_content.py "${{ steps.hashes.outputs.win_zip }}"
+
+    - name: Create or replace GitHub pre-release rc3-uat-candidate
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        if gh release view rc3-uat-candidate --repo ${{ github.repository }} > /dev/null 2>&1; then
+          gh release delete rc3-uat-candidate --repo ${{ github.repository }} --yes --cleanup-tag
+        fi
+        gh release create rc3-uat-candidate \
+          --repo ${{ github.repository }} \
+          --title "RC3 UAT Candidate (Internal — Not for Distribution)" \
+          --notes "Automated pre-release from CI run ${{ github.run_id }}, commit ${{ github.sha }}. Design-partner UAT only. UNSIGNED / NOT FOR PUBLIC DISTRIBUTION." \
+          --prerelease \
+          "${{ steps.hashes.outputs.mac_zip }}#VaultBasis-RC3-macOS-arm64.zip" \
+          "${{ steps.hashes.outputs.win_zip }}#VaultBasis-RC3-Windows-x64.zip"
+
+    - name: Write and commit rc3-uat-manifest.json
+      env:
+        MAC_SHA: ${{ steps.hashes.outputs.mac_sha }}
+        WIN_SHA: ${{ steps.hashes.outputs.win_sha }}
+      run: |
+        python3 - <<'PYEOF'
+        import json, os
+        manifest = {
+          "release_tag": "rc3-uat-candidate",
+          "source_commit": os.environ["GITHUB_SHA"],
+          "ci_run_id": os.environ["GITHUB_RUN_ID"],
+          "artifacts": [
+            {
+              "filename": "VaultBasis-RC3-macOS-arm64.zip",
+              "os": "macos",
+              "architecture": "arm64",
+              "sha256": os.environ["MAC_SHA"],
+              "content_gate": "PASS",
+              "qualification": "UAT-READY"
+            },
+            {
+              "filename": "VaultBasis-RC3-Windows-x64.zip",
+              "os": "windows",
+              "architecture": "x64",
+              "sha256": os.environ["WIN_SHA"],
+              "content_gate": "PASS",
+              "qualification": "UAT-READY"
+            }
+          ]
+        }
+        with open("schemas/release/rc3-uat-manifest.json", "w") as f:
+            json.dump(manifest, f, indent=2)
+            f.write("\n")
+        print("Manifest written.")
+        PYEOF
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git add schemas/release/rc3-uat-manifest.json
+        git diff --cached --quiet && echo "No manifest change." || \
+          git commit -m "ci: update rc3-uat-manifest for run ${{ github.run_id }} [skip ci]"
+        git push
+
