@@ -383,6 +383,21 @@ def serve_schema(filename: str):
     raise HTTPException(status_code=404, detail="Schema file not found")
 
 
+@app.get("/docs/scope_and_limitations_v0.1.html", response_class=HTMLResponse)
+def serve_scope_and_limitations():
+    # Rendered via the single stdlib renderer (scripts/md_to_html.py), same as
+    # the Vercel bundle — practitioners never receive raw markdown.
+    from scripts.md_to_html import render_page
+    doc_path = REPO_ROOT / "docs" / "scope_and_limitations_v0.1.md"
+    if not doc_path.is_file():
+        raise HTTPException(status_code=404, detail="Scope & Limitations document not found")
+    return HTMLResponse(
+        content=render_page(doc_path.read_text(encoding="utf-8"),
+                            "VaultBasis MMP-1 Supported Scope & Limitations"),
+        status_code=200,
+    )
+
+
 @app.get("/sample-receipt.json")
 @app.get("/api/sample-receipt")
 def get_sample_receipt():

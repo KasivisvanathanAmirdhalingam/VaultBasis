@@ -152,3 +152,9 @@ def test_edge_daemon_serves_all_web_routes(client):
     health = res.json()
     assert health.get("status") == "HEALTHY"
     assert health.get("egress_policy") == "STRICT_LOCAL_ONLY"
+
+    # 8. Scope & Limitations page renders HTML, never raw markdown
+    res = client.get("/docs/scope_and_limitations_v0.1.html")
+    assert res.status_code == 200
+    assert "<h1>" in res.text or "<h2>" in res.text
+    assert "## " not in res.text
