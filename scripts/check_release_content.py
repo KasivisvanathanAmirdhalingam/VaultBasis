@@ -51,6 +51,7 @@ TOKEN_SURFACES = [
     "VaultBasis_Troubleshooting.html",
     "apps/web-marketing/index.html",
     "apps/web-verifier/index.html",
+    "apps/web-dashboard/index.html",
 ]
 
 

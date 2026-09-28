@@ -9,20 +9,20 @@
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #090b10;
-      --surface: #11141c;
-      --surface-elevated: #181d29;
-      --border: #232a3b;
-      --border-accent: #374461;
-      --text: #e2e8f0;
-      --text-muted: #8b9bb4;
-      --primary: #3b82f6;
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --surface-elevated: #f1f5f9;
+      --border: #e2e8f0;
+      --border-accent: #cbd5e1;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --primary: #2563eb;
       --primary-hover: #2563eb;
-      --accent: #06b6d4;
-      --success: #10b981;
-      --warning: #f59e0b;
-      --danger: #ef4444;
-      --code-bg: #0d1117;
+      --accent: #0284c7;
+      --success: #059669;
+      --warning: #b45309;
+      --danger: #dc2626;
+      --code-bg: #f1f5f9;
       --radius: 8px;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -35,7 +35,7 @@
       flex-direction: column;
     }
     header {
-      background: rgba(17, 20, 28, 0.85);
+      background: rgba(255, 255, 255, 0.85);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border);
       padding: 1rem 2rem;
@@ -54,7 +54,7 @@
     .brand-logo {
       width: 32px;
       height: 32px;
-      background: linear-gradient(135deg, #3b82f6, #06b6d4);
+      background: linear-gradient(135deg, #2563eb, #0284c7);
       border-radius: 6px;
       display: flex;
       align-items: center;
@@ -71,7 +71,7 @@
     }
     .brand-badge {
       background: rgba(59, 130, 246, 0.15);
-      color: #60a5fa;
+      color: #2563eb;
       border: 1px solid rgba(59, 130, 246, 0.3);
       padding: 2px 8px;
       border-radius: 999px;
@@ -163,7 +163,7 @@
       color: var(--text);
     }
     tr:hover td {
-      background: rgba(255, 255, 255, 0.015);
+      background: rgba(15, 23, 42, 0.04);
     }
     .badge {
       display: inline-block;
@@ -173,11 +173,11 @@
       font-family: 'JetBrains Mono', monospace;
       font-weight: 500;
     }
-    .badge-success { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
-    .badge-warning { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
-    .badge-danger { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
-    .badge-info { background: rgba(6, 182, 212, 0.15); color: #38bdf8; border: 1px solid rgba(6, 182, 212, 0.3); }
-    .badge-neutral { background: rgba(148, 163, 184, 0.1); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.2); }
+    .badge-success { background: rgba(16, 185, 129, 0.15); color: #059669; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge-warning { background: rgba(245, 158, 11, 0.15); color: #b45309; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .badge-danger { background: rgba(239, 68, 68, 0.15); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.3); }
+    .badge-info { background: rgba(6, 182, 212, 0.15); color: #0284c7; border: 1px solid rgba(6, 182, 212, 0.3); }
+    .badge-neutral { background: rgba(148, 163, 184, 0.1); color: #475569; border: 1px solid rgba(148, 163, 184, 0.2); }
     
     .grid-2 {
       display: grid;
@@ -189,7 +189,7 @@
       border-radius: var(--radius);
       padding: 2rem;
       text-align: center;
-      background: rgba(24, 29, 41, 0.5);
+      background: #f1f5f9;
       cursor: pointer;
       transition: all 0.2s;
     }
@@ -211,7 +211,7 @@
       font-weight: 500;
       transition: all 0.2s;
     }
-    .btn:hover { background: #232a3b; }
+    .btn:hover { background: #e2e8f0; }
     .btn:focus-visible, input:focus-visible, .nav-btn:focus-visible {
       outline: 2px solid var(--primary);
       outline-offset: 2px;
@@ -227,7 +227,7 @@
       padding: 1rem;
       font-family: 'JetBrains Mono', monospace;
       font-size: 0.8rem;
-      color: #93c5fd;
+      color: #1d4ed8;
       overflow-x: auto;
       max-height: 400px;
     }
@@ -251,7 +251,7 @@
         <h1>VaultBasis Edge</h1>
       </div>
       <span class="brand-badge">PREVIEW</span>
-      <span class="brand-badge" style="color: #34d399; border-color: rgba(16, 185, 129, 0.3);">ZERO TRANSACTION EGRESS</span>
+      <span class="brand-badge" style="color: #059669; border-color: rgba(16, 185, 129, 0.3);">ZERO TRANSACTION EGRESS</span>
     </div>
     <div class="nav-links">
       <button class="nav-btn active" onclick="showScreen('screen-cases')">Cases</button>
@@ -354,7 +354,7 @@
 
       <!-- UNRESOLVED ITEMS -->
       <div class="card">
-        <h3 style="margin-bottom: 12px; font-size: 1rem; color: #fbbf24;">Unresolved Items (First-Class Unknown State)</h3>
+        <h3 style="margin-bottom: 12px; font-size: 1rem; color: #b45309;">Unresolved Items (First-Class Unknown State)</h3>
         <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
           PRD Invariant: Missing facts are never assumed as zero. They remain explicitly recorded.
         </p>
@@ -406,8 +406,8 @@
   <footer role="contentinfo" style="display: flex; flex-direction: column; gap: 1rem; padding: 2rem; background: var(--surface); border-top: 1px solid var(--border); font-size: 0.82rem; color: var(--text-muted); margin-top: auto;">
     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 1.25rem;">
       <div style="display: flex; align-items: center; gap: 1rem;">
-        <strong style="color: #fff; font-size: 0.95rem;">Local Edge · Active</strong>
-        <span class="brand-badge" style="color: #34d399; border-color: rgba(16, 185, 129, 0.3);">Customer-controlled assurance processing</span>
+        <strong style="color: #0f172a; font-size: 0.95rem;">Local Edge · Active</strong>
+        <span class="brand-badge" style="color: #059669; border-color: rgba(16, 185, 129, 0.3);">Customer-controlled assurance processing</span>
       </div>
       <div style="display: flex; gap: 1.5rem;">
         <a href="/about" target="_blank" style="color: var(--text-muted); text-decoration: none;">About</a>
@@ -553,7 +553,7 @@
       tbody.innerHTML = '';
       const diffs = data.reconciliation.material_differences;
       if (diffs.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #34d399; padding: 1.5rem;">✓ All reported transactions match between sources with zero variance.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #059669; padding: 1.5rem;">✓ All reported transactions match between sources with zero variance.</td></tr>`;
       } else {
         diffs.forEach(d => {
           const tr = document.createElement('tr');
@@ -577,7 +577,7 @@
         unresDiv.innerHTML = `<p style="color: var(--text-muted);">No unresolved data items detected.</p>`;
       } else {
         unresDiv.innerHTML = unres.map(u => `
-          <div style="background: rgba(245, 158, 11, 0.1); border-left: 3px solid #f59e0b; padding: 8px 12px; margin-bottom: 6px;">
+          <div style="background: rgba(245, 158, 11, 0.1); border-left: 3px solid #b45309; padding: 8px 12px; margin-bottom: 6px;">
             <strong>${u.reason_code}</strong>: ${u.description} (Ref: ${u.affected_row_ref})
           </div>
         `).join('');
