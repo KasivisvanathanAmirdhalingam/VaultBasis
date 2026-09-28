@@ -13,7 +13,7 @@ from typing import Any, Dict, List, Optional
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, JSONResponse, Response, StreamingResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -419,6 +419,14 @@ def serve_schema(filename: str):
     if schema_path.is_file():
         return Response(content=schema_path.read_text(), media_type="application/json")
     raise HTTPException(status_code=404, detail="Schema file not found")
+
+
+@app.get("/docs/scope_and_limitations_v0.1.md", include_in_schema=False)
+def scope_and_limitations_legacy_url():
+    # Old bookmarks/old deployments link the raw .md URL: never serve raw
+    # markdown as a page. Redirect to the rendered document.
+    return RedirectResponse(url="/docs/scope_and_limitations_v0.1.html",
+                            status_code=308)
 
 
 @app.get("/docs/scope_and_limitations_v0.1.html", response_class=HTMLResponse)

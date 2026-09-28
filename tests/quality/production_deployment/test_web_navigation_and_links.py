@@ -158,3 +158,8 @@ def test_edge_daemon_serves_all_web_routes(client):
     assert res.status_code == 200
     assert "<h1>" in res.text or "<h2>" in res.text
     assert "## " not in res.text
+
+    # 9. Legacy .md URL redirects to the rendered page (old bookmarks/deployments)
+    res = client.get("/docs/scope_and_limitations_v0.1.md", follow_redirects=False)
+    assert res.status_code in (301, 302, 307, 308)
+    assert res.headers["location"].endswith(".html")
