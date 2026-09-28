@@ -177,17 +177,6 @@ class DeterministicReconciliationEngine:
             prov_b = build_prov(tx_b, src_b_id)
             prov_both = prov_a + prov_b
 
-            if tx_a.quantity is None or tx_b.quantity is None:
-                result.unresolved_items.append({
-                    "item_id": f"unres_qty_{tx_a.transaction_id}",
-                    "reason_code": "QUANTITY_UNAVAILABLE",
-                    "affected_source_id": src_a_id if tx_a.quantity is None else src_b_id,
-                    "affected_row_ref": tx_a.source_row_reference if tx_a.quantity is None else tx_b.source_row_reference,
-                    "description": "Missing required quantity prevents exact reconciliation.",
-                    "rule_reference": "US_IRC_1099DA_2025_2026_V1",
-                    "provenance_references": prov_both
-                })
-
             if tx_a.proceeds is not None and tx_b.proceeds is not None:
                 proceeds_diff = abs(tx_a.proceeds - tx_b.proceeds)
                 if proceeds_diff > Decimal("0.01"):

@@ -82,6 +82,12 @@ class Form1099DAParser:
             if not basis_str or basis_str == "":
                 is_unresolved = True
                 unresolved_reason = "BASIS_UNAVAILABLE"
+            elif qty_col and not qty_str.strip():
+                # Quantity column is in profile scope but this cell is empty:
+                # genuinely missing fact (SEM-MISS-002). A profile without a
+                # quantity column (qty_col None) is out of scope, not missing.
+                is_unresolved = True
+                unresolved_reason = "QUANTITY_UNAVAILABLE"
 
             tx = CanonicalTransaction(
                 transaction_id=f"{source_id}_row_{row_idx}",

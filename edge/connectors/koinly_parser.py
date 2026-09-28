@@ -72,6 +72,11 @@ class KoinlyCapitalGainsParser:
             if cost_basis_str == "" or cost_basis_str is None:
                 is_unresolved = True
                 unresolved_reason = "BASIS_UNAVAILABLE"
+            elif amount_col and not amount_str.strip():
+                # Amount column is in profile scope but this cell is empty:
+                # genuinely missing fact (SEM-MISS-002).
+                is_unresolved = True
+                unresolved_reason = "QUANTITY_UNAVAILABLE"
 
             tx = CanonicalTransaction(
                 transaction_id=f"{source_id}_row_{row_idx}",

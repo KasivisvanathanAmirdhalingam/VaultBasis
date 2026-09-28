@@ -54,6 +54,12 @@ class VaultBasisCSVParser:
 
             is_unresolved = (basis_str is None or basis_str == "")
             unresolved_reason = "BASIS_UNAVAILABLE" if is_unresolved else None
+            if not is_unresolved and "quantity" in row and not row["quantity"]:
+                # Quantity column is in profile scope but this cell is empty:
+                # genuinely missing fact (SEM-MISS-002). A profile without a
+                # quantity column is out of scope, not missing.
+                is_unresolved = True
+                unresolved_reason = "QUANTITY_UNAVAILABLE"
 
             tx = CanonicalTransaction(
                 transaction_id=f"{source_id}_row_{row_idx}",
