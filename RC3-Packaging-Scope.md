@@ -226,7 +226,8 @@ frozen manifest. This is what catches wrong-platform and stale-guide defects.
 The chain is recorded per artifact in the frozen format
 `schemas/release/manifest-v0.1.json` (release/tag/commit → platform+arch →
 binary SHA-256 → signing/notarization → guide hashes → equivalence result →
-qualification → published hash → post-publication downloaded hash). Only the fourth
+qualification → published hash → post-publication downloaded hash). The trace is
+executed per the frozen procedure `docs/publication-trace.md`. Only the fourth
 state means "a design partner can download this release."
 
 ## Architecture-leakage gate (fails the build)
@@ -274,7 +275,8 @@ RC3 is not a redesign: minimum is VaultBasis branding, light professional presen
 matching the marketing site (bg #f8fafc, Outfit/Plus Jakarta Sans, 12px radius language),
 consistent buttons, clean startup/error states ("VaultBasis couldn't start. Your files
 have not been changed. Troubleshoot · Contact Support"), and no terminal-facing normal
-workflow. MMP-1.1 owns the full design system, accessibility depth, and commercial
+workflow. Shared tokens are versioned at `apps/web-shared/design-tokens-v0.1.json`;
+the content gate fails on drift. MMP-1.1 owns the full design system, accessibility depth, and commercial
 onboarding.
 
 ## Evidence preserved

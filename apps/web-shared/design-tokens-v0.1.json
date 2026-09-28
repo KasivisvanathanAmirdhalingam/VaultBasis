@@ -1,0 +1,27 @@
+{
+  "tokens_name": "VaultBasis Design Tokens",
+  "tokens_version": "v0.1",
+  "status": "FROZEN",
+  "scope": "Lightweight RC3 source of truth for practitioner-facing surfaces (marketing site, Quick Start, Troubleshooting, Scope & Limitations page, Edge workspace chrome). Full design system belongs to MMP-1.1. Consumers copy values; the release content gate asserts the primary color and body font stay present in each surface so drift fails loudly.",
+  "color": {
+    "bg": "#f8fafc",
+    "surface": "#ffffff",
+    "surface_elevated": "#f1f5f9",
+    "border": "#e2e8f0",
+    "border_accent": "#cbd5e1",
+    "text": "#0f172a",
+    "text_muted": "#475569",
+    "primary": "#2563eb",
+    "primary_hover": "#1d4ed8",
+    "accent": "#0284c7"
+  },
+  "typography": {
+    "display": "Outfit",
+    "body": "Plus Jakarta Sans",
+    "mono": "JetBrains Mono"
+  },
+  "shape": {
+    "radius": "12px"
+  },
+  "change_policy": "Token changes require a version bump (v0.2, ...) in release history and re-verification of every consumer surface. Independent per-file edits to these values are forbidden."
+}
