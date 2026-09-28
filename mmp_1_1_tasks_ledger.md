@@ -10,6 +10,7 @@
 - [ ] **Commercial Packaging**: Finalize the packaging for OS-specific releases (e.g., Apple Developer ID signing, Notarization).
 
 
+
 ## Phase 2: Workflow & Conversion (Initiated Parallel to UAT)
 - [ ] **Paddle Payment Integration**: Secure transaction gateway for software license purchases.
 - [ ] **Billing & Licensing**: Subscription management and entitlement verification.
@@ -17,9 +18,13 @@
 - [ ] **Customer '15 Seconds Wow' Journey**: Optimize initial onboarding flow to instantly demonstrate value.
 - [ ] **Cancellation Refunds**: Automated handling of refunds aligned with local policies.
 - [ ] **Customer CRUD**: Dashboard and management plane for end users.
-- [ ] **Source Code Obfuscation**: Integrate Cython or PyArmor into `build_desktop_executable.py` to completely shield edge application logic and prevent source code bleed.
+- [ ] **Chat-bot Support Repository**: Implement non-LLM structured query system connected to a comprehensive Q&A repository to minimize friction.
+- [ ] **Standard Disclaimers & Legal Links**: Ensure commercial compliance on all distribution points.
+- [ ] **Footer Verification**: Validate and fix all broken footer navigation links.
+- [ ] **Social Media Pointers**: Implement Post/Publish functionality for practitioner achievements.
 
 ## Phase 3: Practitioner-Driven Scope (Post-UAT Feedback)
+
 
 *Scope to be determined based on friction and observations from the `mmp-1` internal and distributed UAT.*
 - [ ] TBD based on `CPA-001` validation.
