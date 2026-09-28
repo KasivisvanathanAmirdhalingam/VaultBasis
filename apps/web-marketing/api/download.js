@@ -13,11 +13,9 @@ module.exports = async (req, res) => {
     return res.status(401).json({ error: 'Unauthorized: Invalid or missing distribution token.' });
   }
 
-  // RC3 macOS arm64 candidate — only qualified platform currently available.
-  // Windows x64 will be added to this resolver once RC3-WIN passes qualification.
-  const artifactFilename = 'VaultBasis-RC3-macOS-arm64.zip';
-  const artifactPath = path.join(__dirname, 'data', artifactFilename);
-
+  // The artifact is packaged securely outside the public folder (in the 'data' directory inside api)
+  const artifactPath = path.join(__dirname, 'data', 'VaultBasis-RC1-DesignPartner.zip');
+  
   if (!fs.existsSync(artifactPath)) {
     return res.status(404).json({ error: 'Distribution artifact not found or temporarily unavailable.' });
   }
@@ -27,7 +25,7 @@ module.exports = async (req, res) => {
   res.writeHead(200, {
     'Content-Type': 'application/zip',
     'Content-Length': stat.size,
-    'Content-Disposition': `attachment; filename="${artifactFilename}"`
+    'Content-Disposition': `attachment; filename="VaultBasis-RC1-DesignPartner.zip"`
   });
 
   const readStream = fs.createReadStream(artifactPath);

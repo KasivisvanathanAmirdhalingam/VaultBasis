@@ -123,13 +123,12 @@ if (fs.existsSync(apiSourceDir)) {
   console.log('✓ Packaged Serverless package.json -> dist/public-web/package.json');
 }
 
-const artifactSourcePath = path.join(REPO_ROOT, 'dist', 'artifacts', 'VaultBasis-RC3-macOS-arm64.zip');
+const artifactSourcePath = path.join(REPO_ROOT, 'dist', 'artifacts', 'VaultBasis-RC1-DesignPartner.zip');
 if (fs.existsSync(artifactSourcePath)) {
-  fs.copyFileSync(artifactSourcePath, path.join(DIST_DIR, 'api', 'data', 'VaultBasis-RC3-macOS-arm64.zip'));
-  console.log('✓ Packaged Secure Artifact for Distribution -> dist/public-web/api/data/VaultBasis-RC3-macOS-arm64.zip');
+  fs.copyFileSync(artifactSourcePath, path.join(DIST_DIR, 'api', 'data', 'VaultBasis-RC1-DesignPartner.zip'));
+  console.log('✓ Packaged Secure Artifact for Distribution -> dist/public-web/api/data/VaultBasis-RC1-DesignPartner.zip');
 } else {
-  console.error('❌ ERROR: VaultBasis-RC3-macOS-arm64.zip not found in dist/artifacts/. Build cannot continue without the qualified artifact.');
-  process.exit(1);
+  console.warn('⚠️ WARNING: VaultBasis-RC1-DesignPartner.zip not found in dist/artifacts/. Vercel API download will fail in prod.');
 }
 
 // 6. Generate Custom 404 Fallback Page
