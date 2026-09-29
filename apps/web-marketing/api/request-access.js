@@ -1,5 +1,28 @@
+'use strict';
+
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
+const { get } = require('@vercel/blob');
+const { generateToken, createEntitlement } = require('./entitlement-store');
+
+// External CPA email delivery: NOT PRODUCTION-QUALIFIED.
+// Ethereal is a UAT SMTP sink — emails are captured at ethereal.email for
+// review, not delivered to real inboxes. Separate blocker before CPA distribution.
+
+const MANIFEST_BLOB_PATHNAME = 'rc3/current/manifest.json';
+
+async function readManifest() {
+  const result = await get(MANIFEST_BLOB_PATHNAME, { access: 'private' });
+  if (!result) return null;
+  const chunks = [];
+  const reader = result.stream.getReader();
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    chunks.push(value);
+  }
+  return JSON.parse(Buffer.concat(chunks.map(c => Buffer.from(c))).toString('utf8'));
+}
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
@@ -12,28 +35,47 @@ module.exports = async (req, res) => {
   }
 
   try {
-    // Generate an entitlement/license token
-    const entitlementId = `DP-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
-    const token = crypto.randomBytes(16).toString('hex');
+    // Read the promotion manifest to bind the entitlement to the current
+    // qualified artifact hash. Authorization later requires this binding:
+    // a provisioned entitlement cannot silently grant a different artifact.
+    let qualifiedArtifactHash;
+    try {
+      const manifest = await readManifest();
+      if (!manifest || !Array.isArray(manifest.artifacts) || manifest.artifacts.length === 0) {
+        return res.status(503).json({ error: 'No qualified artifact is currently available for distribution.' });
+      }
+      // Use the first artifact's hash as the binding; both platforms share
+      // the same promotion event, so either hash would be equally valid here.
+      // The download handler validates per-platform artifact hash at download time.
+      qualifiedArtifactHash = manifest.artifacts[0].sha256;
+    } catch (e) {
+      console.error('manifest read error during provisioning:', e.message);
+      return res.status(503).json({ error: 'Distribution manifest unavailable. Please try again.' });
+    }
 
-    // Create a Nodemailer test account (Ethereal) to safely simulate email sending in UAT
-    const testAccount = await nodemailer.createTestAccount();
-    const transporter = nodemailer.createTransport({
-      host: "smtp.ethereal.email",
-      port: 587,
-      secure: false, 
-      auth: {
-        user: testAccount.user, 
-        pass: testAccount.pass, 
-      },
+    // Generate entitlement credentials
+    const entitlementId = `DP-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
+    const rawToken = generateToken();
+
+    // Persist the entitlement server-side before sending the email.
+    // If this fails, the email is not sent — no orphaned credentials.
+    await createEntitlement(rawToken, {
+      entitlementId,
+      email,
+      qualifiedArtifactHash,
     });
 
-    // SEC-003 fix: never infer the canonical origin from request headers.
-    // X-Forwarded-Host and Host are attacker-controlled; using them allows
-    // a host-poisoning attack that embeds an arbitrary domain in provisioning
-    // emails.  Use the explicitly configured PUBLIC_BASE_URL instead.
+    // SEC-003 fix: canonical origin from explicit env var only.
     const canonicalBase = process.env.PUBLIC_BASE_URL || 'http://localhost:3000';
-    const downloadUrl = `${canonicalBase}/api/download?token=${token}&entitlement=${entitlementId}`;
+    const downloadUrl = `${canonicalBase}/api/download?token=${rawToken}&entitlement=${entitlementId}`;
+
+    const testAccount = await nodemailer.createTestAccount();
+    const transporter = nodemailer.createTransport({
+      host: 'smtp.ethereal.email',
+      port: 587,
+      secure: false,
+      auth: { user: testAccount.user, pass: testAccount.pass },
+    });
 
     const htmlContent = `
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
@@ -42,37 +84,33 @@ module.exports = async (req, res) => {
         <p>Your Design-Partner entitlement has been approved and provisioned.</p>
         <div style="background: #f8fafc; padding: 15px; border-radius: 6px; margin: 20px 0;">
           <strong>Entitlement ID:</strong> ${entitlementId}<br/>
-          <strong>Access Level:</strong> RC1 Preview
+          <strong>Access Level:</strong> RC3 Design Partner Preview
         </div>
         <p><strong>Your Secure Artifact Download:</strong></p>
         <a href="${downloadUrl}" style="display: inline-block; background: #3b82f6; color: white; text-decoration: none; padding: 10px 20px; border-radius: 6px; font-weight: bold;">Download VaultBasis Edge (.zip)</a>
         <p style="margin-top: 20px; font-size: 0.9em; color: #64748b;">
-          * Note: This link is uniquely tied to your entitlement. Do not forward it.<br/>
-          * Attached: VaultBasis User Guide & Quick Start instructions are inside the downloaded package.
+          * This link is uniquely tied to your entitlement and expires in 72 hours. Do not forward it.<br/>
+          * Quick Start and Troubleshooting guides are included inside the downloaded package.
         </p>
       </div>
     `;
 
-    // Send the email
     const info = await transporter.sendMail({
       from: '"VaultBasis Provisioning" <no-reply@vaultbasis.com>',
       to: email,
-      subject: "Your VaultBasis Access & Download Link",
+      subject: 'Your VaultBasis Access & Download Link',
       html: htmlContent,
     });
-
-    // In a real prod setup, we would save the token to a DB. 
-    // For UAT, we rely on the token validation in the download endpoint.
 
     return res.status(200).json({
       status: 'success',
       entitlementId,
       message: 'Email dispatched securely.',
-      uatPreviewUrl: nodemailer.getTestMessageUrl(info) // Expose Ethereal URL so associate can view the email without a real inbox
+      uatPreviewUrl: nodemailer.getTestMessageUrl(info),
     });
 
   } catch (error) {
-    console.error('Email dispatch error:', error);
+    console.error('Provisioning error:', error);
     return res.status(500).json({ error: 'Failed to provision access.' });
   }
 };

@@ -1,8 +1,9 @@
+'use strict';
+
 const { get } = require('@vercel/blob');
+const { validateEntitlement, isWellFormedToken } = require('./entitlement-store');
 
 // Platform routing — explicit ?platform= param takes precedence over User-Agent.
-// Architecture is never inferred: Mac User-Agent → recommend mac-arm64 only,
-// but the explicit selector on the download page is authoritative.
 const PLATFORM_MAP = {
   'mac-arm64':   { os: 'macos',   architecture: 'arm64' },
   'windows-x64': { os: 'windows', architecture: 'x64'   },
@@ -10,9 +11,13 @@ const PLATFORM_MAP = {
 
 const SUPPORTED_DISPLAY = ['macOS Apple Silicon (arm64)', 'Windows x64'];
 
-// Stable pointer in private Blob — overwritten on each RC3 promotion,
-// always resolves to the latest BUILD_VERIFIED manifest.
+// Stable pointer in private Blob — overwritten on each RC3 promotion.
 const MANIFEST_BLOB_PATHNAME = 'rc3/current/manifest.json';
+
+// Generic denial response — never reveal why a specific token/entitlement was denied.
+function deny(res) {
+  return res.status(403).json({ error: 'Access denied.' });
+}
 
 function detectPlatformFromUA(ua) {
   if (!ua) return null;
@@ -22,6 +27,19 @@ function detectPlatformFromUA(ua) {
   return null;
 }
 
+async function readBlobJson(pathname) {
+  const result = await get(pathname, { access: 'private' });
+  if (!result) return null;
+  const chunks = [];
+  const reader = result.stream.getReader();
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    chunks.push(value);
+  }
+  return JSON.parse(Buffer.concat(chunks.map(c => Buffer.from(c))).toString('utf8'));
+}
+
 module.exports = async (req, res) => {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -29,34 +47,27 @@ module.exports = async (req, res) => {
 
   const { token, entitlement, platform: platformParam } = req.query;
 
-  if (!token || !entitlement) {
-    return res.status(401).json({ error: 'Unauthorized: Invalid or missing distribution token.' });
+  // Quick format gate before any Blob lookup.
+  if (!token || !entitlement || !isWellFormedToken(token)) {
+    return deny(res);
   }
 
-  // Read promotion manifest from private Blob — if absent, no artifact is served.
+  // Resolve the promotion manifest — must exist before any authorization.
   let manifest;
   try {
-    const manifestResult = await get(MANIFEST_BLOB_PATHNAME, { access: 'private' });
-    if (!manifestResult) {
+    manifest = await readBlobJson(MANIFEST_BLOB_PATHNAME);
+    if (!manifest) {
       return res.status(503).json({
         error: 'VaultBasis preview download is temporarily being updated. Please try again shortly.',
         supported: SUPPORTED_DISPLAY,
       });
     }
-    const chunks = [];
-    const reader = manifestResult.stream.getReader();
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      chunks.push(value);
-    }
-    const manifestJson = Buffer.concat(chunks.map(c => Buffer.from(c))).toString('utf8');
-    manifest = JSON.parse(manifestJson);
   } catch (e) {
     console.error('manifest read/parse error:', e.message);
     return res.status(503).json({ error: 'Release manifest could not be read.' });
   }
 
+  // Resolve platform and artifact entry.
   const ua = req.headers['user-agent'] || '';
   const platformKey = platformParam || detectPlatformFromUA(ua);
 
@@ -80,10 +91,15 @@ module.exports = async (req, res) => {
     });
   }
 
-  // Stream the artifact directly from private Blob storage through this function.
-  // issueSignedToken + presignUrl require a scope not available under OIDC-only
-  // project connections. Streaming via get() uses the same OIDC path as the
-  // manifest read, which is confirmed working.
+  // SEC-002: validate against server-side entitlement record.
+  // Checks: token exists, ACTIVE, not expired, entitlement ID matches,
+  // artifact hash matches the qualified artifact being served.
+  const authResult = await validateEntitlement(token, entitlement, entry.sha256);
+  if (!authResult.ok) {
+    return deny(res);
+  }
+
+  // Stream the authorized artifact.
   try {
     const blobResult = await get(entry.blobPathname, { access: 'private' });
     if (!blobResult) {
@@ -98,7 +114,6 @@ module.exports = async (req, res) => {
       res.setHeader('Content-Length', String(blobResult.size));
     }
 
-    // Pipe the Blob stream to the response
     const reader = blobResult.stream.getReader();
     while (true) {
       const { done, value } = await reader.read();

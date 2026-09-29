@@ -57,7 +57,38 @@ const originalLoad = Module._load;
 
 let capturedDownloadUrl = null;
 
+// Minimal blob stub — entitlement-store now reads the manifest before URL generation.
+const STUB_MANIFEST = JSON.stringify({
+  artifacts: [{ os: 'macos', architecture: 'arm64',
+    blobPathname: 'rc3/current/VaultBasis-RC3-macOS-arm64.zip',
+    sha256: 'a'.repeat(64) }]
+});
+const stubBlobStore = new Map([['rc3/current/manifest.json', STUB_MANIFEST]]);
+function makeStubBlobStream(str) {
+  const buf = Buffer.from(str, 'utf8');
+  return { stream: { getReader() { let s=false; return { async read() {
+    if (!s) { s=true; return { done: false, value: buf }; }
+    return { done: true, value: undefined };
+  }}; }}};
+}
+class StubBlobNotFoundError extends Error {
+  constructor(m) { super(m); this.name = 'BlobNotFoundError'; }
+}
+
 Module._load = function (request, parent, isMain) {
+  if (request === '@vercel/blob') {
+    return {
+      BlobNotFoundError: StubBlobNotFoundError,
+      get: async (pathname) => {
+        if (!stubBlobStore.has(pathname)) throw new StubBlobNotFoundError(pathname);
+        return makeStubBlobStream(stubBlobStore.get(pathname));
+      },
+      put: async (pathname, body) => {
+        stubBlobStore.set(pathname, typeof body === 'string' ? body : body.toString());
+        return { pathname };
+      },
+    };
+  }
   if (request === 'nodemailer') {
     return {
       createTestAccount: async () => ({ user: 'u', pass: 'p' }),
