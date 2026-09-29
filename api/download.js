@@ -1,4 +1,4 @@
-const { get, issueSignedToken, presignUrl } = require('@vercel/blob');
+const { get } = require('@vercel/blob');
 
 // Platform routing — explicit ?platform= param takes precedence over User-Agent.
 // Architecture is never inferred: Mac User-Agent → recommend mac-arm64 only,
@@ -10,21 +10,13 @@ const PLATFORM_MAP = {
 
 const SUPPORTED_DISPLAY = ['macOS Apple Silicon (arm64)', 'Windows x64'];
 
-// Short-lived signed URL expiry (10 minutes) — enough for any connection to start,
-// short enough to limit exposure if the URL is inadvertently logged.
-const SIGNED_URL_EXPIRY_MS = 10 * 60 * 1000;
-
 // Stable pointer in private Blob — overwritten on each RC3 promotion,
 // always resolves to the latest BUILD_VERIFIED manifest.
-// No manifest is committed to the source repository.
 const MANIFEST_BLOB_PATHNAME = 'rc3/current/manifest.json';
 
 function detectPlatformFromUA(ua) {
   if (!ua) return null;
   const lower = ua.toLowerCase();
-  // User-Agent detection is advisory only — the download page always shows
-  // an explicit platform selector. UA detection never silently routes to a
-  // specific architecture when uncertain.
   if (lower.includes('windows')) return 'windows-x64';
   if (lower.includes('macintosh') || lower.includes('mac os')) return 'mac-arm64';
   return null;
@@ -45,7 +37,7 @@ module.exports = async (req, res) => {
   let manifest;
   try {
     const manifestResult = await get(MANIFEST_BLOB_PATHNAME, { access: 'private' });
-    if (!manifestResult || manifestResult.statusCode !== 200) {
+    if (!manifestResult) {
       return res.status(503).json({
         error: 'VaultBasis preview download is temporarily being updated. Please try again shortly.',
         supported: SUPPORTED_DISPLAY,
@@ -88,25 +80,31 @@ module.exports = async (req, res) => {
     });
   }
 
-  // Issue a short-lived, GET-only signed token for this exact private object,
-  // then build the presigned URL. The browser downloads directly from Blob
-  // storage — the ZIP never transits through this serverless function.
+  // Stream the artifact directly from private Blob storage through this function.
+  // issueSignedToken + presignUrl require a scope not available under OIDC-only
+  // project connections. Streaming via get() uses the same OIDC path as the
+  // manifest read, which is confirmed working.
   try {
-    const validUntil = Date.now() + SIGNED_URL_EXPIRY_MS;
-    const signedToken = await issueSignedToken({
-      pathname:   entry.blobPathname,
-      operations: ['get'],
-      validUntil,
-    });
-    const { presignedUrl } = await presignUrl(signedToken, {
-      pathname:  entry.blobPathname,
-      operation: 'get',
-      validUntil,
-    });
+    const blobResult = await get(entry.blobPathname, { access: 'private' });
+    if (!blobResult) {
+      return res.status(503).json({ error: 'Artifact not found in distribution storage.' });
+    }
+
+    const filename = entry.blobPathname.split('/').pop();
+    res.setHeader('Content-Type', 'application/zip');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     res.setHeader('Cache-Control', 'no-store');
-    res.redirect(302, presignedUrl);
+
+    // Pipe the Blob stream to the response
+    const reader = blobResult.stream.getReader();
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      res.write(Buffer.from(value));
+    }
+    res.end();
   } catch (e) {
-    console.error('signed URL generation error:', e.message);
-    return res.status(503).json({ error: 'Download link could not be generated. Please try again.' });
+    console.error('artifact stream error:', e.message);
+    return res.status(503).json({ error: 'Download could not be completed. Please try again.' });
   }
 };
