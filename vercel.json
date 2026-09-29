@@ -6,9 +6,6 @@
   "outputDirectory": "dist/public-web",
   "cleanUrls": true,
   "trailingSlash": false,
-  "functions": {
-    "api/**/*.js": {}
-  },
   "rewrites": [
     {
       "source": "/docs/scope_and_limitations_v0.1.md",
