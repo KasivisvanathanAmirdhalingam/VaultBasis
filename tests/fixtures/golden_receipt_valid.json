@@ -33,7 +33,7 @@
       "source_b_ref": "Koinly:CostBasis",
       "source_b_value": "16300.00",
       "variance": "4200.00",
-      "description": "Difference detected: basis differs by ,200. Review source acquisition records and reporting scope."
+      "description": "Difference detected: basis differs by $4,200. Review source acquisition records and reporting scope."
     }
   ],
   "unresolved_items": [],

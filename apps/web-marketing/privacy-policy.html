@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy — VaultBasis</title>
+  <meta name="description" content="VaultBasis Privacy Policy — how information is handled across the website, design-partner access, and the local VaultBasis Edge application.">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --surface-elevated: #f1f5f9;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --primary: #2563eb;
+      --radius: 12px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      line-height: 1.7;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; }
+    .brand-logo {
+      width: 32px; height: 32px;
+      background: linear-gradient(135deg, #2563eb, #0284c7);
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 1rem; color: white;
+    }
+    .brand-name { font-size: 1.15rem; font-weight: 800; color: #0f172a; }
+    nav a { color: var(--text-muted); text-decoration: none; font-size: 0.92rem; font-weight: 600; }
+    nav a:hover { color: var(--primary); }
+    .container { max-width: 800px; margin: 4rem auto; padding: 0 1.5rem; flex: 1; }
+    h1 { font-size: 2.2rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--text); }
+    .meta { font-size: 0.88rem; color: var(--text-muted); margin-bottom: 2.5rem; font-family: 'JetBrains Mono', monospace; }
+    h2 { font-size: 1.25rem; font-weight: 700; margin: 2.5rem 0 0.75rem 0; color: var(--text); }
+    h3 { font-size: 1rem; font-weight: 700; margin: 1.5rem 0 0.5rem 0; color: var(--text); }
+    p { margin-bottom: 1rem; color: var(--text-muted); font-size: 0.97rem; }
+    ul { margin: 0.5rem 0 1rem 1.5rem; color: var(--text-muted); font-size: 0.97rem; }
+    ul li { margin-bottom: 0.4rem; }
+    .notice-box {
+      background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px;
+      padding: 1.25rem; margin: 2rem 0; font-size: 0.9rem; color: #92400e; line-height: 1.6;
+    }
+    footer.site-footer {
+      border-top: 1px solid var(--border); background: var(--surface);
+      padding: 2rem; text-align: center; font-size: 0.85rem; color: var(--text-muted);
+    }
+    footer a { color: var(--primary); text-decoration: none; margin: 0 0.5rem; }
+  </style>
+</head>
+<body>
+  <header role="banner">
+    <a href="/" class="brand">
+      <div class="brand-logo">V</div>
+      <span class="brand-name">VaultBasis</span>
+    </a>
+    <nav><a href="/">← Home</a></nav>
+  </header>
+
+  <main class="container" role="main">
+    <h1>Privacy Policy</h1>
+    <p class="meta">Version: preview-v0.1 &nbsp;|&nbsp; Effective: 2026-09-30 &nbsp;|&nbsp; Design-Partner Preview Phase</p>
+
+    <div class="notice-box">
+      <strong>Preview status.</strong> VaultBasis is in a controlled design-partner preview phase. This policy describes current practice for this phase. It will be updated before any general availability release. Counsel review is required before any commercial or regulated deployment.
+    </div>
+
+    <h2>Overview — Two Distinct Processing Planes</h2>
+    <p>VaultBasis operates across two distinct planes. Understanding which plane applies to a given interaction is essential for reading this policy correctly.</p>
+    <ul>
+      <li><strong>Web plane</strong> — interactions with vaultbasis.com: visiting the website, submitting an access request, receiving a provisioning email, accessing support or disclosure routes. These interactions involve web infrastructure and are covered in Section 1.</li>
+      <li><strong>Edge evidence plane</strong> — the local VaultBasis Edge application running on the practitioner's device: loading source files, performing reconciliation, generating and signing Outcome Receipts. These interactions occur locally and are covered in Section 2.</li>
+    </ul>
+    <p>Local evidence processing does not mean that website interactions are local. The two planes are separate.</p>
+
+    <h2>Section 1 — Web Plane</h2>
+
+    <h3>1.1 Website Hosting</h3>
+    <p>The vaultbasis.com website is hosted on Vercel. Vercel may collect standard web server log data (IP address, request path, timestamp, browser user agent) as part of hosting operations. VaultBasis does not control Vercel's infrastructure-level logging. See Vercel's privacy documentation for details.</p>
+
+    <h3>1.2 Design-Partner Access Requests</h3>
+    <p>When you submit a design-partner access request, you provide your name and email address. This information is used solely to provision and communicate your design-partner entitlement. It is transmitted to a server-side function hosted on Vercel.</p>
+
+    <h3>1.3 Entitlement Provisioning</h3>
+    <p>When access is provisioned, an entitlement record is created in private server-side storage. This record contains your email address, an entitlement identifier, a hashed token, and an expiry timestamp. The raw bearer token is never stored — only its SHA-256 hash is retained. Entitlements expire 72 hours after creation.</p>
+
+    <h3>1.4 Email Delivery</h3>
+    <p>During the current design-partner preview phase, provisioning emails are routed through a mail delivery service. Your email address is transmitted to that service for the purpose of delivering your access link. Email delivery infrastructure operates as a web-plane subprocessor.</p>
+
+    <h3>1.5 Support and Disclosure Interactions</h3>
+    <p>If you contact VaultBasis via the general enquiries or security disclosure routes, any information you provide (name, email, description of the issue) will be used to respond to your enquiry and, where applicable, to address security concerns. Do not include taxpayer source files, CSV exports, or other sensitive financial evidence in support communications.</p>
+
+    <h3>1.6 What the Web Plane Does Not Collect</h3>
+    <p>VaultBasis does not operate advertising trackers, third-party analytics pixels, or marketing automation on vaultbasis.com during the preview phase. The website does not use cookies for tracking.</p>
+
+    <h2>Section 2 — Edge Evidence Plane</h2>
+
+    <h3>2.1 Local Application Processing</h3>
+    <p>The VaultBasis Edge application runs entirely on the practitioner's local device. Source evidence files (e.g., IRS Form 1099-DA CSV, Koinly CSV exports) are loaded and processed locally. Reconciliation computations occur within the local Edge process. No source evidence is transmitted to VaultBasis or any third party as part of reconciliation or signing.</p>
+
+    <h3>2.2 Local Storage</h3>
+    <p>Case data, reconciliation results, and Outcome Receipts are stored locally on the practitioner's device. VaultBasis Edge does not provide cloud backup, synchronization, or remote access to case data. The practitioner is responsible for maintaining and securing local storage.</p>
+
+    <h3>2.3 Outcome Receipts</h3>
+    <p>An Outcome Receipt is a signed local artifact. It is not transmitted to VaultBasis at creation. If a practitioner chooses to share an Outcome Receipt with a third party (e.g., for independent verification), that transmission is entirely the practitioner's decision and is outside VaultBasis's control.</p>
+
+    <h3>2.4 Installation Key</h3>
+    <p>VaultBasis Edge generates a local Ed25519 signing key on installation. This key is stored on the local device. It is used to sign Outcome Receipts. The public key is included in each signed receipt. VaultBasis does not hold, register, or have access to installation private keys.</p>
+
+    <h3>2.5 No Telemetry in Preview</h3>
+    <p>The current preview release does not include usage telemetry, crash reporting, or diagnostic data transmission. If this changes in a future release, this policy will be updated and design partners will be notified.</p>
+
+    <h2>Section 3 — Data Retention</h2>
+    <p>Access request information and entitlement records are retained for the duration of the design-partner preview phase and a reasonable period thereafter for accountability purposes. When the preview phase concludes, retention will be governed by the updated privacy policy in effect at that time.</p>
+
+    <h2>Section 4 — Contact</h2>
+    <p>For privacy enquiries, use the <a href="/contact">general enquiries route</a>. For security concerns, use the <a href="/security-disclosure">security disclosure route</a>. Do not include source evidence files or taxpayer financial information in any communication.</p>
+
+    <h2>Section 5 — Changes to This Policy</h2>
+    <p>This policy applies to the current design-partner preview phase only. It will be revised before any general availability release. The effective date above reflects when the current version took effect.</p>
+  </main>
+
+  <footer class="site-footer" role="contentinfo">
+    <div>© 2026 VaultBasis. All rights reserved.</div>
+    <div style="margin-top: 0.5rem;">
+      <a href="/">Home</a>
+      <a href="/terms-of-service">Terms of Service</a>
+      <a href="/docs/scope_and_limitations_v0.1.html" target="_blank">Scope &amp; Limitations</a>
+    </div>
+  </footer>
+</body>
+</html>

@@ -315,19 +315,23 @@
         <span id="rep-version" class="badge badge-pass">PASS (v0.1)</span>
       </div>
       <div class="check-row">
-        <span>[3] Declared Key Fingerprint Consistency</span>
+        <span>[3] Receipt Key Self-Consistency</span>
         <span id="rep-fingerprint" class="badge badge-pass">PASS</span>
       </div>
       <div class="check-row">
-        <span>[4] Ed25519 Cryptographic Signature</span>
+        <span>[4] Signature Verification</span>
         <span id="rep-signature" class="badge badge-pass">PASS</span>
+      </div>
+      <div class="check-row">
+        <span>[5] Tax Correctness</span>
+        <span class="badge" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1;">NOT DETERMINED</span>
       </div>
 
       <div id="errors-box" style="display: none; margin-top: 1rem; padding: 1rem; background: rgba(239, 68, 68, 0.1); border-left: 3px solid #ef4444; color: #f87171; font-size: 0.85rem; border-radius: 4px;"></div>
 
       <div class="limitations-box">
         <strong>IMPORTANT NOTICE:</strong><br>
-        Successful verification confirms that the receipt signature is valid for the declared installation public key and that the signed receipt content has not changed relative to that signature. It does not independently establish tax correctness, source-data accuracy, installation identity, software authenticity, or government endorsement.
+        Verification confirms the declared cryptographic and contract checks shown above. The signature is verified against the public key declared within the receipt itself — this does not independently authenticate the originating VaultBasis installation. Verification does not determine tax correctness, source-data accuracy or completeness, legal compliance, or professional judgment, and does not constitute government endorsement or IRS approval.
       </div>
     </div>
   </main>
@@ -363,11 +367,11 @@
       </div>
 
       <div class="footer-col">
-        <h4>Legal & Policy</h4>
+        <h4>Legal &amp; Policy</h4>
         <ul>
-          <li><a href="/#security" id="ft-zero-bleed">Local Processing</a></li>
-          <li><a href="/docs/scope_and_limitations_v0.1.html" target="_blank" id="ft-statutory">Scope &amp; Limitations §27</a></li>
-          <li><a href="/privacy-policy" target="_blank" id="ft-airgap">Privacy Policy</a></li>
+          <li><a href="/docs/scope_and_limitations_v0.1.html" target="_blank">Scope &amp; Limitations</a></li>
+          <li><a href="/privacy-policy" target="_blank">Privacy Policy</a></li>
+          <li><a href="/terms-of-service" target="_blank">Terms of Service</a></li>
         </ul>
       </div>
     </div>
@@ -383,20 +387,14 @@
   <script>
     // Dynamic routing to marketing site
     document.addEventListener('DOMContentLoaded', () => {
-      const mktBase = '/';
-      
-      const setHref = (id, suffix) => {
+      const setHref = (id, href) => {
         const el = document.getElementById(id);
-        if (el) el.href = mktBase + suffix;
+        if (el) el.href = href;
       };
-      
-      setHref('nav-brand-link', '');
-      setHref('nav-back-link', '');
-      setHref('ft-marketing-link', '');
-      setHref('ft-evidence-link', '#evidence-contract');
-      setHref('ft-zero-bleed', '#security');
-      setHref('ft-statutory', '#evidence-contract');
-      setHref('ft-airgap', '#security');
+      setHref('nav-brand-link', '/');
+      setHref('nav-back-link', '/');
+      setHref('ft-marketing-link', '/');
+      setHref('ft-evidence-link', '/docs/scope_and_limitations_v0.1.html');
     });
 
     // Embedded Golden Fixtures for Instant Browser Testing

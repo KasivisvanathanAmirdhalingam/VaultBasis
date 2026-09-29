@@ -274,7 +274,7 @@
       <div class="section-header">
         <span class="section-tag">Deployment Boundary</span>
         <h2>Local-First Evidence Processing</h2>
-        <p>VaultBasis processes your information locally on your device. No data is sent to external servers during reconciliation or signing.</p>
+        <p>VaultBasis Edge is designed for local evidence processing. Source evidence used in reconciliation is processed within the declared local application boundary. Website, access-request, and distribution interactions are separate from the local Edge processing boundary. See Scope &amp; Limitations for tested network behavior, storage boundaries, and known limitations.</p>
       </div>
       <div class="grid-3">
         <div class="feature-card">
@@ -328,8 +328,8 @@
           </div>
         </div>
         <div class="feature-card">
-          <h3>Local Processing Verification</h3>
-          <p style="margin-bottom: 1.25rem;">Independent test confirming that reconciliation and signing ran entirely on the local device, with no data leaving the machine during the process.</p>
+          <h3>Scope &amp; Limitations</h3>
+          <p style="margin-bottom: 1.25rem;">Documents the declared local application boundary, tested network behavior, supported source formats, outcome states, and explicit limitations of the preview release.</p>
           <a href="/docs/scope_and_limitations_v0.1.html" target="_blank" class="btn btn-secondary btn-sm">Scope &amp; Limitations ↗</a>
         </div>
       </div>
@@ -372,16 +372,9 @@
       </div>
 
       <div id="request-success" style="display:none; padding:1.5rem; background:#ecfdf5; border:1px solid #a7f3d0; border-radius:12px; text-align:center;">
-        <h4 style="color:#059669; margin-bottom:0.5rem; font-size:1.15rem; font-weight:700;">Check Your Inbox</h4>
-        <p style="color:#064e3b; font-size:1rem; margin-bottom:1.25rem;">Your secure download link has been dispatched.</p>
-        <div style="background:#ffffff; padding:16px; border-radius:8px; border:1px solid #e2e8f0; text-align:left;">
-          <span style="display:block; font-family:'JetBrains Mono', monospace; font-size:0.82rem; color:#2563eb; margin-bottom:6px; font-weight:700;">TESTING INSTRUCTION:</span>
-          To simulate checking your inbox, open this generated email:
-          <a id="uat-email-link" href="#" target="_blank" style="display:block; margin:10px 0; font-weight:bold; color:#2563eb; font-size:1rem;">Open Ethereal Inbox ↗</a>
-          <span style="display:block; font-size: 0.85rem; color: #64748b; border-top: 1px solid #e2e8f0; padding-top: 10px; margin-top:10px;">
-            <strong>macOS Users:</strong> To bypass Gatekeeper on preview builds, go to <strong>System Settings > Privacy & Security</strong> and click <strong>"Open Anyway"</strong>.
-          </span>
-        </div>
+        <h4 style="color:#059669; margin-bottom:0.5rem; font-size:1.15rem; font-weight:700;">Request Received</h4>
+        <p style="color:#064e3b; font-size:1rem; margin-bottom:1.25rem;">Your design-partner access request has been submitted. You will receive a secure download link by email once your access has been reviewed and provisioned. This is a controlled preview — provisioning is not automatic.</p>
+        <p style="color:#065f46; font-size:0.9rem;">If you do not receive a response within a reasonable time, use the contact route in the footer.</p>
       </div>
     </div>
   </div>
@@ -418,8 +411,8 @@
         <h4>Contact &amp; Access</h4>
         <ul>
           <li><a href="#" onclick="openAccessModal(); return false;">Request Design-Partner Access</a></li>
-          <li><a href="#" onclick="openAccessModal('general'); return false;">General Enquiries</a></li>
-          <li><a href="#" onclick="openAccessModal('security'); return false;">Security Disclosure</a></li>
+          <li><a href="/contact" target="_blank">General Enquiries</a></li>
+          <li><a href="/security-disclosure" target="_blank">Security Disclosure</a></li>
         </ul>
       </div>
       <div class="footer-col">
@@ -473,11 +466,9 @@
         });
         const data = await res.json();
         
-        if (res.ok && data.uatPreviewUrl) {
+        if (res.ok) {
           document.getElementById('request-form-container').style.display = 'none';
-          const successDiv = document.getElementById('request-success');
-          successDiv.style.display = 'block';
-          document.getElementById('uat-email-link').href = data.uatPreviewUrl;
+          document.getElementById('request-success').style.display = 'block';
         } else {
           alert(data.error || 'Failed to request access.');
         }

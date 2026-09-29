@@ -61,6 +61,19 @@ marketingHtml = marketingHtml.replace(
 fs.writeFileSync(path.join(DIST_DIR, 'index.html'), marketingHtml, 'utf8');
 console.log('✓ Packaged Public Marketing Portal -> dist/public-web/index.html');
 
+// Copy standalone pages
+const standalonePages = ['privacy-policy', 'terms-of-service', 'contact', 'security-disclosure'];
+for (const page of standalonePages) {
+  const src = path.join(APPS_DIR, 'web-marketing', `${page}.html`);
+  if (fs.existsSync(src)) {
+    fs.copyFileSync(src, path.join(DIST_DIR, `${page}.html`));
+    console.log(`✓ Packaged ${page} -> dist/public-web/${page}.html`);
+  } else {
+    console.error(`❌ ERROR: ${page}.html missing at ${src}`);
+    process.exit(1);
+  }
+}
+
 // 4. Build Public Web Verifier (dist/public-web/verifier/index.html)
 const verifierSourcePath = path.join(APPS_DIR, 'web-verifier', 'index.html');
 if (!fs.existsSync(verifierSourcePath)) {
