@@ -3,6 +3,7 @@ VaultBasis Edge — Local REST API Service
 Conforms to PRD §18.1 (Local REST API), §62.1 (Service Contracts), §21.1 (Zero Egress)
 """
 
+import hashlib
 import io
 import json
 import uuid
@@ -25,7 +26,7 @@ from edge.assurance.reconciliation_engine import DeterministicReconciliationEngi
 from edge.connectors.validator import IntakeDispatcher
 from edge.receipts.keygen import InstallationKeyManager
 from edge.receipts.signer import ReceiptSigner
-from edge.storage.sqlite_store import SQLiteStore
+from edge.storage.sqlite_store import SQLiteStore, EvidenceCollisionError
 from schemas.canonical.case import CanonicalCase
 
 
@@ -231,7 +232,10 @@ async def upload_source(
     except Exception as e:
         raise HTTPException(status_code=422, detail=f"Intake parser failure: {str(e)}")
 
-    db_store.add_source_and_transactions(case_id, meta, content, transactions)
+    try:
+        db_store.add_source_and_transactions(case_id, meta, content, transactions)
+    except EvidenceCollisionError as e:
+        raise HTTPException(status_code=409, detail=str(e))
     return {
         "status": "INGESTED",
         "case_id": case_id,
@@ -252,8 +256,39 @@ def reconcile_case(case_id: str):
             detail="Reconciliation requires at least two source documents (e.g. Form 1099-DA and Koinly CSV)"
         )
 
+    # Compute a manifest hash of the current source set (sorted for determinism).
+    # Used to detect whether sources changed after a receipt was previously issued.
+    current_manifest = hashlib.sha256(
+        json.dumps(
+            sorted((sid, s.sha256_hash) for sid, s in case.sources.items())
+        ).encode()
+    ).hexdigest()
+
     # Execute deterministic reconciliation
     recon_result = DeterministicReconciliationEngine.reconcile_case(case)
+
+    # Return existing receipt only if sources are identical to when it was issued.
+    # A receipt for a different source set must not masquerade as the current result.
+    if case.receipt_id:
+        existing_receipt = db_store.get_receipt(case.receipt_id)
+        if existing_receipt:
+            issued_sources = existing_receipt.get("source_hashes", {})
+            issued_manifest = hashlib.sha256(
+                json.dumps(sorted(issued_sources.items())).encode()
+            ).hexdigest()
+            if current_manifest == issued_manifest:
+                return {
+                    "status": "RECEIPT_ALREADY_ISSUED",
+                    "case_id": case_id,
+                    "receipt_id": case.receipt_id,
+                    "outcome_state": case.outcome_state,
+                    "assurance_level": case.assurance_level,
+                    "reconciliation": recon_result.to_dict(),
+                    "receipt": existing_receipt,
+                    "message": "Receipt already exists for this case. View it via /cases/{case_id}/receipt.",
+                }
+            # Sources changed after receipt was issued — fall through to re-reconcile
+            # and issue a new receipt. The old receipt remains in the DB as an audit record.
 
     # Build Outcome Receipt Payload
     receipt_id = str(uuid.uuid4())

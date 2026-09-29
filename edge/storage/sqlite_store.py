@@ -8,6 +8,10 @@ import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+
+
+class EvidenceCollisionError(Exception):
+    """Raised when an insert would silently overwrite existing evidence."""
 from schemas.canonical.case import CanonicalCase, SourceDocumentMetadata
 from schemas.canonical.transaction import CanonicalTransaction
 
@@ -145,8 +149,16 @@ class SQLiteStore:
         transactions: List[CanonicalTransaction]
     ):
         with self._get_connection() as conn:
+            existing_source = conn.execute(
+                "SELECT source_id FROM sources WHERE source_id = ?", (meta.source_id,)
+            ).fetchone()
+            if existing_source:
+                raise EvidenceCollisionError(
+                    f"Source '{meta.source_id}' already exists in case '{case_id}'. "
+                    "Existing evidence cannot be overwritten. Upload the source under a new case."
+                )
             conn.execute("""
-                INSERT OR REPLACE INTO sources (source_id, case_id, filename, sha256_hash, byte_size, schema_id, row_count, raw_content, ingested_at)
+                INSERT INTO sources (source_id, case_id, filename, sha256_hash, byte_size, schema_id, row_count, raw_content, ingested_at)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 meta.source_id,
@@ -161,8 +173,17 @@ class SQLiteStore:
             ))
 
             for tx in transactions:
+                existing_tx = conn.execute(
+                    "SELECT transaction_id FROM transactions WHERE transaction_id = ?",
+                    (tx.transaction_id,)
+                ).fetchone()
+                if existing_tx:
+                    raise EvidenceCollisionError(
+                        f"Transaction '{tx.transaction_id}' already exists. "
+                        "Existing transaction evidence cannot be overwritten."
+                    )
                 conn.execute("""
-                    INSERT OR REPLACE INTO transactions (transaction_id, case_id, source_id, data_json)
+                    INSERT INTO transactions (transaction_id, case_id, source_id, data_json)
                     VALUES (?, ?, ?, ?)
                 """, (
                     tx.transaction_id,
@@ -180,7 +201,7 @@ class SQLiteStore:
         now_utc = datetime.now(timezone.utc).isoformat()
         with self._get_connection() as conn:
             conn.execute("""
-                INSERT OR REPLACE INTO receipts (receipt_id, case_id, receipt_json, created_at)
+                INSERT OR IGNORE INTO receipts (receipt_id, case_id, receipt_json, created_at)
                 VALUES (?, ?, ?, ?)
             """, (
                 receipt_id,
