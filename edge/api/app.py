@@ -353,6 +353,9 @@ To verify this receipt independently on any clean machine without internet acces
 1. Ensure Python 3.8+ and 'cryptography' library are installed.
 2. Run:
    python3 verify_receipt.py receipt-v0.1.json --evidence-dir evidence/
+
+IMPORTANT NOTICE:
+VaultBasis performs bounded, deterministic reconciliation of supported sources under declared semantics. It does not assess tax correctness, establish legal compliance, or determine whether source information is complete or accurate. Successful verification confirms that the receipt signature is valid for the declared installation public key and that the signed receipt content has not changed relative to that signature. Verification does not constitute a professional opinion, legal finding, government approval, or endorsement by the IRS or any other government authority. The practitioner remains responsible for professional interpretation and application of applicable law.
 """
         )
 

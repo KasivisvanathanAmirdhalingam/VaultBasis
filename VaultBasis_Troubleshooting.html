@@ -73,22 +73,14 @@
     <h2>A. macOS — security message on first launch</h2>
     <p>This preview build is distributed outside the Mac App Store and is not yet Apple-notarized. macOS Gatekeeper will block it the first time. That block is expected.</p>
 
-    <h3>If you have macOS 14 Sonoma or 13 Ventura</h3>
+    <h3>All supported macOS versions (13 Ventura, 14 Sonoma, 15 Sequoia)</h3>
     <ol>
-      <li>In Finder, <strong>right-click</strong> (or Control-click) the file <code class="inline">VaultBasis-Edge-v0.1.0-preview-macOS</code>.</li>
-      <li>Choose <strong>Open</strong>.</li>
-      <li>In the dialog, click <strong>Open</strong> again.</li>
-      <li>Enter your Mac password if asked. Do this once — macOS remembers.</li>
+      <li>Double-click <code class="inline">VaultBasis.app</code> in Finder. macOS will show a security dialog — click <strong>Done</strong>.</li>
+      <li>Open <strong>System Settings → Privacy &amp; Security</strong> and scroll down to the Security section.</li>
+      <li>You will see a message that VaultBasis was blocked. Click <strong>Open Anyway</strong>.</li>
+      <li>Enter your Mac password if asked. You only do this once — macOS remembers.</li>
     </ol>
-    <p>If no dialog appears, double-click the file once to trigger the block, then immediately open <strong>System Settings → Privacy &amp; Security</strong>, scroll to Security, and click <strong>Open Anyway</strong>.</p>
-
-    <h3>If you have macOS 15 Sequoia</h3>
-    <div class="alert alert-warning"><strong>Sequoia note (observed):</strong> On the tested Mac 3 / macOS 15 environment, the "Open Anyway" button did not appear for this quarantined standalone executable. We make no universal claim about all Sequoia systems — if you do not see it, use the launcher or the Terminal step below.</div>
-    <ol>
-      <li>Double-click <code class="inline">launch_vaultbasis.command</code> (included in the same folder as the application). If prompted, right-click it and choose <strong>Open</strong>.</li>
-      <li>The launcher clears the security flag and starts VaultBasis automatically.</li>
-    </ol>
-    <p>If the launcher itself is blocked, use the one-time Terminal step under "Advanced" below. It works on all macOS versions.</p>
+    <p>After clicking Open Anyway, double-click <code class="inline">VaultBasis.app</code> again and it will open normally.</p>
   </div>
 
   <div class="card">
@@ -136,8 +128,8 @@
   </div>
 
   <div class="card">
-    <h2>Advanced — one-time Terminal fix (macOS, all versions)</h2>
-    <p>Only use this if the sections above did not work. This takes about 30 seconds.</p>
+    <h2>Advanced — if Open Anyway does not appear (macOS, technical support)</h2>
+    <p>Only use this if System Settings → Privacy &amp; Security does not show an Open Anyway button after the first blocked launch attempt.</p>
     <details>
       <summary>Advanced diagnostics (for technical support)</summary>
       <div class="body">
@@ -145,15 +137,12 @@
           <li>Open <strong>Terminal</strong> (press ⌘ Space, type <strong>Terminal</strong>, press Enter).</li>
           <li>Paste the following line, then press Enter. Enter your Mac password when asked (nothing appears while typing — that is normal):</li>
         </ol>
-        <div class="terminal"><button class="copy-btn" onclick="copyCmd(this)">Copy</button><span class="prompt">$ </span>xattr -d com.apple.quarantine ~/Downloads/VaultBasis-Edge-v0.1.0-preview-macOS</div>
+        <div class="terminal"><button class="copy-btn" onclick="copyCmd(this)">Copy</button><span class="prompt">$ </span>xattr -d com.apple.quarantine ~/Downloads/VaultBasis.app</div>
         <p>If you see <em>No such xattr</em>, the flag is already cleared — skip ahead.</p>
         <ol start="3">
-          <li>Double-click <code class="inline">VaultBasis-Edge-v0.1.0-preview-macOS</code> in Finder. It will launch.</li>
+          <li>Double-click <code class="inline">VaultBasis.app</code> in Finder. It will launch.</li>
         </ol>
-        <div class="alert alert-info"><strong>Different folder?</strong> Replace <code class="inline">~/Downloads/</code> with the folder path. Tip: drag the file from Finder into the Terminal window to paste its path automatically.</div>
-        <hr class="divider">
-        <p><strong>Terminal closes immediately?</strong> The file may be missing execute permission. Run:</p>
-        <div class="terminal"><button class="copy-btn" onclick="copyCmd(this)">Copy</button><span class="prompt">$ </span>chmod +x ~/Downloads/VaultBasis-Edge-v0.1.0-preview-macOS &amp;&amp; ~/Downloads/VaultBasis-Edge-v0.1.0-preview-macOS</div>
+        <div class="alert alert-info"><strong>Different folder?</strong> Replace <code class="inline">~/Downloads/</code> with the path to wherever VaultBasis.app is located. Tip: drag the app from Finder into the Terminal window to paste its path automatically.</div>
       </div>
     </details>
   </div>
