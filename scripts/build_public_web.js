@@ -116,7 +116,8 @@ if (fs.existsSync(apiSourceDir)) {
     name: "vaultbasis-web",
     version: "1.0.0",
     dependencies: {
-      "nodemailer": "^6.9.13"
+      "nodemailer": "^6.9.13",
+      "@vercel/blob": "^0.27.0"
     }
   };
   fs.writeFileSync(path.join(DIST_DIR, 'package.json'), JSON.stringify(pkgJson, null, 2), 'utf8');

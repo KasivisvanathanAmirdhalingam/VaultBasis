@@ -25,6 +25,8 @@ Thumbs.db
 
 # Web Build & Deployment Artifacts
 dist/
+build/
 .vercel/
 node_modules/
 
+.env*

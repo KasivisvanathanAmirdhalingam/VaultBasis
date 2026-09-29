@@ -1,5 +1,4 @@
-const path = require('path');
-const fs = require('fs');
+const { get, issueSignedToken, presignUrl } = require('@vercel/blob');
 
 // Platform routing — explicit ?platform= param takes precedence over User-Agent.
 // Architecture is never inferred: Mac User-Agent → recommend mac-arm64 only,
@@ -10,6 +9,15 @@ const PLATFORM_MAP = {
 };
 
 const SUPPORTED_DISPLAY = ['macOS Apple Silicon (arm64)', 'Windows x64'];
+
+// Short-lived signed URL expiry (10 minutes) — enough for any connection to start,
+// short enough to limit exposure if the URL is inadvertently logged.
+const SIGNED_URL_EXPIRY_MS = 10 * 60 * 1000;
+
+// Stable pointer in private Blob — overwritten on each RC3 promotion,
+// always resolves to the latest BUILD_VERIFIED manifest.
+// No manifest is committed to the source repository.
+const MANIFEST_BLOB_PATHNAME = 'rc3/current/manifest.json';
 
 function detectPlatformFromUA(ua) {
   if (!ua) return null;
@@ -33,20 +41,27 @@ module.exports = async (req, res) => {
     return res.status(401).json({ error: 'Unauthorized: Invalid or missing distribution token.' });
   }
 
-  // Read manifest — if absent, no artifact is served (no RC1 fallback).
-  const manifestPath = path.join(__dirname, 'manifest.json');
-  if (!fs.existsSync(manifestPath)) {
-    return res.status(503).json({
-      error: 'VaultBasis preview download is temporarily being updated. Please try again shortly.',
-      supported: SUPPORTED_DISPLAY,
-    });
-  }
-
+  // Read promotion manifest from private Blob — if absent, no artifact is served.
   let manifest;
   try {
-    manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+    const manifestResult = await get(MANIFEST_BLOB_PATHNAME, { access: 'private' });
+    if (!manifestResult || manifestResult.statusCode !== 200) {
+      return res.status(503).json({
+        error: 'VaultBasis preview download is temporarily being updated. Please try again shortly.',
+        supported: SUPPORTED_DISPLAY,
+      });
+    }
+    const chunks = [];
+    const reader = manifestResult.stream.getReader();
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value);
+    }
+    const manifestJson = Buffer.concat(chunks.map(c => Buffer.from(c))).toString('utf8');
+    manifest = JSON.parse(manifestJson);
   } catch (e) {
-    console.error('manifest.json parse error:', e.message);
+    console.error('manifest read/parse error:', e.message);
     return res.status(503).json({ error: 'Release manifest could not be read.' });
   }
 
@@ -73,17 +88,25 @@ module.exports = async (req, res) => {
     });
   }
 
-  const artifactPath = path.join(__dirname, 'data', entry.filename);
-  if (!fs.existsSync(artifactPath)) {
-    console.error(`Artifact not on disk: ${entry.filename}`);
-    return res.status(503).json({ error: 'Artifact temporarily unavailable.' });
+  // Issue a short-lived, GET-only signed token for this exact private object,
+  // then build the presigned URL. The browser downloads directly from Blob
+  // storage — the ZIP never transits through this serverless function.
+  try {
+    const validUntil = Date.now() + SIGNED_URL_EXPIRY_MS;
+    const signedToken = await issueSignedToken({
+      pathname:   entry.blobPathname,
+      operations: ['get'],
+      validUntil,
+    });
+    const { presignedUrl } = await presignUrl(signedToken, {
+      pathname:  entry.blobPathname,
+      operation: 'get',
+      validUntil,
+    });
+    res.setHeader('Cache-Control', 'no-store');
+    res.redirect(302, presignedUrl);
+  } catch (e) {
+    console.error('signed URL generation error:', e.message);
+    return res.status(503).json({ error: 'Download link could not be generated. Please try again.' });
   }
-
-  const stat = fs.statSync(artifactPath);
-  res.writeHead(200, {
-    'Content-Type': 'application/zip',
-    'Content-Length': stat.size,
-    'Content-Disposition': `attachment; filename="${entry.filename}"`,
-  });
-  fs.createReadStream(artifactPath).pipe(res);
 };
