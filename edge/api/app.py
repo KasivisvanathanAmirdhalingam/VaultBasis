@@ -85,13 +85,18 @@ app = FastAPI(
     version="0.1.0-preview"
 )
 
-# Enable CORS for local origins
+# CORS locked to loopback origins only — Edge is a local-only application.
+# allow_credentials requires explicit origin list (wildcard + credentials is rejected by browsers
+# and is a security defect: any site could XHR the local API while Edge runs).
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=[
+        "http://127.0.0.1:8000",
+        "http://localhost:8000",
+    ],
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "DELETE"],
+    allow_headers=["Content-Type", "Accept"],
 )
 
 
@@ -416,9 +421,17 @@ def serve_marketing():
 
 
 
+_SCHEMA_ALLOWLIST = {"receipt-v0.1.json"}
+
 @app.get("/schemas/{filename:path}")
 def serve_schema(filename: str):
-    schema_path = RESOURCE_BASE / "schemas" / "receipt" / filename
+    if filename not in _SCHEMA_ALLOWLIST:
+        raise HTTPException(status_code=404, detail="Schema file not found")
+    schema_dir = (RESOURCE_BASE / "schemas" / "receipt").resolve()
+    schema_path = (schema_dir / filename).resolve()
+    # Reject any path that escapes the schema directory
+    if not str(schema_path).startswith(str(schema_dir)):
+        raise HTTPException(status_code=404, detail="Schema file not found")
     if schema_path.is_file():
         return Response(content=schema_path.read_text(), media_type="application/json")
     raise HTTPException(status_code=404, detail="Schema file not found")
