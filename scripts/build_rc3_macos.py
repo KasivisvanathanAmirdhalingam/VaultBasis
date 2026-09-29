@@ -228,12 +228,18 @@ def main() -> int:
         )
         extracted_app = tmp_path / PACKAGE_NAME / APP_NAME
         assert extracted_app.is_dir(), f"extracted .app missing at {extracted_app}"
-        # Confirm symlink was preserved — absence here means the ZIP was built without -y.
-        symlink_path = extracted_app / "Contents" / "Frameworks" / "python3.13"
-        assert symlink_path.is_symlink(), (
-            f"python3.13 symlink missing after extraction — ZIP was not built with -y "
-            f"(symlinks flag). Packaging defect."
+        # Confirm PyInstaller python3.X symlink was preserved — absence means the ZIP
+        # was built without -y. The version suffix matches the bundled Python, so we
+        # scan for any python3.* symlink rather than hardcoding the version.
+        frameworks = extracted_app / "Contents" / "Frameworks"
+        py_symlinks = [p for p in frameworks.iterdir()
+                       if p.name.startswith("python3.") and p.is_symlink()]
+        assert py_symlinks, (
+            f"No python3.X symlink found in extracted Frameworks/ — "
+            f"ZIP was not built with -y (symlinks flag). Packaging defect.\n"
+            f"  Frameworks contents: {[p.name for p in sorted(frameworks.iterdir())]}"
         )
+        print(f"  [symlink-assert] Found: {[p.name + ' -> ' + os.readlink(p) for p in py_symlinks]}")
         launch_gate(extracted_app, "POST-ZIP: extracted .app from candidate ZIP")
 
     # Candidate manifest: honest pre-qualification states. It MUST NOT validate
