@@ -202,6 +202,10 @@ def main() -> int:
             zf.extractall(tmp_path)
         extracted_app = tmp_path / PACKAGE_NAME / APP_NAME
         assert extracted_app.is_dir(), f"extracted .app missing at {extracted_app}"
+        # Python's zipfile does not restore Unix permissions on extraction.
+        # Restore execute bit on the bundle executable before launching.
+        extracted_exe = extracted_app / "Contents" / "MacOS" / "VaultBasis"
+        extracted_exe.chmod(extracted_exe.stat().st_mode | 0o111)
         launch_gate(extracted_app, "POST-ZIP: extracted .app from candidate ZIP")
 
     # Candidate manifest: honest pre-qualification states. It MUST NOT validate

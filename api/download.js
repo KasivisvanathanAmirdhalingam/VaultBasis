@@ -94,6 +94,9 @@ module.exports = async (req, res) => {
     res.setHeader('Content-Type', 'application/zip');
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
     res.setHeader('Cache-Control', 'no-store');
+    if (blobResult.size) {
+      res.setHeader('Content-Length', String(blobResult.size));
+    }
 
     // Pipe the Blob stream to the response
     const reader = blobResult.stream.getReader();
