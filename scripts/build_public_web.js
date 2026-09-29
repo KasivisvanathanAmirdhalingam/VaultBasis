@@ -106,23 +106,9 @@ if (fs.existsSync(scopeDocSource)) {
   console.log('✓ Rendered Scope & Limitations page -> dist/public-web/docs/scope_and_limitations_v0.1.html');
 }
 
-// 5c. Package Backend API Functions and Secure Artifacts
-const apiSourceDir = path.join(APPS_DIR, 'web-marketing', 'api');
-if (fs.existsSync(apiSourceDir)) {
-  fs.cpSync(apiSourceDir, path.join(DIST_DIR, 'api'), { recursive: true });
-  console.log('✓ Packaged Backend API Functions -> dist/public-web/api/');
-  
-  const pkgJson = {
-    name: "vaultbasis-web",
-    version: "1.0.0",
-    dependencies: {
-      "nodemailer": "^6.9.13",
-      "@vercel/blob": "^0.27.0"
-    }
-  };
-  fs.writeFileSync(path.join(DIST_DIR, 'package.json'), JSON.stringify(pkgJson, null, 2), 'utf8');
-  console.log('✓ Packaged Serverless package.json -> dist/public-web/package.json');
-}
+// 5c. API functions live at the repo root /api/ directory and are picked up by
+// Vercel's function runtime directly — they must NOT be copied into outputDirectory
+// or they will be served as static files instead of executed as serverless functions.
 
 // 5d. Artifact distribution placeholder.
 // RC3 qualified artifacts are not yet in controlled storage.
