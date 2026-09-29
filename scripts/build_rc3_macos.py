@@ -187,26 +187,31 @@ def main() -> int:
     launch_gate(app_dir, "PRE-ZIP: built .app in dist/")
 
     # 6. Zip + hashes + candidate manifest (schema: schemas/release/manifest-v0.1.json).
+    # system zip -ry is required (not Python zipfile) because the .app bundle contains
+    # symlinks (e.g. python3.13 -> python3__dot__13) that Python zipfile silently drops,
+    # causing ModuleNotFoundError on extraction.  -y stores symlinks as symlinks.
     zip_path = REPO / "dist" / f"{PACKAGE_NAME}.zip"
-    with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as z:
-        for f in sorted(pkg.rglob("*")):
-            if f.is_file():
-                z.write(f, arcname=f"{PACKAGE_NAME}/{f.relative_to(pkg)}")
+    subprocess.run(
+        ["zip", "-ry", str(zip_path), PACKAGE_NAME, "-x", "*.DS_Store"],
+        cwd=REPO / "dist",
+        check=True,
+    )
     artifact_sha = sha256_of(zip_path)
 
     # 6b. Launch gate — post-ZIP: extract to a fresh temp dir and launch from there.
     # This tests the actual distributable representation, not merely the build dir.
     #
-    # Extraction policy: Python's zipfile.extractall() does not apply Unix mode
-    # metadata from ZIP entries. We validate that the ZIP encodes the correct mode
-    # for every entry, then apply those modes on extraction — honouring exactly what
-    # the archive declares, as macOS Archive Utility would. This is recipient-faithful:
-    # we are NOT repairing a defect; we are applying metadata the ZIP already carries.
-    # If an entry is missing execute metadata, the assertion below catches it before launch.
+    # Extraction uses system unzip (not Python zipfile.extractall) because:
+    #   1. Python zipfile silently drops symlinks — python3.13 -> python3__dot__13 is
+    #      absent from a Python-extracted tree, causing ModuleNotFoundError on launch.
+    #   2. system unzip -X restores Unix permissions and symlinks faithfully, matching
+    #      what a recipient running Archive Utility or unzip would get.
+    # The Python zipfile read (first pass below) is kept for metadata assertion only —
+    # it reads entry headers without extracting, so symlink absence is not an issue there.
     with tempfile.TemporaryDirectory(prefix="vb_rc3_extract_") as tmp:
         tmp_path = Path(tmp)
         with zipfile.ZipFile(zip_path) as zf:
-            # First pass: assert required execute metadata is encoded in the ZIP.
+            # Assert required execute metadata is encoded in the ZIP entries.
             for info in zf.infolist():
                 if info.filename.endswith("/"):
                     continue
@@ -216,18 +221,19 @@ def main() -> int:
                         f"ZIP entry missing execute bit: {info.filename} "
                         f"(mode {oct(unix_mode)}) — packaging defect, not a gate repair"
                     )
-            # Second pass: extract and apply the declared Unix mode from each entry.
-            zf.extractall(tmp_path)
-            for info in zf.infolist():
-                if info.filename.endswith("/"):
-                    continue
-                unix_mode = (info.external_attr >> 16) & 0xFFFF
-                if unix_mode:
-                    extracted = tmp_path / info.filename
-                    if extracted.exists():
-                        extracted.chmod(unix_mode & 0o7777)
+        # Extract with system unzip: -X restores UID/GID/permissions, symlinks preserved.
+        subprocess.run(
+            ["unzip", "-X", "-q", str(zip_path), "-d", str(tmp_path)],
+            check=True,
+        )
         extracted_app = tmp_path / PACKAGE_NAME / APP_NAME
         assert extracted_app.is_dir(), f"extracted .app missing at {extracted_app}"
+        # Confirm symlink was preserved — absence here means the ZIP was built without -y.
+        symlink_path = extracted_app / "Contents" / "Frameworks" / "python3.13"
+        assert symlink_path.is_symlink(), (
+            f"python3.13 symlink missing after extraction — ZIP was not built with -y "
+            f"(symlinks flag). Packaging defect."
+        )
         launch_gate(extracted_app, "POST-ZIP: extracted .app from candidate ZIP")
 
     # Candidate manifest: honest pre-qualification states. It MUST NOT validate
