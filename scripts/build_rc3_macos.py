@@ -196,16 +196,38 @@ def main() -> int:
 
     # 6b. Launch gate — post-ZIP: extract to a fresh temp dir and launch from there.
     # This tests the actual distributable representation, not merely the build dir.
+    #
+    # Extraction policy: Python's zipfile.extractall() does not apply Unix mode
+    # metadata from ZIP entries. We validate that the ZIP encodes the correct mode
+    # for every entry, then apply those modes on extraction — honouring exactly what
+    # the archive declares, as macOS Archive Utility would. This is recipient-faithful:
+    # we are NOT repairing a defect; we are applying metadata the ZIP already carries.
+    # If an entry is missing execute metadata, the assertion below catches it before launch.
     with tempfile.TemporaryDirectory(prefix="vb_rc3_extract_") as tmp:
         tmp_path = Path(tmp)
         with zipfile.ZipFile(zip_path) as zf:
+            # First pass: assert required execute metadata is encoded in the ZIP.
+            for info in zf.infolist():
+                if info.filename.endswith("/"):
+                    continue
+                if "/MacOS/" in info.filename and not info.filename.endswith(".dylib"):
+                    unix_mode = (info.external_attr >> 16) & 0xFFFF
+                    assert unix_mode & 0o111, (
+                        f"ZIP entry missing execute bit: {info.filename} "
+                        f"(mode {oct(unix_mode)}) — packaging defect, not a gate repair"
+                    )
+            # Second pass: extract and apply the declared Unix mode from each entry.
             zf.extractall(tmp_path)
+            for info in zf.infolist():
+                if info.filename.endswith("/"):
+                    continue
+                unix_mode = (info.external_attr >> 16) & 0xFFFF
+                if unix_mode:
+                    extracted = tmp_path / info.filename
+                    if extracted.exists():
+                        extracted.chmod(unix_mode & 0o7777)
         extracted_app = tmp_path / PACKAGE_NAME / APP_NAME
         assert extracted_app.is_dir(), f"extracted .app missing at {extracted_app}"
-        # Python's zipfile does not restore Unix permissions on extraction.
-        # Restore execute bit on the bundle executable before launching.
-        extracted_exe = extracted_app / "Contents" / "MacOS" / "VaultBasis"
-        extracted_exe.chmod(extracted_exe.stat().st_mode | 0o111)
         launch_gate(extracted_app, "POST-ZIP: extracted .app from candidate ZIP")
 
     # Candidate manifest: honest pre-qualification states. It MUST NOT validate
