@@ -7,6 +7,9 @@ manifest. No installer toolchain on stock runners: ships the signed-ready
 application layout; a real installer (Inno/MSI) + code signing are tracked
 as PLANNED in the manifest and required before qualification. Stdlib +
 PyInstaller only. Exit non-zero on any assertion.
+
+Launch gate: BUILD_VERIFIED requires the packaged executable to boot
+successfully on the native CI runner, both pre-ZIP and post-ZIP-extraction.
 """
 import hashlib
 import json
@@ -15,12 +18,67 @@ import shutil
 import struct
 import subprocess
 import sys
+import tempfile
+import time
+import urllib.request
+import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
-import zipfile
 
 REPO = Path(__file__).resolve().parent.parent
 PACKAGE_NAME = "VaultBasis-RC3-Windows-x64"
+
+HEALTH_URL = "http://127.0.0.1:8000/health"
+LAUNCH_TIMEOUT_S = 30
+POLL_INTERVAL_S = 1
+
+
+def launch_gate(exe_path: Path, label: str) -> None:
+    """
+    Launch VaultBasis.exe, wait for the health endpoint, then terminate cleanly.
+    Raises SystemExit(1) on any failure.
+    """
+    print(f"\n[LAUNCH-GATE] {label}")
+    print(f"  exe: {exe_path}")
+
+    proc = subprocess.Popen(
+        [str(exe_path)],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        cwd=str(exe_path.parent),
+    )
+
+    deadline = time.monotonic() + LAUNCH_TIMEOUT_S
+    healthy = False
+    last_err = None
+    while time.monotonic() < deadline:
+        try:
+            with urllib.request.urlopen(HEALTH_URL, timeout=2) as resp:
+                if resp.status == 200:
+                    healthy = True
+                    break
+        except Exception as e:
+            last_err = e
+        time.sleep(POLL_INTERVAL_S)
+
+    proc.terminate()
+    try:
+        stdout_bytes, _ = proc.communicate(timeout=10)
+    except subprocess.TimeoutExpired:
+        proc.kill()
+        stdout_bytes, _ = proc.communicate()
+
+    output = stdout_bytes.decode("utf-8", errors="replace").strip()
+    if output:
+        print(f"  [app output]\n{output}\n  [/app output]")
+
+    if not healthy:
+        print(f"  FAIL: health endpoint did not respond within {LAUNCH_TIMEOUT_S}s")
+        print(f"  Last error: {last_err}")
+        sys.exit(1)
+
+    print(f"  PASS: health endpoint responded within deadline")
+    print(f"  Process exit code: {proc.returncode}")
 
 
 def sh(*args):
@@ -113,12 +171,24 @@ def main() -> int:
                   "Simulate Audits", "proves you ran", "preview-macOS"]:
             assert b not in text, f"BANNED {b!r} in package file {name}"
 
+    # Launch gate — pre-ZIP: launch the built exe from dist/.
+    launch_gate(exe, "PRE-ZIP: built VaultBasis.exe in dist/")
+
     zip_path = REPO / "dist" / f"{PACKAGE_NAME}.zip"
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as z:
         for f in sorted(pkg.rglob("*")):
             if f.is_file():
                 z.write(f, arcname=f"{PACKAGE_NAME}/{f.relative_to(pkg)}")
     artifact_sha = sha256_of(zip_path)
+
+    # Launch gate — post-ZIP: extract to fresh temp dir and launch from there.
+    with tempfile.TemporaryDirectory(prefix="vb_rc3_extract_") as tmp:
+        tmp_path = Path(tmp)
+        with zipfile.ZipFile(zip_path) as zf:
+            zf.extractall(tmp_path)
+        extracted_exe = tmp_path / PACKAGE_NAME / "VaultBasis.exe"
+        assert extracted_exe.is_file(), f"extracted exe missing at {extracted_exe}"
+        launch_gate(extracted_exe, "POST-ZIP: extracted VaultBasis.exe from candidate ZIP")
 
     manifest = {
         "manifest_version": "v0.1",
@@ -160,6 +230,8 @@ def main() -> int:
         },
         "qualification": {
             "distribution": "PENDING", "usability": "PENDING", "leakage_gate": "PASS",
+            "launch_gate_pre_zip": "PASS",
+            "launch_gate_post_zip": "PASS",
             "result": "CANDIDATE-UNQUALIFIED",
         },
         "publication": {"endpoint": "NONE (do not distribute)", "published_artifact_sha256": artifact_sha},

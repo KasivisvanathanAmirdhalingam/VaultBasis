@@ -5,8 +5,13 @@ Deterministic assembly: frozen source -> .app bundle -> platform package with
 current guides + release metadata -> hashes. Asserts the UAT-MAC-003 negative
 vectors: Finder-recognizable application (no extensionless loose binary), no
 stale RC1 content, correct-arch executable. Stdlib + PyInstaller + system tools.
- Signing/notarization: UNSIGNED here (no Developer ID); recorded honestly in
+Signing/notarization: UNSIGNED here (no Developer ID); recorded honestly in
 the candidate manifest. Exit non-zero on any assertion.
+
+Launch gate: BUILD_VERIFIED now requires the packaged executable to boot
+successfully on the native CI runner, both pre-ZIP (build dir) and post-ZIP
+(fresh temp extraction). A binary that cannot bootstrap its bundled runtime
+cannot become a candidate regardless of static checks.
 """
 import hashlib
 import json
@@ -15,6 +20,9 @@ import plistlib
 import shutil
 import subprocess
 import sys
+import tempfile
+import time
+import urllib.request
 import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
@@ -22,6 +30,10 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 APP_NAME = "VaultBasis.app"
 PACKAGE_NAME = "VaultBasis-RC3-macOS-arm64"
+
+HEALTH_URL = "http://127.0.0.1:8000/health"
+LAUNCH_TIMEOUT_S = 30   # max seconds to wait for health endpoint to respond
+POLL_INTERVAL_S = 1
 
 
 def sh(*args):
@@ -35,6 +47,60 @@ def sha256_of(path: Path) -> str:
         for chunk in iter(lambda: f.read(1 << 20), b""):
             h.update(chunk)
     return h.hexdigest()
+
+
+def launch_gate(app_path: Path, label: str) -> None:
+    """
+    Launch the .app, wait for the health endpoint, then terminate cleanly.
+    Raises SystemExit(1) on any failure — a binary that cannot bootstrap
+    its bundled runtime cannot become a BUILD_VERIFIED candidate.
+    """
+    exe = app_path / "Contents" / "MacOS" / "VaultBasis"
+    print(f"\n[LAUNCH-GATE] {label}")
+    print(f"  app:  {app_path}")
+    print(f"  exe:  {exe}")
+
+    proc = subprocess.Popen(
+        [str(exe)],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        cwd=str(app_path.parent),
+    )
+
+    # Poll health endpoint until ready or timeout
+    deadline = time.monotonic() + LAUNCH_TIMEOUT_S
+    healthy = False
+    last_err = None
+    while time.monotonic() < deadline:
+        try:
+            with urllib.request.urlopen(HEALTH_URL, timeout=2) as resp:
+                if resp.status == 200:
+                    healthy = True
+                    break
+        except Exception as e:
+            last_err = e
+        time.sleep(POLL_INTERVAL_S)
+
+    # Capture any output from the process before terminating
+    proc.terminate()
+    try:
+        stdout_bytes, _ = proc.communicate(timeout=10)
+    except subprocess.TimeoutExpired:
+        proc.kill()
+        stdout_bytes, _ = proc.communicate()
+
+    output = stdout_bytes.decode("utf-8", errors="replace").strip()
+    if output:
+        print(f"  [app output]\n{output}\n  [/app output]")
+
+    if not healthy:
+        print(f"  FAIL: health endpoint did not respond within {LAUNCH_TIMEOUT_S}s")
+        print(f"  Last error: {last_err}")
+        print(f"  EXIT CODE: {label} — BUILD_VERIFIED BLOCKED")
+        sys.exit(1)
+
+    print(f"  PASS: health endpoint responded within deadline")
+    print(f"  Process exit code: {proc.returncode}")
 
 
 def main() -> int:
@@ -107,8 +173,6 @@ def main() -> int:
 
     # 5. Forbidden-content sweep: artifact identity across the whole package,
     # plus claim-level sweep of the practitioner Quick Start + RELEASE.txt.
-    # (Troubleshooting/Technical may reference historical RC2 filenames when
-    # guiding support; the content gate already bans superseded claims there.)
     for f in pkg.rglob("*"):
         for b in ["preview-macOS", "RC1", "VaultBasis-RC1"]:
             assert b not in f.name, f"stale identity in package filename: {f.name}"
@@ -118,6 +182,10 @@ def main() -> int:
                   "Simulate Audits", "proves you ran", "preview-macOS"]:
             assert b not in text, f"BANNED {b!r} in package file {name}"
 
+    # 5b. Launch gate — pre-ZIP: launch the built .app from the dist directory.
+    # This directly tests the PyInstaller output before packaging.
+    launch_gate(app_dir, "PRE-ZIP: built .app in dist/")
+
     # 6. Zip + hashes + candidate manifest (schema: schemas/release/manifest-v0.1.json).
     zip_path = REPO / "dist" / f"{PACKAGE_NAME}.zip"
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as z:
@@ -125,6 +193,16 @@ def main() -> int:
             if f.is_file():
                 z.write(f, arcname=f"{PACKAGE_NAME}/{f.relative_to(pkg)}")
     artifact_sha = sha256_of(zip_path)
+
+    # 6b. Launch gate — post-ZIP: extract to a fresh temp dir and launch from there.
+    # This tests the actual distributable representation, not merely the build dir.
+    with tempfile.TemporaryDirectory(prefix="vb_rc3_extract_") as tmp:
+        tmp_path = Path(tmp)
+        with zipfile.ZipFile(zip_path) as zf:
+            zf.extractall(tmp_path)
+        extracted_app = tmp_path / PACKAGE_NAME / APP_NAME
+        assert extracted_app.is_dir(), f"extracted .app missing at {extracted_app}"
+        launch_gate(extracted_app, "POST-ZIP: extracted .app from candidate ZIP")
 
     # Candidate manifest: honest pre-qualification states. It MUST NOT validate
     # against schemas/release/manifest-v0.1.json yet (that schema's consts —
@@ -170,6 +248,8 @@ def main() -> int:
         },
         "qualification": {
             "distribution": "PENDING", "usability": "PENDING", "leakage_gate": "PASS",
+            "launch_gate_pre_zip": "PASS",
+            "launch_gate_post_zip": "PASS",
             "result": "CANDIDATE-UNQUALIFIED",
         },
         "publication": {"endpoint": "NONE (do not distribute)", "published_artifact_sha256": artifact_sha},

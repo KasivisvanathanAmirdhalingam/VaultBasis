@@ -118,6 +118,43 @@ ZIP_QUICKSTART_BANNED_CONTENT = [
 ]
 
 
+def check_zip_relative_links(names: list, zf) -> list:
+    """
+    Verify that every relative href/src in HTML members resolves to another
+    member in the same ZIP directory. External URLs (http/https/mailto/#)
+    and absolute paths are skipped. A broken relative link is a packaging
+    defect that causes silent failure for recipients (Defect B in RC3 smoke).
+    """
+    import re
+    failures = []
+    # Build a set of bare filenames present in the ZIP (flat — all members)
+    zip_filenames = {Path(n).name for n in names if not n.endswith("/")}
+    for name in names:
+        if not name.endswith(".html"):
+            continue
+        try:
+            text = zf.read(name).decode("utf-8", errors="replace")
+        except Exception:
+            continue
+        member_name = Path(name).name
+        # Extract all href and src attribute values
+        for attr_val in re.findall(r'(?:href|src)=["\']([^"\']+)["\']', text):
+            # Skip external URLs, anchors, mailto
+            if attr_val.startswith(("http://", "https://", "mailto:", "#", "/")):
+                continue
+            # Strip query/fragment for file resolution
+            target = attr_val.split("?")[0].split("#")[0]
+            if not target:
+                continue
+            target_name = Path(target).name
+            if target_name not in zip_filenames:
+                failures.append(
+                    f"ZIP-BROKEN-LINK in {member_name}: "
+                    f"'{attr_val}' → '{target_name}' not found in package"
+                )
+    return failures
+
+
 def check_zip(zip_path: Path) -> list:
     """Inspect an RC3 candidate ZIP. Returns failure strings; empty = PASS."""
     failures = []
@@ -149,6 +186,8 @@ def check_zip(zip_path: Path) -> list:
                             failures.append(
                                 f"ZIP-SHELL-BANNED {banned!r} in Quick Start member {name}"
                             )
+            # Relative link integrity: every local href/src must resolve within the ZIP
+            failures.extend(check_zip_relative_links(names, zf))
     except zipfile.BadZipFile as e:
         failures.append(f"ZIP unreadable: {e}")
     return failures

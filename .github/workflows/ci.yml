@@ -5,6 +5,13 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch:
+    inputs:
+      promote:
+        description: "Promote BUILD_VERIFIED RC3 artifacts to Private Blob storage (explicit promotion — not automatic)"
+        type: boolean
+        required: true
+        default: false
 
 jobs:
   validate:
@@ -220,12 +227,23 @@ jobs:
 
             results.append(r)
 
+        # Emit verified-identities.json for store-rc3 to consume — eliminates
+        # the manually maintained hardcoded hash table in the promotion job.
+        identities = {r['target']: r['sha256'] for r in results if 'sha256' in r}
+        identities['source_commit'] = os.environ['GITHUB_SHA']
+        identities['ci_run_id'] = os.environ['GITHUB_RUN_ID']
+        with open('verified-identities.json', 'w') as f:
+            import json as _json
+            _json.dump(identities, f, indent=2)
+        print('verified-identities.json written')
+
         # Emit GitHub Step Summary
         summary = ['# RC3 Candidate Inspection Report', '',
                    f'Source commit: `{os.environ["GITHUB_SHA"]}`',
                    f'CI run: `{os.environ["GITHUB_RUN_ID"]}`', '',
-                   '> **Classification: BUILD_VERIFIED** — content gate and architecture checks passed.',
-                   '> UAT-READY requires additional human-verified qualification gates (launch, smoke, clean-machine).',
+                   '> **Classification: BUILD_VERIFIED** — content gate, architecture checks,',
+                   '> and native platform launch gates (pre-ZIP and post-ZIP extraction) passed.',
+                   '> UAT-READY requires additional human-verified qualification gates (smoke, clean-machine).',
                    '']
         for r in results:
             s = r.get('qualification', 'MISSING')
@@ -270,4 +288,188 @@ jobs:
 
         print('\n✅ Both candidates BUILD_VERIFIED. Retrieve artifacts from this run for human review and UAT qualification.')
         PYEOF
+
+    - name: Upload verified identities for promotion job
+      uses: actions/upload-artifact@v4
+      with:
+        name: vaultbasis-rc3-verified-identities
+        path: verified-identities.json
+        retention-days: 7
+
+  store-rc3:
+    name: Promote BUILD_VERIFIED Artifacts to Private Blob Storage
+    needs: [inspect-rc3]
+    runs-on: ubuntu-latest
+    # Promotion is explicit — must be triggered via workflow_dispatch with promote: true.
+    # Automatic pushes to main never promote artifacts; inspect-rc3 still runs automatically.
+    if: github.event_name == 'workflow_dispatch' && inputs.promote == true
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Download macOS RC3 candidate
+      uses: actions/download-artifact@v4
+      with:
+        name: vaultbasis-rc3-candidate-macos-latest
+        path: downloaded/macos
+
+    - name: Download Windows RC3 candidate
+      uses: actions/download-artifact@v4
+      with:
+        name: vaultbasis-rc3-candidate-windows-latest
+        path: downloaded/windows
+
+    - name: Download verified identities from inspection job
+      uses: actions/download-artifact@v4
+      with:
+        name: vaultbasis-rc3-verified-identities
+        path: downloaded/identities
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: "20"
+
+    - name: Install @vercel/blob
+      run: npm install @vercel/blob
+
+    - name: Upload artifacts to private Blob and write manifest
+      env:
+        BLOB_READ_WRITE_TOKEN: ${{ secrets.BLOB_READ_WRITE_TOKEN }}
+      run: |
+        node - <<'JSEOF'
+        const { put } = require('@vercel/blob');
+        const fs = require('fs');
+        const path = require('path');
+        const crypto = require('crypto');
+
+        function sha256File(filePath) {
+          return crypto.createHash('sha256').update(fs.readFileSync(filePath)).digest('hex');
+        }
+
+        function findFile(dir, pattern) {
+          const files = fs.readdirSync(dir, { recursive: true });
+          for (const f of files) {
+            if (f.includes(pattern)) return path.join(dir, f);
+          }
+          return null;
+        }
+
+        const COMMIT = process.env.GITHUB_SHA;
+        const SHORT_COMMIT = COMMIT.slice(0, 7);
+        const RUN_ID = process.env.GITHUB_RUN_ID;
+        const PROMOTED_AT = new Date().toISOString();
+
+        // Load BUILD_VERIFIED SHA-256 identities emitted by the inspect-rc3 job.
+        // These are asserted — upload fails if the actual file does not match.
+        // Eliminates the manually maintained hardcoded hash table.
+        const identitiesPath = 'downloaded/identities/verified-identities.json';
+        if (!fs.existsSync(identitiesPath)) {
+          console.error('❌ verified-identities.json not found — inspect-rc3 must pass before promotion');
+          process.exit(1);
+        }
+        const identities = JSON.parse(fs.readFileSync(identitiesPath, 'utf8'));
+        console.log('Loaded verified identities:', JSON.stringify(identities, null, 2));
+
+        // Map inspection target labels to platform keys
+        const EXPECTED = {
+          'mac-arm64':   identities['macOS arm64'],
+          'windows-x64': identities['Windows x64'],
+        };
+        if (!EXPECTED['mac-arm64'] || !EXPECTED['windows-x64']) {
+          console.error('❌ verified-identities.json missing expected platform entries');
+          process.exit(1);
+        }
+
+        async function main() {
+          const macZip  = findFile('downloaded/macos',   'VaultBasis-RC3-macOS-arm64.zip');
+          const winZip  = findFile('downloaded/windows', 'VaultBasis-RC3-Windows-x64.zip');
+
+          if (!macZip || !winZip) {
+            console.error('❌ Could not locate one or both ZIP files');
+            process.exit(1);
+          }
+
+          const artifacts = [
+            { platformKey: 'mac-arm64',   os: 'macos',   architecture: 'arm64', filePath: macZip,  filename: 'VaultBasis-RC3-macOS-arm64.zip'  },
+            { platformKey: 'windows-x64', os: 'windows', architecture: 'x64',   filePath: winZip,  filename: 'VaultBasis-RC3-Windows-x64.zip'  },
+          ];
+
+          const manifestArtifacts = [];
+
+          for (const art of artifacts) {
+            const actual = sha256File(art.filePath);
+            const expected = EXPECTED[art.platformKey];
+
+            if (actual !== expected) {
+              console.error(`❌ SHA-256 MISMATCH for ${art.platformKey}`);
+              console.error(`   Expected: ${expected}`);
+              console.error(`   Actual:   ${actual}`);
+              console.error('   Artifact identity does not match BUILD_VERIFIED record. Aborting.');
+              process.exit(1);
+            }
+            console.log(`✓ SHA-256 verified: ${art.platformKey} = ${actual}`);
+
+            // Immutable content-addressed path: rc3/<short-commit>/<platform>/<sha256>/<filename>
+            const blobPathname = `rc3/${SHORT_COMMIT}/${art.platformKey}/${actual}/${art.filename}`;
+
+            console.log(`  Uploading to: ${blobPathname}`);
+            const result = await put(blobPathname, fs.readFileSync(art.filePath), {
+              access: 'private',
+              addRandomSuffix: false,
+            });
+            console.log(`✓ Uploaded: ${result.pathname}`);
+
+            manifestArtifacts.push({
+              os:             art.os,
+              architecture:   art.architecture,
+              platformKey:    art.platformKey,
+              filename:       art.filename,
+              blobPathname:   result.pathname,
+              sha256:         actual,
+              sourceCommit:   COMMIT,
+              ciRunId:        RUN_ID,
+              qualification:  'BUILD_VERIFIED',
+              promotedAt:     PROMOTED_AT,
+            });
+          }
+
+          const manifest = {
+            version:       '1',
+            qualification: 'BUILD_VERIFIED',
+            sourceCommit:  COMMIT,
+            ciRunId:       RUN_ID,
+            promotedAt:    PROMOTED_AT,
+            artifacts:     manifestArtifacts,
+          };
+
+          const manifestJson = JSON.stringify(manifest, null, 2);
+          const manifestPathname = `rc3/${SHORT_COMMIT}/manifest.json`;
+
+          console.log(`  Uploading manifest to: ${manifestPathname}`);
+          const mResult = await put(manifestPathname, manifestJson, {
+            access: 'private',
+            addRandomSuffix: false,
+            contentType: 'application/json',
+          });
+          console.log(`✓ Manifest uploaded: ${mResult.pathname}`);
+
+          // Write manifest pathname to a well-known stable pointer (also in private blob)
+          // This is the only path download.js needs to know: rc3/current/manifest.json
+          // It is overwritten on each promotion — always points to the latest BUILD_VERIFIED set
+          const pointerResult = await put('rc3/current/manifest.json', manifestJson, {
+            access: 'private',
+            addRandomSuffix: false,
+            contentType: 'application/json',
+          });
+          console.log(`✓ Current pointer updated: ${pointerResult.pathname}`);
+
+          console.log('\n✅ store-rc3 complete. Manifest:');
+          console.log(manifestJson);
+          console.log('\nArtifacts are in private Blob storage. No manifest committed to main.');
+        }
+
+        main().catch(e => { console.error(e); process.exit(1); });
+        JSEOF
 
