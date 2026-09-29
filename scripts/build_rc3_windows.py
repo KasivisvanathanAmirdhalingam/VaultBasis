@@ -28,7 +28,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent
 PACKAGE_NAME = "VaultBasis-RC3-Windows-x64"
 
-HEALTH_URL = "http://127.0.0.1:8000/health"
+HEALTH_URL = "http://127.0.0.1:8000/api/health"
 LAUNCH_TIMEOUT_S = 30
 POLL_INTERVAL_S = 1
 

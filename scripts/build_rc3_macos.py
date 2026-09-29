@@ -31,7 +31,7 @@ REPO = Path(__file__).resolve().parent.parent
 APP_NAME = "VaultBasis.app"
 PACKAGE_NAME = "VaultBasis-RC3-macOS-arm64"
 
-HEALTH_URL = "http://127.0.0.1:8000/health"
+HEALTH_URL = "http://127.0.0.1:8000/api/health"
 LAUNCH_TIMEOUT_S = 30   # max seconds to wait for health endpoint to respond
 POLL_INTERVAL_S = 1
 
