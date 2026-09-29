@@ -110,9 +110,16 @@ PAGE_CSS = """
 :root{--bg:#f8fafc;--surface:#fff;--text:#0f172a;--muted:#475569;--primary:#2563eb;--border:#e2e8f0}
 *{box-sizing:border-box}body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',-apple-system,'Segoe UI',sans-serif;line-height:1.75;margin:0}
 .wrap{max-width:780px;margin:0 auto;padding:2.5rem 1.5rem 4rem}nav.top{margin-bottom:2rem;font-size:.9rem}nav.top a{color:var(--primary);text-decoration:none}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:2.25rem;box-shadow:0 1px 3px rgba(15,23,42,.06)}
-h1{font-size:1.9rem;margin:0 0 1rem}h2{font-size:1.35rem;margin:2rem 0 .75rem;padding-top:1rem;border-top:1px solid var(--border)}h3{font-size:1.1rem;margin:1.5rem 0 .5rem}
-p{margin:.6rem 0;color:#1e293b}ul,ol{padding-left:1.4rem;margin:.6rem 0}li{margin:.35rem 0}ul.sub{margin:.3rem 0}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:2.25rem 2.5rem;box-shadow:0 1px 3px rgba(15,23,42,.06)}
+.doc-title{font-size:1.75rem;font-weight:700;margin:0 0 .35rem;color:var(--text)}
+.doc-meta{font-size:.85rem;color:var(--muted);margin:0 0 1.5rem;line-height:1.6}
+h2{font-size:1.2rem;font-weight:700;margin:2rem 0 .6rem;padding-top:1.25rem;border-top:1px solid var(--border);color:var(--text)}
+h3{font-size:1rem;font-weight:600;margin:1.25rem 0 .4rem}
+p{margin:.6rem 0;color:#1e293b}
+ul{padding-left:1.4rem;margin:.5rem 0}
+ul ul{margin:.25rem 0}
+li{margin:.4rem 0;color:#1e293b}
+li ul li{margin:.25rem 0;color:#334155}
 code{background:#f1f5f9;border:1px solid var(--border);border-radius:4px;padding:1px 6px;font-family:'JetBrains Mono',monospace;font-size:.84em}
 hr{border:none;border-top:1px solid var(--border);margin:1.75rem 0}a{color:var(--primary)}
 footer{margin-top:2.5rem;font-size:.8rem;color:var(--muted);text-align:center}
@@ -120,15 +127,51 @@ footer{margin-top:2.5rem;font-size:.8rem;color:var(--muted);text-align:center}
 
 
 def render_page(md_text: str, title: str, back_href: str = "/", back_label: str = "← VaultBasis Home") -> str:
-    body = render_body(md_text)
+    # Strip the h1 and any leading bold key:value meta lines from the body —
+    # they are rendered as a styled header block instead.
+    lines = md_text.splitlines()
+    meta_lines = []
+    body_start = 0
+    for i, line in enumerate(lines):
+        stripped = line.strip()
+        if stripped.startswith("# "):
+            body_start = i + 1
+            continue
+        if re.match(r"^\*\*[^*]+:\*\*", stripped) and i <= body_start + 4:
+            # Extract the value after the bold label
+            m = re.match(r"^\*\*([^*]+):\*\*\s*(.*)", stripped)
+            if m:
+                meta_lines.append(f"{html.escape(m.group(1))}: {html.escape(m.group(2))}")
+            body_start = i + 1
+        elif stripped == "" and i == body_start:
+            body_start = i + 1
+        elif stripped == "---" and i == body_start:
+            body_start = i + 1
+            break
+        elif i > body_start + 5:
+            break
+
+    remaining_md = "\n".join(lines[body_start:])
+    body = render_body(remaining_md)
+
+    meta_html = ""
+    if meta_lines:
+        meta_html = f'<p class="doc-meta">{" &nbsp;·&nbsp; ".join(meta_lines)}</p>'
+
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{html.escape(title)}</title><style>{PAGE_CSS}</style></head>
+<title>{html.escape(title)}</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>{PAGE_CSS}</style></head>
 <body><div class="wrap">
 <nav class="top"><a href="{back_href}">{html.escape(back_label)}</a></nav>
-<div class="card">{body}</div>
-<footer>© 2026 VaultBasis. All rights reserved. · Design Partner Preview</footer>
+<div class="card">
+<h1 class="doc-title">{html.escape(title)}</h1>
+{meta_html}
+{body}
+</div>
+<footer>© 2026 VaultBasis. All rights reserved.</footer>
 </div></body></html>"""
 
 
