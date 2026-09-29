@@ -93,10 +93,9 @@ if (fs.existsSync(sampleTamperedSource)) {
 fs.mkdirSync(path.join(DIST_DIR, 'docs'), { recursive: true });
 const scopeDocSource = path.join(REPO_ROOT, 'docs', 'scope_and_limitations_v0.1.md');
 if (fs.existsSync(scopeDocSource)) {
-  fs.copyFileSync(scopeDocSource, path.join(DIST_DIR, 'docs', 'scope_and_limitations_v0.1.md'));
-  console.log('✓ Packaged Scope & Limitations source -> dist/public-web/docs/scope_and_limitations_v0.1.md');
-  // Render readable HTML via the single stdlib renderer (fail closed: practitioners
-  // must never be served raw markdown). Used by app.py for local Edge too.
+  // Render HTML only — do NOT copy the .md source into the output directory.
+  // Vercel serves static files before applying rewrites, so a .md file in the
+  // output would be served as raw text regardless of any rewrite rule.
   const { execFileSync } = require('child_process');
   execFileSync('python3', [
     path.join(REPO_ROOT, 'scripts', 'md_to_html.py'),

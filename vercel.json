@@ -8,10 +8,6 @@
   "trailingSlash": false,
   "rewrites": [
     {
-      "source": "/docs/scope_and_limitations_v0.1.md",
-      "destination": "/docs/scope_and_limitations_v0.1.html"
-    },
-    {
       "source": "/verifier",
       "destination": "/verifier/index.html"
     },
