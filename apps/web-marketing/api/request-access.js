@@ -28,9 +28,12 @@ module.exports = async (req, res) => {
       },
     });
 
-    const host = req.headers['x-forwarded-host'] || req.headers.host;
-    const protocol = host.includes('localhost') ? 'http' : 'https';
-    const downloadUrl = `${protocol}://${host}/api/download?token=${token}&entitlement=${entitlementId}`;
+    // SEC-003 fix: never infer the canonical origin from request headers.
+    // X-Forwarded-Host and Host are attacker-controlled; using them allows
+    // a host-poisoning attack that embeds an arbitrary domain in provisioning
+    // emails.  Use the explicitly configured PUBLIC_BASE_URL instead.
+    const canonicalBase = process.env.PUBLIC_BASE_URL || 'http://localhost:3000';
+    const downloadUrl = `${canonicalBase}/api/download?token=${token}&entitlement=${entitlementId}`;
 
     const htmlContent = `
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
