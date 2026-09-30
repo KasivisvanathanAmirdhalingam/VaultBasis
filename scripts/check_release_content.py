@@ -11,9 +11,15 @@ Usage:
   python3 scripts/check_release_content.py            # source lint only
   python3 scripts/check_release_content.py <zip>      # source lint + ZIP inspection
 """
+import io
 import sys
 import zipfile
 from pathlib import Path
+
+# Windows CI runners default to cp1252 stdout. Force UTF-8 so diagnostic
+# messages with non-ASCII characters (arrows, bullets) don't crash the gate.
+if sys.stdout.encoding and sys.stdout.encoding.lower() not in ("utf-8", "utf8"):
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 
 REPO = Path(__file__).resolve().parent.parent
 
@@ -150,7 +156,7 @@ def check_zip_relative_links(names: list, zf) -> list:
             if target_name not in zip_filenames:
                 failures.append(
                     f"ZIP-BROKEN-LINK in {member_name}: "
-                    f"'{attr_val}' → '{target_name}' not found in package"
+                    f"'{attr_val}' -> '{target_name}' not found in package"
                 )
     return failures
 
