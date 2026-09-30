@@ -145,8 +145,8 @@ def check_zip_relative_links(names: list, zf) -> list:
         member_name = Path(name).name
         # Extract all href and src attribute values
         for attr_val in re.findall(r'(?:href|src)=["\']([^"\']+)["\']', text):
-            # Skip external URLs, anchors, mailto
-            if attr_val.startswith(("http://", "https://", "mailto:", "#", "/")):
+            # Skip external URLs, anchors, mailto, and javascript: pseudo-URLs
+            if attr_val.startswith(("http://", "https://", "mailto:", "#", "/", "javascript:")):
                 continue
             # Strip query/fragment for file resolution
             target = attr_val.split("?")[0].split("#")[0]

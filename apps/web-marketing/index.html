@@ -145,6 +145,8 @@
     .footer-col ul li { margin-bottom: 0.85rem; }
     .footer-col ul li a { color: var(--text-muted); text-decoration: none; font-size: 0.92rem; transition: color 0.2s; font-weight: 500; }
     .footer-col ul li a:hover { color: var(--primary); }
+    .footer-link-btn { background: none; border: none; padding: 0; cursor: pointer; color: var(--text-muted); font-size: 0.92rem; font-weight: 500; font-family: inherit; transition: color 0.2s; }
+    .footer-link-btn:hover { color: var(--primary); }
 
     .disclaimer-box { max-width: 1200px; margin: 2.5rem auto 0 auto; padding: 1.5rem; background: var(--surface-elevated); border: 1px solid var(--border); border-radius: 8px; font-size: 0.82rem; color: var(--text-muted); line-height: 1.6; }
     .footer-bottom { max-width: 1200px; margin: 2rem auto 0 auto; display: flex; justify-content: space-between; align-items: center; font-size: 0.88rem; color: var(--text-muted); }
@@ -436,7 +438,7 @@
           <li><a href="#comparison">How It Works</a></li>
           <li><a href="#comparison">Evaluation Boundary</a></li>
           <li><a href="#security">Local Evidence</a></li>
-          <li><a href="javascript:void(0)" onclick="openAccessModal();">Request Access</a></li>
+          <li><button class="footer-link-btn" onclick="openAccessModal();">Request Access</button></li>
           <li><a href="/about">About VaultBasis</a></li>
         </ul>
       </div>
