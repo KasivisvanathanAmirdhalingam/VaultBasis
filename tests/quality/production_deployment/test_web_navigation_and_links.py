@@ -33,12 +33,12 @@ def test_marketing_site_header_footer_and_anchor_links():
     assert marketing_file.is_file(), "apps/web-marketing/index.html must exist"
     html = marketing_file.read_text(encoding="utf-8")
 
-    # 1. Header Navigation elements (current regulatory-approved copy;
-    # "What We Verify"/"Evidence Hub" renamed in P0/P1 fixes e3e63b9 + 9e68178)
-    assert "Why Reconcile?" in html
-    assert "Evaluation Boundary" in html
-    assert "Local Evidence" in html
-    assert "Assurance Evidence" in html
+    # 1. Header Navigation elements (MMP11-WEB-PRES-001: nav renamed from
+    # anchor-section names to practitioner-facing IA labels)
+    assert "Product" in html
+    assert "How It Works" in html
+    assert "Evidence" in html  # covers "Evidence &amp; Verification"
+    assert "Scope" in html     # covers "Scope &amp; Limitations"
     assert "Verify an Outcome Receipt" in html
     assert "Request Design-Partner Access" in html
 
@@ -67,16 +67,15 @@ def test_web_verifier_interactive_controls_and_footer():
     assert verifier_file.is_file(), "apps/web-verifier/index.html must exist"
     html = verifier_file.read_text(encoding="utf-8")
 
-    # Header navigation
-    assert "VaultBasis Verifier" in html
-    assert "← Why VaultBasis?" in html
-    assert "Evidence Schema" in html
+    # Header navigation (MMP11-WEB-PRES-001: verifier nav unified with marketing IA)
+    assert "VaultBasis Home" in html
+    assert "Evidence Contract" in html
 
     # Interactive sample testing controls
     assert "loadSampleGoldenValid" in html
     assert "loadSampleGoldenTampered" in html
-    assert "Test with Valid Sample Receipt" in html
-    assert "Test with Tampered Receipt" in html
+    assert "Try valid test receipt" in html
+    assert "Try intentionally tampered receipt" in html
 
     # Results card checklist
     assert "JSON Schema Conformance" in html

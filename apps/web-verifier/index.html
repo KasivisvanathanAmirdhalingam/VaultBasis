@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    
+
     :root {
       --bg: #f8fafc;
       --surface: #ffffff;
@@ -70,14 +70,9 @@
     .brand-logo {
       width: 36px;
       height: 36px;
-      background: linear-gradient(135deg, #2563eb, #0284c7);
-      border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: 800;
-      font-size: 1.15rem;
-      color: white;
       box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
     }
     .brand-name {
@@ -86,6 +81,12 @@
       font-weight: 800;
       letter-spacing: -0.01em;
       color: #0f172a;
+    }
+    .brand-descriptor {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      letter-spacing: 0.02em;
     }
     .nav-links {
       display: flex;
@@ -162,13 +163,12 @@
     .btn-secondary { background: #fff; color: var(--text); border-color: var(--border-accent); box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
     .btn-secondary:hover { background: var(--surface-elevated); }
 
-    .sample-controls {
-      display: flex;
-      gap: 1rem;
-      justify-content: center;
-      margin-top: 1.5rem;
-      flex-wrap: wrap;
-    }
+    .test-vectors-card { padding: 1.5rem 2rem; }
+    .test-vectors-label { font-size: 0.9rem; font-weight: 600; color: var(--text-muted); margin-bottom: 1rem; }
+    .test-vectors-controls { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; }
+    .test-tampered-btn { border-color: #fecaca; color: #dc2626; background: #fef2f2; }
+    .test-tampered-btn:hover { background: #fee2e2; }
+    .test-vectors-note { margin-top: 0.75rem; font-size: 0.78rem; color: #94a3b8; font-family: 'JetBrains Mono', monospace; }
 
     .check-row {
       display: flex;
@@ -203,7 +203,7 @@
       max-width: 1100px;
       margin: 0 auto;
       display: grid;
-      grid-template-columns: 2fr 1fr 1fr 1fr;
+      grid-template-columns: 2fr 1fr 1fr;
       gap: 3rem;
       padding-bottom: 3rem;
       border-bottom: 1px solid var(--border);
@@ -243,16 +243,30 @@
   <!-- Standard Enterprise Header -->
   <header role="banner">
     <a href="/" id="nav-brand-link" class="brand" aria-label="VaultBasis Home">
-      <div class="brand-logo" aria-hidden="true">V</div>
-      <div>
-        <div class="brand-name">VaultBasis Verifier</div>
+      <div class="brand-logo" aria-hidden="true">
+        <svg width="36" height="36" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect width="38" height="38" rx="9" fill="url(#vb-grad-hdr)"/>
+          <defs>
+            <linearGradient id="vb-grad-hdr" x1="0" y1="0" x2="38" y2="38" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#2563eb"/>
+              <stop offset="100%" stop-color="#0284c7"/>
+            </linearGradient>
+          </defs>
+          <path d="M10 10 L19 26" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M28 10 L19 26" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="19" y1="26" x2="19" y2="30" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
       </div>
-      
+      <div>
+        <div class="brand-name">VaultBasis</div>
+        <span class="brand-descriptor">Outcome Receipt Verifier</span>
+      </div>
     </a>
     <nav class="nav-links">
-      <a href="/" id="nav-back-link">← Why VaultBasis?</a>
-      <a href="/schemas/receipt-v0.1.json" target="_blank">Evidence Schema ↗</a>
-      <a href="/sample-receipt.json" download="golden_receipt_valid.json">Sample Receipt ⤓</a>
+      <a href="/" id="nav-back-link">VaultBasis Home</a>
+      <a href="/docs/scope_and_limitations_v0.1.html" target="_blank">Verification Guide</a>
+      <a href="/schemas/receipt-v0.1.json" target="_blank">Evidence Contract</a>
+      <a href="/docs/scope_and_limitations_v0.1.html" target="_blank">Scope &amp; Limitations</a>
     </nav>
   </header>
 
@@ -260,31 +274,36 @@
     <div class="card" style="text-align: center;">
       <h2 style="font-size: 1.6rem; margin-bottom: 8px; color: #0f172a;">Independent Outcome Verification</h2>
       <p style="color: var(--text-muted); font-size: 0.95rem; max-width: 680px; margin: 0 auto 1.5rem auto;">
-        Upload a VaultBasis Outcome Receipt to check that it has not been changed since it was signed and that its signature is valid. Verification runs entirely in your browser — nothing is uploaded to VaultBasis.
+        Select or drop a VaultBasis Outcome Receipt to verify its integrity and cryptographic signature. Verification runs entirely in your browser — receipt contents are not sent to VaultBasis.
       </p>
-
-      <div class="sample-controls">
-        <button onclick="loadSampleGoldenValid()" class="btn btn-secondary">
-          ★ Test with Valid Sample Receipt
-        </button>
-        <button onclick="loadSampleGoldenTampered()" class="btn btn-secondary" style="border-color: #fecaca; color: #dc2626; background: #fef2f2;">
-          ⚠ Test with Tampered Receipt
-        </button>
-        <a href="/sample-receipt.json" download="golden_receipt_valid.json" class="btn btn-secondary">
-          Download Sample JSON ⤓
-        </a>
-      </div>
     </div>
 
     <!-- Dropzone Card -->
     <div class="card">
       <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Upload receipt JSON" onclick="document.getElementById('receipt-upload').click()" onkeydown="if(event.key==='Enter'||event.key===' ') { event.preventDefault(); document.getElementById('receipt-upload').click(); }">
         <input type="file" id="receipt-upload" accept=".json" style="display: none;" onchange="handleReceiptFile(event)">
-        <p style="font-size: 1.15rem; font-weight: 600; margin-bottom: 6px; color: #0f172a;">Drop receipt.json here or click to select</p>
+        <p style="font-size: 1.15rem; font-weight: 600; margin-bottom: 6px; color: #0f172a;">Drop an Outcome Receipt here or click to open</p>
         <p style="font-size: 0.85rem; color: var(--text-muted);">
           Cryptographic verification is performed client-side in your browser.
         </p>
       </div>
+    </div>
+
+    <!-- Test Vectors Card -->
+    <div class="card test-vectors-card">
+      <p class="test-vectors-label">Want to test the verifier first?</p>
+      <div class="test-vectors-controls">
+        <button onclick="loadSampleGoldenValid()" class="btn btn-secondary">
+          Try valid test receipt
+        </button>
+        <button onclick="loadSampleGoldenTampered()" class="btn btn-secondary test-tampered-btn">
+          Try intentionally tampered receipt
+        </button>
+        <a href="/sample-receipt.json" download="golden_receipt_valid.json" class="btn btn-secondary">
+          Download test receipt ⤓
+        </a>
+      </div>
+      <p class="test-vectors-note">Published verification test vectors · Contract v0.1</p>
     </div>
 
     <!-- Results Card -->
@@ -341,45 +360,53 @@
     <div class="footer-grid">
       <div class="footer-col">
         <div class="brand" style="margin-bottom: 0.75rem;">
-          <div class="brand-logo" style="width: 28px; height: 28px; font-size: 0.9rem;">V</div>
+          <div class="brand-logo" style="width: 28px; height: 28px;">
+            <svg width="28" height="28" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <rect width="38" height="38" rx="9" fill="url(#vb-grad-ft)"/>
+              <defs>
+                <linearGradient id="vb-grad-ft" x1="0" y1="0" x2="38" y2="38" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stop-color="#2563eb"/>
+                  <stop offset="100%" stop-color="#0284c7"/>
+                </linearGradient>
+              </defs>
+              <path d="M10 10 L19 26" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+              <path d="M28 10 L19 26" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+              <line x1="19" y1="26" x2="19" y2="30" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+          </div>
           <span class="brand-name" style="font-size: 1rem;">VaultBasis</span>
         </div>
         <p style="font-size: 0.82rem; color: #94a3b8; max-width: 260px;">
-          Verify Outcome Receipts independently, directly in your browser.
+          Independently verify Outcome Receipts in your browser.
         </p>
       </div>
 
       <div class="footer-col">
         <h4>Verification</h4>
         <ul>
-          <li><a href="/schemas/receipt-v0.1.json" target="_blank">Normative Schema</a></li>
-          <li><a href="/docs/scope_and_limitations_v0.1.html" target="_blank" id="ft-evidence-link">Scope &amp; Limitations</a></li>
-          <li><a href="/sample-receipt.json" download="golden_receipt_valid.json">Sample Golden Receipt</a></li>
-          <li><a href="/sample-receipt-tampered.json" download="golden_receipt_tampered.json">Tampered Test Vector</a></li>
-        </ul>
-      </div>
-
-      <div class="footer-col">
-        <h4>Resources</h4>
-        <ul>
-          <li><a href="/" id="ft-marketing-link">VaultBasis Home</a></li>
-        </ul>
-      </div>
-
-      <div class="footer-col">
-        <h4>Legal &amp; Policy</h4>
-        <ul>
+          <li><a href="/schemas/receipt-v0.1.json" target="_blank">Evidence Contract</a></li>
+          <li><a href="/sample-receipt.json" download>Verification Test Receipts</a></li>
+          <li><a href="/sample-receipt-tampered.json" download>Intentionally Tampered Receipt</a></li>
           <li><a href="/docs/scope_and_limitations_v0.1.html" target="_blank">Scope &amp; Limitations</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Legal &amp; Support</h4>
+        <ul>
           <li><a href="/privacy-policy" target="_blank">Privacy Policy</a></li>
           <li><a href="/terms-of-service" target="_blank">Terms of Service</a></li>
+          <li><a href="/security-disclosure" target="_blank">Security Disclosure</a></li>
+          <li><a href="/contact" target="_blank">Report an Issue</a></li>
+          <li><a href="/" id="ft-marketing-link">VaultBasis Home</a></li>
         </ul>
       </div>
     </div>
 
     <div class="footer-bottom">
-      <div>© 2026 VaultBasis. All rights reserved.</div>
+      <div>© 2026 VaultBasis</div>
       <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;">
-        Verification runs entirely in your browser. No data is uploaded.
+        Outcome Receipt Verifier · Contract v0.1
       </div>
     </div>
   </footer>
@@ -394,7 +421,6 @@
       setHref('nav-brand-link', '/');
       setHref('nav-back-link', '/');
       setHref('ft-marketing-link', '/');
-      setHref('ft-evidence-link', '/docs/scope_and_limitations_v0.1.html');
     });
 
     // Embedded Golden Fixtures for Instant Browser Testing
