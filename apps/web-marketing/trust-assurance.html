@@ -325,7 +325,7 @@
       <div class="assurance-grid">
         <div class="assurance-card">
           <h3>Deterministic Reconciliation</h3>
-          <p>Outcomes are computed under fixed, published rules. The same inputs always produce the same output.</p>
+          <p>Reconciliation outcomes for the same source inputs are computed under fixed, published rules. Installation-specific elements — signing keys, timestamps, and receipt identifiers — are unique per installation.</p>
           <p><a href="/schemas/receipt-v0.1.json" target="_blank">View Evidence Contract ↗</a></p>
         </div>
         <div class="assurance-card">
@@ -360,7 +360,7 @@
         <tbody>
           <tr>
             <td><strong>Local Edge</strong></td>
-            <td>The local VaultBasis Edge application processes source evidence, performs reconciliation, and generates the signed Outcome Receipt. Source evidence does not leave this boundary during reconciliation or signing.</td>
+            <td>The local VaultBasis Edge application processes source evidence, performs reconciliation, and generates the signed Outcome Receipt. Source evidence used in reconciliation is processed within the declared local application boundary. See <a href="/docs/scope_and_limitations_v0.1.html" target="_blank">Scope &amp; Limitations</a> for tested network behaviour and known limitations.</td>
           </tr>
           <tr>
             <td><strong>Web / Marketing</strong></td>
@@ -398,7 +398,7 @@
       <ul class="privacy-list">
         <li>
           <strong>Edge evidence processing</strong>
-          Source evidence is processed within the local Edge application boundary. Evidence does not leave the Edge application during reconciliation or signing.
+          Source evidence used in reconciliation is processed within the declared local application boundary. See <a href="/docs/scope_and_limitations_v0.1.html">Scope &amp; Limitations</a> for tested network behaviour and known limitations.
         </li>
         <li>
           <strong>Website interactions</strong>
@@ -435,7 +435,7 @@
         <li>
           <div>
             <strong>Release qualification</strong>
-            Candidate artifacts pass an automated multi-gate validation pipeline before promotion. Artifacts not passing qualification are not distributed.
+            Distribution candidates undergo automated integrity, regression, and packaging checks before controlled release. Artifacts not passing qualification are not distributed.
           </div>
         </li>
         <li>

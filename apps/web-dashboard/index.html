@@ -246,7 +246,19 @@
 <body>
   <header role="banner">
     <div class="brand" aria-label="VaultBasis Home">
-      <div class="brand-logo" aria-hidden="true">V</div>
+      <div class="brand-logo" aria-hidden="true">
+        <svg width="32" height="32" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs>
+            <linearGradient id="vb-grad-edge" x1="0" y1="0" x2="38" y2="38" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#2563eb"/>
+              <stop offset="100%" stop-color="#0284c7"/>
+            </linearGradient>
+          </defs>
+          <path d="M6 6 L19 30" stroke="url(#vb-grad-edge)" stroke-width="3.5" stroke-linecap="round"/>
+          <path d="M32 6 L19 30" stroke="url(#vb-grad-edge)" stroke-width="3.5" stroke-linecap="round"/>
+          <path d="M19 6 L19 28" stroke="url(#vb-grad-edge)" stroke-width="2.5" stroke-linecap="round" opacity="0.55"/>
+        </svg>
+      </div>
       <div>
         <h1>VaultBasis Edge</h1>
       </div>
@@ -258,6 +270,7 @@
       <a href="/about" class="nav-btn" target="_blank">Why VaultBasis? ↗</a>
       <a href="/verifier" class="nav-btn" target="_blank">Independent Verifier ↗</a>
       <a href="/schemas/receipt-v0.1.json" class="nav-btn" target="_blank">Evidence Schema ↗</a>
+      <button class="nav-btn" onclick="showScreen('screen-help')">Help</button>
       <button class="nav-btn primary" onclick="showCreateCaseModal()">+ New Case</button>
     </div>
   </header>
@@ -356,7 +369,7 @@
       <div class="card">
         <h3 style="margin-bottom: 12px; font-size: 1rem; color: #b45309;">Unresolved Items (First-Class Unknown State)</h3>
         <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
-          PRD Invariant: Missing facts are never assumed as zero. They remain explicitly recorded.
+          Missing facts are never assumed as zero. They remain explicitly recorded as unresolved items.
         </p>
         <div id="unresolved-list" style="font-size: 0.85rem; color: var(--text-muted);">
           No unresolved data items detected.
@@ -401,6 +414,76 @@
         <pre id="receipt-json-viewer" class="code-block">Loading receipt...</pre>
       </div>
     </div>
+
+    <!-- SCREEN 4: HELP -->
+    <div id="screen-help" class="screen">
+      <div class="header-bar">
+        <div>
+          <h2>Help &amp; Getting Started</h2>
+          <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 4px;">Guidance for using VaultBasis Edge locally.</p>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3 style="margin-bottom: 0.75rem; font-size: 1rem;">Getting Started</h3>
+          <ol style="font-size: 0.85rem; color: var(--text-muted); padding-left: 1.25rem; line-height: 1.8;">
+            <li>Click <strong>+ New Case</strong> and enter a case identifier.</li>
+            <li>Open the case, then upload your source files (Form 1099-DA CSV/JSON, Koinly CSV).</li>
+            <li>Click <strong>⚡ Run Deterministic Reconciliation</strong>.</li>
+            <li>Review Material Differences and any Unresolved Items.</li>
+            <li>When ready, view the Signed Outcome Receipt and download the Evidence Bundle.</li>
+          </ol>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom: 0.75rem; font-size: 1rem;">Supported Source Inputs</h3>
+          <ul style="font-size: 0.85rem; color: var(--text-muted); padding-left: 1.25rem; line-height: 1.8;">
+            <li>Form 1099-DA (CSV or JSON)</li>
+            <li>Koinly Capital Gains Report (CSV)</li>
+            <li>VaultBasis Normalized CSV</li>
+          </ul>
+          <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.75rem;">See <a href="/docs/scope_and_limitations_v0.1.html" target="_blank" style="color: var(--primary);">Scope &amp; Limitations ↗</a> for the full list of supported formats and known limitations.</p>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-top: 1rem;">
+        <div class="card">
+          <h3 style="margin-bottom: 0.75rem; font-size: 1rem;">Understanding Outcome States</h3>
+          <ul style="font-size: 0.85rem; color: var(--text-muted); padding-left: 1.25rem; line-height: 1.8;">
+            <li><strong>MATCHED</strong> — All material differences resolved within declared tolerances.</li>
+            <li><strong>UNMATCHED</strong> — One or more material differences not resolved.</li>
+            <li><strong>UNRECONCILED</strong> — Reconciliation not yet run or data incomplete.</li>
+          </ul>
+          <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.75rem;">Unresolved items are never assumed as zero. They remain explicitly recorded in the Outcome Receipt.</p>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom: 0.75rem; font-size: 1rem;">Understanding the Outcome Receipt</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6;">The Outcome Receipt is a signed JSON document recording the declared reconciliation outcome. It can be verified independently using the <a href="/verifier" target="_blank" style="color: var(--primary);">Web Verifier ↗</a> or the CLI verifier on any machine without contacting VaultBasis.</p>
+          <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.75rem;">Signature verification confirms the receipt has not been changed since signing. It does not assess tax correctness or constitute a professional opinion.</p>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-top: 1rem;">
+        <div class="card">
+          <h3 style="margin-bottom: 0.75rem; font-size: 1rem;">Troubleshooting</h3>
+          <ul style="font-size: 0.85rem; color: var(--text-muted); padding-left: 1.25rem; line-height: 1.8;">
+            <li><strong>File not accepted</strong> — Check the file is a supported format and not password-protected.</li>
+            <li><strong>Unresolved items remain after reconciliation</strong> — This is the intended behaviour for facts that cannot be determined from available source data.</li>
+            <li><strong>Receipt signature invalid on verifier</strong> — The receipt file may have been modified after signing. Use the original downloaded file.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom: 0.75rem; font-size: 1rem;">Further Help</h3>
+          <ul style="font-size: 0.85rem; line-height: 1.8;">
+            <li><a href="/faq" target="_blank" style="color: var(--primary);">Full FAQ ↗</a></li>
+            <li><a href="/docs/scope_and_limitations_v0.1.html" target="_blank" style="color: var(--primary);">Scope &amp; Limitations ↗</a></li>
+            <li><a href="/verifier" target="_blank" style="color: var(--primary);">Web Verifier ↗</a></li>
+            <li><a href="/contact" target="_blank" style="color: var(--primary);">Contact Support ↗</a></li>
+            <li><a href="/security-disclosure" target="_blank" style="color: var(--primary);">Report a Security Issue ↗</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
   </main>
 
   <footer role="contentinfo" style="display: flex; flex-direction: column; gap: 1rem; padding: 2rem; background: var(--surface); border-top: 1px solid var(--border); font-size: 0.82rem; color: var(--text-muted); margin-top: auto;">
@@ -413,7 +496,9 @@
         <a href="/about" target="_blank" style="color: var(--text-muted); text-decoration: none;">About</a>
         <a href="/verifier" target="_blank" style="color: var(--text-muted); text-decoration: none;">Offline Verifier</a>
         <a href="/schemas/receipt-v0.1.json" target="_blank" style="color: var(--text-muted); text-decoration: none;">JSON Schema</a>
-        <a href="/docs" target="_blank" style="color: var(--text-muted); text-decoration: none;">OpenAPI Spec</a>
+        <a href="/faq" target="_blank" style="color: var(--text-muted); text-decoration: none;">Help &amp; FAQ</a>
+        <a href="/contact" target="_blank" style="color: var(--text-muted); text-decoration: none;">Contact</a>
+        <a href="/security-disclosure" target="_blank" style="color: var(--text-muted); text-decoration: none;">Security</a>
       </div>
     </div>
     <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 0.85rem 1rem; font-size: 0.78rem; color: #475569; line-height: 1.5;">

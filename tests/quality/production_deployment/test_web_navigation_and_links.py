@@ -102,11 +102,20 @@ def test_web_dashboard_header_and_industrial_footer():
     assert "Why VaultBasis? ↗" in html
     assert "Independent Verifier ↗" in html
     assert "Evidence Schema ↗" in html
+    assert "screen-help" in html  # Help screen present and reachable via nav
+
+    # Engineering vocabulary must not be practitioner-visible (LANG-001)
+    assert "PRD Invariant" not in html
 
     # Industrial footer
     assert "Local Edge · Active" in html
     assert "Customer-controlled assurance processing" in html
     assert "Zero Transaction-Data Egress" in html
+
+    # Footer institutional links (MMP11-WEB-PRES-001: cross-surface completeness)
+    assert "/faq" in html
+    assert "/contact" in html
+    assert "/security-disclosure" in html
 
 
 @pytest.mark.regression
