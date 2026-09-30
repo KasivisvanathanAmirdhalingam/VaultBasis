@@ -34,6 +34,8 @@ See [roadmap](VAULTBASIS_PRODUCT_ROADMAP.md), [Git/evidence governance](../audit
 | Security / Privacy Impact | Potential sensitive case evidence: minimize collection, enforce case/firm permissions, document processing location and retention, prevent secrets/evidence in logs. No new egress or analytics by implication. |
 | Acceptance Criteria | Incorrect/unsupported/ambiguous classifications remain reviewable; model cannot silently authorize processing. |
 | Evidence Required | Versioned task cases with expected/actual results, relevant negative controls, provenance and isolation checks, practitioner before/after task observations, exact source/artifact identity and reviewer decision. For AI: grounded/ungrounded and adversarial examples, model/prompt version, uncertainty and override evaluations. |
+| Implementation commit IDs | None — no implementation yet; record full SHA(s) at task closeout. |
+| Documentation closeout | Required six-category review under [execution standard](../task_execution_standard.md); [registry](../task_registry.json). |
 | Status | PROPOSED; no implementation, measured value or qualification claimed. |
 | Risks | Prompt injection, sensitive-data egress, overconfident classification. |
 
@@ -60,6 +62,8 @@ See [roadmap](VAULTBASIS_PRODUCT_ROADMAP.md), [Git/evidence governance](../audit
 | Security / Privacy Impact | Potential sensitive case evidence: minimize collection, enforce case/firm permissions, document processing location and retention, prevent secrets/evidence in logs. No new egress or analytics by implication. |
 | Acceptance Criteria | Every proposed value locates its source; absent/ambiguous values remain unknown; confirmed data still meets supported validation. |
 | Evidence Required | Versioned task cases with expected/actual results, relevant negative controls, provenance and isolation checks, practitioner before/after task observations, exact source/artifact identity and reviewer decision. For AI: grounded/ungrounded and adversarial examples, model/prompt version, uncertainty and override evaluations. |
+| Implementation commit IDs | None — no implementation yet; record full SHA(s) at task closeout. |
+| Documentation closeout | Required six-category review under [execution standard](../task_execution_standard.md); [registry](../task_registry.json). |
 | Status | PROPOSED; no implementation, measured value or qualification claimed. |
 | Risks | Hallucinated values, OCR errors, lost units or source attribution. |
 
@@ -86,6 +90,8 @@ See [roadmap](VAULTBASIS_PRODUCT_ROADMAP.md), [Git/evidence governance](../audit
 | Security / Privacy Impact | Potential sensitive case evidence: minimize collection, enforce case/firm permissions, document processing location and retention, prevent secrets/evidence in logs. No new egress or analytics by implication. |
 | Acceptance Criteria | No ingestion under an unconfirmed mapping; ambiguous proceeds/basis/date/unit fields require review; no silent parser expansion. |
 | Evidence Required | Versioned task cases with expected/actual results, relevant negative controls, provenance and isolation checks, practitioner before/after task observations, exact source/artifact identity and reviewer decision. For AI: grounded/ungrounded and adversarial examples, model/prompt version, uncertainty and override evaluations. |
+| Implementation commit IDs | None — no implementation yet; record full SHA(s) at task closeout. |
+| Documentation closeout | Required six-category review under [execution standard](../task_execution_standard.md); [registry](../task_registry.json). |
 | Status | PROPOSED; no implementation, measured value or qualification claimed. |
 | Risks | Semantic drift and mistaken confirmation. |
 
@@ -112,6 +118,8 @@ See [roadmap](VAULTBASIS_PRODUCT_ROADMAP.md), [Git/evidence governance](../audit
 | Security / Privacy Impact | Potential sensitive case evidence: minimize collection, enforce case/firm permissions, document processing location and retention, prevent secrets/evidence in logs. No new egress or analytics by implication. |
 | Acceptance Criteria | Recommendations cite real unresolved items and never invent missing evidence or decide tax correctness. |
 | Evidence Required | Versioned task cases with expected/actual results, relevant negative controls, provenance and isolation checks, practitioner before/after task observations, exact source/artifact identity and reviewer decision. For AI: grounded/ungrounded and adversarial examples, model/prompt version, uncertainty and override evaluations. |
+| Implementation commit IDs | None — no implementation yet; record full SHA(s) at task closeout. |
+| Documentation closeout | Required six-category review under [execution standard](../task_execution_standard.md); [registry](../task_registry.json). |
 | Status | PROPOSED; no implementation, measured value or qualification claimed. |
 | Risks | Advice may drift into legal conclusions or request unnecessary sensitive data. |
 
@@ -138,6 +146,8 @@ See [roadmap](VAULTBASIS_PRODUCT_ROADMAP.md), [Git/evidence governance](../audit
 | Security / Privacy Impact | Potential sensitive case evidence: minimize collection, enforce case/firm permissions, document processing location and retention, prevent secrets/evidence in logs. No new egress or analytics by implication. |
 | Acceptance Criteria | Explanation cannot alter numbers/state or hide uncertainty; unsupported explanations are rejected or visibly unavailable. |
 | Evidence Required | Versioned task cases with expected/actual results, relevant negative controls, provenance and isolation checks, practitioner before/after task observations, exact source/artifact identity and reviewer decision. For AI: grounded/ungrounded and adversarial examples, model/prompt version, uncertainty and override evaluations. |
+| Implementation commit IDs | None — no implementation yet; record full SHA(s) at task closeout. |
+| Documentation closeout | Required six-category review under [execution standard](../task_execution_standard.md); [registry](../task_registry.json). |
 | Status | PROPOSED; no implementation, measured value or qualification claimed. |
 | Risks | Fluent but misleading explanations; loss of exact decimal meaning. |
 
@@ -164,6 +174,8 @@ See [roadmap](VAULTBASIS_PRODUCT_ROADMAP.md), [Git/evidence governance](../audit
 | Security / Privacy Impact | Potential sensitive case evidence: minimize collection, enforce case/firm permissions, document processing location and retention, prevent secrets/evidence in logs. No new egress or analytics by implication. |
 | Acceptance Criteria | Human approves recipients and content before any sending; drafting alone performs no external action. |
 | Evidence Required | Versioned task cases with expected/actual results, relevant negative controls, provenance and isolation checks, practitioner before/after task observations, exact source/artifact identity and reviewer decision. For AI: grounded/ungrounded and adversarial examples, model/prompt version, uncertainty and override evaluations. |
+| Implementation commit IDs | None — no implementation yet; record full SHA(s) at task closeout. |
+| Documentation closeout | Required six-category review under [execution standard](../task_execution_standard.md); [registry](../task_registry.json). |
 | Status | PROPOSED; no implementation, measured value or qualification claimed. |
 | Risks | Misaddressed sensitive information; implied consent to send. |
 
@@ -190,6 +202,8 @@ See [roadmap](VAULTBASIS_PRODUCT_ROADMAP.md), [Git/evidence governance](../audit
 | Security / Privacy Impact | Potential sensitive case evidence: minimize collection, enforce case/firm permissions, document processing location and retention, prevent secrets/evidence in logs. No new egress or analytics by implication. |
 | Acceptance Criteria | Every factual assertion is traceable; contradictions remain proposals and do not declare a source true. |
 | Evidence Required | Versioned task cases with expected/actual results, relevant negative controls, provenance and isolation checks, practitioner before/after task observations, exact source/artifact identity and reviewer decision. For AI: grounded/ungrounded and adversarial examples, model/prompt version, uncertainty and override evaluations. |
+| Implementation commit IDs | None — no implementation yet; record full SHA(s) at task closeout. |
+| Documentation closeout | Required six-category review under [execution standard](../task_execution_standard.md); [registry](../task_registry.json). |
 | Status | PROPOSED; no implementation, measured value or qualification claimed. |
 | Risks | Mixing opinion/fact; stale summaries; suppressing contradictory evidence. |
 
@@ -216,6 +230,8 @@ See [roadmap](VAULTBASIS_PRODUCT_ROADMAP.md), [Git/evidence governance](../audit
 | Security / Privacy Impact | Potential sensitive case evidence: minimize collection, enforce case/firm permissions, document processing location and retention, prevent secrets/evidence in logs. No new egress or analytics by implication. |
 | Acceptance Criteria | Numeric/filter questions use declared deterministic queries; case isolation, unsupported-question refusal and exact values are tested. |
 | Evidence Required | Versioned task cases with expected/actual results, relevant negative controls, provenance and isolation checks, practitioner before/after task observations, exact source/artifact identity and reviewer decision. For AI: grounded/ungrounded and adversarial examples, model/prompt version, uncertainty and override evaluations. |
+| Implementation commit IDs | None — no implementation yet; record full SHA(s) at task closeout. |
+| Documentation closeout | Required six-category review under [execution standard](../task_execution_standard.md); [registry](../task_registry.json). |
 | Status | PROPOSED; no implementation, measured value or qualification claimed. |
 | Risks | Query ambiguity, cross-case leakage, fabricated answers. |
 

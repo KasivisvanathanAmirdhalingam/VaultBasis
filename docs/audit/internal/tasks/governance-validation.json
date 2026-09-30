@@ -1,0 +1,44 @@
+{
+  "task": "VB-GOV-001",
+  "scope": "Governance/documentation tooling only; no product qualification",
+  "registry_tasks": 141,
+  "historical_imports": 96,
+  "traceability_errors": [],
+  "new_broken_document_links": [],
+  "unindexed_task_ids": [],
+  "negative_controls": {
+    "duplicate_id": {
+      "detected": true,
+      "errors": [
+        "VB-GOV-001: missing/invalid/duplicate task ID"
+      ]
+    },
+    "missing_commit": {
+      "detected": true,
+      "errors": [
+        "VB-GOV-001: implementation-closed task has no commit"
+      ]
+    },
+    "missing_document_category": {
+      "detected": true,
+      "errors": [
+        "VB-GOV-001: all six documentation categories required"
+      ]
+    },
+    "missing_document_path": {
+      "detected": true,
+      "errors": [
+        "VB-GOV-001: technical requires existing linked document(s)"
+      ]
+    },
+    "ambiguous_done_state": {
+      "detected": true,
+      "errors": [
+        "VB-GOV-001: unknown or ambiguous state"
+      ]
+    }
+  },
+  "implementation_state_at_check": "IN_PROGRESS; full real implementation SHA to be recorded after commit",
+  "runtime_tests": "Not applicable: no application/kernel changes; documentation checker exercised directly",
+  "ci_enforcement": "Not yet wired into CI; standing local task-closeout gate"
+}

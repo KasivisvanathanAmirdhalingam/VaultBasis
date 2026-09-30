@@ -2,6 +2,8 @@
 
 Updated: 2026-09-30. **Evidence organized for review; not a claim of audit certification or release readiness.**
 
+Current task maintenance is mandatory under [VB-GOV-001](../task_execution_standard.md): [task/commit registry](../task_registry.json), [current status](../status.md), [knowledge base](../knowledge_base.md), [internal evidence](internal/README.md) and [external-facing draft](external/README.md). The founder accepted the prior audit as a planning baseline at `95708fade15efe583e25c6f5257e4bebe285f864`; controlled implementation follows [the authoritative workflow](../development_workflow.md). This is not FOUNDER_UX_ACCEPTED.
+
 Use [side-by-side traceability](traceability-matrix.md) to compare requirements, protected product truth, founder observations, implementation history and verification gaps. Use [change governance](git-and-evidence-governance.md) to maintain that comparison whenever work changes. The three evidence classes remain separate even when displayed in the same row.
 
 | Audit lens | Primary material | What is established | What remains open |
@@ -27,4 +29,4 @@ Public-facing reports must exclude secrets, access tokens, installation private 
 
 Documentation maintenance is now specified, but no automated enforcement, continuous audit service, regulatory certification or guarantee of being “always audit-ready” is claimed.
 
-Packet checks: [documentation validation](validation-2026-09-30.json) and [unsigned SHA-256 manifest](documentation-manifest.json). Validation found no broken new-packet links or missing required task fields; the three archived directives match the supplied originals byte for byte. These checks validate documentation integrity, not product behavior or release readiness.
+Historical packet checks: [documentation validation](validation-2026-09-30.json) and [unsigned SHA-256 manifest](documentation-manifest.json) describe the files at baseline commit `95708fade15efe583e25c6f5257e4bebe285f864`, not later edited working files. Retain that immutable snapshot rather than rewriting its hashes. Current governance checks are linked from [VB-GOV-001 closeout](internal/tasks/VB-GOV-001.md). Neither packet certifies product behavior or release readiness.

@@ -1,0 +1,749 @@
+The new developer needs a single authoritative branch → CI → pre-production → qualification → production workflow, otherwise there is a real risk of repeating the previous mistake: coding on the wrong branch, treating CI as qualification, or testing production first.
+Based on the outgoing handover and the subsequent takeover audit, I would give the developer the following directive.
+VaultBasis MMP-1.1 — Development, Branching & Promotion Directive
+1. Current repository truth
+The takeover starts from these known branch states:
+Branch / candidate	Known SHA	Meaning	Action
+main	73a4523	Historical accepted/integrated baseline	DO NOT develop directly
+release/mmp-1.1	73a4523	MMP-1.1 stabilization baseline	Controlled release/integration line
+fix/mmp11-dist-mac-001	83d78db	Salvageable Edge UX/distribution remediation	Inspect/requalify; don't blindly merge
+fix/mmp11-pres-003	586a83c	Founder-rejected web IA candidate	Historical evidence only; do not merge
+lab/mmp-2-ai	412a6db	Experimental MMP-2 work	Keep completely isolated
+handover branch	70606ff... handover commit	Documentation/evidence only	Reference, not product development
+
+
+The outgoing handover establishes the first four product branch states and explicitly distinguishes 83d78db from the rejected 586a83c.    Pasted markdown    Pasted markdown
+Before changing anything, fetch remote state and verify these assumptions. The handover is a snapshot. If GitHub has moved since then, report the difference before altering branches.
+2. Create one new active convergence branch
+Do not continue public UX work on the rejected PRES-003 branch.
+Do not develop directly on main.
+Create the new branch from the MMP-1.1 release baseline:
+release/mmp-1.1 @ 73a4523
+        │
+        └── fix/mmp11-ux-001
+
+Recommended name:
+fix/mmp11-ux-001
+
+Purpose:
+Enterprise Practitioner Experience Convergence
+
+This is the branch for the new developer's approved public-web/access/verifier UX, accessibility and NFR remediation.
+It must remain bounded to the Experience/Workflow plane.
+3. Do not discard the useful Edge branch
+Edge is different.
+There is already useful isolated work at:
+fix/mmp11-dist-mac-001 @ 83d78db
+
+The handover identifies it as the Mac/Edge remediation candidate rather than part of the rejected web presentation work.    Pasted markdown
+Therefore:
+                     release/mmp-1.1
+                           │
+             ┌─────────────┴──────────────┐
+             │                            │
+             ▼                            ▼
+fix/mmp11-ux-001              fix/mmp11-dist-mac-001
+PUBLIC WEB / UX               EDGE / DISTRIBUTION
+NEW WORK                      EXISTING 83d78db
+
+Do not merge the branches together immediately.
+First qualify them independently.
+This gives us two clean evidence tracks:
+Track W — Web Experience
+fix/mmp11-ux-001
+Track E — Edge Distribution
+fix/mmp11-dist-mac-001
+Eventually accepted work converges through release/mmp-1.1.
+4. Protected branches
+Until qualification says otherwise:
+main
+        NO direct development
+
+release/mmp-1.1
+        NO exploratory development
+
+lab/mmp-2-ai
+        NO MMP-1.1 fixes
+
+fix/mmp11-pres-003
+        REJECTED / historical evidence
+
+No force pushes.
+No history rewriting.
+No “cleanup merge.”
+No large refactoring because the new developer dislikes existing code.
+No AI/MMP-1.5 work mixed into MMP-1.1 release recovery.
+5. Development workflow
+For Web:
+release/mmp-1.1
+       │
+       ▼
+fix/mmp11-ux-001
+       │
+       ├─ audit baseline
+       ├─ UX architecture
+       ├─ shared design system
+       ├─ public web
+       ├─ access journey
+       ├─ verifier UX
+       ├─ accessibility
+       ├─ responsive/browser behavior
+       └─ error states
+
+Small commits are desirable.
+For example:
+feat(ux): establish canonical practitioner shell
+fix(nav): converge public navigation taxonomy
+fix(a11y): implement accessible dialog lifecycle
+fix(web): return intentional 404 for unknown routes
+fix(access): implement truthful request-access states
+test(ux): add cross-browser journey qualification
+test(a11y): add WCAG automated gates
+
+Do not make one opaque 5,000-line “final UX” commit.
+But also do not deploy every small commit.
+Commit incrementally; qualify one coherent candidate.
+6. Local Definition of Done
+Before pushing a candidate to CI, all applicable local gates must pass.
+For fix/mmp11-ux-001:
+□ approved UX blueprint implemented
+□ one canonical header
+□ one canonical footer
+□ no competing pseudo-header
+□ navigation mapping correct
+□ persistent accessible Back-to-Top restored
+□ access dialog lifecycle correct
+□ 404 returns real 404
+□ responsive behavior validated
+□ keyboard basics validated
+□ automated accessibility scan passes release threshold
+□ navigation contract passes
+□ negative controls demonstrated
+□ generated-output crawl passes
+□ no unexpected console errors
+□ no broken resources
+□ full regression passes
+□ deterministic tests unchanged/passing
+□ git status understood/clean except explicitly permitted local files
+
+Only then push.
+7. Push does not mean qualification
+Once locally ready:
+fix/mmp11-ux-001
+       │
+       │ git push
+       ▼
+GitHub
+       │
+       ▼
+CI
+
+At this moment classify it:
+IMPLEMENTED
+
+not:
+PASS
+QUALIFIED
+RELEASE READY
+
+8. CI Definition of Done
+CI must run against the exact pushed SHA.
+At minimum preserve the existing canonical validation and add the new UX/NFR gates.
+Expected:
+Existing
+────────
+GATE-01
+...
+GATE-11
+
+Regression suite
+Deterministic invariants
+Security tests
+Generated-output tests
+
+
+New
+───
+UX navigation contract
+broken-link/deep-link crawl
+soft-404 negative test
+responsive/browser journeys
+axe accessibility tests
+modal keyboard contract
+console-error gate
+external-resource/offline policy checks
+visual-regression tests after baseline acceptance
+
+CI must also demonstrate that its tests can detect selected deliberate violations through negative-control tests.
+CI DoD
+□ exact source SHA recorded
+□ all canonical gates PASS
+□ full regression PASS
+□ UX tests PASS
+□ accessibility automated gate PASS
+□ security regression PASS
+□ generated output produced
+□ no unexplained warnings affecting qualification
+□ artifacts/evidence retained
+
+Then the state may become:
+AUTOMATED_VALIDATION_PASS
+
+For a native build that additionally passes applicable packaging/static checks:
+BUILD_VERIFIED
+
+Still not production qualified.
+9. Vercel must have two roles
+This is where the old process needs to change permanently.
+We need:
+Vercel Preview
+        =
+PRE-PRODUCTION
+
+vaultbasis.com
+        =
+PRODUCTION
+
+Never treat them interchangeably.
+The intended chain is:
+fix/mmp11-ux-001
+        ↓
+GitHub CI
+        ↓
+GREEN EXACT SHA
+        ↓
+VERCEL PREVIEW
+        ↓
+QUALIFY PREVIEW
+        ↓
+FOUNDER ACCEPTANCE
+        ↓
+PROMOTE SAME QUALIFIED CANDIDATE
+        ↓
+vaultbasis.com
+
+Production must never again be the first meaningful runtime.
+10. Deploy exact CI-green SHA to Vercel Preview
+Only after CI is green.
+Record:
+Git SHA
+CI run number
+CI database ID if available
+Vercel deployment ID
+immutable Preview URL
+deployment timestamp
+environment
+
+State:
+PREPROD_DEPLOYED
+
+This does not mean qualified.
+11. Automated Preview qualification
+Run against the actual Vercel Preview URL, not localhost.
+Test all public surfaces:
+/
+Trust Center
+About
+Contact
+Privacy
+Terms
+Security
+Scope & Limitations
+Verifier Access
+Verifier
+404
+Request Access
+
+And all interactions.
+Browser matrix
+At minimum:
+Chrome
+Edge
+Firefox
+Safari
+
+desktop
+laptop
+tablet
+mobile
+
+with real-device/manual Safari/iPhone and Android checks where browser automation cannot faithfully substitute.
+Journeys
+Home
+→ How It Works
+→ Trust Center
+→ About
+→ Request Access
+
+and:
+Request Access
+→ validation
+→ submit
+→ resulting state
+
+and:
+Verifier Access
+→ authentication
+→ Verifier
+→ valid receipt
+→ tampered receipt
+
+and:
+unknown URL
+→ intentional 404
+→ HTTP 404
+→ recovery navigation
+
+12. Preview NFR qualification
+The exact Preview candidate must also pass:
+responsive/reflow
+keyboard
+focus
+screen reader smoke
+contrast
+zoom
+mobile navigation
+Back-to-Top
+reduced motion
+form validation
+loading states
+error states
+network degradation
+deep linking
+browser Back/Forward
+refresh
+session expiry
+revocation where applicable
+console cleanliness
+network cleanliness
+
+Automated axe passing is necessary but not sufficient for WCAG engineering qualification.
+Human accessibility evidence is required.
+13. Request Access has an extra qualification dependency
+The handover confirms the existing email path uses Ethereal/test email rather than delivering the production practitioner journey.    Pasted markdown
+Therefore do not declare the access journey qualified merely because the modal works.
+We need:
+Request Access
+      ↓
+server acceptance
+      ↓
+real operational provisioning
+      ↓
+real practitioner-reachable communication
+      ↓
+preview credential
+      ↓
+artifact entitlement
+      ↓
+qualified artifact download
+
+If email delivery remains intentionally manual during design-partner preview, that's acceptable only if the UX truthfully describes the manual process.
+Never fake automation.
+14. Founder acceptance
+Only after the complete Preview candidate passes engineering qualification.
+Provide the founder:
+immutable Preview URL
+exact Git SHA
+CI run
+qualification report
+desktop screenshots
+mobile screenshots
+known limitations
+
+Then founder reviews the actual deployed candidate.
+The developer may report:
+READY_FOR_FOUNDER_REVIEW
+
+The developer may not report:
+FOUNDER UX PASS
+
+Only the founder can assign:
+FOUNDER_UX_ACCEPTED
+
+This rule is permanent.
+15. Preview Definition of Done
+Only when all applicable checks pass:
+□ CI exact SHA green
+□ Vercel Preview exact candidate deployed
+□ browser matrix passes
+□ mobile/responsive passes
+□ navigation passes
+□ accessibility engineering qualification passes
+□ real 404 passes
+□ access workflow behavior passes
+□ verifier journey passes
+□ security gates pass
+□ console/network clean
+□ no P0
+□ no release-blocking P1
+□ screenshot matrix reviewed
+□ founder accepts deployed candidate
+
+then classify:
+PREPROD_QUALIFIED
+
+That is the first meaningful candidate for release promotion.
+16. Merge into release/mmp-1.1
+Once fix/mmp11-ux-001 is qualified:
+fix/mmp11-ux-001
+       │
+       ▼
+release/mmp-1.1
+
+Do this through a controlled PR/merge.
+Then CI must run again on the resulting release branch SHA.
+Why?
+Because:
+qualified feature SHA
+≠ automatically
+qualified merge SHA
+
+If the merge SHA differs, re-establish automated evidence.
+17. Edge follows its own qualification path
+For:
+fix/mmp11-dist-mac-001 @ 83d78db
+
+do not use Vercel as the primary qualification environment.
+Its chain is:
+Edge source SHA
+      ↓
+CI
+      ↓
+native build
+      ↓
+package
+      ↓
+artifact inspection
+      ↓
+recipient-style extraction
+      ↓
+launch exact packaged app
+      ↓
+human Edge workflow
+      ↓
+artifact identity
+      ↓
+controlled distribution
+      ↓
+download exact artifact
+      ↓
+repeat smoke
+
+Mac Edge DoD
+□ correct arm64 artifact
+□ proper .app
+□ recipient extraction preserves package
+□ no repair/chmod/xattr
+□ launches
+□ Cases works
+□ Sample Case works
+□ reconciliation works
+□ Finding Why works
+□ Outcome Receipt works
+□ Offline Verifier: valid → VALID
+□ tampered → INVALID
+□ Help works
+□ every visible navigation destination works
+□ external destinations are intentional HTTPS URLs
+□ no accidental localhost routes
+□ no raw framework errors
+□ no undeclared external dependency for offline functionality
+□ quit cleanly
+□ relaunch
+□ persistence preserved
+□ practitioner readability/accessibility acceptable
+
+Only then:
+DISTRIBUTION_QUALIFIED_MAC
+
+Windows gets its own equivalent state.
+Never infer:
+Mac PASS → Windows PASS
+
+18. Converge Web and Edge only after independent qualification
+Eventually:
+fix/mmp11-ux-001 ─────────┐
+                          │
+                          ▼
+                   release/mmp-1.1
+                          ▲
+                          │
+fix/mmp11-dist-mac-001 ───┘
+
+But only accepted work converges.
+Then run the entire release qualification again.
+19. Release candidate Definition of Done
+release/mmp-1.1 becomes an actual release candidate only when:
+Assurance
+□ deterministic suite green
+□ Golden Corpus green
+□ schemas unchanged or explicitly qualified
+□ receipt/signing/verifier semantics qualified
+
+Web
+□ PREPROD_QUALIFIED
+□ founder UX accepted
+□ WCAG engineering gate
+□ cross-browser
+□ cross-device
+□ security deployed checks
+□ access workflow qualified
+
+Edge
+□ Mac qualified
+□ Windows qualified or explicitly excluded from release
+□ artifact hashes frozen
+□ install/launch/relaunch
+□ offline verifier
+□ Help
+□ persistence
+
+Security
+□ DEPLOY-SEC-001 qualified
+□ SEC-002 production-qualified
+□ SEC-003 production-qualified
+□ SEC-005 limitation accurately represented
+
+Governance
+□ Scope & Limitations accurate
+□ support path accurate
+□ legal/privacy wording reviewed as required
+□ exact source SHA recorded
+□ exact artifacts recorded
+□ known limitations recorded
+
+Then create a candidate identity/tag as appropriate.
+20. Promotion to production
+For the web application, promote the same qualified immutable deployment/candidate wherever Vercel permits that workflow.
+Do not rebuild “equivalent” source and assume equivalence.
+The desired model:
+QUALIFIED PREVIEW B
+        │
+        │ promote / alias switch
+        ▼
+vaultbasis.com
+
+not:
+qualified preview
+       ↓
+fresh independent production build
+       ↓
+hope it's equivalent
+
+If Vercel requires another build, the new deployment must be treated as a new artifact and the necessary equivalence/production checks must be performed.
+21. Production qualification
+After promotion:
+PRODUCTION_PROMOTED
+
+Immediately perform bounded production smoke against:
+VaultBasis production site
+Verify:
+homepage
+navigation
+Trust Center
+About
+Contact
+Request Access
+Verifier access
+Verifier
+Privacy
+Terms
+Security
+Scope
+real 404
+mobile navigation
+Back-to-Top
+access controls
+SEC-002 download
+SEC-003 trusted URL behavior
+console/network
+
+Do not perform destructive test activity using real taxpayer evidence.
+When successful:
+PRODUCTION_VERIFIED
+
+22. Only then update main
+The conceptual flow should be:
+                         DEVELOPMENT
+                              │
+                              ▼
+                    fix/mmp11-ux-001
+                              │
+                       local qualification
+                              │
+                              ▼
+                           PUSH
+                              │
+                              ▼
+                             CI
+                              │
+                    AUTOMATED_VALIDATION_PASS
+                              │
+                              ▼
+                       VERCEL PREVIEW
+                              │
+                     PREPROD_DEPLOYED
+                              │
+                              ▼
+             browser + NFR + security + human
+                              │
+                              ▼
+                     PREPROD_QUALIFIED
+                              │
+                              ▼
+                       FOUNDER ACCEPTS
+                              │
+                              ▼
+                    release/mmp-1.1
+                              │
+                     release CI/gates
+                              │
+                 ┌────────────┴────────────┐
+                 │                         │
+              WEB RC                    EDGE RC
+                 │                         │
+                 └────────────┬────────────┘
+                              ▼
+                    MMP-1.1 RELEASE RC
+                              │
+                              ▼
+                     PRODUCTION PROMOTION
+                              │
+                              ▼
+                     PRODUCTION SMOKE
+                              │
+                              ▼
+                    PRODUCTION_VERIFIED
+                              │
+                              ▼
+                            main
+                              │
+                              ▼
+                    qualified release tag
+
+main becomes the accepted integrated state—not the place where we discover whether the release works.
+23. Rollback must exist before promotion
+Before production promotion record:
+current known-good deployment
+candidate deployment
+rollback deployment ID
+current alias
+candidate source SHA
+
+If production smoke exposes a P0:
+STOP
+↓
+rollback alias
+↓
+record failure
+↓
+candidate returns to FAILED/BLOCKED
+↓
+fix branch
+
+Do not debug P0s live in production.
+24. State vocabulary
+Require the developer to use these terms precisely:
+IMPLEMENTED
+        code exists
+
+AUTOMATED_VALIDATION_PASS
+        CI passed exact SHA
+
+BUILD_VERIFIED
+        build/artifact passed applicable automated checks
+
+PREPROD_DEPLOYED
+        candidate is running in pre-production
+
+PREPROD_QUALIFIED
+        automated + applicable human/NFR/security gates passed
+
+READY_FOR_FOUNDER_REVIEW
+        developer may ask founder to inspect
+
+FOUNDER_UX_ACCEPTED
+        founder assigned this state
+
+DISTRIBUTION_QUALIFIED
+        native artifact passed recipient-path qualification
+
+RELEASE_QUALIFIED
+        complete release candidate passed applicable gates
+
+PRODUCTION_PROMOTED
+        candidate moved to production
+
+PRODUCTION_VERIFIED
+        production smoke/security checks passed
+
+PRACTITIONER_QUALIFIED
+        external practitioner evidence supports usability/value
+
+And failure states:
+BLOCKED
+FAILED
+REJECTED
+SUPERSEDED
+
+Never use generic:
+DONE
+PASS
+READY
+COMPLETE
+
+without specifying what passed.
+25. What happens immediately after MMP-1.1 production verification
+Not MMP-2.
+The next evidence gate is:
+PRODUCTION_VERIFIED
+       ↓
+Associate-001
+       ↓
+Associate findings
+       ↓
+bounded remediation if necessary
+       ↓
+Associate qualification
+       ↓
+CPA-001
+       ↓
+practitioner evidence
+
+This is crucial.
+MMP-1.1 isn't ultimately validated by us.
+It is validated when an uninformed user can actually operate it.
+26. Meanwhile future development remains isolated
+While MMP-1.1 is qualifying:
+MMP-1.1
+release/mmp-1.1
+ACTIVE RELEASE WORK
+
+
+MMP-1.5
+DOCUMENTATION / PRODUCT DESIGN
+NO RELEASE CONTAMINATION
+
+
+MMP-2
+lab/mmp-2-ai
+RESEARCH / EXPERIMENTS ONLY
+
+
+MMP-2.1 / 2.5 / 3
+ROADMAP / ARCHITECTURE
+NO CURRENT RELEASE IMPLEMENTATION
+
+That allows us to keep moving without sacrificing release integrity.
+The rule the new developer should remember
+Development happens on bounded branches.
+CI verifies the exact source.
+Pre-production verifies the actual deployed experience.
+Humans verify what automation cannot.
+Release branches integrate only qualified changes.
+Production receives a qualified candidate rather than becoming the test environment.
+Production verification precedes main becoming the new accepted truth.
+And above all:
+A newer commit is not a better commit. A green commit is not necessarily a qualified commit. A deployed commit is not necessarily a production-verified commit. Qualification evidence determines promotion.
+
+That should become the operating model for the new developer from this point onward.

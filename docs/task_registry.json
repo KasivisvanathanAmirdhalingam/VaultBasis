@@ -1,0 +1,1842 @@
+{
+  "schema_version": 1,
+  "authority": "docs/task_execution_standard.md",
+  "planning_baseline_commit": "95708fade15efe583e25c6f5257e4bebe285f864",
+  "historical_import_policy": "Retained original claims only; not current qualification. Missing attribution is not inferred.",
+  "tasks": [
+    {
+      "id": "GOV-01",
+      "title": "Draft normative JSON Schema `schemas/receipt/receipt-v0.1.json` specifying all 23 core fields",
+      "stage": "MMP-1",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "b5a3e5ff80a2381bdf96941630fe56ecf6cb6c4e"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "GOV-02",
+      "title": "Define `schemas/receipt/canonicalization-v0.1.md` (UTF-8, sorted keys, strict decimal strings, UTC ISO 8601)",
+      "stage": "MMP-1",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "b5a3e5ff80a2381bdf96941630fe56ecf6cb6c4e"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "GOV-03",
+      "title": "Define `schemas/receipt/signing-v0.1.md` for Ed25519 installation key signing over SHA-256 digest",
+      "stage": "MMP-1",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "b5a3e5ff80a2381bdf96941630fe56ecf6cb6c4e"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "GOV-04",
+      "title": "Define `schemas/receipt/verification-v0.1.md` governing offline, zero-network verification rules",
+      "stage": "MMP-1",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "b5a3e5ff80a2381bdf96941630fe56ecf6cb6c4e"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "GOV-05",
+      "title": "Formalize 13 reconciliation states, 5 assurance levels, and authority classes",
+      "stage": "MMP-1",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "b5a3e5ff80a2381bdf96941630fe56ecf6cb6c4e"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "GOV-06",
+      "title": "Generate initial valid and tampered golden receipts for test automation",
+      "stage": "MMP-1",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "b5a3e5ff80a2381bdf96941630fe56ecf6cb6c4e"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "ENG-10A",
+      "title": "Implement local Ed25519 keypair generation and secure file-permission storage",
+      "stage": "MMP-1",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "b5a3e5ff80a2381bdf96941630fe56ecf6cb6c4e"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "ENG-10B",
+      "title": "Implement deterministic JSON canonicalizer conforming to `canonicalization-v0.1.md`",
+      "stage": "MMP-1",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "b5a3e5ff80a2381bdf96941630fe56ecf6cb6c4e"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "ENG-10C",
+      "title": "Implement receipt builder and signer producing `receipt-v0.1.json`",
+      "stage": "MMP-1",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "b5a3e5ff80a2381bdf96941630fe56ecf6cb6c4e"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "ENG-11A",
+      "title": "Build standalone zero-dependency Python/CLI verifier checking signature, schema, hash",
+      "stage": "MMP-1",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "b5a3e5ff80a2381bdf96941630fe56ecf6cb6c4e"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "ENG-11B",
+      "title": "Verify offline verifier works in disconnected container with no network access",
+      "stage": "MMP-1",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "b5a3e5ff80a2381bdf96941630fe56ecf6cb6c4e"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "ENG-05A",
+      "title": "Implement `CanonicalTransaction` and `CanonicalCase` data models with Decimal math",
+      "stage": "MMP-1",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "b5a3e5ff80a2381bdf96941630fe56ecf6cb6c4e"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "ENG-06A",
+      "title": "Implement streaming SHA-256 hasher for ingested files with metadata capture",
+      "stage": "MMP-1",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "b5a3e5ff80a2381bdf96941630fe56ecf6cb6c4e"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "ENG-03A",
+      "title": "Build parser for Form 1099-DA representation (proceeds, basis, dates, box 2 indicator)",
+      "stage": "MMP-1",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "b5a3e5ff80a2381bdf96941630fe56ecf6cb6c4e"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "ENG-04A",
+      "title": "Build adapter for Koinly Capital Gains Report CSV with version detection",
+      "stage": "MMP-1",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "b5a3e5ff80a2381bdf96941630fe56ecf6cb6c4e"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "ENG-04B",
+      "title": "Implement generic `VaultBasis Reconciliation CSV v0.1` fallback adapter",
+      "stage": "MMP-1",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "b5a3e5ff80a2381bdf96941630fe56ecf6cb6c4e"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "ENG-03B",
+      "title": "Implement malformed input validation rejecting invalid headers or corrupted rows",
+      "stage": "MMP-1",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "b5a3e5ff80a2381bdf96941630fe56ecf6cb6c4e"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "ENG-07A",
+      "title": "Implement transaction matching hierarchy (date proximity, asset, quantity, proceeds)",
+      "stage": "MMP-1",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "b5a3e5ff80a2381bdf96941630fe56ecf6cb6c4e"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "ENG-08A",
+      "title": "Build deterministic difference classifier implementing 13 outcome states",
+      "stage": "MMP-1",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "b5a3e5ff80a2381bdf96941630fe56ecf6cb6c4e"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "ENG-08B",
+      "title": "Implement explicit `UNRESOLVED` state tracking (missing basis/date/price never becomes $0)",
+      "stage": "MMP-1",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "b5a3e5ff80a2381bdf96941630fe56ecf6cb6c4e"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "ENG-08C",
+      "title": "Implement 2025 vs 2026 reporting scope difference classifier (Box 2 logic)",
+      "stage": "MMP-1",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "b5a3e5ff80a2381bdf96941630fe56ecf6cb6c4e"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "ENG-09A",
+      "title": "Build provenance linker connecting source hashes, rows, and differences",
+      "stage": "MMP-1",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "b5a3e5ff80a2381bdf96941630fe56ecf6cb6c4e"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "ENG-01A",
+      "title": "Build Edge REST service with `/cases`, `/sources`, `/reconcile`, `/receipt`, `/verify`",
+      "stage": "MMP-1",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "b5a3e5ff80a2381bdf96941630fe56ecf6cb6c4e"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "ENG-01B",
+      "title": "Implement local SQLite database for case metadata, sources, and receipts",
+      "stage": "MMP-1",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "b5a3e5ff80a2381bdf96941630fe56ecf6cb6c4e"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "ENG-01C",
+      "title": "Package single Docker/OCI container image (`vaultbasis-edge:preview`)",
+      "stage": "MMP-1",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "bf8a7956904c440e08f0ea4d0fb44a2225e1b86e"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "ENG-02A",
+      "title": "Configure zero-egress container profile and verify with packet capture tests",
+      "stage": "MMP-1",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "bf8a7956904c440e08f0ea4d0fb44a2225e1b86e"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "SEC-01A",
+      "title": "Execute SAST, dependency vulnerability scan, and secret leak detection",
+      "stage": "MMP-1",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "b5a3e5ff80a2381bdf96941630fe56ecf6cb6c4e"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "UX-01A",
+      "title": "Build Case List view (Create Case, Ingest Status, Case ID, Outcome State)",
+      "stage": "MMP-1",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "b5a3e5ff80a2381bdf96941630fe56ecf6cb6c4e"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "UX-01B",
+      "title": "Build Case Review view (Source Integrity, Differences, Unresolved Items, Provenance)",
+      "stage": "MMP-1",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "b5a3e5ff80a2381bdf96941630fe56ecf6cb6c4e"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "UX-01C",
+      "title": "Build Receipt & Export view (Receipt ID, Signer ID, Hash, Download Bundle)",
+      "stage": "MMP-1",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "b5a3e5ff80a2381bdf96941630fe56ecf6cb6c4e"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "UX-02A",
+      "title": "Build client-side standalone HTML/JS verifier (drag-and-drop receipt verification)",
+      "stage": "MMP-1",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "b5a3e5ff80a2381bdf96941630fe56ecf6cb6c4e"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "WEB-01A",
+      "title": "Create single-page preview marketing site explaining trust proposition & receipt demo",
+      "stage": "MMP-1",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "73a7a75f38c94b2fceeffcc963fb9853728336be"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "QA-01A",
+      "title": "Comprehensive unit tests for math, parsing, serializing, signing, hashing",
+      "stage": "MMP-1",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "b5a3e5ff80a2381bdf96941630fe56ecf6cb6c4e"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "QA-02A",
+      "title": "Reference test vectors with realistic 1099-DA and Koinly CSV cases",
+      "stage": "MMP-1",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "b5a3e5ff80a2381bdf96941630fe56ecf6cb6c4e"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "QA-ATDD",
+      "title": "End-to-end customer & CPA workflows (`test_atdd_cpa_user_journey.py`)",
+      "stage": "MMP-1",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "835a91c9432c014b8655aa5d40ec666c36e9bca4"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "QA-BDD",
+      "title": "Given-When-Then criteria for 7 preview gates (`test_bdd_acceptance_gates.py`)",
+      "stage": "MMP-1",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "835a91c9432c014b8655aa5d40ec666c36e9bca4"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "QA-TDD",
+      "title": "Low-level exact decimal & RFC 8785 tests (`test_tdd_invariants.py`)",
+      "stage": "MMP-1",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "835a91c9432c014b8655aa5d40ec666c36e9bca4"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "QA-DDD",
+      "title": "Entity, value object & case aggregate tests (`test_ddd_domain_models.py`)",
+      "stage": "MMP-1",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "835a91c9432c014b8655aa5d40ec666c36e9bca4"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "QA-03A",
+      "title": "Differential testing against independent reference calculation scripts",
+      "stage": "MMP-1",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "b5a3e5ff80a2381bdf96941630fe56ecf6cb6c4e"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "QA-04A",
+      "title": "Fuzz tests with corrupted, truncated, and random byte inputs",
+      "stage": "MMP-1",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "b5a3e5ff80a2381bdf96941630fe56ecf6cb6c4e"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "QA-05A",
+      "title": "Python-based Categorical Runner for 11 validation gates",
+      "stage": "MMP-1",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "7763c9bac300fa36372607268a20a439dd28760e"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "QA-06A",
+      "title": "Extended invariant coverage (11 DDD, 14 TDD) for boundary testing",
+      "stage": "MMP-1",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "7763c9bac300fa36372607268a20a439dd28760e"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "DOC-01A",
+      "title": "Write Edge Deployment Guide (`docs/edge_deployment_guide.md`)",
+      "stage": "MMP-1",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "bf8a7956904c440e08f0ea4d0fb44a2225e1b86e"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "DOC-02A",
+      "title": "Write Independent Verifier Guide (`docs/verifier_guide.md`)",
+      "stage": "MMP-1",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "bf8a7956904c440e08f0ea4d0fb44a2225e1b86e"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "DOC-03A",
+      "title": "Create Manual Validation Scenarios Runbook (`docs/manual_validation_scenarios.md`)",
+      "stage": "MMP-1",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "835a91c9432c014b8655aa5d40ec666c36e9bca4"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "UX-03A",
+      "title": "Standardized enterprise headers, multi-column footers, live sample receipts & anchor links",
+      "stage": "MMP-1",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "3cd422cfb79e566bb6f96d5536160c0d462608ca"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "MMP11-DIST-MAC-001",
+      "title": "Mac RC3 packaging: PyInstaller onedir, symlink preservation via `zip -ry`, recipient-style extraction via `unzip -X`, PRE/POST-ZIP launch gates",
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "38452199cb49dc8871b50a27fd43d69d916e5258",
+        "4ec1a749b3b1f24aded9d1a53407ea83d2214654",
+        "5dc4962de00ca807050e689c1e49c5ca948879f2"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "MMP11-DIST-WIN-001",
+      "title": "Windows RC3: switch `--onefile` \u2192 `--onedir`, hard timeout on communicate(), Defender exclusion in CI",
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "5dc4962de00ca807050e689c1e49c5ca948879f2"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "MMP11-SEC-002",
+      "title": "Blob-backed expiring entitlement: token \u2192 `sha256(token).json`, 72h TTL, timing-safe comparison, artifact-hash binding, fail-closed",
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "MMP11-SEC-003",
+      "title": "`PUBLIC_BASE_URL` env var for provisioning emails; adversarial host-header test",
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "MMP11-SEC-004",
+      "title": "CORS origin restriction to canonical production hostname",
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "MMP11-SEC-DEPLOY-001",
+      "title": "Restore Vercel Deployment Protection (anonymous access to vaultbasis.com was open)",
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "MMP11-WEB-001",
+      "title": "P0/P1 regulatory audit fixes: copyright, claims, terminology, disclaimer",
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "e3e63b9f48b7c7d358df5f046a113038998c32ed"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "MMP11-WEB-002",
+      "title": "Footer link corrections based on user feedback",
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "f6c6647f91fc750fb6fdc5f067ec7116dc7d4003"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "MMP11-WEB-003",
+      "title": "Remove TecTixBase, engineering jargon, internal refs from all user-facing pages",
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "9e68178e3761dd38717c219de1c7f7cb4330a7b0"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "MMP11-WEB-004",
+      "title": "WEB-QUAL-001 remediation batch: Ethereal removal, real support routes, verifier terminology, Tax Correctness row, standalone legal pages, sample receipt fix",
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "bb8e93a37cfb175be3e5d430a5ea45ccfc2236fb"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "MMP11-WEB-005",
+      "title": "Fix GATE-08/09 regressions: update test assertions for renamed labels; revert golden fixture description to preserve Ed25519 signature",
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "a69fc8759b97fcbdd0f5e15d4b6de4df0431e423"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "MMP11-WEB-006",
+      "title": "MMP11-WEB-PRES-001: SVG geometric brand mark, practitioner nav IA, trust strip, hero composition, footer restructure, verifier UX reorder",
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "034eb387f656b94eff53621bed8542d19801f9ce"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "MMP11-WEB-007",
+      "title": "Practitioner-readiness convergence: About, Trust & Assurance, FAQ pages; nav updated; \"Golden Test Vectors\" \u2192 \"Verification Test Receipts\"; vercel.json + build script updated",
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "MMP11-WEB-QUAL-001",
+      "title": "Route verification + absence of dev artifacts in production",
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "MMP11-WEB-A11Y-001",
+      "title": "Human browser pass: keyboard, focus, contrast, zoom, mobile, 8 routes",
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "MMP11-CI-001",
+      "title": "Record exact CI evidence for current HEAD: run ID, conclusion, GATE-01..11, artifact SHAs",
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "034eb387f656b94eff53621bed8542d19801f9ce"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "MMP11-DIST-MAC-001-VERIFY",
+      "title": "Inspect Mac CI result: PRE-ZIP, symlink, POST-ZIP, health, content gate, artifact SHA",
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "MMP11-DIST-WIN-001-VERIFY",
+      "title": "Windows full qualification: native launch, health, sample, receipt, verify, relaunch",
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "5dc4962de00ca807050e689c1e49c5ca948879f2"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "MMP11-PROMOTE-001",
+      "title": "Promote exact qualified artifacts to private Blob storage via workflow_dispatch",
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "MMP11-DEPLOY-001",
+      "title": "Deploy qualified web build to Vercel + verify production routes",
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "MMP11-DEPLOY-VERIFY-001",
+      "title": "Post-deployment: verify actual document content (not just HTTP 200) for all 12 routes on both vaultbasis.com and www",
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "MMP11-SEC-002-PROD",
+      "title": "10-step production entitlement smoke: synthetic data, separate from DEPLOY-SEC-001",
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "MMP11-SEC-003-PROD",
+      "title": "PUBLIC_BASE_URL Vercel env confirmation + adversarial host-header test",
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "MMP11-SMOKE-FOUNDER",
+      "title": "Founder recipient-path smoke: exact production bytes, Finder extraction, launch, sample case, receipt, verify \u2014 no developer intervention",
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "Associate-001A",
+      "title": "Distribution canary: download \u2192 extract \u2192 launch \u2192 sample \u2192 receipt \u2192 verify \u2192 quit \u2192 relaunch \u2192 help",
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "Associate-001B",
+      "title": "Zero-knowledge practitioner rehearsal: website \u2192 understand \u2192 access \u2192 download \u2192 use \u2192 verify \u2192 find support",
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "CPA-001",
+      "title": "CPA/EA Design-Partner evaluation",
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "MMP11-SEC-005",
+      "title": "Fixture signing-key disposition: usage scope, classification, history-rewrite decision",
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "MMP11-TEST-001",
+      "title": "Golden fixture defect: new test-only signing key, regenerate correctly-formed signed receipt",
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "BRAND-001",
+      "title": "VaultBasis distinctive identity system: geometric mark concepts, trademark search, favicon/app-icon system",
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "LEGACY-001",
+      "title": "L1.1 / L1.2 Canonicalization & Hashing",
+      "stage": "Historical L1/L2",
+      "ledger": "tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "LEGACY-002",
+      "title": "Verify payload integrity decoupled from external truth",
+      "stage": "Historical L1/L2",
+      "ledger": "tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "LEGACY-003",
+      "title": "L2.1 Preflight Implementation",
+      "stage": "Historical L1/L2",
+      "ledger": "tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "3b5ef2e5c1b934ed5e54e106e7cff17fcab75bda"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "LEGACY-004",
+      "title": "L2.2 Finding Why Explanations",
+      "stage": "Historical L1/L2",
+      "ledger": "tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "3b5ef2e5c1b934ed5e54e106e7cff17fcab75bda"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "LEGACY-005",
+      "title": "Legal Entity Check (TecTixBase EURL)",
+      "stage": "Historical L1/L2",
+      "ledger": "tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [
+        "3b5ef2e5c1b934ed5e54e106e7cff17fcab75bda"
+      ],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "LEGACY-006",
+      "title": "L2.3 Provenance Mapping",
+      "stage": "Historical L1/L2",
+      "ledger": "tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Original ledger criteria; current qualification not inferred.",
+      "implementation_commits": [],
+      "historical_import": true,
+      "historical_note": "Imported original attribution only; resolved SHA is not independent proof of scope. Missing mappings require evidence review; historical PASS is not current qualification."
+    },
+    {
+      "id": "MMP11-AUDIT-001",
+      "title": "Preserve accepted takeover planning baseline",
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "owner": "Engineering; human acceptance by founder where specified",
+      "state": "IMPLEMENTED",
+      "acceptance": "Planning acceptance and immutable evidence commit; not runtime qualification.",
+      "implementation_commits": [
+        "95708fade15efe583e25c6f5257e4bebe285f864"
+      ],
+      "closeout": "docs/audit/internal/tasks/MMP11-AUDIT-001.md",
+      "documentation": {
+        "technical": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/technical_change_register.md",
+            "docs/development_workflow.md"
+          ],
+          "rationale": "Records task scope, evidence and current limitations; no product qualification implied."
+        },
+        "knowledge_base": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/knowledge_base.md"
+          ],
+          "rationale": "Records task scope, evidence and current limitations; no product qualification implied."
+        },
+        "status": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/status.md"
+          ],
+          "rationale": "Records task scope, evidence and current limitations; no product qualification implied."
+        },
+        "adr": {
+          "disposition": "NO_CHANGE",
+          "paths": [
+            "docs/adr/README.md"
+          ],
+          "rationale": "Audit did not change assurance architecture; protected ADRs remain authoritative."
+        },
+        "internal_audit": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/audit/internal/README.md"
+          ],
+          "rationale": "Records task scope, evidence and current limitations; no product qualification implied."
+        },
+        "external_audit": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/audit/external/README.md"
+          ],
+          "rationale": "Records task scope, evidence and current limitations; no product qualification implied."
+        }
+      }
+    },
+    {
+      "id": "VB-GOV-001",
+      "title": "Establish automatic task/commit/documentation closeout",
+      "stage": "Governance",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "owner": "Engineering; human acceptance by founder where specified",
+      "state": "IN_PROGRESS",
+      "acceptance": "Unique IDs, real implementation SHAs, six documentation dispositions, checker and negative controls.",
+      "implementation_commits": [],
+      "closeout": "docs/audit/internal/tasks/VB-GOV-001.md",
+      "documentation": {
+        "technical": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/technical_change_register.md",
+            "docs/development_workflow.md"
+          ],
+          "rationale": "Records task scope, evidence and current limitations; no product qualification implied."
+        },
+        "knowledge_base": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/knowledge_base.md"
+          ],
+          "rationale": "Records task scope, evidence and current limitations; no product qualification implied."
+        },
+        "status": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/status.md"
+          ],
+          "rationale": "Records task scope, evidence and current limitations; no product qualification implied."
+        },
+        "adr": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/adr/ADR-007-task-traceability-and-evidence-lifecycle.md"
+          ],
+          "rationale": "Records task scope, evidence and current limitations; no product qualification implied."
+        },
+        "internal_audit": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/audit/internal/README.md"
+          ],
+          "rationale": "Records task scope, evidence and current limitations; no product qualification implied."
+        },
+        "external_audit": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/audit/external/README.md"
+          ],
+          "rationale": "Records task scope, evidence and current limitations; no product qualification implied."
+        }
+      }
+    },
+    {
+      "id": "MMP11-GIT-001",
+      "title": "Establish verified bounded Web convergence branch",
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "owner": "Engineering; human acceptance by founder where specified",
+      "state": "AUTHORIZED",
+      "acceptance": "Fresh refs compared; branch from release baseline; Edge remains independent.",
+      "implementation_commits": []
+    },
+    {
+      "id": "MMP11-UX-001",
+      "title": "Deliver coherent MMP-1.1 practitioner experience",
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "owner": "Engineering; human acceptance by founder where specified",
+      "state": "AUTHORIZED",
+      "acceptance": "Complete accepted blueprint and journeys; no kernel changes; one complete candidate review.",
+      "implementation_commits": []
+    },
+    {
+      "id": "MMP11-UX-FOUNDATION-001",
+      "title": "Shared design tokens and application shell",
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "owner": "Engineering; human acceptance by founder where specified",
+      "state": "AUTHORIZED",
+      "acceptance": "One header/footer, typography/spacing/controls/status/focus system and distinct local navigation.",
+      "implementation_commits": []
+    },
+    {
+      "id": "MMP11-UX-PAGES-001",
+      "title": "Converge all public/reference/verifier surfaces",
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "owner": "Engineering; human acceptance by founder where specified",
+      "state": "AUTHORIZED",
+      "acceptance": "Home, Trust, About, Contact, Privacy, Terms, Security, Scope, access/verifier and 404 follow canonical IA.",
+      "implementation_commits": []
+    },
+    {
+      "id": "MMP11-NAV-404-001",
+      "title": "Return intentional unknown-route HTTP 404",
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "owner": "Engineering; human acceptance by founder where specified",
+      "state": "AUTHORIZED",
+      "acceptance": "Unknown path including negative control returns 404 and usable recovery on actual candidate.",
+      "implementation_commits": []
+    },
+    {
+      "id": "MMP11-NAV-TOP-001",
+      "title": "Accessible persistent Back-to-Top",
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "owner": "Engineering; human acceptance by founder where specified",
+      "state": "AUTHORIZED",
+      "acceptance": "Keyboard/focus, scroll threshold, mobile-safe placement and reduced motion verified.",
+      "implementation_commits": []
+    },
+    {
+      "id": "MMP11-A11Y-001",
+      "title": "Dialog lifecycle and WCAG 2.2 AA qualification",
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "owner": "Engineering; human acceptance by founder where specified",
+      "state": "AUTHORIZED",
+      "acceptance": "Focus enters/contained/restored to exact invoker; Escape; labels/errors/status; axe plus human keyboard/VoiceOver.",
+      "implementation_commits": []
+    },
+    {
+      "id": "MMP11-ACCESS-001",
+      "title": "Truthful access and provisioning state machine",
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "owner": "Engineering; human acceptance by founder where specified",
+      "state": "AUTHORIZED",
+      "acceptance": "Validation/submitting/accepted-pending-error match durable service state; real or explicit manual provisioning; separate credentials/entitlements.",
+      "implementation_commits": []
+    },
+    {
+      "id": "MMP11-EDGE-AUDIT-001",
+      "title": "Audit exact packaged Edge and remediate experience",
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "owner": "Engineering; human acceptance by founder where specified",
+      "state": "AUTHORIZED",
+      "acceptance": "Cases/sample/finding/receipt/offline valid+tampered/help/navigation/persistence/quit/relaunch on recipient artifact; independently qualified track.",
+      "implementation_commits": []
+    },
+    {
+      "id": "MMP11-NFR-001",
+      "title": "Supported environments and runtime qualification",
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "owner": "Engineering; human acceptance by founder where specified",
+      "state": "AUTHORIZED",
+      "acceptance": "All NFR Q01\u2013Q19 applicable evidence on exact candidate; no source-only substitution.",
+      "implementation_commits": []
+    },
+    {
+      "id": "MMP11-JOURNEY-001",
+      "title": "Behavioral journeys and negative controls",
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "owner": "Engineering; human acceptance by founder where specified",
+      "state": "AUTHORIZED",
+      "acceptance": "Full public/access/verifier/Edge journeys; dead-link/focus/404/offline negative controls demonstrably fail.",
+      "implementation_commits": []
+    },
+    {
+      "id": "MMP11-CI-UX-001",
+      "title": "Exact-SHA CI for bounded recovery branches",
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "owner": "Engineering; human acceptance by founder where specified",
+      "state": "AUTHORIZED",
+      "acceptance": "Preserve canonical gates and add UX/NFR coverage; retain exact SHA/run/artifact evidence; CI triggers cover intended branch/PR.",
+      "implementation_commits": []
+    },
+    {
+      "id": "MMP11-VISUAL-001",
+      "title": "Maintain visual acceptance matrix",
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "owner": "Engineering; human acceptance by founder where specified",
+      "state": "AUTHORIZED",
+      "acceptance": "Every captured surface mapped to desktop/mobile/functional/a11y/UX/action; gaps explicit; baseline is not design acceptance.",
+      "implementation_commits": []
+    },
+    {
+      "id": "MMP11-PREPROD-001",
+      "title": "Deploy exact CI-green Web candidate to protected Preview",
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "owner": "Engineering; human acceptance by founder where specified",
+      "state": "AUTHORIZED",
+      "acceptance": "Immutable URL/deployment identity/source/run/time recorded; no production-first deployment.",
+      "implementation_commits": []
+    },
+    {
+      "id": "MMP11-FOUNDER-001",
+      "title": "Complete candidate founder review",
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "owner": "Engineering; human acceptance by founder where specified",
+      "state": "PENDING",
+      "acceptance": "Founder reviews exact coherent deployed candidate after engineering qualification; only founder assigns acceptance.",
+      "implementation_commits": []
+    },
+    {
+      "id": "MMP11-RELEASE-001",
+      "title": "Integrate qualified tracks and requalify release",
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "owner": "Engineering; human acceptance by founder where specified",
+      "state": "PENDING",
+      "acceptance": "Controlled PR into release; new merge SHA CI and applicable runtime evidence; accepted main follows production verification.",
+      "implementation_commits": []
+    },
+    {
+      "id": "MMP11-PROD-001",
+      "title": "Immutable promotion, rollback readiness and production smoke",
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "owner": "Engineering; human acceptance by founder where specified",
+      "state": "PENDING",
+      "acceptance": "Recorded rollback identity; promote same qualified candidate; verify real URLs/access/downloaded bytes; no unexplained blockers.",
+      "implementation_commits": []
+    },
+    {
+      "id": "MMP15-001",
+      "title": "Evidence Inbox",
+      "stage": "MMP-1.5",
+      "ledger": "docs/roadmap/MMP15_TASK_LEDGER.md",
+      "state": "PLANNED",
+      "owner": "Unassigned product/architecture",
+      "acceptance": "Unsupported evidence remains visible; duplicate classification has an explicit rule and never silently deletes historical evidence.",
+      "implementation_commits": []
+    },
+    {
+      "id": "MMP15-002",
+      "title": "Case Readiness and Evidence Request List",
+      "stage": "MMP-1.5",
+      "ledger": "docs/roadmap/MMP15_TASK_LEDGER.md",
+      "state": "PLANNED",
+      "owner": "Unassigned product/architecture",
+      "acceptance": "Every blocker/request traces to actual inventory or declared requirements; readiness never asserts tax correctness; no automatic send.",
+      "implementation_commits": []
+    },
+    {
+      "id": "MMP15-003",
+      "title": "Review Queue",
+      "stage": "MMP-1.5",
+      "ledger": "docs/roadmap/MMP15_TASK_LEDGER.md",
+      "state": "PLANNED",
+      "owner": "Unassigned product/architecture",
+      "acceptance": "Counts reconcile to defined categories without hidden double counting; agreements and excluded items remain inspectable.",
+      "implementation_commits": []
+    },
+    {
+      "id": "MMP15-004",
+      "title": "Finding Lifecycle and Practitioner Notes",
+      "stage": "MMP-1.5",
+      "ledger": "docs/roadmap/MMP15_TASK_LEDGER.md",
+      "state": "PLANNED",
+      "owner": "Unassigned product/architecture",
+      "acceptance": "Workflow resolution never changes historical machine state; reevaluation creates traceable new machine evidence; notes are attributable.",
+      "implementation_commits": []
+    },
+    {
+      "id": "MMP15-005",
+      "title": "Workpaper Evidence Bundle",
+      "stage": "MMP-1.5",
+      "ledger": "docs/roadmap/MMP15_TASK_LEDGER.md",
+      "state": "PLANNED",
+      "owner": "Unassigned product/architecture",
+      "acceptance": "All included facts trace to their origin; notes are distinguishable from machine facts; signed receipt bytes remain unchanged.",
+      "implementation_commits": []
+    },
+    {
+      "id": "MMP15-006",
+      "title": "Multi-case Workspace",
+      "stage": "MMP-1.5",
+      "ledger": "docs/roadmap/MMP15_TASK_LEDGER.md",
+      "state": "PLANNED",
+      "owner": "Unassigned product/architecture",
+      "acceptance": "Opening a case cannot show another case\u2019s findings/receipt; readiness displays blockers rather than unsupported certainty.",
+      "implementation_commits": []
+    },
+    {
+      "id": "MMP21-001",
+      "title": "Versioned Source Adapters",
+      "stage": "MMP-2.1",
+      "ledger": "docs/roadmap/MMP21_TASK_LEDGER.md",
+      "state": "PLANNED",
+      "owner": "Unassigned product/architecture",
+      "acceptance": "Reproducible acquisition retains lineage and adapter version; changed/unsupported profiles fail visibly; kernel authority unchanged.",
+      "implementation_commits": []
+    },
+    {
+      "id": "MMP21-002",
+      "title": "Controlled Document Intake",
+      "stage": "MMP-2.1",
+      "ledger": "docs/roadmap/MMP21_TASK_LEDGER.md",
+      "state": "PLANNED",
+      "owner": "Unassigned product/architecture",
+      "acceptance": "Minimum permissions, explicit destination case and no silent import or send; duplicate/failure handling is traceable.",
+      "implementation_commits": []
+    },
+    {
+      "id": "MMP21-003",
+      "title": "Firm Mappings and Tax-software Export",
+      "stage": "MMP-2.1",
+      "ledger": "docs/roadmap/MMP21_TASK_LEDGER.md",
+      "state": "PLANNED",
+      "owner": "Unassigned product/architecture",
+      "acceptance": "Mappings cannot silently expand semantics; exports preserve origin and do not represent tax-law determinations.",
+      "implementation_commits": []
+    },
+    {
+      "id": "MMP21-004",
+      "title": "Connector Health and Lineage",
+      "stage": "MMP-2.1",
+      "ledger": "docs/roadmap/MMP21_TASK_LEDGER.md",
+      "state": "PLANNED",
+      "owner": "Unassigned product/architecture",
+      "acceptance": "Partial/failed fetch never reports complete; retry and version changes remain visible without changing prior evidence.",
+      "implementation_commits": []
+    },
+    {
+      "id": "MMP25-001",
+      "title": "Firm Queue and Maker/Reviewer Controls",
+      "stage": "MMP-2.5",
+      "ledger": "docs/roadmap/MMP25_TASK_LEDGER.md",
+      "state": "PLANNED",
+      "owner": "Unassigned product/architecture",
+      "acceptance": "Policy routes review without determining tax correctness; unsupported evidence requires declared review; no self-approval bypass where forbidden.",
+      "implementation_commits": []
+    },
+    {
+      "id": "MMP25-002",
+      "title": "Evidence-request Workflow",
+      "stage": "MMP-2.5",
+      "ledger": "docs/roadmap/MMP25_TASK_LEDGER.md",
+      "state": "PLANNED",
+      "owner": "Unassigned product/architecture",
+      "acceptance": "Every external send is approved; arrival never silently resolves findings; new evidence passes supported validation.",
+      "implementation_commits": []
+    },
+    {
+      "id": "MMP25-003",
+      "title": "Change Impact and Reviewer Delta",
+      "stage": "MMP-2.5",
+      "ledger": "docs/roadmap/MMP25_TASK_LEDGER.md",
+      "state": "PLANNED",
+      "owner": "Unassigned product/architecture",
+      "acceptance": "Delta counts reconcile to stable comparison rules; unchanged findings remain inspectable; historical signed records preserved.",
+      "implementation_commits": []
+    },
+    {
+      "id": "MMP25-004",
+      "title": "Operational Review Metrics",
+      "stage": "MMP-2.5",
+      "ledger": "docs/roadmap/MMP25_TASK_LEDGER.md",
+      "state": "PLANNED",
+      "owner": "Unassigned product/architecture",
+      "acceptance": "Definitions/denominators and access boundaries are documented; no taxpayer behavioral analytics; no metrics collection before authorization.",
+      "implementation_commits": []
+    },
+    {
+      "id": "MMP2-001",
+      "title": "Evidence Classification",
+      "stage": "MMP-2",
+      "ledger": "docs/roadmap/MMP2_TASK_LEDGER.md",
+      "state": "RESEARCH_LAB",
+      "owner": "Unassigned product/architecture",
+      "acceptance": "Incorrect/unsupported/ambiguous classifications remain reviewable; model cannot silently authorize processing.",
+      "implementation_commits": []
+    },
+    {
+      "id": "MMP2-002",
+      "title": "Evidence Extraction",
+      "stage": "MMP-2",
+      "ledger": "docs/roadmap/MMP2_TASK_LEDGER.md",
+      "state": "RESEARCH_LAB",
+      "owner": "Unassigned product/architecture",
+      "acceptance": "Every proposed value locates its source; absent/ambiguous values remain unknown; confirmed data still meets supported validation.",
+      "implementation_commits": []
+    },
+    {
+      "id": "MMP2-003",
+      "title": "Schema Mapping",
+      "stage": "MMP-2",
+      "ledger": "docs/roadmap/MMP2_TASK_LEDGER.md",
+      "state": "RESEARCH_LAB",
+      "owner": "Unassigned product/architecture",
+      "acceptance": "No ingestion under an unconfirmed mapping; ambiguous proceeds/basis/date/unit fields require review; no silent parser expansion.",
+      "implementation_commits": []
+    },
+    {
+      "id": "MMP2-004",
+      "title": "Evidence Gap Assistant",
+      "stage": "MMP-2",
+      "ledger": "docs/roadmap/MMP2_TASK_LEDGER.md",
+      "state": "RESEARCH_LAB",
+      "owner": "Unassigned product/architecture",
+      "acceptance": "Recommendations cite real unresolved items and never invent missing evidence or decide tax correctness.",
+      "implementation_commits": []
+    },
+    {
+      "id": "MMP2-005",
+      "title": "Finding Explanation Assistant",
+      "stage": "MMP-2",
+      "ledger": "docs/roadmap/MMP2_TASK_LEDGER.md",
+      "state": "RESEARCH_LAB",
+      "owner": "Unassigned product/architecture",
+      "acceptance": "Explanation cannot alter numbers/state or hide uncertainty; unsupported explanations are rejected or visibly unavailable.",
+      "implementation_commits": []
+    },
+    {
+      "id": "MMP2-006",
+      "title": "Evidence-request Drafting",
+      "stage": "MMP-2",
+      "ledger": "docs/roadmap/MMP2_TASK_LEDGER.md",
+      "state": "RESEARCH_LAB",
+      "owner": "Unassigned product/architecture",
+      "acceptance": "Human approves recipients and content before any sending; drafting alone performs no external action.",
+      "implementation_commits": []
+    },
+    {
+      "id": "MMP2-007",
+      "title": "Case Summary and Conflict Discovery",
+      "stage": "MMP-2",
+      "ledger": "docs/roadmap/MMP2_TASK_LEDGER.md",
+      "state": "RESEARCH_LAB",
+      "owner": "Unassigned product/architecture",
+      "acceptance": "Every factual assertion is traceable; contradictions remain proposals and do not declare a source true.",
+      "implementation_commits": []
+    },
+    {
+      "id": "MMP2-008",
+      "title": "Case Q&A",
+      "stage": "MMP-2",
+      "ledger": "docs/roadmap/MMP2_TASK_LEDGER.md",
+      "state": "RESEARCH_LAB",
+      "owner": "Unassigned product/architecture",
+      "acceptance": "Numeric/filter questions use declared deterministic queries; case isolation, unsupported-question refusal and exact values are tested.",
+      "implementation_commits": []
+    },
+    {
+      "id": "MMP3-001",
+      "title": "Assurance API, Receipt SDK and Verifier Ecosystem",
+      "stage": "MMP-3",
+      "ledger": "docs/roadmap/MMP3_TASK_LEDGER.md",
+      "state": "DIRECTIONAL",
+      "owner": "Unassigned product/architecture",
+      "acceptance": "External implementations pass declared conformance vectors; API does not delegate assurance authority to AI.",
+      "implementation_commits": []
+    },
+    {
+      "id": "MMP3-002",
+      "title": "Portable Evidence Graph and Review History",
+      "stage": "MMP-3",
+      "ledger": "docs/roadmap/MMP3_TASK_LEDGER.md",
+      "state": "DIRECTIONAL",
+      "owner": "Unassigned product/architecture",
+      "acceptance": "History preserves machine/human/AI distinctions and verifies change lineage without modifying prior signed records.",
+      "implementation_commits": []
+    },
+    {
+      "id": "MMP3-003",
+      "title": "Enterprise Identity, Policy and Deployment",
+      "stage": "MMP-3",
+      "ledger": "docs/roadmap/MMP3_TASK_LEDGER.md",
+      "state": "DIRECTIONAL",
+      "owner": "Unassigned product/architecture",
+      "acceptance": "Tenant isolation, least privilege, recovery and deployment evidence are qualified; firm policy never becomes a tax determination.",
+      "implementation_commits": []
+    },
+    {
+      "id": "MMP3-004",
+      "title": "Enterprise Connectors and Additional Assurance Domains",
+      "stage": "MMP-3",
+      "ledger": "docs/roadmap/MMP3_TASK_LEDGER.md",
+      "state": "DIRECTIONAL",
+      "owner": "Unassigned product/architecture",
+      "acceptance": "Each new domain has an explicit contract, corpus, uncertainty boundary and independent qualification; no inherited claims of correctness.",
+      "implementation_commits": []
+    },
+    {
+      "id": "REL-01A",
+      "title": "Review and certify all 7 preview gates in `docs/preview_gates_certification.md`",
+      "stage": "Historical MMP-1 / deferred scope",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "All 7 gates signed off with test evidence",
+      "implementation_commits": [
+        "bf8a7956904c440e08f0ea4d0fb44a2225e1b86e"
+      ],
+      "historical_import": true,
+      "historical_note": "Original historical/deferred row; attribution not independently requalified. Commercialization is not MMP-1.1 scope."
+    },
+    {
+      "id": "REL-02A",
+      "title": "Document execution strategy in ADR-006 & Audit Status Updates",
+      "stage": "Historical MMP-1 / deferred scope",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "ADR-006 approved and Audit Status reflects Python matrix",
+      "implementation_commits": [
+        "7763c9bac300fa36372607268a20a439dd28760e"
+      ],
+      "historical_import": true,
+      "historical_note": "Original historical/deferred row; attribution not independently requalified. Commercialization is not MMP-1.1 scope."
+    },
+    {
+      "id": "DEP-01A",
+      "title": "Define `vercel.json` and `package.json` for incremental static deployment with strict security headers",
+      "stage": "Historical MMP-1 / deferred scope",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Validated Vercel config with cleanUrls, rewrites, and security headers",
+      "implementation_commits": [
+        "1424697b61af2b943c5f186a7b6452557850e0ee"
+      ],
+      "historical_import": true,
+      "historical_note": "Original historical/deferred row; attribution not independently requalified. Commercialization is not MMP-1.1 scope."
+    },
+    {
+      "id": "DEP-02A",
+      "title": "Build deterministic packager `scripts/build_public_web.js` with zero-leakage security audit",
+      "stage": "Historical MMP-1 / deferred scope",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Packages public web distribution with 0 keys and 0 DBs",
+      "implementation_commits": [
+        "1424697b61af2b943c5f186a7b6452557850e0ee"
+      ],
+      "historical_import": true,
+      "historical_note": "Original historical/deferred row; attribution not independently requalified. Commercialization is not MMP-1.1 scope."
+    },
+    {
+      "id": "DEP-03A",
+      "title": "Build client-side localhost bridge in marketing site and WebCrypto verifier",
+      "stage": "Historical MMP-1 / deferred scope",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Public internet visitor discovers local edge or verifies receipts client-side",
+      "implementation_commits": [
+        "1424697b61af2b943c5f186a7b6452557850e0ee"
+      ],
+      "historical_import": true,
+      "historical_note": "Original historical/deferred row; attribution not independently requalified. Commercialization is not MMP-1.1 scope."
+    },
+    {
+      "id": "DEP-04A",
+      "title": "Implement automated production deployment test suite (`test_vercel_incremental_build.py`)",
+      "stage": "Historical MMP-1 / deferred scope",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "100% pass on deployment test + pre-commit pipeline step 6",
+      "implementation_commits": [
+        "1424697b61af2b943c5f186a7b6452557850e0ee"
+      ],
+      "historical_import": true,
+      "historical_note": "Original historical/deferred row; attribution not independently requalified. Commercialization is not MMP-1.1 scope."
+    },
+    {
+      "id": "DEP-05A",
+      "title": "Comprehensive Operations & Deployment Runbook (`docs/infrastructure_and_deployment_guide.md`)",
+      "stage": "Historical MMP-1 / deferred scope",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "End-to-end multi-tier infrastructure runbook documented",
+      "implementation_commits": [
+        "3cd422cfb79e566bb6f96d5536160c0d462608ca"
+      ],
+      "historical_import": true,
+      "historical_note": "Original historical/deferred row; attribution not independently requalified. Commercialization is not MMP-1.1 scope."
+    },
+    {
+      "id": "DEP-06A",
+      "title": "Regression test suite for web navigation, headers, footers & endpoints (`test_web_navigation_and_links.py`)",
+      "stage": "Historical MMP-1 / deferred scope",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "51 tests green across comprehensive suite",
+      "implementation_commits": [
+        "3cd422cfb79e566bb6f96d5536160c0d462608ca"
+      ],
+      "historical_import": true,
+      "historical_note": "Original historical/deferred row; attribution not independently requalified. Commercialization is not MMP-1.1 scope."
+    },
+    {
+      "id": "FIX-01A",
+      "title": "Resolve sticky header occlusion using `scroll-padding-top`, `scroll-margin-top` and smooth offset handler",
+      "stage": "Historical MMP-1 / deferred scope",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Headings scroll with full clearance beneath sticky header",
+      "implementation_commits": [
+        "e9500d41d1e80229091ec99ba67e28598586f24d"
+      ],
+      "historical_import": true,
+      "historical_note": "Original historical/deferred row; attribution not independently requalified. Commercialization is not MMP-1.1 scope."
+    },
+    {
+      "id": "COM-01A",
+      "title": "Configure GCP/AWS/Scaleway bucket to securely store the obfuscated Desktop Executable bundles",
+      "stage": "Historical MMP-1 / deferred scope",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Automated push of `Release.zip` from CI/CD to secure cloud bucket",
+      "implementation_commits": [],
+      "historical_import": true,
+      "historical_note": "Original historical/deferred row; attribution not independently requalified. Commercialization is not MMP-1.1 scope."
+    },
+    {
+      "id": "COM-02A",
+      "title": "Integrate Paddle Billing overlay into the Public Marketing Site (`web-marketing`)",
+      "stage": "Historical MMP-1 / deferred scope",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Users can add VaultBasis to cart and trigger a test payment",
+      "implementation_commits": [],
+      "historical_import": true,
+      "historical_note": "Original historical/deferred row; attribution not independently requalified. Commercialization is not MMP-1.1 scope."
+    },
+    {
+      "id": "COM-03A",
+      "title": "Deploy a cloud webhook (Serverless function) to catch Paddle `transaction.completed` events",
+      "stage": "Historical MMP-1 / deferred scope",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Webhook generates and emails a cryptographically signed license key",
+      "implementation_commits": [],
+      "historical_import": true,
+      "historical_note": "Original historical/deferred row; attribution not independently requalified. Commercialization is not MMP-1.1 scope."
+    },
+    {
+      "id": "COM-04A",
+      "title": "Update VaultBasis Edge (`app.py`) to cryptographically verify the user's purchased license key",
+      "stage": "Historical MMP-1 / deferred scope",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Dashboard requires a valid license key before allowing Case Creation",
+      "implementation_commits": [],
+      "historical_import": true,
+      "historical_note": "Original historical/deferred row; attribution not independently requalified. Commercialization is not MMP-1.1 scope."
+    },
+    {
+      "id": "COM-05A",
+      "title": "Implement secure, time-limited, signed download URLs for buyers to download the desktop bundle",
+      "stage": "Historical MMP-1 / deferred scope",
+      "ledger": "docs/master_tasks_ledger.md",
+      "state": "HISTORICAL_RECORDED",
+      "owner": "Unassigned historical evidence owner",
+      "acceptance": "Only verified purchasers can download the actual Desktop Bundle",
+      "implementation_commits": [],
+      "historical_import": true,
+      "historical_note": "Original historical/deferred row; attribution not independently requalified. Commercialization is not MMP-1.1 scope."
+    }
+  ]
+}

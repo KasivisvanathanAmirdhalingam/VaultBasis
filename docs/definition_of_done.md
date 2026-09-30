@@ -1,5 +1,7 @@
 # VaultBasis — Matured Definition of Done (DoD)
 
+> Current task-closeout and release process: [execution standard](task_execution_standard.md) and [development workflow](development_workflow.md). Historical checked boxes below are not present qualification; no automatic native launch or blanket product test run is required for documentation-only work.
+
 > **Document Version**: v2.0.0-INDUSTRIAL  
 > **Status**: NORMATIVE / MANDATORY GATING POLICY  
 > **Scope**: All Vertical Slices & Production Release Gates for MMP-1  

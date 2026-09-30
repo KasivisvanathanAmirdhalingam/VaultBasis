@@ -1,5 +1,7 @@
 # Git, qualification and evidence governance
 
+Current controlling workflow: [development and promotion](../development_workflow.md), with mandatory [task closeout](../task_execution_standard.md). The founder's subsequent implementation/promotion directives supersede earlier abbreviated stage ordering here: production verification precedes accepted-main integration. Future work updates all six documentation categories without repeated requests.
+
 Effective directive: founder's Sept 30 roadmap/Git brief. Scope: document policy now; implement branch/protection changes only within an authorized bounded task. No branch, tag, remote setting, merge or release change was made by this documentation work.
 
 ## Branch purpose beside evidence state
