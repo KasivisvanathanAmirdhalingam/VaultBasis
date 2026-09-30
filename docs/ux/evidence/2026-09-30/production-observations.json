@@ -1,0 +1,3278 @@
+{
+  "capturedAt": "2026-09-30T20:35:53.642Z",
+  "browser": "153.0.8010.12",
+  "boundary": "Live public URLs; anonymous; read-only; no form submissions",
+  "results": [
+    {
+      "route": "/",
+      "width": 1440,
+      "status": 200,
+      "url": "https://vaultbasis.com/",
+      "title": "VaultBasis — Independent Reconciliation for Broker & Tax-Ledger Outcomes",
+      "headings": [
+        "Independently Reconcile Broker and Tax-Ledger Outcomes",
+        "Deterministic Reconciliation",
+        "Unresolved Stays Unresolved",
+        "Independently Verifiable Receipt",
+        "How It Works",
+        "Provide Supported Evidence",
+        "Reconcile Independently",
+        "Review the Outcome",
+        "Produce an Outcome Receipt",
+        "Canonical Evaluation Boundary",
+        "Local-First Evidence Processing",
+        "Local Processing",
+        "Local Signing",
+        "Independent Receipt Verification",
+        "Evidence & Verification Resources",
+        "Public Evidence Contract v0.1",
+        "Independent Web Verifier",
+        "Verification Test Receipts",
+        "Scope & Limitations",
+        "Participate in the Design-Partner Preview",
+        "Request VaultBasis Access"
+      ],
+      "links": [
+        {
+          "text": "VaultBasis",
+          "href": "/"
+        },
+        {
+          "text": "How It Works",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "Trust & Assurance",
+          "href": "/trust-assurance"
+        },
+        {
+          "text": "Resources",
+          "href": "/#resources"
+        },
+        {
+          "text": "About",
+          "href": "/about"
+        },
+        {
+          "text": "Verify an Outcome Receipt ↗",
+          "href": "/verifier"
+        },
+        {
+          "text": "Verify an Outcome Receipt",
+          "href": "/verifier"
+        },
+        {
+          "text": "How It Works",
+          "href": "#how-it-works"
+        },
+        {
+          "text": "Evaluation Boundary",
+          "href": "#comparison"
+        },
+        {
+          "text": "Evidence Processing",
+          "href": "#security"
+        },
+        {
+          "text": "Resources",
+          "href": "#resources"
+        },
+        {
+          "text": "View Evidence Schema ↗",
+          "href": "/schemas/receipt-v0.1.json"
+        },
+        {
+          "text": "Open Web Verifier ↗",
+          "href": "/verifier"
+        },
+        {
+          "text": "Valid Sample Receipt ⤓",
+          "href": "/sample-receipt.json"
+        },
+        {
+          "text": "Tampered Receipt ⤓",
+          "href": "/sample-receipt-tampered.json"
+        },
+        {
+          "text": "Scope & Limitations ↗",
+          "href": "/docs/scope_and_limitations_v0.1.html"
+        },
+        {
+          "text": "See How It Works →",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "VaultBasis",
+          "href": "/"
+        },
+        {
+          "text": "How It Works",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "Evaluation Boundary",
+          "href": "/#comparison"
+        },
+        {
+          "text": "Local Evidence",
+          "href": "/#security"
+        },
+        {
+          "text": "About VaultBasis",
+          "href": "/about"
+        },
+        {
+          "text": "Verify an Outcome Receipt",
+          "href": "/verifier"
+        },
+        {
+          "text": "Outcome Receipt Specification",
+          "href": "/schemas/receipt-v0.1.json"
+        },
+        {
+          "text": "Verification Test Receipts",
+          "href": "/sample-receipt.json"
+        },
+        {
+          "text": "Scope & Limitations",
+          "href": "/docs/scope_and_limitations_v0.1.html"
+        },
+        {
+          "text": "Trust & Assurance",
+          "href": "/trust-assurance"
+        },
+        {
+          "text": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "text": "Terms of Service",
+          "href": "/terms-of-service"
+        },
+        {
+          "text": "Contact",
+          "href": "/contact"
+        },
+        {
+          "text": "Security Disclosure",
+          "href": "/security-disclosure"
+        },
+        {
+          "text": "Report an Issue",
+          "href": "/contact"
+        }
+      ],
+      "buttons": [
+        "",
+        "Request Design-Partner Access",
+        "Request Design-Partner Access",
+        "Request Design-Partner Access",
+        "×",
+        "Submit Request",
+        "← Return to VaultBasis",
+        "Request Access",
+        "↑ Back to top"
+      ],
+      "horizontalOverflow": false,
+      "build": "VaultBasis Build: preview | Timestamp: 2026-09-30T14:34:34.015Z -->\n      ",
+      "errors": [],
+      "screenshot": "home-1440.png"
+    },
+    {
+      "route": "access-modal",
+      "width": 1440,
+      "focus": [
+        {
+          "id": "req-name",
+          "text": "",
+          "inDialog": true
+        },
+        {
+          "id": "req-email",
+          "text": "",
+          "inDialog": true
+        },
+        {
+          "id": "btn-submit-req",
+          "text": "Submit Request",
+          "inDialog": true
+        },
+        {
+          "id": "",
+          "text": "VaultBasis",
+          "inDialog": false
+        },
+        {
+          "id": "",
+          "text": "How It Works",
+          "inDialog": false
+        },
+        {
+          "id": "",
+          "text": "Evaluation Boundary",
+          "inDialog": false
+        },
+        {
+          "id": "",
+          "text": "Local Evidence",
+          "inDialog": false
+        },
+        {
+          "id": "",
+          "text": "Request Access",
+          "inDialog": false
+        }
+      ],
+      "focusAfterEscape": {
+        "id": "",
+        "tag": "A",
+        "text": "About VaultBasis"
+      }
+    },
+    {
+      "route": "/trust-assurance",
+      "width": 1440,
+      "status": 200,
+      "url": "https://vaultbasis.com/trust-assurance",
+      "title": "Trust & Assurance — VaultBasis",
+      "headings": [
+        "Trust & Assurance",
+        "Product Assurance",
+        "Deterministic Reconciliation",
+        "Independent Receipt Verification",
+        "Local Evidence Boundary",
+        "Cryptographic Signing",
+        "Security",
+        "Vulnerability Reporting",
+        "Release Integrity",
+        "Known Limitations",
+        "Privacy & Data Handling",
+        "Governance",
+        "Legal",
+        "Request VaultBasis Access"
+      ],
+      "links": [
+        {
+          "text": "VaultBasis",
+          "href": "/"
+        },
+        {
+          "text": "How It Works",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "Trust & Assurance",
+          "href": "/trust-assurance"
+        },
+        {
+          "text": "Resources",
+          "href": "/#resources"
+        },
+        {
+          "text": "About",
+          "href": "/about"
+        },
+        {
+          "text": "Verify an Outcome Receipt ↗",
+          "href": "/verifier"
+        },
+        {
+          "text": "Product Assurance",
+          "href": "#product-assurance"
+        },
+        {
+          "text": "Security",
+          "href": "#security"
+        },
+        {
+          "text": "Privacy & Data Handling",
+          "href": "#privacy"
+        },
+        {
+          "text": "Governance",
+          "href": "#governance"
+        },
+        {
+          "text": "Legal",
+          "href": "#legal"
+        },
+        {
+          "text": "View Evidence Contract ↗",
+          "href": "/schemas/receipt-v0.1.json"
+        },
+        {
+          "text": "Open Web Verifier ↗",
+          "href": "/verifier"
+        },
+        {
+          "text": "Scope & Limitations ↗",
+          "href": "/docs/scope_and_limitations_v0.1.html"
+        },
+        {
+          "text": "Scope & Limitations",
+          "href": "/docs/scope_and_limitations_v0.1.html"
+        },
+        {
+          "text": "Security Disclosure ↗",
+          "href": "/security-disclosure"
+        },
+        {
+          "text": "View Scope & Limitations ↗",
+          "href": "/docs/scope_and_limitations_v0.1.html"
+        },
+        {
+          "text": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "text": "Scope & Limitations",
+          "href": "/docs/scope_and_limitations_v0.1.html"
+        },
+        {
+          "text": "Scope & Limitations ↗",
+          "href": "/docs/scope_and_limitations_v0.1.html"
+        },
+        {
+          "text": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "text": "Terms of Service",
+          "href": "/terms-of-service"
+        },
+        {
+          "text": "See How It Works →",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "VaultBasis",
+          "href": "/"
+        },
+        {
+          "text": "How It Works",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "Evaluation Boundary",
+          "href": "/#comparison"
+        },
+        {
+          "text": "Local Evidence",
+          "href": "/#security"
+        },
+        {
+          "text": "About VaultBasis",
+          "href": "/about"
+        },
+        {
+          "text": "Verify an Outcome Receipt",
+          "href": "/verifier"
+        },
+        {
+          "text": "Outcome Receipt Specification",
+          "href": "/schemas/receipt-v0.1.json"
+        },
+        {
+          "text": "Verification Test Receipts",
+          "href": "/sample-receipt.json"
+        },
+        {
+          "text": "Scope & Limitations",
+          "href": "/docs/scope_and_limitations_v0.1.html"
+        },
+        {
+          "text": "Trust & Assurance",
+          "href": "/trust-assurance"
+        },
+        {
+          "text": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "text": "Terms of Service",
+          "href": "/terms-of-service"
+        },
+        {
+          "text": "Contact",
+          "href": "/contact"
+        },
+        {
+          "text": "Security Disclosure",
+          "href": "/security-disclosure"
+        },
+        {
+          "text": "Report an Issue",
+          "href": "/contact"
+        }
+      ],
+      "buttons": [
+        "",
+        "Request Design-Partner Access",
+        "×",
+        "Submit Request",
+        "← Return to VaultBasis",
+        "Request Access",
+        "↑ Back to top"
+      ],
+      "horizontalOverflow": false,
+      "build": null,
+      "errors": [],
+      "screenshot": "_trust-assurance-1440.png"
+    },
+    {
+      "route": "/about",
+      "width": 1440,
+      "status": 200,
+      "url": "https://vaultbasis.com/about",
+      "title": "About VaultBasis — Independent Evidence Assurance",
+      "headings": [
+        "Independent Evidence Assurance",
+        "What VaultBasis Is",
+        "Why It Exists",
+        "What VaultBasis Is Not",
+        "The Outcome Receipt",
+        "Preview Status",
+        "Evaluate VaultBasis",
+        "Request VaultBasis Access"
+      ],
+      "links": [
+        {
+          "text": "VaultBasis",
+          "href": "/"
+        },
+        {
+          "text": "How It Works",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "Trust & Assurance",
+          "href": "/trust-assurance"
+        },
+        {
+          "text": "Resources",
+          "href": "/#resources"
+        },
+        {
+          "text": "About",
+          "href": "/about"
+        },
+        {
+          "text": "Verify an Outcome Receipt ↗",
+          "href": "/verifier"
+        },
+        {
+          "text": "Verify an Outcome Receipt ↗",
+          "href": "/verifier"
+        },
+        {
+          "text": "See How It Works →",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "VaultBasis",
+          "href": "/"
+        },
+        {
+          "text": "How It Works",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "Evaluation Boundary",
+          "href": "/#comparison"
+        },
+        {
+          "text": "Local Evidence",
+          "href": "/#security"
+        },
+        {
+          "text": "About VaultBasis",
+          "href": "/about"
+        },
+        {
+          "text": "Verify an Outcome Receipt",
+          "href": "/verifier"
+        },
+        {
+          "text": "Outcome Receipt Specification",
+          "href": "/schemas/receipt-v0.1.json"
+        },
+        {
+          "text": "Verification Test Receipts",
+          "href": "/sample-receipt.json"
+        },
+        {
+          "text": "Scope & Limitations",
+          "href": "/docs/scope_and_limitations_v0.1.html"
+        },
+        {
+          "text": "Trust & Assurance",
+          "href": "/trust-assurance"
+        },
+        {
+          "text": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "text": "Terms of Service",
+          "href": "/terms-of-service"
+        },
+        {
+          "text": "Contact",
+          "href": "/contact"
+        },
+        {
+          "text": "Security Disclosure",
+          "href": "/security-disclosure"
+        },
+        {
+          "text": "Report an Issue",
+          "href": "/contact"
+        }
+      ],
+      "buttons": [
+        "",
+        "Request Design-Partner Access",
+        "Request Design-Partner Access",
+        "×",
+        "Submit Request",
+        "← Return to VaultBasis",
+        "Request Access",
+        "↑ Back to top"
+      ],
+      "horizontalOverflow": false,
+      "build": null,
+      "errors": [],
+      "screenshot": "_about-1440.png"
+    },
+    {
+      "route": "/contact",
+      "width": 1440,
+      "status": 200,
+      "url": "https://vaultbasis.com/contact",
+      "title": "Contact & Report an Issue — VaultBasis",
+      "headings": [
+        "Contact & Report an Issue",
+        "General Enquiries",
+        "Report an Issue",
+        "Security Concerns",
+        "Request VaultBasis Access"
+      ],
+      "links": [
+        {
+          "text": "VaultBasis",
+          "href": "/"
+        },
+        {
+          "text": "How It Works",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "Trust & Assurance",
+          "href": "/trust-assurance"
+        },
+        {
+          "text": "Resources",
+          "href": "/#resources"
+        },
+        {
+          "text": "About",
+          "href": "/about"
+        },
+        {
+          "text": "Verify an Outcome Receipt ↗",
+          "href": "/verifier"
+        },
+        {
+          "text": "hello@vaultbasis.com",
+          "href": "mailto:hello@vaultbasis.com"
+        },
+        {
+          "text": "hello@vaultbasis.com",
+          "href": "mailto:hello@vaultbasis.com"
+        },
+        {
+          "text": "Security Disclosure route",
+          "href": "/security-disclosure"
+        },
+        {
+          "text": "See How It Works →",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "VaultBasis",
+          "href": "/"
+        },
+        {
+          "text": "How It Works",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "Evaluation Boundary",
+          "href": "/#comparison"
+        },
+        {
+          "text": "Local Evidence",
+          "href": "/#security"
+        },
+        {
+          "text": "About VaultBasis",
+          "href": "/about"
+        },
+        {
+          "text": "Verify an Outcome Receipt",
+          "href": "/verifier"
+        },
+        {
+          "text": "Outcome Receipt Specification",
+          "href": "/schemas/receipt-v0.1.json"
+        },
+        {
+          "text": "Verification Test Receipts",
+          "href": "/sample-receipt.json"
+        },
+        {
+          "text": "Scope & Limitations",
+          "href": "/docs/scope_and_limitations_v0.1.html"
+        },
+        {
+          "text": "Trust & Assurance",
+          "href": "/trust-assurance"
+        },
+        {
+          "text": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "text": "Terms of Service",
+          "href": "/terms-of-service"
+        },
+        {
+          "text": "Contact",
+          "href": "/contact"
+        },
+        {
+          "text": "Security Disclosure",
+          "href": "/security-disclosure"
+        },
+        {
+          "text": "Report an Issue",
+          "href": "/contact"
+        }
+      ],
+      "buttons": [
+        "",
+        "Request Design-Partner Access",
+        "×",
+        "Submit Request",
+        "← Return to VaultBasis",
+        "Request Access",
+        "↑ Back to top"
+      ],
+      "horizontalOverflow": false,
+      "build": null,
+      "errors": [],
+      "screenshot": "_contact-1440.png"
+    },
+    {
+      "route": "/verifier-access",
+      "width": 1440,
+      "status": 200,
+      "url": "https://vaultbasis.com/verifier-access",
+      "title": "Verifier Access — VaultBasis",
+      "headings": [
+        "Verifier Access",
+        "Request VaultBasis Access"
+      ],
+      "links": [
+        {
+          "text": "VaultBasis",
+          "href": "/"
+        },
+        {
+          "text": "How It Works",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "Trust & Assurance",
+          "href": "/trust-assurance"
+        },
+        {
+          "text": "Resources",
+          "href": "/#resources"
+        },
+        {
+          "text": "About",
+          "href": "/about"
+        },
+        {
+          "text": "Verify an Outcome Receipt ↗",
+          "href": "/verifier"
+        },
+        {
+          "text": "Request design-partner access",
+          "href": "/verifier-access"
+        },
+        {
+          "text": "FAQ",
+          "href": "/faq"
+        },
+        {
+          "text": "Security Disclosure",
+          "href": "/security-disclosure"
+        },
+        {
+          "text": "See How It Works →",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "VaultBasis",
+          "href": "/"
+        },
+        {
+          "text": "How It Works",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "Evaluation Boundary",
+          "href": "/#comparison"
+        },
+        {
+          "text": "Local Evidence",
+          "href": "/#security"
+        },
+        {
+          "text": "About VaultBasis",
+          "href": "/about"
+        },
+        {
+          "text": "Verify an Outcome Receipt",
+          "href": "/verifier"
+        },
+        {
+          "text": "Outcome Receipt Specification",
+          "href": "/schemas/receipt-v0.1.json"
+        },
+        {
+          "text": "Verification Test Receipts",
+          "href": "/sample-receipt.json"
+        },
+        {
+          "text": "Scope & Limitations",
+          "href": "/docs/scope_and_limitations_v0.1.html"
+        },
+        {
+          "text": "Trust & Assurance",
+          "href": "/trust-assurance"
+        },
+        {
+          "text": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "text": "Terms of Service",
+          "href": "/terms-of-service"
+        },
+        {
+          "text": "Contact",
+          "href": "/contact"
+        },
+        {
+          "text": "Security Disclosure",
+          "href": "/security-disclosure"
+        },
+        {
+          "text": "Report an Issue",
+          "href": "/contact"
+        }
+      ],
+      "buttons": [
+        "",
+        "Request Design-Partner Access",
+        "Continue to Verifier",
+        "×",
+        "Submit Request",
+        "← Return to VaultBasis",
+        "Request Access",
+        "↑ Back to top"
+      ],
+      "horizontalOverflow": false,
+      "build": null,
+      "errors": [],
+      "screenshot": "_verifier-access-1440.png"
+    },
+    {
+      "route": "/verifier",
+      "width": 1440,
+      "status": 200,
+      "url": "https://vaultbasis.com/verifier-access?next=/verifier",
+      "title": "Verifier Access — VaultBasis",
+      "headings": [
+        "Verifier Access",
+        "Request VaultBasis Access"
+      ],
+      "links": [
+        {
+          "text": "VaultBasis",
+          "href": "/"
+        },
+        {
+          "text": "How It Works",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "Trust & Assurance",
+          "href": "/trust-assurance"
+        },
+        {
+          "text": "Resources",
+          "href": "/#resources"
+        },
+        {
+          "text": "About",
+          "href": "/about"
+        },
+        {
+          "text": "Verify an Outcome Receipt ↗",
+          "href": "/verifier"
+        },
+        {
+          "text": "Request design-partner access",
+          "href": "/verifier-access"
+        },
+        {
+          "text": "FAQ",
+          "href": "/faq"
+        },
+        {
+          "text": "Security Disclosure",
+          "href": "/security-disclosure"
+        },
+        {
+          "text": "See How It Works →",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "VaultBasis",
+          "href": "/"
+        },
+        {
+          "text": "How It Works",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "Evaluation Boundary",
+          "href": "/#comparison"
+        },
+        {
+          "text": "Local Evidence",
+          "href": "/#security"
+        },
+        {
+          "text": "About VaultBasis",
+          "href": "/about"
+        },
+        {
+          "text": "Verify an Outcome Receipt",
+          "href": "/verifier"
+        },
+        {
+          "text": "Outcome Receipt Specification",
+          "href": "/schemas/receipt-v0.1.json"
+        },
+        {
+          "text": "Verification Test Receipts",
+          "href": "/sample-receipt.json"
+        },
+        {
+          "text": "Scope & Limitations",
+          "href": "/docs/scope_and_limitations_v0.1.html"
+        },
+        {
+          "text": "Trust & Assurance",
+          "href": "/trust-assurance"
+        },
+        {
+          "text": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "text": "Terms of Service",
+          "href": "/terms-of-service"
+        },
+        {
+          "text": "Contact",
+          "href": "/contact"
+        },
+        {
+          "text": "Security Disclosure",
+          "href": "/security-disclosure"
+        },
+        {
+          "text": "Report an Issue",
+          "href": "/contact"
+        }
+      ],
+      "buttons": [
+        "",
+        "Request Design-Partner Access",
+        "Continue to Verifier",
+        "×",
+        "Submit Request",
+        "← Return to VaultBasis",
+        "Request Access",
+        "↑ Back to top"
+      ],
+      "horizontalOverflow": false,
+      "build": null,
+      "errors": [],
+      "screenshot": "_verifier-1440.png"
+    },
+    {
+      "route": "/privacy-policy",
+      "width": 1440,
+      "status": 200,
+      "url": "https://vaultbasis.com/privacy-policy",
+      "title": "Privacy Policy — VaultBasis",
+      "headings": [
+        "Privacy Policy",
+        "Overview — Two Distinct Processing Planes",
+        "Section 1 — Web Plane",
+        "1.1 Website Hosting",
+        "1.2 Design-Partner Access Requests",
+        "1.3 Entitlement Provisioning",
+        "1.4 Access Provisioning Communication",
+        "1.5 Support and Disclosure Interactions",
+        "1.6 What the Web Plane Does Not Collect",
+        "Section 2 — Edge Evidence Plane",
+        "2.1 Local Application Processing",
+        "2.2 Local Storage",
+        "2.3 Outcome Receipts",
+        "2.4 Installation Key",
+        "2.5 No Telemetry in Preview",
+        "Section 3 — Data Retention",
+        "Section 4 — Contact",
+        "Section 5 — Changes to This Policy",
+        "Request VaultBasis Access"
+      ],
+      "links": [
+        {
+          "text": "VaultBasis",
+          "href": "/"
+        },
+        {
+          "text": "How It Works",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "Trust & Assurance",
+          "href": "/trust-assurance"
+        },
+        {
+          "text": "Resources",
+          "href": "/#resources"
+        },
+        {
+          "text": "About",
+          "href": "/about"
+        },
+        {
+          "text": "Verify an Outcome Receipt ↗",
+          "href": "/verifier"
+        },
+        {
+          "text": "general enquiries route",
+          "href": "/contact"
+        },
+        {
+          "text": "security disclosure route",
+          "href": "/security-disclosure"
+        },
+        {
+          "text": "See How It Works →",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "VaultBasis",
+          "href": "/"
+        },
+        {
+          "text": "How It Works",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "Evaluation Boundary",
+          "href": "/#comparison"
+        },
+        {
+          "text": "Local Evidence",
+          "href": "/#security"
+        },
+        {
+          "text": "About VaultBasis",
+          "href": "/about"
+        },
+        {
+          "text": "Verify an Outcome Receipt",
+          "href": "/verifier"
+        },
+        {
+          "text": "Outcome Receipt Specification",
+          "href": "/schemas/receipt-v0.1.json"
+        },
+        {
+          "text": "Verification Test Receipts",
+          "href": "/sample-receipt.json"
+        },
+        {
+          "text": "Scope & Limitations",
+          "href": "/docs/scope_and_limitations_v0.1.html"
+        },
+        {
+          "text": "Trust & Assurance",
+          "href": "/trust-assurance"
+        },
+        {
+          "text": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "text": "Terms of Service",
+          "href": "/terms-of-service"
+        },
+        {
+          "text": "Contact",
+          "href": "/contact"
+        },
+        {
+          "text": "Security Disclosure",
+          "href": "/security-disclosure"
+        },
+        {
+          "text": "Report an Issue",
+          "href": "/contact"
+        }
+      ],
+      "buttons": [
+        "",
+        "Request Design-Partner Access",
+        "×",
+        "Submit Request",
+        "← Return to VaultBasis",
+        "Request Access",
+        "↑ Back to top"
+      ],
+      "horizontalOverflow": false,
+      "build": null,
+      "errors": [],
+      "screenshot": "_privacy-policy-1440.png"
+    },
+    {
+      "route": "/terms-of-service",
+      "width": 1440,
+      "status": 200,
+      "url": "https://vaultbasis.com/terms-of-service",
+      "title": "Terms of Service — VaultBasis",
+      "headings": [
+        "Terms of Service",
+        "1. Scope",
+        "2. Preview Software — No Warranty",
+        "3. What VaultBasis Does and Does Not Do",
+        "4. Design-Partner Obligations",
+        "5. Practitioner Responsibility",
+        "6. Sensitive Information",
+        "7. Limitation of Liability",
+        "8. Changes",
+        "9. Governing Law",
+        "10. Contact",
+        "Request VaultBasis Access"
+      ],
+      "links": [
+        {
+          "text": "VaultBasis",
+          "href": "/"
+        },
+        {
+          "text": "How It Works",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "Trust & Assurance",
+          "href": "/trust-assurance"
+        },
+        {
+          "text": "Resources",
+          "href": "/#resources"
+        },
+        {
+          "text": "About",
+          "href": "/about"
+        },
+        {
+          "text": "Verify an Outcome Receipt ↗",
+          "href": "/verifier"
+        },
+        {
+          "text": "general enquiries route",
+          "href": "/contact"
+        },
+        {
+          "text": "security disclosure route",
+          "href": "/security-disclosure"
+        },
+        {
+          "text": "See How It Works →",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "VaultBasis",
+          "href": "/"
+        },
+        {
+          "text": "How It Works",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "Evaluation Boundary",
+          "href": "/#comparison"
+        },
+        {
+          "text": "Local Evidence",
+          "href": "/#security"
+        },
+        {
+          "text": "About VaultBasis",
+          "href": "/about"
+        },
+        {
+          "text": "Verify an Outcome Receipt",
+          "href": "/verifier"
+        },
+        {
+          "text": "Outcome Receipt Specification",
+          "href": "/schemas/receipt-v0.1.json"
+        },
+        {
+          "text": "Verification Test Receipts",
+          "href": "/sample-receipt.json"
+        },
+        {
+          "text": "Scope & Limitations",
+          "href": "/docs/scope_and_limitations_v0.1.html"
+        },
+        {
+          "text": "Trust & Assurance",
+          "href": "/trust-assurance"
+        },
+        {
+          "text": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "text": "Terms of Service",
+          "href": "/terms-of-service"
+        },
+        {
+          "text": "Contact",
+          "href": "/contact"
+        },
+        {
+          "text": "Security Disclosure",
+          "href": "/security-disclosure"
+        },
+        {
+          "text": "Report an Issue",
+          "href": "/contact"
+        }
+      ],
+      "buttons": [
+        "",
+        "Request Design-Partner Access",
+        "×",
+        "Submit Request",
+        "← Return to VaultBasis",
+        "Request Access",
+        "↑ Back to top"
+      ],
+      "horizontalOverflow": false,
+      "build": null,
+      "errors": [],
+      "screenshot": "_terms-of-service-1440.png"
+    },
+    {
+      "route": "/security-disclosure",
+      "width": 1440,
+      "status": 200,
+      "url": "https://vaultbasis.com/security-disclosure",
+      "title": "Security Disclosure — VaultBasis",
+      "headings": [
+        "Security Disclosure",
+        "How to Report",
+        "Coordinated Disclosure",
+        "Scope",
+        "Preview Status",
+        "Request VaultBasis Access"
+      ],
+      "links": [
+        {
+          "text": "VaultBasis",
+          "href": "/"
+        },
+        {
+          "text": "How It Works",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "Trust & Assurance",
+          "href": "/trust-assurance"
+        },
+        {
+          "text": "Resources",
+          "href": "/#resources"
+        },
+        {
+          "text": "About",
+          "href": "/about"
+        },
+        {
+          "text": "Verify an Outcome Receipt ↗",
+          "href": "/verifier"
+        },
+        {
+          "text": "security@vaultbasis.com",
+          "href": "mailto:security@vaultbasis.com"
+        },
+        {
+          "text": "See How It Works →",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "VaultBasis",
+          "href": "/"
+        },
+        {
+          "text": "How It Works",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "Evaluation Boundary",
+          "href": "/#comparison"
+        },
+        {
+          "text": "Local Evidence",
+          "href": "/#security"
+        },
+        {
+          "text": "About VaultBasis",
+          "href": "/about"
+        },
+        {
+          "text": "Verify an Outcome Receipt",
+          "href": "/verifier"
+        },
+        {
+          "text": "Outcome Receipt Specification",
+          "href": "/schemas/receipt-v0.1.json"
+        },
+        {
+          "text": "Verification Test Receipts",
+          "href": "/sample-receipt.json"
+        },
+        {
+          "text": "Scope & Limitations",
+          "href": "/docs/scope_and_limitations_v0.1.html"
+        },
+        {
+          "text": "Trust & Assurance",
+          "href": "/trust-assurance"
+        },
+        {
+          "text": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "text": "Terms of Service",
+          "href": "/terms-of-service"
+        },
+        {
+          "text": "Contact",
+          "href": "/contact"
+        },
+        {
+          "text": "Security Disclosure",
+          "href": "/security-disclosure"
+        },
+        {
+          "text": "Report an Issue",
+          "href": "/contact"
+        }
+      ],
+      "buttons": [
+        "",
+        "Request Design-Partner Access",
+        "×",
+        "Submit Request",
+        "← Return to VaultBasis",
+        "Request Access",
+        "↑ Back to top"
+      ],
+      "horizontalOverflow": false,
+      "build": null,
+      "errors": [],
+      "screenshot": "_security-disclosure-1440.png"
+    },
+    {
+      "route": "/docs/scope_and_limitations_v0.1.html",
+      "width": 1440,
+      "status": 200,
+      "url": "https://vaultbasis.com/docs/scope_and_limitations_v0.1",
+      "title": "VaultBasis Supported Scope & Limitations",
+      "headings": [
+        "VaultBasis Supported Scope & Limitations",
+        "1. Supported Source File Formats",
+        "2. How VaultBasis Evaluates Records",
+        "3. What VaultBasis Does Not Determine",
+        "4. What Is Not Supported",
+        "5. Local Processing & Record Retention"
+      ],
+      "links": [
+        {
+          "text": "← VaultBasis Home",
+          "href": "/"
+        }
+      ],
+      "buttons": [],
+      "horizontalOverflow": false,
+      "build": null,
+      "errors": [],
+      "screenshot": "_docs_scope_and_limitations_v0_1_html-1440.png"
+    },
+    {
+      "route": "/faq",
+      "width": 1440,
+      "status": 200,
+      "url": "https://vaultbasis.com/faq",
+      "title": "FAQ — VaultBasis",
+      "headings": [
+        "FAQ",
+        "Understanding VaultBasis",
+        "Outcomes and Findings",
+        "Outcome Receipt",
+        "Privacy and Security",
+        "Design-Partner Preview",
+        "Request VaultBasis Access"
+      ],
+      "links": [
+        {
+          "text": "VaultBasis",
+          "href": "/"
+        },
+        {
+          "text": "How It Works",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "Trust & Assurance",
+          "href": "/trust-assurance"
+        },
+        {
+          "text": "Resources",
+          "href": "/#resources"
+        },
+        {
+          "text": "About",
+          "href": "/about"
+        },
+        {
+          "text": "Verify an Outcome Receipt ↗",
+          "href": "/verifier"
+        },
+        {
+          "text": "Scope & Limitations",
+          "href": "/docs/scope_and_limitations_v0.1.html"
+        },
+        {
+          "text": "/verifier",
+          "href": "/verifier"
+        },
+        {
+          "text": "Scope & Limitations",
+          "href": "/docs/scope_and_limitations_v0.1.html"
+        },
+        {
+          "text": "Scope & Limitations",
+          "href": "/docs/scope_and_limitations_v0.1.html"
+        },
+        {
+          "text": "/security-disclosure",
+          "href": "/security-disclosure"
+        },
+        {
+          "text": "home page",
+          "href": "/"
+        },
+        {
+          "text": "See How It Works →",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "VaultBasis",
+          "href": "/"
+        },
+        {
+          "text": "How It Works",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "Evaluation Boundary",
+          "href": "/#comparison"
+        },
+        {
+          "text": "Local Evidence",
+          "href": "/#security"
+        },
+        {
+          "text": "About VaultBasis",
+          "href": "/about"
+        },
+        {
+          "text": "Verify an Outcome Receipt",
+          "href": "/verifier"
+        },
+        {
+          "text": "Outcome Receipt Specification",
+          "href": "/schemas/receipt-v0.1.json"
+        },
+        {
+          "text": "Verification Test Receipts",
+          "href": "/sample-receipt.json"
+        },
+        {
+          "text": "Scope & Limitations",
+          "href": "/docs/scope_and_limitations_v0.1.html"
+        },
+        {
+          "text": "Trust & Assurance",
+          "href": "/trust-assurance"
+        },
+        {
+          "text": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "text": "Terms of Service",
+          "href": "/terms-of-service"
+        },
+        {
+          "text": "Contact",
+          "href": "/contact"
+        },
+        {
+          "text": "Security Disclosure",
+          "href": "/security-disclosure"
+        },
+        {
+          "text": "Report an Issue",
+          "href": "/contact"
+        }
+      ],
+      "buttons": [
+        "",
+        "Request Design-Partner Access",
+        "×",
+        "Submit Request",
+        "← Return to VaultBasis",
+        "Request Access",
+        "↑ Back to top"
+      ],
+      "horizontalOverflow": false,
+      "build": null,
+      "errors": [],
+      "screenshot": "_faq-1440.png"
+    },
+    {
+      "route": "/ux-audit-missing-page",
+      "width": 1440,
+      "status": 200,
+      "url": "https://vaultbasis.com/ux-audit-missing-page",
+      "title": "VaultBasis — Independent Reconciliation for Broker & Tax-Ledger Outcomes",
+      "headings": [
+        "Independently Reconcile Broker and Tax-Ledger Outcomes",
+        "Deterministic Reconciliation",
+        "Unresolved Stays Unresolved",
+        "Independently Verifiable Receipt",
+        "How It Works",
+        "Provide Supported Evidence",
+        "Reconcile Independently",
+        "Review the Outcome",
+        "Produce an Outcome Receipt",
+        "Canonical Evaluation Boundary",
+        "Local-First Evidence Processing",
+        "Local Processing",
+        "Local Signing",
+        "Independent Receipt Verification",
+        "Evidence & Verification Resources",
+        "Public Evidence Contract v0.1",
+        "Independent Web Verifier",
+        "Verification Test Receipts",
+        "Scope & Limitations",
+        "Participate in the Design-Partner Preview",
+        "Request VaultBasis Access"
+      ],
+      "links": [
+        {
+          "text": "VaultBasis",
+          "href": "/"
+        },
+        {
+          "text": "How It Works",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "Trust & Assurance",
+          "href": "/trust-assurance"
+        },
+        {
+          "text": "Resources",
+          "href": "/#resources"
+        },
+        {
+          "text": "About",
+          "href": "/about"
+        },
+        {
+          "text": "Verify an Outcome Receipt ↗",
+          "href": "/verifier"
+        },
+        {
+          "text": "Verify an Outcome Receipt",
+          "href": "/verifier"
+        },
+        {
+          "text": "How It Works",
+          "href": "#how-it-works"
+        },
+        {
+          "text": "Evaluation Boundary",
+          "href": "#comparison"
+        },
+        {
+          "text": "Evidence Processing",
+          "href": "#security"
+        },
+        {
+          "text": "Resources",
+          "href": "#resources"
+        },
+        {
+          "text": "View Evidence Schema ↗",
+          "href": "/schemas/receipt-v0.1.json"
+        },
+        {
+          "text": "Open Web Verifier ↗",
+          "href": "/verifier"
+        },
+        {
+          "text": "Valid Sample Receipt ⤓",
+          "href": "/sample-receipt.json"
+        },
+        {
+          "text": "Tampered Receipt ⤓",
+          "href": "/sample-receipt-tampered.json"
+        },
+        {
+          "text": "Scope & Limitations ↗",
+          "href": "/docs/scope_and_limitations_v0.1.html"
+        },
+        {
+          "text": "See How It Works →",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "VaultBasis",
+          "href": "/"
+        },
+        {
+          "text": "How It Works",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "Evaluation Boundary",
+          "href": "/#comparison"
+        },
+        {
+          "text": "Local Evidence",
+          "href": "/#security"
+        },
+        {
+          "text": "About VaultBasis",
+          "href": "/about"
+        },
+        {
+          "text": "Verify an Outcome Receipt",
+          "href": "/verifier"
+        },
+        {
+          "text": "Outcome Receipt Specification",
+          "href": "/schemas/receipt-v0.1.json"
+        },
+        {
+          "text": "Verification Test Receipts",
+          "href": "/sample-receipt.json"
+        },
+        {
+          "text": "Scope & Limitations",
+          "href": "/docs/scope_and_limitations_v0.1.html"
+        },
+        {
+          "text": "Trust & Assurance",
+          "href": "/trust-assurance"
+        },
+        {
+          "text": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "text": "Terms of Service",
+          "href": "/terms-of-service"
+        },
+        {
+          "text": "Contact",
+          "href": "/contact"
+        },
+        {
+          "text": "Security Disclosure",
+          "href": "/security-disclosure"
+        },
+        {
+          "text": "Report an Issue",
+          "href": "/contact"
+        }
+      ],
+      "buttons": [
+        "",
+        "Request Design-Partner Access",
+        "Request Design-Partner Access",
+        "Request Design-Partner Access",
+        "×",
+        "Submit Request",
+        "← Return to VaultBasis",
+        "Request Access",
+        "↑ Back to top"
+      ],
+      "horizontalOverflow": false,
+      "build": "VaultBasis Build: preview | Timestamp: 2026-09-30T14:34:34.015Z -->\n      ",
+      "errors": [],
+      "screenshot": "_ux-audit-missing-page-1440.png"
+    },
+    {
+      "route": "/",
+      "width": 390,
+      "status": 200,
+      "url": "https://vaultbasis.com/",
+      "title": "VaultBasis — Independent Reconciliation for Broker & Tax-Ledger Outcomes",
+      "headings": [
+        "Independently Reconcile Broker and Tax-Ledger Outcomes",
+        "Deterministic Reconciliation",
+        "Unresolved Stays Unresolved",
+        "Independently Verifiable Receipt",
+        "How It Works",
+        "Provide Supported Evidence",
+        "Reconcile Independently",
+        "Review the Outcome",
+        "Produce an Outcome Receipt",
+        "Canonical Evaluation Boundary",
+        "Local-First Evidence Processing",
+        "Local Processing",
+        "Local Signing",
+        "Independent Receipt Verification",
+        "Evidence & Verification Resources",
+        "Public Evidence Contract v0.1",
+        "Independent Web Verifier",
+        "Verification Test Receipts",
+        "Scope & Limitations",
+        "Participate in the Design-Partner Preview",
+        "Request VaultBasis Access"
+      ],
+      "links": [
+        {
+          "text": "VaultBasis",
+          "href": "/"
+        },
+        {
+          "text": "How It Works",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "Trust & Assurance",
+          "href": "/trust-assurance"
+        },
+        {
+          "text": "Resources",
+          "href": "/#resources"
+        },
+        {
+          "text": "About",
+          "href": "/about"
+        },
+        {
+          "text": "Verify an Outcome Receipt ↗",
+          "href": "/verifier"
+        },
+        {
+          "text": "Verify an Outcome Receipt",
+          "href": "/verifier"
+        },
+        {
+          "text": "How It Works",
+          "href": "#how-it-works"
+        },
+        {
+          "text": "Evaluation Boundary",
+          "href": "#comparison"
+        },
+        {
+          "text": "Evidence Processing",
+          "href": "#security"
+        },
+        {
+          "text": "Resources",
+          "href": "#resources"
+        },
+        {
+          "text": "View Evidence Schema ↗",
+          "href": "/schemas/receipt-v0.1.json"
+        },
+        {
+          "text": "Open Web Verifier ↗",
+          "href": "/verifier"
+        },
+        {
+          "text": "Valid Sample Receipt ⤓",
+          "href": "/sample-receipt.json"
+        },
+        {
+          "text": "Tampered Receipt ⤓",
+          "href": "/sample-receipt-tampered.json"
+        },
+        {
+          "text": "Scope & Limitations ↗",
+          "href": "/docs/scope_and_limitations_v0.1.html"
+        },
+        {
+          "text": "See How It Works →",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "VaultBasis",
+          "href": "/"
+        },
+        {
+          "text": "How It Works",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "Evaluation Boundary",
+          "href": "/#comparison"
+        },
+        {
+          "text": "Local Evidence",
+          "href": "/#security"
+        },
+        {
+          "text": "About VaultBasis",
+          "href": "/about"
+        },
+        {
+          "text": "Verify an Outcome Receipt",
+          "href": "/verifier"
+        },
+        {
+          "text": "Outcome Receipt Specification",
+          "href": "/schemas/receipt-v0.1.json"
+        },
+        {
+          "text": "Verification Test Receipts",
+          "href": "/sample-receipt.json"
+        },
+        {
+          "text": "Scope & Limitations",
+          "href": "/docs/scope_and_limitations_v0.1.html"
+        },
+        {
+          "text": "Trust & Assurance",
+          "href": "/trust-assurance"
+        },
+        {
+          "text": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "text": "Terms of Service",
+          "href": "/terms-of-service"
+        },
+        {
+          "text": "Contact",
+          "href": "/contact"
+        },
+        {
+          "text": "Security Disclosure",
+          "href": "/security-disclosure"
+        },
+        {
+          "text": "Report an Issue",
+          "href": "/contact"
+        }
+      ],
+      "buttons": [
+        "",
+        "Request Design-Partner Access",
+        "Request Design-Partner Access",
+        "Request Design-Partner Access",
+        "×",
+        "Submit Request",
+        "← Return to VaultBasis",
+        "Request Access",
+        "↑ Back to top"
+      ],
+      "horizontalOverflow": false,
+      "build": "VaultBasis Build: preview | Timestamp: 2026-09-30T14:34:34.015Z -->\n      ",
+      "errors": [],
+      "screenshot": "home-390.png"
+    },
+    {
+      "route": "/trust-assurance",
+      "width": 390,
+      "status": 200,
+      "url": "https://vaultbasis.com/trust-assurance",
+      "title": "Trust & Assurance — VaultBasis",
+      "headings": [
+        "Trust & Assurance",
+        "Product Assurance",
+        "Deterministic Reconciliation",
+        "Independent Receipt Verification",
+        "Local Evidence Boundary",
+        "Cryptographic Signing",
+        "Security",
+        "Vulnerability Reporting",
+        "Release Integrity",
+        "Known Limitations",
+        "Privacy & Data Handling",
+        "Governance",
+        "Legal",
+        "Request VaultBasis Access"
+      ],
+      "links": [
+        {
+          "text": "VaultBasis",
+          "href": "/"
+        },
+        {
+          "text": "How It Works",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "Trust & Assurance",
+          "href": "/trust-assurance"
+        },
+        {
+          "text": "Resources",
+          "href": "/#resources"
+        },
+        {
+          "text": "About",
+          "href": "/about"
+        },
+        {
+          "text": "Verify an Outcome Receipt ↗",
+          "href": "/verifier"
+        },
+        {
+          "text": "Product Assurance",
+          "href": "#product-assurance"
+        },
+        {
+          "text": "Security",
+          "href": "#security"
+        },
+        {
+          "text": "Privacy & Data Handling",
+          "href": "#privacy"
+        },
+        {
+          "text": "Governance",
+          "href": "#governance"
+        },
+        {
+          "text": "Legal",
+          "href": "#legal"
+        },
+        {
+          "text": "View Evidence Contract ↗",
+          "href": "/schemas/receipt-v0.1.json"
+        },
+        {
+          "text": "Open Web Verifier ↗",
+          "href": "/verifier"
+        },
+        {
+          "text": "Scope & Limitations ↗",
+          "href": "/docs/scope_and_limitations_v0.1.html"
+        },
+        {
+          "text": "Scope & Limitations",
+          "href": "/docs/scope_and_limitations_v0.1.html"
+        },
+        {
+          "text": "Security Disclosure ↗",
+          "href": "/security-disclosure"
+        },
+        {
+          "text": "View Scope & Limitations ↗",
+          "href": "/docs/scope_and_limitations_v0.1.html"
+        },
+        {
+          "text": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "text": "Scope & Limitations",
+          "href": "/docs/scope_and_limitations_v0.1.html"
+        },
+        {
+          "text": "Scope & Limitations ↗",
+          "href": "/docs/scope_and_limitations_v0.1.html"
+        },
+        {
+          "text": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "text": "Terms of Service",
+          "href": "/terms-of-service"
+        },
+        {
+          "text": "See How It Works →",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "VaultBasis",
+          "href": "/"
+        },
+        {
+          "text": "How It Works",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "Evaluation Boundary",
+          "href": "/#comparison"
+        },
+        {
+          "text": "Local Evidence",
+          "href": "/#security"
+        },
+        {
+          "text": "About VaultBasis",
+          "href": "/about"
+        },
+        {
+          "text": "Verify an Outcome Receipt",
+          "href": "/verifier"
+        },
+        {
+          "text": "Outcome Receipt Specification",
+          "href": "/schemas/receipt-v0.1.json"
+        },
+        {
+          "text": "Verification Test Receipts",
+          "href": "/sample-receipt.json"
+        },
+        {
+          "text": "Scope & Limitations",
+          "href": "/docs/scope_and_limitations_v0.1.html"
+        },
+        {
+          "text": "Trust & Assurance",
+          "href": "/trust-assurance"
+        },
+        {
+          "text": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "text": "Terms of Service",
+          "href": "/terms-of-service"
+        },
+        {
+          "text": "Contact",
+          "href": "/contact"
+        },
+        {
+          "text": "Security Disclosure",
+          "href": "/security-disclosure"
+        },
+        {
+          "text": "Report an Issue",
+          "href": "/contact"
+        }
+      ],
+      "buttons": [
+        "",
+        "Request Design-Partner Access",
+        "×",
+        "Submit Request",
+        "← Return to VaultBasis",
+        "Request Access",
+        "↑ Back to top"
+      ],
+      "horizontalOverflow": false,
+      "build": null,
+      "errors": [],
+      "screenshot": "_trust-assurance-390.png"
+    },
+    {
+      "route": "/about",
+      "width": 390,
+      "status": 200,
+      "url": "https://vaultbasis.com/about",
+      "title": "About VaultBasis — Independent Evidence Assurance",
+      "headings": [
+        "Independent Evidence Assurance",
+        "What VaultBasis Is",
+        "Why It Exists",
+        "What VaultBasis Is Not",
+        "The Outcome Receipt",
+        "Preview Status",
+        "Evaluate VaultBasis",
+        "Request VaultBasis Access"
+      ],
+      "links": [
+        {
+          "text": "VaultBasis",
+          "href": "/"
+        },
+        {
+          "text": "How It Works",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "Trust & Assurance",
+          "href": "/trust-assurance"
+        },
+        {
+          "text": "Resources",
+          "href": "/#resources"
+        },
+        {
+          "text": "About",
+          "href": "/about"
+        },
+        {
+          "text": "Verify an Outcome Receipt ↗",
+          "href": "/verifier"
+        },
+        {
+          "text": "Verify an Outcome Receipt ↗",
+          "href": "/verifier"
+        },
+        {
+          "text": "See How It Works →",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "VaultBasis",
+          "href": "/"
+        },
+        {
+          "text": "How It Works",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "Evaluation Boundary",
+          "href": "/#comparison"
+        },
+        {
+          "text": "Local Evidence",
+          "href": "/#security"
+        },
+        {
+          "text": "About VaultBasis",
+          "href": "/about"
+        },
+        {
+          "text": "Verify an Outcome Receipt",
+          "href": "/verifier"
+        },
+        {
+          "text": "Outcome Receipt Specification",
+          "href": "/schemas/receipt-v0.1.json"
+        },
+        {
+          "text": "Verification Test Receipts",
+          "href": "/sample-receipt.json"
+        },
+        {
+          "text": "Scope & Limitations",
+          "href": "/docs/scope_and_limitations_v0.1.html"
+        },
+        {
+          "text": "Trust & Assurance",
+          "href": "/trust-assurance"
+        },
+        {
+          "text": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "text": "Terms of Service",
+          "href": "/terms-of-service"
+        },
+        {
+          "text": "Contact",
+          "href": "/contact"
+        },
+        {
+          "text": "Security Disclosure",
+          "href": "/security-disclosure"
+        },
+        {
+          "text": "Report an Issue",
+          "href": "/contact"
+        }
+      ],
+      "buttons": [
+        "",
+        "Request Design-Partner Access",
+        "Request Design-Partner Access",
+        "×",
+        "Submit Request",
+        "← Return to VaultBasis",
+        "Request Access",
+        "↑ Back to top"
+      ],
+      "horizontalOverflow": false,
+      "build": null,
+      "errors": [],
+      "screenshot": "_about-390.png"
+    },
+    {
+      "route": "/contact",
+      "width": 390,
+      "status": 200,
+      "url": "https://vaultbasis.com/contact",
+      "title": "Contact & Report an Issue — VaultBasis",
+      "headings": [
+        "Contact & Report an Issue",
+        "General Enquiries",
+        "Report an Issue",
+        "Security Concerns",
+        "Request VaultBasis Access"
+      ],
+      "links": [
+        {
+          "text": "VaultBasis",
+          "href": "/"
+        },
+        {
+          "text": "How It Works",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "Trust & Assurance",
+          "href": "/trust-assurance"
+        },
+        {
+          "text": "Resources",
+          "href": "/#resources"
+        },
+        {
+          "text": "About",
+          "href": "/about"
+        },
+        {
+          "text": "Verify an Outcome Receipt ↗",
+          "href": "/verifier"
+        },
+        {
+          "text": "hello@vaultbasis.com",
+          "href": "mailto:hello@vaultbasis.com"
+        },
+        {
+          "text": "hello@vaultbasis.com",
+          "href": "mailto:hello@vaultbasis.com"
+        },
+        {
+          "text": "Security Disclosure route",
+          "href": "/security-disclosure"
+        },
+        {
+          "text": "See How It Works →",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "VaultBasis",
+          "href": "/"
+        },
+        {
+          "text": "How It Works",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "Evaluation Boundary",
+          "href": "/#comparison"
+        },
+        {
+          "text": "Local Evidence",
+          "href": "/#security"
+        },
+        {
+          "text": "About VaultBasis",
+          "href": "/about"
+        },
+        {
+          "text": "Verify an Outcome Receipt",
+          "href": "/verifier"
+        },
+        {
+          "text": "Outcome Receipt Specification",
+          "href": "/schemas/receipt-v0.1.json"
+        },
+        {
+          "text": "Verification Test Receipts",
+          "href": "/sample-receipt.json"
+        },
+        {
+          "text": "Scope & Limitations",
+          "href": "/docs/scope_and_limitations_v0.1.html"
+        },
+        {
+          "text": "Trust & Assurance",
+          "href": "/trust-assurance"
+        },
+        {
+          "text": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "text": "Terms of Service",
+          "href": "/terms-of-service"
+        },
+        {
+          "text": "Contact",
+          "href": "/contact"
+        },
+        {
+          "text": "Security Disclosure",
+          "href": "/security-disclosure"
+        },
+        {
+          "text": "Report an Issue",
+          "href": "/contact"
+        }
+      ],
+      "buttons": [
+        "",
+        "Request Design-Partner Access",
+        "×",
+        "Submit Request",
+        "← Return to VaultBasis",
+        "Request Access",
+        "↑ Back to top"
+      ],
+      "horizontalOverflow": false,
+      "build": null,
+      "errors": [],
+      "screenshot": "_contact-390.png"
+    },
+    {
+      "route": "/verifier-access",
+      "width": 390,
+      "status": 200,
+      "url": "https://vaultbasis.com/verifier-access",
+      "title": "Verifier Access — VaultBasis",
+      "headings": [
+        "Verifier Access",
+        "Request VaultBasis Access"
+      ],
+      "links": [
+        {
+          "text": "VaultBasis",
+          "href": "/"
+        },
+        {
+          "text": "How It Works",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "Trust & Assurance",
+          "href": "/trust-assurance"
+        },
+        {
+          "text": "Resources",
+          "href": "/#resources"
+        },
+        {
+          "text": "About",
+          "href": "/about"
+        },
+        {
+          "text": "Verify an Outcome Receipt ↗",
+          "href": "/verifier"
+        },
+        {
+          "text": "Request design-partner access",
+          "href": "/verifier-access"
+        },
+        {
+          "text": "FAQ",
+          "href": "/faq"
+        },
+        {
+          "text": "Security Disclosure",
+          "href": "/security-disclosure"
+        },
+        {
+          "text": "See How It Works →",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "VaultBasis",
+          "href": "/"
+        },
+        {
+          "text": "How It Works",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "Evaluation Boundary",
+          "href": "/#comparison"
+        },
+        {
+          "text": "Local Evidence",
+          "href": "/#security"
+        },
+        {
+          "text": "About VaultBasis",
+          "href": "/about"
+        },
+        {
+          "text": "Verify an Outcome Receipt",
+          "href": "/verifier"
+        },
+        {
+          "text": "Outcome Receipt Specification",
+          "href": "/schemas/receipt-v0.1.json"
+        },
+        {
+          "text": "Verification Test Receipts",
+          "href": "/sample-receipt.json"
+        },
+        {
+          "text": "Scope & Limitations",
+          "href": "/docs/scope_and_limitations_v0.1.html"
+        },
+        {
+          "text": "Trust & Assurance",
+          "href": "/trust-assurance"
+        },
+        {
+          "text": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "text": "Terms of Service",
+          "href": "/terms-of-service"
+        },
+        {
+          "text": "Contact",
+          "href": "/contact"
+        },
+        {
+          "text": "Security Disclosure",
+          "href": "/security-disclosure"
+        },
+        {
+          "text": "Report an Issue",
+          "href": "/contact"
+        }
+      ],
+      "buttons": [
+        "",
+        "Request Design-Partner Access",
+        "Continue to Verifier",
+        "×",
+        "Submit Request",
+        "← Return to VaultBasis",
+        "Request Access",
+        "↑ Back to top"
+      ],
+      "horizontalOverflow": false,
+      "build": null,
+      "errors": [],
+      "screenshot": "_verifier-access-390.png"
+    },
+    {
+      "route": "/verifier",
+      "width": 390,
+      "status": 200,
+      "url": "https://vaultbasis.com/verifier-access?next=/verifier",
+      "title": "Verifier Access — VaultBasis",
+      "headings": [
+        "Verifier Access",
+        "Request VaultBasis Access"
+      ],
+      "links": [
+        {
+          "text": "VaultBasis",
+          "href": "/"
+        },
+        {
+          "text": "How It Works",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "Trust & Assurance",
+          "href": "/trust-assurance"
+        },
+        {
+          "text": "Resources",
+          "href": "/#resources"
+        },
+        {
+          "text": "About",
+          "href": "/about"
+        },
+        {
+          "text": "Verify an Outcome Receipt ↗",
+          "href": "/verifier"
+        },
+        {
+          "text": "Request design-partner access",
+          "href": "/verifier-access"
+        },
+        {
+          "text": "FAQ",
+          "href": "/faq"
+        },
+        {
+          "text": "Security Disclosure",
+          "href": "/security-disclosure"
+        },
+        {
+          "text": "See How It Works →",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "VaultBasis",
+          "href": "/"
+        },
+        {
+          "text": "How It Works",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "Evaluation Boundary",
+          "href": "/#comparison"
+        },
+        {
+          "text": "Local Evidence",
+          "href": "/#security"
+        },
+        {
+          "text": "About VaultBasis",
+          "href": "/about"
+        },
+        {
+          "text": "Verify an Outcome Receipt",
+          "href": "/verifier"
+        },
+        {
+          "text": "Outcome Receipt Specification",
+          "href": "/schemas/receipt-v0.1.json"
+        },
+        {
+          "text": "Verification Test Receipts",
+          "href": "/sample-receipt.json"
+        },
+        {
+          "text": "Scope & Limitations",
+          "href": "/docs/scope_and_limitations_v0.1.html"
+        },
+        {
+          "text": "Trust & Assurance",
+          "href": "/trust-assurance"
+        },
+        {
+          "text": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "text": "Terms of Service",
+          "href": "/terms-of-service"
+        },
+        {
+          "text": "Contact",
+          "href": "/contact"
+        },
+        {
+          "text": "Security Disclosure",
+          "href": "/security-disclosure"
+        },
+        {
+          "text": "Report an Issue",
+          "href": "/contact"
+        }
+      ],
+      "buttons": [
+        "",
+        "Request Design-Partner Access",
+        "Continue to Verifier",
+        "×",
+        "Submit Request",
+        "← Return to VaultBasis",
+        "Request Access",
+        "↑ Back to top"
+      ],
+      "horizontalOverflow": false,
+      "build": null,
+      "errors": [],
+      "screenshot": "_verifier-390.png"
+    },
+    {
+      "route": "/privacy-policy",
+      "width": 390,
+      "status": 200,
+      "url": "https://vaultbasis.com/privacy-policy",
+      "title": "Privacy Policy — VaultBasis",
+      "headings": [
+        "Privacy Policy",
+        "Overview — Two Distinct Processing Planes",
+        "Section 1 — Web Plane",
+        "1.1 Website Hosting",
+        "1.2 Design-Partner Access Requests",
+        "1.3 Entitlement Provisioning",
+        "1.4 Access Provisioning Communication",
+        "1.5 Support and Disclosure Interactions",
+        "1.6 What the Web Plane Does Not Collect",
+        "Section 2 — Edge Evidence Plane",
+        "2.1 Local Application Processing",
+        "2.2 Local Storage",
+        "2.3 Outcome Receipts",
+        "2.4 Installation Key",
+        "2.5 No Telemetry in Preview",
+        "Section 3 — Data Retention",
+        "Section 4 — Contact",
+        "Section 5 — Changes to This Policy",
+        "Request VaultBasis Access"
+      ],
+      "links": [
+        {
+          "text": "VaultBasis",
+          "href": "/"
+        },
+        {
+          "text": "How It Works",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "Trust & Assurance",
+          "href": "/trust-assurance"
+        },
+        {
+          "text": "Resources",
+          "href": "/#resources"
+        },
+        {
+          "text": "About",
+          "href": "/about"
+        },
+        {
+          "text": "Verify an Outcome Receipt ↗",
+          "href": "/verifier"
+        },
+        {
+          "text": "general enquiries route",
+          "href": "/contact"
+        },
+        {
+          "text": "security disclosure route",
+          "href": "/security-disclosure"
+        },
+        {
+          "text": "See How It Works →",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "VaultBasis",
+          "href": "/"
+        },
+        {
+          "text": "How It Works",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "Evaluation Boundary",
+          "href": "/#comparison"
+        },
+        {
+          "text": "Local Evidence",
+          "href": "/#security"
+        },
+        {
+          "text": "About VaultBasis",
+          "href": "/about"
+        },
+        {
+          "text": "Verify an Outcome Receipt",
+          "href": "/verifier"
+        },
+        {
+          "text": "Outcome Receipt Specification",
+          "href": "/schemas/receipt-v0.1.json"
+        },
+        {
+          "text": "Verification Test Receipts",
+          "href": "/sample-receipt.json"
+        },
+        {
+          "text": "Scope & Limitations",
+          "href": "/docs/scope_and_limitations_v0.1.html"
+        },
+        {
+          "text": "Trust & Assurance",
+          "href": "/trust-assurance"
+        },
+        {
+          "text": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "text": "Terms of Service",
+          "href": "/terms-of-service"
+        },
+        {
+          "text": "Contact",
+          "href": "/contact"
+        },
+        {
+          "text": "Security Disclosure",
+          "href": "/security-disclosure"
+        },
+        {
+          "text": "Report an Issue",
+          "href": "/contact"
+        }
+      ],
+      "buttons": [
+        "",
+        "Request Design-Partner Access",
+        "×",
+        "Submit Request",
+        "← Return to VaultBasis",
+        "Request Access",
+        "↑ Back to top"
+      ],
+      "horizontalOverflow": false,
+      "build": null,
+      "errors": [],
+      "screenshot": "_privacy-policy-390.png"
+    },
+    {
+      "route": "/terms-of-service",
+      "width": 390,
+      "status": 200,
+      "url": "https://vaultbasis.com/terms-of-service",
+      "title": "Terms of Service — VaultBasis",
+      "headings": [
+        "Terms of Service",
+        "1. Scope",
+        "2. Preview Software — No Warranty",
+        "3. What VaultBasis Does and Does Not Do",
+        "4. Design-Partner Obligations",
+        "5. Practitioner Responsibility",
+        "6. Sensitive Information",
+        "7. Limitation of Liability",
+        "8. Changes",
+        "9. Governing Law",
+        "10. Contact",
+        "Request VaultBasis Access"
+      ],
+      "links": [
+        {
+          "text": "VaultBasis",
+          "href": "/"
+        },
+        {
+          "text": "How It Works",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "Trust & Assurance",
+          "href": "/trust-assurance"
+        },
+        {
+          "text": "Resources",
+          "href": "/#resources"
+        },
+        {
+          "text": "About",
+          "href": "/about"
+        },
+        {
+          "text": "Verify an Outcome Receipt ↗",
+          "href": "/verifier"
+        },
+        {
+          "text": "general enquiries route",
+          "href": "/contact"
+        },
+        {
+          "text": "security disclosure route",
+          "href": "/security-disclosure"
+        },
+        {
+          "text": "See How It Works →",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "VaultBasis",
+          "href": "/"
+        },
+        {
+          "text": "How It Works",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "Evaluation Boundary",
+          "href": "/#comparison"
+        },
+        {
+          "text": "Local Evidence",
+          "href": "/#security"
+        },
+        {
+          "text": "About VaultBasis",
+          "href": "/about"
+        },
+        {
+          "text": "Verify an Outcome Receipt",
+          "href": "/verifier"
+        },
+        {
+          "text": "Outcome Receipt Specification",
+          "href": "/schemas/receipt-v0.1.json"
+        },
+        {
+          "text": "Verification Test Receipts",
+          "href": "/sample-receipt.json"
+        },
+        {
+          "text": "Scope & Limitations",
+          "href": "/docs/scope_and_limitations_v0.1.html"
+        },
+        {
+          "text": "Trust & Assurance",
+          "href": "/trust-assurance"
+        },
+        {
+          "text": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "text": "Terms of Service",
+          "href": "/terms-of-service"
+        },
+        {
+          "text": "Contact",
+          "href": "/contact"
+        },
+        {
+          "text": "Security Disclosure",
+          "href": "/security-disclosure"
+        },
+        {
+          "text": "Report an Issue",
+          "href": "/contact"
+        }
+      ],
+      "buttons": [
+        "",
+        "Request Design-Partner Access",
+        "×",
+        "Submit Request",
+        "← Return to VaultBasis",
+        "Request Access",
+        "↑ Back to top"
+      ],
+      "horizontalOverflow": false,
+      "build": null,
+      "errors": [],
+      "screenshot": "_terms-of-service-390.png"
+    },
+    {
+      "route": "/security-disclosure",
+      "width": 390,
+      "status": 200,
+      "url": "https://vaultbasis.com/security-disclosure",
+      "title": "Security Disclosure — VaultBasis",
+      "headings": [
+        "Security Disclosure",
+        "How to Report",
+        "Coordinated Disclosure",
+        "Scope",
+        "Preview Status",
+        "Request VaultBasis Access"
+      ],
+      "links": [
+        {
+          "text": "VaultBasis",
+          "href": "/"
+        },
+        {
+          "text": "How It Works",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "Trust & Assurance",
+          "href": "/trust-assurance"
+        },
+        {
+          "text": "Resources",
+          "href": "/#resources"
+        },
+        {
+          "text": "About",
+          "href": "/about"
+        },
+        {
+          "text": "Verify an Outcome Receipt ↗",
+          "href": "/verifier"
+        },
+        {
+          "text": "security@vaultbasis.com",
+          "href": "mailto:security@vaultbasis.com"
+        },
+        {
+          "text": "See How It Works →",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "VaultBasis",
+          "href": "/"
+        },
+        {
+          "text": "How It Works",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "Evaluation Boundary",
+          "href": "/#comparison"
+        },
+        {
+          "text": "Local Evidence",
+          "href": "/#security"
+        },
+        {
+          "text": "About VaultBasis",
+          "href": "/about"
+        },
+        {
+          "text": "Verify an Outcome Receipt",
+          "href": "/verifier"
+        },
+        {
+          "text": "Outcome Receipt Specification",
+          "href": "/schemas/receipt-v0.1.json"
+        },
+        {
+          "text": "Verification Test Receipts",
+          "href": "/sample-receipt.json"
+        },
+        {
+          "text": "Scope & Limitations",
+          "href": "/docs/scope_and_limitations_v0.1.html"
+        },
+        {
+          "text": "Trust & Assurance",
+          "href": "/trust-assurance"
+        },
+        {
+          "text": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "text": "Terms of Service",
+          "href": "/terms-of-service"
+        },
+        {
+          "text": "Contact",
+          "href": "/contact"
+        },
+        {
+          "text": "Security Disclosure",
+          "href": "/security-disclosure"
+        },
+        {
+          "text": "Report an Issue",
+          "href": "/contact"
+        }
+      ],
+      "buttons": [
+        "",
+        "Request Design-Partner Access",
+        "×",
+        "Submit Request",
+        "← Return to VaultBasis",
+        "Request Access",
+        "↑ Back to top"
+      ],
+      "horizontalOverflow": false,
+      "build": null,
+      "errors": [],
+      "screenshot": "_security-disclosure-390.png"
+    },
+    {
+      "route": "/docs/scope_and_limitations_v0.1.html",
+      "width": 390,
+      "status": 200,
+      "url": "https://vaultbasis.com/docs/scope_and_limitations_v0.1",
+      "title": "VaultBasis Supported Scope & Limitations",
+      "headings": [
+        "VaultBasis Supported Scope & Limitations",
+        "1. Supported Source File Formats",
+        "2. How VaultBasis Evaluates Records",
+        "3. What VaultBasis Does Not Determine",
+        "4. What Is Not Supported",
+        "5. Local Processing & Record Retention"
+      ],
+      "links": [
+        {
+          "text": "← VaultBasis Home",
+          "href": "/"
+        }
+      ],
+      "buttons": [],
+      "horizontalOverflow": false,
+      "build": null,
+      "errors": [],
+      "screenshot": "_docs_scope_and_limitations_v0_1_html-390.png"
+    },
+    {
+      "route": "/faq",
+      "width": 390,
+      "status": 200,
+      "url": "https://vaultbasis.com/faq",
+      "title": "FAQ — VaultBasis",
+      "headings": [
+        "FAQ",
+        "Understanding VaultBasis",
+        "Outcomes and Findings",
+        "Outcome Receipt",
+        "Privacy and Security",
+        "Design-Partner Preview",
+        "Request VaultBasis Access"
+      ],
+      "links": [
+        {
+          "text": "VaultBasis",
+          "href": "/"
+        },
+        {
+          "text": "How It Works",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "Trust & Assurance",
+          "href": "/trust-assurance"
+        },
+        {
+          "text": "Resources",
+          "href": "/#resources"
+        },
+        {
+          "text": "About",
+          "href": "/about"
+        },
+        {
+          "text": "Verify an Outcome Receipt ↗",
+          "href": "/verifier"
+        },
+        {
+          "text": "Scope & Limitations",
+          "href": "/docs/scope_and_limitations_v0.1.html"
+        },
+        {
+          "text": "/verifier",
+          "href": "/verifier"
+        },
+        {
+          "text": "Scope & Limitations",
+          "href": "/docs/scope_and_limitations_v0.1.html"
+        },
+        {
+          "text": "Scope & Limitations",
+          "href": "/docs/scope_and_limitations_v0.1.html"
+        },
+        {
+          "text": "/security-disclosure",
+          "href": "/security-disclosure"
+        },
+        {
+          "text": "home page",
+          "href": "/"
+        },
+        {
+          "text": "See How It Works →",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "VaultBasis",
+          "href": "/"
+        },
+        {
+          "text": "How It Works",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "Evaluation Boundary",
+          "href": "/#comparison"
+        },
+        {
+          "text": "Local Evidence",
+          "href": "/#security"
+        },
+        {
+          "text": "About VaultBasis",
+          "href": "/about"
+        },
+        {
+          "text": "Verify an Outcome Receipt",
+          "href": "/verifier"
+        },
+        {
+          "text": "Outcome Receipt Specification",
+          "href": "/schemas/receipt-v0.1.json"
+        },
+        {
+          "text": "Verification Test Receipts",
+          "href": "/sample-receipt.json"
+        },
+        {
+          "text": "Scope & Limitations",
+          "href": "/docs/scope_and_limitations_v0.1.html"
+        },
+        {
+          "text": "Trust & Assurance",
+          "href": "/trust-assurance"
+        },
+        {
+          "text": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "text": "Terms of Service",
+          "href": "/terms-of-service"
+        },
+        {
+          "text": "Contact",
+          "href": "/contact"
+        },
+        {
+          "text": "Security Disclosure",
+          "href": "/security-disclosure"
+        },
+        {
+          "text": "Report an Issue",
+          "href": "/contact"
+        }
+      ],
+      "buttons": [
+        "",
+        "Request Design-Partner Access",
+        "×",
+        "Submit Request",
+        "← Return to VaultBasis",
+        "Request Access",
+        "↑ Back to top"
+      ],
+      "horizontalOverflow": false,
+      "build": null,
+      "errors": [],
+      "screenshot": "_faq-390.png"
+    },
+    {
+      "route": "/ux-audit-missing-page",
+      "width": 390,
+      "status": 200,
+      "url": "https://vaultbasis.com/ux-audit-missing-page",
+      "title": "VaultBasis — Independent Reconciliation for Broker & Tax-Ledger Outcomes",
+      "headings": [
+        "Independently Reconcile Broker and Tax-Ledger Outcomes",
+        "Deterministic Reconciliation",
+        "Unresolved Stays Unresolved",
+        "Independently Verifiable Receipt",
+        "How It Works",
+        "Provide Supported Evidence",
+        "Reconcile Independently",
+        "Review the Outcome",
+        "Produce an Outcome Receipt",
+        "Canonical Evaluation Boundary",
+        "Local-First Evidence Processing",
+        "Local Processing",
+        "Local Signing",
+        "Independent Receipt Verification",
+        "Evidence & Verification Resources",
+        "Public Evidence Contract v0.1",
+        "Independent Web Verifier",
+        "Verification Test Receipts",
+        "Scope & Limitations",
+        "Participate in the Design-Partner Preview",
+        "Request VaultBasis Access"
+      ],
+      "links": [
+        {
+          "text": "VaultBasis",
+          "href": "/"
+        },
+        {
+          "text": "How It Works",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "Trust & Assurance",
+          "href": "/trust-assurance"
+        },
+        {
+          "text": "Resources",
+          "href": "/#resources"
+        },
+        {
+          "text": "About",
+          "href": "/about"
+        },
+        {
+          "text": "Verify an Outcome Receipt ↗",
+          "href": "/verifier"
+        },
+        {
+          "text": "Verify an Outcome Receipt",
+          "href": "/verifier"
+        },
+        {
+          "text": "How It Works",
+          "href": "#how-it-works"
+        },
+        {
+          "text": "Evaluation Boundary",
+          "href": "#comparison"
+        },
+        {
+          "text": "Evidence Processing",
+          "href": "#security"
+        },
+        {
+          "text": "Resources",
+          "href": "#resources"
+        },
+        {
+          "text": "View Evidence Schema ↗",
+          "href": "/schemas/receipt-v0.1.json"
+        },
+        {
+          "text": "Open Web Verifier ↗",
+          "href": "/verifier"
+        },
+        {
+          "text": "Valid Sample Receipt ⤓",
+          "href": "/sample-receipt.json"
+        },
+        {
+          "text": "Tampered Receipt ⤓",
+          "href": "/sample-receipt-tampered.json"
+        },
+        {
+          "text": "Scope & Limitations ↗",
+          "href": "/docs/scope_and_limitations_v0.1.html"
+        },
+        {
+          "text": "See How It Works →",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "VaultBasis",
+          "href": "/"
+        },
+        {
+          "text": "How It Works",
+          "href": "/#how-it-works"
+        },
+        {
+          "text": "Evaluation Boundary",
+          "href": "/#comparison"
+        },
+        {
+          "text": "Local Evidence",
+          "href": "/#security"
+        },
+        {
+          "text": "About VaultBasis",
+          "href": "/about"
+        },
+        {
+          "text": "Verify an Outcome Receipt",
+          "href": "/verifier"
+        },
+        {
+          "text": "Outcome Receipt Specification",
+          "href": "/schemas/receipt-v0.1.json"
+        },
+        {
+          "text": "Verification Test Receipts",
+          "href": "/sample-receipt.json"
+        },
+        {
+          "text": "Scope & Limitations",
+          "href": "/docs/scope_and_limitations_v0.1.html"
+        },
+        {
+          "text": "Trust & Assurance",
+          "href": "/trust-assurance"
+        },
+        {
+          "text": "Privacy Policy",
+          "href": "/privacy-policy"
+        },
+        {
+          "text": "Terms of Service",
+          "href": "/terms-of-service"
+        },
+        {
+          "text": "Contact",
+          "href": "/contact"
+        },
+        {
+          "text": "Security Disclosure",
+          "href": "/security-disclosure"
+        },
+        {
+          "text": "Report an Issue",
+          "href": "/contact"
+        }
+      ],
+      "buttons": [
+        "",
+        "Request Design-Partner Access",
+        "Request Design-Partner Access",
+        "Request Design-Partner Access",
+        "×",
+        "Submit Request",
+        "← Return to VaultBasis",
+        "Request Access",
+        "↑ Back to top"
+      ],
+      "horizontalOverflow": false,
+      "build": "VaultBasis Build: preview | Timestamp: 2026-09-30T14:34:34.015Z -->\n      ",
+      "errors": [],
+      "screenshot": "_ux-audit-missing-page-390.png"
+    }
+  ]
+}

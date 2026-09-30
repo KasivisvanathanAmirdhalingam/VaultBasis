@@ -1,0 +1,909 @@
+Yes. I would give the new developer a product-evolution + Git-governance briefing, because without it they could easily interpret the repository as “finish MMP-1.1, then add AI.” That is not the architecture.
+The roadmap is a progression from deterministic evidence assurance → practitioner workflow → evidence intelligence → connectivity → firm automation → assurance platform, while the deterministic kernel remains the trust anchor.
+The handover confirms the current branch reality: main and release/mmp-1.1 are at 73a4523; Edge remediation is isolated on fix/mmp11-dist-mac-001; the rejected web presentation work is on fix/mmp11-pres-003; and lab/mmp-2-ai already exists.    Pasted markdown
+You can give the new developer the following.
+VaultBasis — Branching Strategy & MMP Product Roadmap
+1. First understand what VaultBasis is becoming
+VaultBasis is not intended to become another crypto tax calculator.
+The product begins with a narrower proposition:
+A tax system produces an outcome. VaultBasis independently determines what agrees with the supported underlying evidence, what differs, what remains unresolved, and produces a portable Outcome Receipt another party can verify.
+
+The core chain is:
+Source Evidence
+      ↓
+Deterministic Reconciliation
+      ↓
+Agreements / Differences / Unresolved
+      ↓
+Explainable Findings
+      ↓
+Provenance
+      ↓
+Outcome Receipt
+      ↓
+Cryptographic Verification
+
+Everything in later MMPs grows around this.
+The deterministic assurance kernel remains authoritative.
+AI, connectors, workflow automation and enterprise infrastructure surround the kernel rather than replace it.
+2. Product evolution at a glance
+Think of the roadmap this way:
+MMP-1
+PROVE THE ASSURANCE CONCEPT
+        ↓
+MMP-1.1
+MAKE IT PRACTITIONER-GRADE
+        ↓
+MMP-1.5
+MAKE IT A PRACTITIONER WORKFLOW
+        ↓
+MMP-2
+ADD EVIDENCE INTELLIGENCE
+        ↓
+MMP-2.1
+CONNECT THE EVIDENCE ECOSYSTEM
+        ↓
+MMP-2.5
+AUTOMATE FIRM REVIEW OPERATIONS
+        ↓
+MMP-3
+BECOME AN EVIDENCE-ASSURANCE PLATFORM
+
+These are capability boundaries, not arbitrary version numbers.
+3. MMP-1 — Deterministic Evidence Assurance
+Objective
+Prove that VaultBasis can independently reconcile supported evidence and produce a portable, verifiable result.
+Core capabilities
+supported evidence ingestion
+deterministic reconciliation
+MATCHED
+DIFFERENCE
+UNRESOLVED
+Finding Why
+provenance
+Outcome Receipt
+local signing
+independent verification
+Scope & Limitations
+Golden Corpus
+deterministic reproducibility
+
+Fundamental principle
+Missing evidence is never silently converted into certainty.
+UNKNOWN ≠ ZERO
+UNRESOLVED ≠ MATCHED
+
+Status
+Conceptually complete as the foundation.
+Do not casually reopen MMP-1 semantics while implementing later product layers.
+4. MMP-1.1 — Practitioner-Grade Stabilization
+Objective
+Transform the technically functioning MMP-1 into something an uninformed CPA/EA can install, understand, operate and trust without developer assistance.
+This is the current release effort.
+Theme
+Trustworthy productization of the assurance kernel.
+
+Work includes
+native macOS distribution
+native Windows distribution
+practitioner UX
+public website
+Edge UX
+Help
+Quick Start
+offline verifier
+Web Verifier
+access control
+artifact entitlement
+secure distribution
+cross-browser behavior
+cross-device behavior
+WCAG 2.2 AA engineering qualification
+error states
+production qualification
+Associate validation
+CPA validation
+
+MMP-1.1 does NOT include
+AI
+new tax semantics
+new reconciliation algorithms
+billing
+analytics
+CRM
+large connector ecosystem
+firm workflow automation
+MMP-2 functionality
+
+The handover identifies the deterministic modules that must remain protected during this work.    Pasted markdown
+Exit condition
+Not:
+“tests pass.”
+
+Instead:
+An uninformed practitioner can obtain VaultBasis, understand its boundaries, complete the supported workflow, produce an Outcome Receipt, independently verify it and understand what that verification does and does not establish.
+
+5. MMP-1.5 — Practice Workflow Foundation
+This is the first significant product expansion after the current stabilization.
+Objective
+Move VaultBasis from:
+“run a reconciliation”
+
+to:
+“manage the evidence-review lifecycle for a practitioner case.”
+
+This is deliberately before heavy AI.
+Priority capabilities
+Evidence Inbox
+Accept the evidence belonging to a case and classify its processing state:
+RECEIVED
+SUPPORTED
+UNSUPPORTED
+DUPLICATE
+MISSING
+REQUIRES REVIEW
+
+Case Readiness
+Answer:
+What prevents this case from being ready for professional review?
+
+Example:
+Broker evidence             READY
+Tax ledger                  READY
+Acquisition evidence        MISSING
+Unsupported documents       2
+Differences                 17
+Unresolved                  8
+
+Evidence Request List
+Turn unresolved/missing evidence into a structured request list.
+Review Queue
+Instead of forcing practitioners to inspect thousands of records:
+48,327 records
+   ↓
+47,991 agreements
+     218 differences
+      93 unresolved
+      25 unsupported
+   ↓
+336 items requiring attention
+
+Finding Lifecycle
+For example:
+OPEN
+REVIEWED
+EVIDENCE REQUESTED
+EVIDENCE RECEIVED
+RESOLVED
+PROFESSIONAL REVIEW
+
+Human actions never rewrite historical machine evidence.
+Practitioner annotations
+Machine determination and professional commentary remain distinct.
+Workpaper Evidence Bundle
+Export:
+Case Summary
+Evidence Manifest
+Reconciliation Summary
+Findings
+Unresolved Evidence
+Practitioner Notes
+Provenance
+Outcome Receipt
+Verification Instructions
+
+Multi-case workspace
+Eventually:
+CLIENT       READY    DIFFERENCES    UNRESOLVED
+
+Smith        YES           3              0
+Jones        NO            8             17
+ABC LLC      REVIEW        1              4
+
+MMP-1.5 thesis
+Before adding sophisticated AI, create the structured workflow state AI will later operate against.
+6. MMP-2 — Evidence Intelligence
+Objective
+Use AI to remove evidence preparation and review toil without giving AI authority over deterministic assurance outcomes.
+Theme
+AI assists evidence work. Evidence remains authoritative.
+
+This is an architectural boundary, not marketing language.
+AI may
+classify
+extract candidate information
+propose mappings
+explain
+summarize
+retrieve
+prioritize
+draft
+identify potential conflicts
+
+AI may NOT
+change reconciliation outcomes
+silently create missing evidence
+convert UNRESOLVED into MATCHED
+determine tax correctness
+determine legal compliance
+overwrite provenance
+alter signed receipts
+hide uncertainty
+silently perform external actions
+
+Priority MMP-2 capabilities
+1. Intelligent evidence classification
+Mixed documents → proposed evidence categories.
+2. AI-assisted evidence extraction
+PDF/document → candidate structured values + exact provenance.
+3. Smart schema mapping
+Unknown CSV:
+Asset Qty      → quantity ?
+Net Amount     → proceeds ?
+Acquired       → acquisition_date ?
+
+AI proposes.
+Human confirms.
+Confirmed mapping becomes deterministic.
+4. Evidence Gap Assistant
+Explain why something remains unresolved and what evidence might resolve it.
+5. Finding Explanation Assistant
+Translate deterministic findings into concise practitioner language.
+6. Evidence-request drafting
+Draft client requests based on actual unresolved evidence.
+Human approves before sending.
+7. Case summarization
+Summarize verified case state while distinguishing:
+deterministic fact
+unresolved evidence
+practitioner annotation
+AI-generated explanation
+
+8. Evidence conflict detection
+Identify possible contradictions without declaring which source is correct.
+9. Case Q&A
+For example:
+Show disposals where broker proceeds differ from the tax ledger by more than $500.
+
+Prefer deterministic queries underneath whenever possible.
+Architectural invariant
+Create:
+VB-AI-INV-001 — Intelligence Is Subordinate to Evidence
+This must govern MMP-2.
+7. MMP-2.1 — Evidence Connectivity
+Objective
+Reduce the practitioner's burden of manually assembling evidence from fragmented systems.
+Theme
+Bring evidence to the assurance boundary safely.
+
+Potential capabilities:
+tax-ledger adapters
+broker adapters
+exchange adapters
+1099-DA profiles
+cloud-document import
+tax-software export adapters
+reusable firm mappings
+connector health/versioning
+source lineage
+controlled email/document intake later
+
+Architecture:
+External System
+      ↓
+Connector / Adapter
+      ↓
+Canonical Evidence Boundary
+      ↓
+Validation
+      ↓
+Deterministic Assurance Kernel
+
+Never:
+External API
+      ↓
+LLM
+      ↓
+Tax conclusion
+
+Connectors increase evidence acquisition.
+They do not acquire authority over the assurance kernel.
+8. MMP-2.5 — Firm Review Automation
+Objective
+Move practitioner attention only to cases and evidence requiring professional attention.
+Theme
+Exception-driven professional review.
+
+Capabilities can include:
+Firm review queue
+2,810 cases
+
+1,934 ready
+491 waiting evidence
+272 practitioner review
+113 significant exceptions
+
+Maker/reviewer workflow
+Preparer
+   ↓
+Reviewer
+   ↓
+Partner / professional approval
+
+Evidence-request workflow
+UNRESOLVED
+   ↓
+request drafted
+   ↓
+practitioner approves
+   ↓
+client responds
+   ↓
+evidence arrives
+   ↓
+deterministic reevaluation
+
+Change-impact analysis
+This could be especially valuable.
+Instead of reviewing everything again:
+New evidence received
+
+14 findings changed
+3 unresolved items resolved
+2 new differences
+461 findings unchanged
+
+Reviewer Delta View
+Show exactly what changed since previous review.
+Firm workflow controls
+For example:
+unsupported evidence
+→ mandatory review
+
+difference above firm threshold
+→ senior review
+
+unresolved basis
+→ cannot mark evidence-complete
+
+These are firm workflow controls, not tax-law determinations.
+Operational analytics
+Eventually:
+case cycle time
+unresolved aging
+evidence-request turnaround
+review bottlenecks
+
+Avoid taxpayer behavioral analytics.
+9. MMP-3 — Evidence Assurance Platform
+Objective
+Generalize VaultBasis into an independent assurance/control layer between evidence-producing systems, AI, professional judgment and downstream systems.
+Theme
+Evidence infrastructure for professional decision workflows.
+
+Architecture:
+                    SOURCE SYSTEMS
+                          │
+                          ▼
+                 Evidence Acquisition
+                          │
+                          ▼
+                Canonical Evidence Layer
+                          │
+                ┌─────────┴───────────┐
+                ▼                     ▼
+       Deterministic Kernel     Intelligence Plane
+                │                     │
+                │              classify/extract/
+                │              explain/retrieve
+                │                     │
+                └─────────┬───────────┘
+                          ▼
+                    Review Workflow
+                          │
+                          ▼
+                Professional Judgment
+                          │
+                          ▼
+                 Signed Evidence Record
+                          │
+              ┌───────────┼───────────┐
+              ▼           ▼           ▼
+          Tax System   Workpaper   Assurance/
+                                   Verification
+
+Potential capabilities:
+Evidence Assurance API
+portable Evidence Graph
+firm policy/control engine
+Assurance Receipt SDK
+enterprise identity/RBAC
+tamper-evident review history
+enterprise connector framework
+private-cloud / OCI deployment
+firm-wide controls
+additional assurance domains
+AI-output evidence assurance
+external verifier ecosystem
+
+This is where Docker/OCI, IaC/Terraform and larger enterprise deployment architecture become much more relevant.
+They should not be pulled backward into MMP-1.1 without a concrete requirement.
+10. Branching strategy
+The branch strategy exists to prevent these roadmap stages from contaminating one another.
+Think of branches as qualification boundaries, not developer workspaces.
+main
+Meaning
+Integrated accepted product truth.
+
+main should not mean:
+newest code.
+
+It should mean:
+code accepted through the applicable qualification process.
+
+Current historical baseline:
+main
+└── 73a4523
+
+per the outgoing handover.    Pasted markdown
+Do not immediately “clean up” main when taking over.
+First establish repository truth.
+11. release/mmp-1.1
+This is the stabilization/release line for the current product.
+Purpose:
+MMP-1 assurance kernel
++
+MMP-1.1 distribution/security/UX stabilization
+
+Only changes required to qualify MMP-1.1 belong here.
+Not:
+AI
+MMP-1.5 workflows
+experimental connectors
+future architecture
+speculative refactoring
+
+The outgoing handover records release/mmp-1.1 at the same 73a4523 baseline.    Pasted markdown
+12. Bounded fix branches
+Fix branches originate from the relevant release baseline.
+Pattern:
+release/mmp-1.1
+       │
+       ├── fix/mmp11-ux-001
+       ├── fix/mmp11-dist-mac-001
+       ├── fix/mmp11-sec-002
+       └── fix/mmp11-a11y-001
+
+A fix branch should correspond to a bounded problem.
+For example, the handover records:
+fix/mmp11-dist-mac-001
+= 83d78db
+
+as the Edge remediation candidate.    Pasted markdown
+Do not mix unrelated website redesign, AI experiments and distribution fixes into that branch.
+13. What to do with rejected branches
+The rejected presentation branch:
+fix/mmp11-pres-003
+= 586a83c
+
+is historical evidence.
+It was rejected.
+It was not production-qualified.
+It should not be merged simply because some code inside it looks useful.    Pasted markdown
+If useful ideas/components exist there, the new developer should:
+inspect
+understand
+select intentionally
+reimplement/cherry-pick only if justified
+requalify
+
+Do not resurrect the branch wholesale.
+14. MMP-1.5 branch
+Once MMP-1.1 reaches the appropriate stable baseline, create a dedicated development line such as:
+develop/mmp-1.5
+
+or, once stabilization becomes formal:
+release/mmp-1.5
+
+Recommended lifecycle:
+qualified main
+     ↓
+develop/mmp-1.5
+     ↓
+feature/mmp15-evidence-inbox
+feature/mmp15-readiness
+feature/mmp15-review-queue
+feature/mmp15-workpaper
+     ↓
+integration qualification
+     ↓
+release/mmp-1.5
+     ↓
+main
+
+Do not build MMP-1.5 directly on the active MMP-1.1 release branch.
+15. MMP-2 experimental branch
+The repository already has:
+lab/mmp-2-ai
+
+according to the handover.    Pasted markdown
+This branch has a special meaning.
+It is a laboratory, not a release line.
+Allowed:
+AI experiments
+model evaluation
+evidence classification prototypes
+schema mapping prototypes
+RAG experiments
+prompt experiments
+local model tests
+AI safety/invariant tests
+cost/latency experiments
+
+Not allowed:
+casually merging experimental AI into the deterministic kernel.
+
+Experiments can fail freely here without destabilizing MMP-1.1.
+16. Future MMP branches
+Eventually:
+develop/mmp-2
+release/mmp-2
+
+develop/mmp-2.1
+release/mmp-2.1
+
+develop/mmp-2.5
+release/mmp-2.5
+
+develop/mmp-3
+release/mmp-3
+
+Do not create all of them now just because they appear on the roadmap.
+Create a branch when real implementation begins.
+The roadmap may be years ahead of the Git branch graph.
+That's healthy.
+17. Feature branch naming
+Use bounded names:
+feature/mmp15-evidence-inbox
+feature/mmp15-case-readiness
+feature/mmp15-review-queue
+
+feature/mmp2-evidence-classifier
+feature/mmp2-schema-mapping
+feature/mmp2-gap-assistant
+
+feature/mmp21-koinly-adapter
+
+feature/mmp25-delta-review
+feature/mmp25-review-routing
+
+Bug fixes:
+fix/mmp11-access-email
+fix/mmp11-web-nav
+fix/mmp11-edge-help
+
+Security:
+fix/sec002-entitlement
+fix/sec003-public-base-url
+
+Avoid:
+fix-stuff
+new-ui
+final-fix
+final-final
+cleanup
+misc
+
+because six months later they convey no governance meaning.
+18. Promotion model
+The expected progression is:
+FEATURE / FIX BRANCH
+        ↓
+automated validation
+        ↓
+human validation where required
+        ↓
+release branch
+        ↓
+release qualification
+        ↓
+main
+
+For user-facing releases:
+SOURCE SHA
+    ↓
+CI RUN
+    ↓
+ARTIFACT IDENTITY
+    ↓
+PRE-PRODUCTION DEPLOYMENT
+    ↓
+AUTOMATED QUALIFICATION
+    ↓
+HUMAN UX / SECURITY / DISTRIBUTION QUALIFICATION
+    ↓
+QUALIFIED CANDIDATE
+    ↓
+PRODUCTION PROMOTION
+    ↓
+PRODUCTION SMOKE
+
+Do not replace this with:
+push to main
+→ Vercel deploys
+→ inspect production
+→ fix production
+
+Production must not be the first meaningful runtime test.
+19. Tags
+Tags should identify meaningful qualified states, not every build attempt.
+For example:
+vaultbasis-mmp1-rc1
+vaultbasis-mmp1-rc2
+
+already represent historical release identities.
+Future pattern might become:
+vaultbasis-mmp1.1-rc1
+vaultbasis-mmp1.1
+vaultbasis-mmp1.5-rc1
+vaultbasis-mmp1.5
+
+But only after qualification.
+Never tag something merely because:
+CI is green.
+
+20. Artifact identity is independent of branch names
+This is essential.
+Never say:
+“Use the latest main build.”
+
+A distributable artifact is identified by something like:
+MMP
+Source SHA
+CI run ID
+Platform
+Architecture
+Artifact SHA-256
+Qualification state
+
+Example conceptually:
+MMP-1.1
+83d78db...
+CI #...
+macOS
+arm64
+SHA256: ...
+BUILD_VERIFIED
+
+Then later:
+DISTRIBUTION_QUALIFIED
+
+after actual qualification.
+Branch names move.
+Artifact identities do not.
+21. Qualification state is not Git state
+A commit can be:
+committed
+pushed
+CI green
+
+and still be:
+NOT QUALIFIED
+
+Likewise:
+main
+
+does not automatically mean:
+production verified
+
+Use explicit states.
+I recommend:
+IMPLEMENTED
+
+AUTOMATED_VALIDATION_PASS
+
+BUILD_VERIFIED
+
+PREPROD_DEPLOYED
+
+PREPROD_QUALIFIED
+
+DISTRIBUTION_QUALIFIED
+
+PRODUCTION_PROMOTED
+
+PRODUCTION_VERIFIED
+
+PRACTITIONER_QUALIFIED
+
+Not every component needs every state.
+But never collapse them into generic PASS.
+22. MMPs are evidence gates, not just feature releases
+The developer should understand this subtle point.
+We do not advance from MMP-1.1 to MMP-1.5 merely because development finished.
+Each MMP answers a business hypothesis.
+MMP-1
+Can deterministic independent evidence assurance work?
+
+MMP-1.1
+Can a practitioner actually consume it safely and professionally?
+
+MMP-1.5
+Does evidence workflow management materially reduce practitioner work?
+
+MMP-2
+Can intelligence remove evidence toil while practitioners still trust the result?
+
+MMP-2.1
+Does direct evidence connectivity materially reduce case preparation friction?
+
+MMP-2.5
+Can VaultBasis materially reduce firm-wide review effort?
+
+MMP-3
+Can the assurance model generalize into infrastructure used across systems/workflows?
+
+Features should exist to answer those questions.
+23. Practitioner evidence determines roadmap promotion
+This means MMP-1.5 should not become a giant backlog blindly implemented before CPAs touch MMP-1.1.
+For example, CPA interviews may reveal:
+Evidence Readiness
+>>>>>>>>>
+AI explanations
+
+Then readiness moves forward.
+Or they may say:
+Delta Review
+>>>>>>>>>
+Multi-case dashboard
+
+Then MMP-2.5 planning changes.
+The roadmap provides direction.
+Practitioner evidence determines prioritization.
+24. Parallel work is allowed
+The new developer does not need to interpret this roadmap sequentially as:
+Nobody can think about MMP-2 until MMP-1.1 is finished.
+
+Parallel work is fine if isolation is preserved.
+For example:
+TRACK A
+MMP-1.1 UX/release qualification
+
+TRACK B
+MMP-1.5 product design/task ledger
+
+TRACK C
+lab/mmp-2-ai research/prototypes
+
+TRACK D
+MMP-2.1 connector research
+
+But:
+TRACK C
+        ✗
+release/mmp-1.1
+
+Experimental code must not leak into the release.
+25. The protected architecture across every MMP
+The most important long-term architectural rule is:
+                  ┌──────────────────────┐
+                  │ Intelligence / AI    │
+                  └──────────┬───────────┘
+                             │ proposals
+                             ▼
+Evidence → Validation → DETERMINISTIC KERNEL → Outcome
+                             │
+                             ▼
+                         Provenance
+                             │
+                             ▼
+                     Outcome Receipt
+                             │
+                             ▼
+                        Verification
+
+Not:
+Evidence
+   ↓
+AI decides what happened
+   ↓
+Receipt
+
+The second architecture destroys VaultBasis's differentiator.
+26. Think in three product planes
+This will help the developer enormously.
+Assurance Plane
+canonicalization
+reconciliation
+findings
+provenance
+receipt
+signing
+verification
+
+Highest change control.
+Experience / Workflow Plane
+Cases
+Evidence Inbox
+Review Queue
+Help
+Web
+Edge
+Access
+Workpapers
+Practitioner workflows
+
+Can evolve much faster.
+Intelligence / Integration Plane
+AI
+connectors
+extraction
+classification
+schema mapping
+automation
+
+Must never silently override Assurance Plane truth.
+This separation should survive MMP-3.
+27. What the new developer should do immediately
+Do not create every future branch.
+Do this:
+1. Verify repository truth from the handover.
+2. Preserve main @ 73a4523.
+3. Preserve release/mmp-1.1 baseline.
+4. Inspect 83d78db Edge remediation.
+5. Treat 586a83c as rejected evidence.
+6. Establish the new bounded MMP-1.1 UX branch.
+7. Complete current UX/NFR qualification work there.
+8. Keep lab/mmp-2-ai isolated.
+9. Create the roadmap/task-ledger documents.
+10. Do not start broad MMP-1.5/MMP-2 implementation until their architecture/tasks are approved.
+
+And before creating/changing branches, verify whether remote state has changed since the outgoing handover. The handover is a snapshot, not an excuse to overwrite newer Git truth.
+28. Roadmap documents to establish
+The handover says the future MMP ledgers were not actually created.    Pasted markdown
+So create:
+docs/roadmap/
+    VAULTBASIS_PRODUCT_ROADMAP.md
+
+    MMP15_TASK_LEDGER.md
+    MMP2_TASK_LEDGER.md
+    MMP21_TASK_LEDGER.md
+    MMP25_TASK_LEDGER.md
+    MMP3_TASK_LEDGER.md
+
+The top-level roadmap explains why.
+The task ledgers explain what and evidence required.
+Every future feature entry should have:
+Task ID
+MMP
+Problem
+Practitioner Job-to-be-Done
+Feature
+Expected Value
+Priority
+Deterministic / AI / Hybrid
+Inputs
+Outputs
+Human Judgment Boundary
+Dependencies
+Security / Privacy Impact
+Acceptance Criteria
+Evidence Required
+Status
+Risks
+
+Do not turn roadmap ideas directly into code.
+29. Final mental model for the developer
+If the developer remembers only this, it is enough:
+MMP-1 built the trust anchor.
+MMP-1.1 makes the trust anchor usable.
+MMP-1.5 builds practitioner workflow around it.
+MMP-2 adds intelligence around it.
+MMP-2.1 brings evidence into it.
+MMP-2.5 orchestrates professional review around it.
+MMP-3 turns it into an assurance platform.
+
+And:
+main is accepted truth, release branches are controlled qualification lines, fix/feature branches are bounded changes, and lab/mmp-2-ai is explicitly allowed to experiment without becoming product truth.
+
+The one thing the new developer must never do is confuse newer with more qualified. That confusion contributed heavily to the release problems we've just spent time unwinding.

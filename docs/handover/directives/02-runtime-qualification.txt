@@ -1,0 +1,671 @@
+Yes. The handover is strong on repository state, release/security boundaries, and known defects, but it does not yet define a sufficiently rigorous non-functional qualification contract for the new developer.
+That matters because the next failure mode could easily be: “works on my Mac/Chrome at 1440px, therefore finished.” We should prevent that now.
+The handover itself says public-web production qualification and human WCAG qualification remain pending, while the Mac and Windows distributions are also not yet qualified.    Pasted markdown It also shows that the product actually spans several distinct surfaces—public web, gated Web Verifier, local Edge dashboard, offline verifier, Vercel APIs, native Mac/Windows packages—so one generic “responsive/browser tested” checkbox is insufficient.    Pasted markdown    Pasted markdown
+I would therefore give the new developer the following additional controlling directive before implementation starts.
+VB-NFR-001 — Enterprise Experience & Runtime Qualification Contract
+1. Objective
+VaultBasis is intended for professional practitioners operating in high-trust and regulated workflows.
+Therefore a feature is not complete merely because:
+the code builds
+the page renders
+unit tests pass
+Chrome desktop works
+the happy path works
+or localhost looks correct
+
+A practitioner-facing capability is complete only when its functional and applicable non-functional requirements are demonstrated at the actual user boundary.
+This directive applies to:
+Public Website
+Trust Center
+Request Access
+Web Verifier
+Artifact Download
+VaultBasis Edge
+Offline Verifier
+Help / documentation surfaces
+
+It does not authorize changes to the deterministic assurance kernel identified in the handover. The protected modules include reconciliation, canonicalization, signing, verification, schemas, parsers and Golden Corpus/test vectors.    Pasted markdown
+2. Establish a supported-environment matrix
+Do not say “cross-browser compatible.”
+Define exactly what VaultBasis supports.
+For the public website / Trust Center / Request Access / Web Verifier, I recommend this MMP-1.1 qualification baseline:
+Environment	Required
+Chrome desktop — current stable	PASS
+Edge desktop — current stable	PASS
+Safari macOS — current stable	PASS
+Firefox desktop — current stable	PASS
+Safari iPhone	PASS
+Chrome Android	PASS
+Desktop 1920×1080	PASS
+Desktop 1440×900	PASS
+Laptop 1280×800	PASS
+Tablet ~768px	PASS
+Mobile 390px	PASS
+Mobile 320px reflow	PASS
+
+
+Do not attempt to support every historical browser.
+Publish a bounded support policy instead.
+For Edge native application, the handover already establishes the Mac package as arm64 with minimum macOS 14 and Windows as a separate x64 build path.    Pasted markdown
+Therefore keep desktop qualification separately bounded:
+macOS 14+ / Apple Silicon
+Windows x64 / declared supported Windows versions
+
+Do not claim Intel Mac support until there is an actual qualified Intel artifact.
+3. Responsive design must be semantic, not merely non-overlapping
+At every supported viewport verify:
+- no horizontal page scrolling;
+- no clipped text;
+- no truncated CTA;
+- no overlapping controls;
+- no footer collision;
+- no modal outside viewport;
+- no hidden required action;
+- no microscopic text;
+- no broken tables;
+- no cards producing ridiculous whitespace;
+- no navigation wrapping unpredictably;
+- no floating Back-to-Top covering content;
+- no inaccessible mobile menu;
+- no layout shift that changes interaction meaning.
+More importantly:
+Information hierarchy must survive responsive transformation.
+
+Desktop:
+Primary message
+Supporting explanation
+Primary CTA
+Secondary CTA
+
+must not become on mobile:
+secondary CTA
+random paragraph
+primary CTA
+navigation fragment
+
+because CSS reordered something.
+Test meaning, not screenshots alone.
+4. Cross-browser functional equivalence
+The same business journey must behave equivalently across supported browsers.
+For example:
+Homepage
+→ Request Access
+→ complete form
+→ validation
+→ submit
+→ success/error state
+
+and:
+Verifier
+→ select/drop receipt
+→ verify
+→ result
+→ explanation
+
+must behave consistently.
+Pay particular attention to:
+- file picker;
+- drag/drop;
+- downloads;
+- WebCrypto;
+- Blob handling;
+- clipboard;
+- modal focus;
+- cookies;
+- redirects;
+- session expiry;
+- SameSite cookie behavior;
+- browser back/forward;
+- external links;
+- JSON downloads;
+- responsive navigation.
+The Web Verifier is especially important because it is session-gated and its server-side access path is materially different from static marketing pages.    Pasted markdown
+5. Accessibility becomes a formal qualification gate
+Create:
+MMP11-A11Y-001 — WCAG 2.2 AA Engineering Qualification
+Do not market “ADA compliant” based solely on engineering tests.
+The engineering target is WCAG 2.2 Level AA.
+Automated testing should cover the entire public experience and Edge UI where applicable.
+Manual testing must include:
+Keyboard-only
+Tab, Shift+Tab, Enter, Space, Escape, arrow-key behavior where applicable.
+Screen reader
+At minimum VoiceOver + Safari on macOS for this release, with another platform combination added as practical.
+Visual
+Contrast, focus indicators, zoom, reflow, text spacing, non-text contrast.
+Semantic
+Landmarks, headings, labels, status messages, errors, tables, dialogs, navigation.
+Modal acceptance is particularly strict
+The Request Access modal must:
+move focus into dialog
+announce dialog
+have accessible title
+trap focus appropriately
+support Escape
+provide explicit close control
+restore focus to invoking button
+associate labels/errors programmatically
+announce submission state
+announce success/failure
+
+A modal that merely “looks good” fails.
+The handover confirms that the access journey is currently incomplete beyond appearance, including the non-production Ethereal email path.    Pasted markdown
+6. Color and readability contract
+The previous Edge qualification already failed on muted-text contrast.    Pasted markdown
+Therefore create design tokens rather than fixing individual gray values.
+At minimum:
+--text-primary
+--text-secondary
+--text-muted
+--surface
+--surface-secondary
+--border
+--focus
+--interactive
+--interactive-hover
+--success
+--warning
+--error
+
+No arbitrary per-page grays.
+Verify WCAG contrast programmatically where possible.
+Do not use low contrast as a way to create “premium subtlety.”
+For assurance software, readability wins.
+7. Typography and density contract
+One typography system across:
+Marketing
+Trust
+Verifier
+Edge
+Help
+Access
+
+Define:
+Display
+H1
+H2
+H3
+Body
+Small
+Label
+Code/data
+
+and use them consistently.
+Avoid giant marketing H1s beside tiny technical text.
+Avoid excessive cardification.
+Avoid enormous vertical gaps.
+Avoid filling the viewport with legal text.
+The product should feel calm and dense enough for professional work, not sparse SaaS decoration and not developer tooling.
+8. Navigation contract
+This deserves its own release invariant.
+UX-NAV-INV-001
+Every visible interactive element must have exactly one intentional outcome.
+Classify every link/action:
+IN_PAGE
+PUBLIC_PAGE
+AUTHENTICATED_WEB_CAPABILITY
+EDGE_LOCAL
+PACKAGED_RESOURCE
+EXTERNAL
+DOWNLOAD
+MODAL_ACTION
+
+Automated tests should reject:
+javascript:
+#
+empty href
+unknown relative route
+raw .md destination
+unintended localhost URL
+framework 404
+unqualified artifact URL
+stale RC URL
+dead fragment
+missing anchor target
+
+The handover already documents exactly how accidental Edge-relative links caused /faq, /contact, /security-disclosure and verifier failures.    Pasted markdown
+Do not allow that class of defect to return.
+9. Back/forward/deep-link/reload behavior
+This is often missed.
+Test:
+direct URL entry
+browser refresh
+Back
+Forward
+new tab
+open external link
+deep-link to anchor
+deep-link to gated verifier
+expired session
+revoked session
+
+A page is not qualified if it only works when reached through the homepage.
+10. Error-state quality
+No practitioner should ever see:
+{"detail":"Not Found"}
+
+a stack trace,
+raw exception,
+blank white page,
+serverless-function error,
+unformatted JSON,
+or indefinite spinner.
+Create designed states for:
+404
+403
+401/session expired
+429/rate limited
+500
+503
+network unavailable
+email/provisioning failure
+invalid receipt
+unsupported receipt
+expired access
+revoked access
+artifact unavailable
+unsupported platform
+
+Each must answer:
+What happened?
+
+Is my data safe?
+
+What can I do next?
+
+Do not expose implementation details.
+11. Loading and latency UX
+Every asynchronous action needs:
+idle
+working
+success
+failure
+retry/recovery
+
+No double submission.
+Disable or otherwise protect repeated destructive/duplicate actions while pending.
+Request Access must not appear frozen while provisioning.
+Verifier must not appear frozen while parsing/validating.
+Edge reconciliation should clearly communicate operation state without inventing progress percentages.
+12. Performance budget
+Do not overengineer performance infrastructure yet, but establish budgets.
+For the public site:
+- avoid unnecessarily large JS;
+- optimize logo/SVG/images;
+- avoid render-blocking third-party dependencies;
+- minimize layout shift;
+- avoid needless fonts;
+- no marketing analytics added without explicit authorization;
+- no dependency added solely for a trivial UI effect.
+Track Core Web Vitals during pre-production qualification.
+The goal is not a synthetic score of 100.
+The goal is fast, stable, immediate-feeling professional interaction.
+13. Network-degradation behavior
+Test at least:
+normal network
+slow network
+temporarily offline
+request timeout
+API 500
+API 503
+
+The public informational content should degrade gracefully.
+Edge's local workflow must not unexpectedly depend on public internet resources.
+This is particularly important because the handover records that the Edge remediation removed a Google Fonts CDN dependency from the new offline verifier.    Pasted markdown
+Make that an invariant:
+EDGE-OFFLINE-INV-001
+All functionality declared offline/local must remain usable with external network connectivity disabled.
+
+14. Privacy by interface
+A privacy architecture can be undermined by the UI.
+For every form/action ask:
+What information is collected?
+Why?
+Where is it sent?
+How long is it needed?
+What does the practitioner reasonably believe is happening?
+
+Never encourage uploading taxpayer evidence to:
+Contact
+Support
+Request Access
+Web marketing forms
+
+unless that becomes an explicitly designed and secured workflow in a later release.
+The UI should make the separation between:
+Local Evidence Plane
+Web/Access Plane
+Distribution Plane
+
+understandable without forcing the practitioner to learn architecture terminology.
+15. Security UX
+Security should not produce confusing UX.
+Test:
+anonymous verifier access
+valid session
+invalid session
+expired session
+revoked session
+valid entitlement
+invalid entitlement
+expired entitlement
+wrong artifact entitlement
+unsupported platform
+
+And ensure failure is fail-closed but comprehensible.
+Do not expose whether a specific email/account/token exists through overly specific authentication errors.
+The handover confirms SEC-002 and SEC-003 are implemented but not yet production-verified, so UI work must not accidentally weaken those boundaries.    Pasted markdown
+16. Installation and native desktop UX
+For Mac:
+Download
+→ ZIP
+→ extract
+→ identify VaultBasis.app
+→ Gatekeeper handling
+→ launch
+→ workspace appears
+→ sample workflow
+→ quit
+→ relaunch
+
+For Windows:
+Download
+→ extract/install
+→ launch
+→ security prompt if applicable
+→ workspace
+→ sample workflow
+→ quit
+→ relaunch
+
+The user must not need:
+Terminal
+PowerShell
+Python
+Docker
+chmod
+xattr
+manual server launch
+repository checkout
+
+The handover already requires a recipient-path Mac qualification and explicitly identifies that this remains human qualification rather than merely an automated build test.    Pasted markdown
+Keep that distinction.
+17. State persistence
+Native Edge qualification must test:
+create case
+quit normally
+relaunch
+case remains
+
+generate receipt
+quit
+relaunch
+receipt remains accessible as intended
+
+unexpected close
+relaunch
+no corruption
+
+multiple cases
+correct case opens
+
+failed operation
+no partial/corrupt state
+
+Your earlier observation that persisted cases survived is valuable. Preserve that behavior.
+18. Data-scale UX
+The engine already has bounded supported inputs. The UI must remain usable near those boundaries.
+Test:
+small sample
+normal practitioner case
+large supported file
+near supported row limit
+near supported file-size limit
+unsupported oversized input
+
+Don't just measure computation.
+Observe:
+- responsiveness;
+- useful progress state;
+- error clarity;
+- browser/app memory behavior;
+- whether user can accidentally repeat the action;
+- whether UI freezes.
+Do not expand the engine's supported limits as part of this task.
+19. No external dependency surprise
+Maintain an inventory of runtime third-party dependencies.
+For Edge particularly:
+If the practitioner disconnects Wi-Fi, every capability advertised as local/offline must continue to function.
+
+No:
+Google Fonts
+remote CSS
+CDN JavaScript
+analytics
+remote icon library
+telemetry
+remote verifier dependency masquerading as offline verification
+
+unless specifically declared as a separate online capability.
+20. Accessibility and UX of generated artifacts
+Don't stop testing at screens.
+Review:
+Outcome Receipt
+Evidence Bundle
+downloaded JSON
+Quick Start
+Scope & Limitations
+other practitioner documentation
+
+for naming, discoverability and understandable presentation.
+Raw JSON may appropriately remain machine-readable, but the user needs an obvious human pathway for understanding what it represents.
+21. Content quality becomes an NFR
+Add a practitioner-language lint/invariant.
+No practitioner-facing production surface should expose terms such as:
+RC1
+RC2
+RC3
+MMP
+BUILD_VERIFIED
+UAT
+P0/P1/P2
+localhost
+FastAPI
+Vercel Blob
+PyInstaller
+CI candidate
+internal task IDs
+
+unless the context specifically requires technical documentation.
+The interface should speak in practitioner concepts:
+Case
+Evidence
+Finding
+Agreement
+Difference
+Unresolved
+Outcome Receipt
+Verification
+Help
+
+22. Browser console and network cleanliness
+For every qualified browser journey:
+0 uncaught JavaScript errors
+0 unexplained console errors
+0 failed required resources
+0 unexpected 404s
+0 mixed-content requests
+0 accidental third-party requests
+0 secrets/tokens in console
+0 taxpayer evidence in logs
+
+Warnings must be reviewed rather than automatically ignored.
+23. Visual regression testing
+After you approve the new design, then establish visual regression baselines.
+Not before.
+Capture canonical screenshots for:
+Home
+Trust Center
+About
+Contact
+Request Access modal
+Access success/error
+Verifier access
+Verifier
+404
+
+Edge Cases
+Sample Case
+Case detail
+Finding
+Outcome Receipt
+Offline Verifier
+Help
+
+Desktop + mobile where applicable.
+Then use screenshot differences to prevent accidental future deterioration.
+The screenshot is a regression detector—not proof of good UX.
+24. Cross-surface brand consistency
+Web and Edge need not be identical.
+They must unmistakably belong to the same system.
+Freeze:
+logo
+mark geometry
+type family
+primary typography hierarchy
+spacing scale
+border radius family
+focus treatment
+button hierarchy
+status semantics
+icon language
+terminology
+
+Marketing can be more spacious.
+Edge can be denser.
+Verifier can be extremely focused.
+But none should look like products from different companies.
+25. User preference and OS behavior
+At minimum verify:
+- browser zoom;
+- OS text scaling where practical;
+- reduced-motion preference;
+- keyboard navigation;
+- touch;
+- trackpad/mouse;
+- high-DPI/Retina;
+- system font fallback.
+Do not add dark mode merely because it is a common NFR.
+A well-qualified light theme is more valuable right now than two poorly qualified themes.
+26. Localization readiness without localization scope
+Do not translate MMP-1.1.
+But avoid implementation that makes future localization unnecessarily difficult:
+- no important strings painted into images;
+- don't depend on exact English string length for layout;
+- avoid fixed-width CTA containers;
+- use semantic dates/numbers where relevant.
+Localization itself is later scope.
+27. Browser automation + human qualification
+Use two layers.
+Automated
+Browser automation should exercise:
+routes
+links
+forms
+modal
+keyboard basics
+access redirects
+verifier
+downloads
+404
+responsive breakpoints
+console errors
+axe accessibility
+
+across the supported browser engines that can reasonably be automated.
+Human
+Human qualification covers:
+visual hierarchy
+professional credibility
+content comprehension
+keyboard experience
+screen reader
+responsive feel
+native installation
+Edge journey
+real email
+real download
+
+Neither substitutes for the other.
+28. Negative controls are mandatory
+This is particularly important given the history.
+A test suite must prove it can fail.
+Examples:
+Temporarily inject a dead footer link → navigation test fails.
+Reduce contrast below threshold → accessibility test fails.
+Remove modal label → accessibility test fails.
+Point Edge Help at /faq locally → Edge navigation contract fails.
+Introduce external font into offline verifier → offline dependency test fails.
+Break an anchor → crawl fails.
+Without negative controls, “205 tests passed” tells us much less than it appears to.
+29. Production-boundary qualification
+Create this permanent chain:
+SOURCE
+  ↓
+TEST
+  ↓
+BUILD
+  ↓
+PRE-PRODUCTION
+  ↓
+AUTOMATED BROWSER QUALIFICATION
+  ↓
+HUMAN UX/A11Y QUALIFICATION
+  ↓
+IMMUTABLE CANDIDATE
+  ↓
+PROMOTION
+  ↓
+PRODUCTION
+  ↓
+PRODUCTION SMOKE
+
+Never again:
+localhost screenshots
+        ↓
+"Founder PASS"
+
+And never let production be the first environment where the candidate is exercised.
+30. Add one NFR ledger
+I would ask the new developer to create:
+docs/non_functional_requirements.md
+with a compact matrix:
+NFR	Web	Verifier	Edge	Automated	Human	Release blocker
+Cross-browser	✓	✓	N/A	✓	✓	Yes
+Responsive	✓	✓	limited	✓	✓	Yes
+WCAG 2.2 AA	✓	✓	✓	✓	✓	Yes
+Keyboard	✓	✓	✓	partial	✓	Yes
+Screen reader	✓	✓	✓	partial	✓	Yes
+Offline behavior	—	—	✓	✓	✓	Yes
+Performance	✓	✓	✓	✓	review	threshold
+Error handling	✓	✓	✓	✓	✓	Yes
+Navigation integrity	✓	✓	✓	✓	✓	Yes
+Security UX	✓	✓	✓	✓	✓	Yes
+Persistence	—	—	✓	✓	✓	Yes
+Installation	—	—	✓	CI partial	✓	Yes
+Visual consistency	✓	✓	✓	regression	✓	Yes
+Production smoke	✓	✓	download	✓	✓	Yes
+
+
+The developer should fill in the exact test IDs and evidence references rather than merely checking boxes.
+One more important correction from the handover
+I would tell the new developer not to blindly inherit two assertions.
+First, the handover says deployment protection of the entire domain is “intended.”    Pasted markdown That conflicts with the architecture we subsequently settled on: public informational pages may remain public; protected product capabilities require app-level controls. The new developer should verify the desired architecture before changing Vercel protection.
+Second, the handover lists the Windows state around an older 5dc4962 source and says its artifact identity/qualification is not established.    Pasted markdown Therefore the new developer should re-establish Windows truth from CI, not assume Windows is equivalent to Mac or current merely because a build exists.
+And there is a third operational blocker that UX cannot solve: real provisioning email is not implemented. The handover explicitly says Ethereal captures the email rather than delivering it to the practitioner.    Pasted markdown A beautiful Request Access modal cannot be considered complete until that journey has a truthful operational conclusion.
+The standard I'd give the new developer
+VaultBasis must work correctly when the user changes browser, screen size, input method, network condition, operating environment, navigation path, session state, data size, or error condition—within the explicitly declared supported boundary.
+No variation may alter deterministic assurance semantics.
+The practitioner should experience one coherent product; the engineering team should be able to produce evidence explaining why it works.
+
+That closes a major gap in the previous development approach: we're no longer qualifying only what VaultBasis does, but also the conditions under which we promise it will continue to do it correctly.

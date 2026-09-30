@@ -1,0 +1,40 @@
+# Side-by-side requirement and evidence ledger
+
+Snapshot: 2026-09-30. Owners below are accountable roles, not assigned individuals. States are scoped observations, never a generic PASS. P/F identifiers resolve in the [three-class evidence register](../ux/evidence-register.md); D identifiers in the [experience map](../ux/current-experience-map.md); Q identifiers in the [NFR ledger](../non_functional_requirements.md).
+
+| Requirement / audit lens | Protected product truth | Founder acceptance evidence | Implementation / Git history | Current verification evidence | Gap / next evidence | Owner / state |
+|---|---|---|---|---|---|---|
+| UX-001 coherent first-use journey | P01–03: bounded independent reconciliation | F01: no contradictions, dead ends or founder explanation | `73a4523` baseline; `586a83c` rejected | Live Home/Trust/Scope images; D01/D02 | Review canonical blueprint; unfamiliar-practitioner task completion on deployed candidate | UX + founder / PROPOSED |
+| A11Y-001 accessible operation | Semantics unchanged by input method | Keyboard, readable controls, usable mobile required | Shared modal source at `70606ff` | Live focus escapes dialog; Escape fails restoration (D03) | Q03–05 complete automation/manual/VoiceOver | Accessibility / OBSERVED_FAIL |
+| NAV-001 intentional destinations | Local evidence boundary vs online services | H Mac local 404 complaints; one clear taxonomy | Baseline relative URLs; candidate `83d78db` remediation | Live unknown URL returns Home/200 (D13); candidate source inspection | Q09 full click/history/deep-link/package crawl | UX / OBSERVED_FAIL, NATIVE_UNVERIFIED |
+| ACCESS-001 truthful request and next step | P05 separates preview auth and distribution entitlement | User must know what happened and next action | Root request API creates entitlement + Ethereal; modal says under review | Source D05/D06; no live submission | Q18 durable states, real qualified transport, preview credential and platform path | Service + security / BLOCKED_JOURNEY |
+| AUTH-001 server-side verifier control | P05; no static output bypass | Hosted gate must be understandable, distinct from offline | Session/page gate and build source | Live anonymous `/verifier` redirects to access | Valid/expired/revoked/storage-failure and alternate-path checks Q10 | Security / PARTIALLY_OBSERVED |
+| DIST-001 exact qualified download | Artifact-hash-bound entitlement | No fake or stale download | H `83d78db` Mac candidate; local manifest says `98b7e6fa…`; Windows unresolved | Manifest source inspection only | CI run/artifact digest/inner ZIP hash; platform auth; real recipient path | Release / UNQUALIFIED |
+| KERNEL-001 protected semantics | P01/P02/P04; UNKNOWN ≠ ZERO, UNRESOLVED ≠ MATCHED | User forbids kernel changes in UX work | Frozen contracts/Golden Corpus; no code changed here | Documentation-only working-tree scope | Exact-candidate unchanged protected-path diff plus existing regression gates | Architecture / PROTECTED, NOT_RETESTED |
+| CLAIM-001 authoritative findings | Outcome/provenance from kernel only | No misleading certainty | Dashboard empty-difference claim and reopen logic | D09 source finding | Reopened/empty/unresolved/mixed case browser checks, no semantic edits | UX + architecture / SOURCE_DEFECT |
+| VERIFY-001 bounded receipt checks | P02: separate checks, declared key; tax not determined | First-class understandable verification | Browser/Python verification code and historical AC06 | Historical report only; protected route not authenticated here | Golden valid/tampered/wrong-key/version/schema and runtime-error display on exact candidate | Verification / CURRENT_RUNTIME_UNVERIFIED |
+| OFFLINE-001 local capability stays local | P03 local evidence plane | No technical setup or surprise network | Baseline remote fonts; `83d78db` offline UI change | Source evidence; old AC07 package hash pending | Q06 denied-network native workflow, logs/resource inventory | Edge + privacy / UNQUALIFIED |
+| STATE-001 recoverable errors and persistence | Historical evidence must remain unchanged | No raw JSON/spinner/dead ends | Dashboard alerts/silent fetch failures; existing SQLite store | D08 source; H persisted cases reported | Q08/Q11 synthetic multiple-case crash/quit/reopen/error tests | Edge / UNVERIFIED |
+| RELEASE-001 actual-boundary qualification | Same semantic contracts across candidate | Only founder gives founder acceptance | Retracted historical acceptance; build comment says `preview` | Dated anonymous live packet; no immutable deployment ID | Exact source→CI→artifact→preprod→human→promotion→smoke chain | Release + founder / OPEN |
+| PRIVACY-001 accurate information handling | Separate local evidence, access, distribution | No taxpayer evidence in support/access | Policies and APIs; declared external fonts | No private data submitted during capture | Actual dependency/data-flow/retention check; policy approval | Privacy + service / OPEN |
+| ROADMAP-001 evidence-led expansion | Kernel remains trust anchor | Practitioner evidence determines priority | Lab `412a6db`; no future branch created here | Roadmap/task definitions only | Associate/CPA observations and architecture decisions per stage | Product / PROPOSED |
+| AI-INV-001 intelligence subordinate to evidence | AI cannot alter outcome/provenance/receipt or conceal uncertainty | Human judgment and send approval remain distinct | `lab/mmp-2-ai` isolated by intended policy; enforcement not verified | Documented invariant and planned tasks | Adversarial evaluations, permissions/data-flow review, deterministic re-entry gate | Architecture + AI / PROPOSED |
+
+## Discrepancy and decision log
+
+| ID | Conflicting evidence | Current disposition | Closing evidence / owner |
+|---|---|---|---|
+| DEC-001 | Handover calls whole-domain deployment protection intended; later founder brief permits public information | Keep public informational access separate from app-level protected capabilities. No Vercel setting changed. | Production capability-access matrix / security |
+| DEC-002 | Handover §7 describes preview-access record creation; root request source creates artifact entitlement | Source description controls implementation record; end-to-end credential provisioning remains unproven | Trace actual service writes and both credential paths in qualified environment / service |
+| DEC-003 | Old certification says all gates green; later founder rejects experience | Retain historical engineering evidence, withdraw any inference of present UX/native/release acceptance | Exact new candidate evidence + founder decision / release |
+| DEC-004 | Local Mac files vs named handover candidate | Do not use local old unqualified package as current candidate | CI metadata + inner hash + recipient audit / release |
+| DEC-005 | Current production source inferred as `73a4523` in history; live HTML says `preview` | Exact production SHA not established | Immutable deployment records and alias evidence / release |
+| DEC-006 | Old master ledger contains commercialization/billing work; latest roadmap excludes billing from MMP-1.1 | Historical backlog is not active scope. Current stabilization exclusions govern. | Future product/architecture decision, separate stage ledger / product |
+| DEC-007 | Blueprint needs persisted finding presentation; source refresh only renders sources/outcome | Review existing API capabilities; do not change kernel to satisfy a screen | API data contract assessment + architecture decision if needed / Edge |
+
+## Update record for this packet
+
+| Change | Requirement | Evidence added | Validation | Release impact |
+|---|---|---|---|---|
+| Audit/blueprint/NFR documentation | UX-001, A11Y-001, RELEASE-001 | Public live capture, source map, explicit gaps | Documentation links/schema/hash checks recorded in packet | No application or release change |
+| Roadmap/Git/audit documentation | ROADMAP-001, AI-INV-001 | Founder brief, locally observed refs, future task ledgers | All task fields present; stages marked proposed | No branches, merges, tags or future implementation |
