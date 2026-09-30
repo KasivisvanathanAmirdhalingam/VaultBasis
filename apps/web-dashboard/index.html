@@ -263,13 +263,13 @@
         <h1>VaultBasis Edge</h1>
       </div>
       <span class="brand-badge">PREVIEW</span>
-      <span class="brand-badge" style="color: #059669; border-color: rgba(16, 185, 129, 0.3);">ZERO TRANSACTION EGRESS</span>
+      <span class="brand-badge" style="color: #059669; border-color: rgba(16, 185, 129, 0.3);">LOCAL EVIDENCE PROCESSING</span>
     </div>
     <div class="nav-links">
       <button class="nav-btn active" onclick="showScreen('screen-cases')">Cases</button>
-      <a href="/about" class="nav-btn" target="_blank">Why VaultBasis? ↗</a>
-      <a href="/verifier" class="nav-btn" target="_blank">Independent Verifier ↗</a>
-      <a href="/schemas/receipt-v0.1.json" class="nav-btn" target="_blank">Evidence Schema ↗</a>
+      <a href="https://vaultbasis.com" class="nav-btn" target="_blank" rel="noopener">Why VaultBasis? ↗</a>
+      <a href="https://vaultbasis.com/verifier" class="nav-btn" target="_blank" rel="noopener">Independent Web Verifier ↗</a>
+      <a href="/schemas/receipt-v0.1.json" class="nav-btn" target="_blank">Evidence Schema</a>
       <button class="nav-btn" onclick="showScreen('screen-help')">Help</button>
       <button class="nav-btn primary" onclick="showCreateCaseModal()">+ New Case</button>
     </div>
@@ -405,7 +405,8 @@
           <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
             This signed receipt can be independently verified on any clean machine using our zero-dependency CLI or web verifier without contacting VaultBasis servers.
           </p>
-          <a href="/verifier" target="_blank" class="btn btn-primary" style="text-decoration: none;">Launch Verifier Tool ↗</a>
+          <a href="/offline-verifier" target="_blank" class="btn btn-primary" style="text-decoration: none;">Offline Verifier</a>
+          <a href="https://vaultbasis.com/verifier" target="_blank" rel="noopener" class="btn" style="text-decoration: none; margin-left: 8px;">Independent Web Verifier ↗</a>
         </div>
       </div>
 
@@ -458,7 +459,7 @@
         </div>
         <div class="card">
           <h3 style="margin-bottom: 0.75rem; font-size: 1rem;">Understanding the Outcome Receipt</h3>
-          <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6;">The Outcome Receipt is a signed JSON document recording the declared reconciliation outcome. It can be verified independently using the <a href="/verifier" target="_blank" style="color: var(--primary);">Web Verifier ↗</a> or the CLI verifier on any machine without contacting VaultBasis.</p>
+          <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6;">The Outcome Receipt is a signed JSON document recording the declared reconciliation outcome. It can be verified locally using the <a href="/offline-verifier" target="_blank" style="color: var(--primary);">Offline Verifier</a>, or independently via the <a href="https://vaultbasis.com/verifier" target="_blank" rel="noopener" style="color: var(--primary);">Independent Web Verifier ↗</a> without contacting VaultBasis.</p>
           <p style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.75rem;">Signature verification confirms the receipt has not been changed since signing. It does not assess tax correctness or constitute a professional opinion.</p>
         </div>
       </div>
@@ -475,11 +476,11 @@
         <div class="card">
           <h3 style="margin-bottom: 0.75rem; font-size: 1rem;">Further Help</h3>
           <ul style="font-size: 0.85rem; line-height: 1.8;">
-            <li><a href="/faq" target="_blank" style="color: var(--primary);">Full FAQ ↗</a></li>
+            <li><a href="/offline-verifier" target="_blank" style="color: var(--primary);">Offline Verifier</a></li>
             <li><a href="/docs/scope_and_limitations_v0.1.html" target="_blank" style="color: var(--primary);">Scope &amp; Limitations ↗</a></li>
-            <li><a href="/verifier" target="_blank" style="color: var(--primary);">Web Verifier ↗</a></li>
-            <li><a href="/contact" target="_blank" style="color: var(--primary);">Contact Support ↗</a></li>
-            <li><a href="/security-disclosure" target="_blank" style="color: var(--primary);">Report a Security Issue ↗</a></li>
+            <li><a href="https://vaultbasis.com/faq" target="_blank" rel="noopener" style="color: var(--primary);">Full FAQ ↗</a></li>
+            <li><a href="https://vaultbasis.com/contact" target="_blank" rel="noopener" style="color: var(--primary);">Contact Support ↗</a></li>
+            <li><a href="https://vaultbasis.com/security-disclosure" target="_blank" rel="noopener" style="color: var(--primary);">Report a Security Issue ↗</a></li>
           </ul>
         </div>
       </div>
@@ -493,12 +494,12 @@
         <span class="brand-badge" style="color: #059669; border-color: rgba(16, 185, 129, 0.3);">Customer-controlled assurance processing</span>
       </div>
       <div style="display: flex; gap: 1.5rem;">
-        <a href="/about" target="_blank" style="color: var(--text-muted); text-decoration: none;">About</a>
-        <a href="/verifier" target="_blank" style="color: var(--text-muted); text-decoration: none;">Offline Verifier</a>
-        <a href="/schemas/receipt-v0.1.json" target="_blank" style="color: var(--text-muted); text-decoration: none;">JSON Schema</a>
-        <a href="/faq" target="_blank" style="color: var(--text-muted); text-decoration: none;">Help &amp; FAQ</a>
-        <a href="/contact" target="_blank" style="color: var(--text-muted); text-decoration: none;">Contact</a>
-        <a href="/security-disclosure" target="_blank" style="color: var(--text-muted); text-decoration: none;">Security</a>
+        <a href="https://vaultbasis.com" target="_blank" rel="noopener" style="color: var(--text-muted); text-decoration: none;">About ↗</a>
+        <a href="/offline-verifier" target="_blank" style="color: var(--text-muted); text-decoration: none;">Offline Verifier</a>
+        <a href="/schemas/receipt-v0.1.json" target="_blank" style="color: var(--text-muted); text-decoration: none;">Evidence Schema</a>
+        <a href="https://vaultbasis.com/faq" target="_blank" rel="noopener" style="color: var(--text-muted); text-decoration: none;">Help &amp; FAQ ↗</a>
+        <a href="https://vaultbasis.com/contact" target="_blank" rel="noopener" style="color: var(--text-muted); text-decoration: none;">Contact ↗</a>
+        <a href="https://vaultbasis.com/security-disclosure" target="_blank" rel="noopener" style="color: var(--text-muted); text-decoration: none;">Security ↗</a>
       </div>
     </div>
     <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 0.85rem 1rem; font-size: 0.78rem; color: #475569; line-height: 1.5;">
@@ -506,7 +507,7 @@
     </div>
     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
       <div>© 2026 VaultBasis. All rights reserved. • Design-Partner Preview</div>
-      <div style="font-size: 0.76rem; color: #64748b;">Zero Transaction-Data Egress</div>
+      <div style="font-size: 0.76rem; color: #64748b;">Local Evidence Processing</div>
     </div>
   </footer>
 

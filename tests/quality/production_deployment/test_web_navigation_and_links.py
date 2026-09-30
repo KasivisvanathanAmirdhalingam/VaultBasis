@@ -101,8 +101,8 @@ def test_web_dashboard_header_and_industrial_footer():
     # Header nav
     assert "Cases" in html
     assert "Why VaultBasis? ↗" in html
-    assert "Independent Verifier ↗" in html
-    assert "Evidence Schema ↗" in html
+    assert "Independent Web Verifier ↗" in html
+    assert "Evidence Schema" in html
     assert "screen-help" in html  # Help screen present and reachable via nav
 
     # Engineering vocabulary must not be practitioner-visible (LANG-001)
@@ -111,12 +111,15 @@ def test_web_dashboard_header_and_industrial_footer():
     # Industrial footer
     assert "Local Edge · Active" in html
     assert "Customer-controlled assurance processing" in html
-    assert "Zero Transaction-Data Egress" in html
+    assert "Local Evidence Processing" in html
+    # Absolute egress claims must not reappear (MAC-UX-003 fix)
+    assert "Zero Transaction-Data Egress" not in html
+    assert "ZERO TRANSACTION EGRESS" not in html
 
-    # Footer institutional links (MMP11-WEB-PRES-001: cross-surface completeness)
-    assert "/faq" in html
-    assert "/contact" in html
-    assert "/security-disclosure" in html
+    # Footer institutional links now use canonical vaultbasis.com URLs
+    assert "vaultbasis.com/faq" in html
+    assert "vaultbasis.com/contact" in html
+    assert "vaultbasis.com/security-disclosure" in html
 
 
 @pytest.mark.regression
@@ -127,10 +130,16 @@ def test_edge_daemon_serves_all_web_routes(client):
     assert res.status_code == 200
     assert "VaultBasis Edge" in res.text
 
-    # 2. Verifier
-    res = client.get("/verifier")
+    # 2. Verifier — now redirects to canonical production URL (no local production verifier)
+    tc_no_follow = TestClient(app, follow_redirects=False)
+    res = tc_no_follow.get("/verifier")
+    assert res.status_code in (301, 302, 307, 308)
+    assert "vaultbasis.com/verifier" in res.headers.get("location", "")
+
+    # 2b. Offline verifier serves HTML locally
+    res = client.get("/offline-verifier")
     assert res.status_code == 200
-    assert "VaultBasis Verifier" in res.text
+    assert "VaultBasis" in res.text
 
     # 3. Marketing / About
     res = client.get("/about")

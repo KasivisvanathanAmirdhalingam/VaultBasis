@@ -424,7 +424,7 @@ async def verify_uploaded_receipt(file: UploadFile = File(...)):
 # ------------------------------------------------------------------------------
 
 WEB_DASHBOARD_DIR = RESOURCE_BASE / "apps" / "web-dashboard"
-WEB_VERIFIER_DIR = RESOURCE_BASE / "apps" / "web-verifier"
+WEB_OFFLINE_VERIFIER_DIR = RESOURCE_BASE / "apps" / "edge-offline-verifier"
 WEB_MARKETING_DIR = RESOURCE_BASE / "apps" / "web-marketing"
 
 if WEB_DASHBOARD_DIR.exists():
@@ -437,13 +437,19 @@ def serve_dashboard():
         return HTMLResponse(content=index_file.read_text(), status_code=200)
     return HTMLResponse("<h2>VaultBasis Dashboard building...</h2>")
 
-@app.get("/verifier", response_class=HTMLResponse)
-def serve_verifier():
-    verifier_file = WEB_VERIFIER_DIR / "index.html"
-    if verifier_file.exists():
-        return HTMLResponse(content=verifier_file.read_text(), status_code=200)
-    return HTMLResponse("<h2>VaultBasis Public Verifier building...</h2>")
+@app.get("/verifier")
+def verifier_redirect():
+    # The production Web Verifier is a separate, independently authenticated service.
+    # Edge does not host it locally. Redirect to the canonical production URL.
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse(url="https://vaultbasis.com/verifier", status_code=302)
 
+@app.get("/offline-verifier", response_class=HTMLResponse)
+def serve_offline_verifier():
+    index_file = WEB_OFFLINE_VERIFIER_DIR / "index.html"
+    if index_file.exists():
+        return HTMLResponse(content=index_file.read_text(), status_code=200)
+    return HTMLResponse("<h2>Offline Verifier building...</h2>")
 
 @app.get("/about", response_class=HTMLResponse)
 @app.get("/marketing", response_class=HTMLResponse)

@@ -8,7 +8,7 @@ a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[],
-    datas=[('apps', 'apps'), ('schemas', 'schemas'),
+    datas=[('apps', 'apps'), ('apps/edge-offline-verifier', 'apps/edge-offline-verifier'), ('schemas', 'schemas'),
            ('docs/scope_and_limitations_v0.1.md', 'docs'),
            ('tests/fixtures/golden_receipt_valid.json', 'sample'),
            ('tests/fixtures/golden_receipt_tampered.json', 'sample')],

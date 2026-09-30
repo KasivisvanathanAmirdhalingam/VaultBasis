@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offline Receipt Verifier — VaultBasis Edge</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --surface-elevated: #f1f5f9;
+      --border: #e2e8f0;
+      --border-accent: #cbd5e1;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --primary: #2563eb;
+      --success: #059669;
+      --danger: #dc2626;
+      --warning: #b45309;
+      --radius: 8px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: rgba(255,255,255,0.9);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-logo {
+      width: 32px; height: 32px;
+      background: linear-gradient(135deg, #2563eb, #0284c7);
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .brand h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.2rem; font-weight: 800; letter-spacing: -0.01em;
+    }
+    .brand-badge {
+      background: rgba(59,130,246,0.1);
+      color: #2563eb;
+      border: 1px solid rgba(59,130,246,0.25);
+      padding: 2px 8px; border-radius: 999px;
+      font-size: 0.72rem; font-family: 'JetBrains Mono', monospace;
+    }
+    nav a {
+      color: var(--text-muted); text-decoration: none;
+      font-size: 0.85rem; font-weight: 500;
+      padding: 6px 12px; border-radius: var(--radius);
+      border: 1px solid var(--border);
+      transition: all 0.2s;
+    }
+    nav a:hover { color: var(--text); border-color: var(--border-accent); background: var(--surface-elevated); }
+    main { flex: 1; max-width: 780px; margin: 0 auto; padding: 2.5rem 1.5rem; width: 100%; }
+    h2 { font-size: 1.6rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.5rem; }
+    .subtitle { font-size: 0.95rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 2rem; }
+    .upload-zone {
+      border: 2px dashed var(--border-accent);
+      border-radius: var(--radius);
+      padding: 2.5rem 2rem;
+      text-align: center;
+      background: var(--surface);
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 1.5rem;
+    }
+    .upload-zone:hover { border-color: var(--primary); background: rgba(37,99,235,0.03); }
+    .upload-zone.drag-over { border-color: var(--primary); background: rgba(37,99,235,0.06); }
+    .upload-label { font-size: 1rem; font-weight: 600; margin-bottom: 0.35rem; }
+    .upload-hint { font-size: 0.82rem; color: var(--text-muted); }
+    .btn {
+      background: var(--primary); color: white;
+      border: none; border-radius: var(--radius);
+      padding: 10px 20px; font-size: 0.9rem; font-weight: 600;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .btn:hover { background: #1d4ed8; }
+    .btn:disabled { background: #94a3b8; cursor: default; }
+    .btn-secondary {
+      background: var(--surface-elevated); color: var(--text);
+      border: 1px solid var(--border-accent);
+    }
+    .btn-secondary:hover { background: var(--border); }
+    #result-panel { display: none; margin-top: 1.5rem; }
+    .result-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .result-header {
+      padding: 1.25rem 1.5rem;
+      display: flex; align-items: center; gap: 1rem;
+    }
+    .result-header.pass { background: rgba(5,150,105,0.08); border-bottom: 1px solid rgba(5,150,105,0.2); }
+    .result-header.fail { background: rgba(220,38,38,0.07); border-bottom: 1px solid rgba(220,38,38,0.2); }
+    .result-icon { font-size: 1.5rem; }
+    .result-title { font-size: 1.1rem; font-weight: 700; }
+    .result-title.pass { color: var(--success); }
+    .result-title.fail { color: var(--danger); }
+    .result-subtitle { font-size: 0.85rem; color: var(--text-muted); margin-top: 2px; }
+    .checklist { padding: 1rem 1.5rem; display: flex; flex-direction: column; gap: 0.6rem; }
+    .check-row {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 0.88rem; padding: 0.5rem 0.75rem;
+      background: var(--surface-elevated); border-radius: 6px;
+    }
+    .check-label { color: var(--text); font-weight: 500; }
+    .check-val { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; font-weight: 700; }
+    .check-val.pass { color: var(--success); }
+    .check-val.fail { color: var(--danger); }
+    .check-val.info { color: var(--text-muted); }
+    .check-val.not-determined { color: var(--warning); }
+    .meta-section { padding: 0 1.5rem 1.25rem; }
+    .meta-section h4 { font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.6rem; }
+    .meta-grid { display: grid; grid-template-columns: auto 1fr; gap: 0.3rem 1rem; font-size: 0.82rem; }
+    .meta-key { color: var(--text-muted); }
+    .meta-val { font-family: 'JetBrains Mono', monospace; color: var(--text); word-break: break-all; }
+    .boundary-notice {
+      margin-top: 1.5rem;
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      font-size: 0.8rem; color: var(--text-muted); line-height: 1.6;
+    }
+    .boundary-notice strong { color: var(--text); }
+    .error-box {
+      background: rgba(220,38,38,0.06);
+      border: 1px solid rgba(220,38,38,0.2);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      font-size: 0.85rem; color: #dc2626;
+      margin-top: 1rem;
+      display: none;
+    }
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 1rem 2rem;
+      font-size: 0.78rem; color: var(--text-muted);
+      display: flex; justify-content: space-between; align-items: center;
+      background: var(--surface); flex-wrap: wrap; gap: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <header role="banner">
+    <div class="brand">
+      <div class="brand-logo" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M6 6 L19 30" stroke="white" stroke-width="3.5" stroke-linecap="round"/>
+          <path d="M32 6 L19 30" stroke="white" stroke-width="3.5" stroke-linecap="round"/>
+          <path d="M19 6 L19 28" stroke="white" stroke-width="2.5" stroke-linecap="round" opacity="0.6"/>
+        </svg>
+      </div>
+      <h1>VaultBasis Edge</h1>
+      <span class="brand-badge">OFFLINE VERIFIER</span>
+    </div>
+    <nav aria-label="Navigation">
+      <a href="/" onclick="window.location.href='/'">← Cases</a>
+    </nav>
+  </header>
+
+  <main role="main">
+    <h2>Offline Receipt Verifier</h2>
+    <p class="subtitle">
+      Verify a signed Outcome Receipt locally, without contacting VaultBasis or any external server.
+      Verification runs entirely within this Edge installation.
+    </p>
+
+    <div class="upload-zone" id="drop-zone" onclick="document.getElementById('receipt-file').click()"
+         ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+      <input type="file" id="receipt-file" accept=".json" style="display:none" onchange="handleFileSelect(event)">
+      <p class="upload-label" id="upload-label">Drop Outcome Receipt JSON here, or click to select</p>
+      <p class="upload-hint" id="upload-hint">Accepts VaultBasis Outcome Receipt v0.1 JSON files</p>
+    </div>
+
+    <div style="display: flex; gap: 0.75rem; align-items: center;">
+      <button class="btn" id="verify-btn" onclick="verifyReceipt()" disabled>Verify Receipt</button>
+      <button class="btn btn-secondary" id="clear-btn" onclick="clearAll()" style="display:none">Clear</button>
+    </div>
+
+    <div id="error-box" class="error-box"></div>
+    <div id="result-panel"></div>
+
+    <div class="boundary-notice">
+      <strong>Verification scope:</strong> This verifier confirms payload integrity, Evidence Contract conformance, and cryptographic signature validity for the key declared in the receipt.
+      It does not independently authenticate the originating VaultBasis installation.
+      Tax correctness is not determined by VaultBasis and is shown as NOT DETERMINED.
+      Verification does not constitute a professional opinion, legal finding, government approval, or IRS endorsement.
+    </div>
+  </main>
+
+  <footer role="contentinfo">
+    <span>© 2026 VaultBasis. All rights reserved. • Design-Partner Preview</span>
+    <span>Local Evidence Processing</span>
+  </footer>
+
+  <script>
+    let selectedFile = null;
+
+    function handleDragOver(e) {
+      e.preventDefault();
+      document.getElementById('drop-zone').classList.add('drag-over');
+    }
+    function handleDragLeave(e) {
+      document.getElementById('drop-zone').classList.remove('drag-over');
+    }
+    function handleDrop(e) {
+      e.preventDefault();
+      document.getElementById('drop-zone').classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (file) setFile(file);
+    }
+    function handleFileSelect(e) {
+      const file = e.target.files[0];
+      if (file) setFile(file);
+    }
+    function setFile(file) {
+      selectedFile = file;
+      document.getElementById('upload-label').textContent = file.name;
+      document.getElementById('upload-hint').textContent = (file.size / 1024).toFixed(1) + ' KB';
+      document.getElementById('verify-btn').disabled = false;
+      document.getElementById('clear-btn').style.display = 'inline-block';
+      document.getElementById('result-panel').style.display = 'none';
+      document.getElementById('error-box').style.display = 'none';
+    }
+    function clearAll() {
+      selectedFile = null;
+      document.getElementById('upload-label').textContent = 'Drop Outcome Receipt JSON here, or click to select';
+      document.getElementById('upload-hint').textContent = 'Accepts VaultBasis Outcome Receipt v0.1 JSON files';
+      document.getElementById('verify-btn').disabled = true;
+      document.getElementById('clear-btn').style.display = 'none';
+      document.getElementById('result-panel').style.display = 'none';
+      document.getElementById('error-box').style.display = 'none';
+      document.getElementById('receipt-file').value = '';
+    }
+
+    async function verifyReceipt() {
+      if (!selectedFile) return;
+      const btn = document.getElementById('verify-btn');
+      btn.disabled = true;
+      btn.textContent = 'Verifying…';
+      document.getElementById('error-box').style.display = 'none';
+      document.getElementById('result-panel').style.display = 'none';
+
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+
+      try {
+        const res = await fetch('/api/receipts/verify', { method: 'POST', body: formData });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({ detail: 'Unexpected server error.' }));
+          showError(err.detail || 'Verification failed.');
+          return;
+        }
+        const data = await res.json();
+        renderResult(data);
+      } catch (e) {
+        showError('Could not reach the local verification service. Ensure VaultBasis Edge is running.');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Verify Receipt';
+      }
+    }
+
+    function showError(msg) {
+      const box = document.getElementById('error-box');
+      box.textContent = msg;
+      box.style.display = 'block';
+    }
+
+    function renderResult(data) {
+      const overall = data.overall_status === 'PASS' || data.is_valid === true;
+      const panel = document.getElementById('result-panel');
+
+      const checks = data.checks || {};
+      const meta = data;
+
+      function checkRow(label, key, display) {
+        const val = checks[key];
+        const cls = val === 'PASS' ? 'pass' : val === 'FAIL' ? 'fail' : 'info';
+        const text = display || val || '—';
+        return `<div class="check-row"><span class="check-label">${label}</span><span class="check-val ${cls}">${text}</span></div>`;
+      }
+
+      panel.innerHTML = `
+        <div class="result-card">
+          <div class="result-header ${overall ? 'pass' : 'fail'}">
+            <span class="result-icon">${overall ? '✓' : '✗'}</span>
+            <div>
+              <div class="result-title ${overall ? 'pass' : 'fail'}">${overall ? 'PASS — Receipt Valid' : 'FAIL — Receipt Invalid or Tampered'}</div>
+              <div class="result-subtitle">${overall ? 'Payload integrity, contract conformance, and signature are valid.' : 'One or more verification checks failed. Receipt may have been altered.'}</div>
+            </div>
+          </div>
+          <div class="checklist">
+            ${checkRow('JSON Schema Conformance', 'schema_conformance')}
+            ${checkRow('Evidence Contract Version', 'version_supported')}
+            ${checkRow('Receipt Key Self-Consistency', 'key_fingerprint')}
+            ${checkRow('Signature Verification', 'signature_authenticity')}
+            <div class="check-row">
+              <span class="check-label">Tax Correctness</span>
+              <span class="check-val not-determined">NOT DETERMINED</span>
+            </div>
+          </div>
+          ${meta.receipt_id ? `
+          <div class="meta-section">
+            <h4>Receipt Details</h4>
+            <div class="meta-grid">
+              <span class="meta-key">Receipt ID</span><span class="meta-val">${meta.receipt_id || '—'}</span>
+              <span class="meta-key">Outcome State</span><span class="meta-val">${meta.outcome_state || '—'}</span>
+              <span class="meta-key">Assurance Level</span><span class="meta-val">${meta.assurance_level || '—'}</span>
+              <span class="meta-key">Signer Key ID</span><span class="meta-val">${meta.signer_key_id || '—'}</span>
+            </div>
+          </div>` : ''}
+        </div>`;
+      panel.style.display = 'block';
+    }
+  </script>
+</body>
+</html>
