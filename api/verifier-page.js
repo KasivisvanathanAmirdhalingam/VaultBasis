@@ -1,6 +1,34 @@
 'use strict';
 
 /**
+ * ACCESS-INV-001 — Removable Preview Access Boundary
+ *
+ * This file is the access-policy boundary for the Web Verifier. It is
+ * deliberately isolated from the verifier's verification semantics.
+ *
+ * The preview access requirement is a distribution/access policy, not a
+ * VaultBasis product semantic. This implementation MUST NOT be modified to
+ * embed authentication into:
+ *   - receipt parsing, canonicalization, or signing
+ *   - deterministic reconciliation or outcome computation
+ *   - receipt schema or verification logic
+ *   - Edge packaging or runtime
+ *   - SEC-002 artifact integrity/binding semantics
+ *
+ * Required future access-mode transitions must be achievable by changing
+ * routing/policy at this boundary only:
+ *   VERIFIER_CONTROLLED + EDGE_CONTROLLED  (current)
+ *   VERIFIER_PUBLIC     + EDGE_CONTROLLED  (post-CPA-validation target)
+ *   VERIFIER_PUBLIC     + EDGE_COMMERCIAL  (future)
+ *
+ * Web Verifier access policy and Edge download authorization are independently
+ * configurable. Removing verifier access control must not affect Edge download
+ * authorization, and vice versa.
+ *
+ * Do not implement future public/commercial modes now. Preserve this seam.
+ */
+
+/**
  * GET /api/verifier-page
  *
  * Server-authoritative gateway for the Web Verifier application.

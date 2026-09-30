@@ -26,7 +26,7 @@
  *   - Fail-closed: storage errors → 503, never permit
  *
  * Rate limiting:
- *   - Key: SHA-256(rightmost X-Forwarded-For entry) — IP never stored raw
+ *   - Key: SHA-256(derived IP) — IP never stored raw
  *   - Window: 15 minutes; Limit: 10 attempts per window per IP
  *   - Stored as rate-limit/<hash>.json in private Blob
  *   - Limit exceeded → 429 with Retry-After header
@@ -64,9 +64,11 @@ function deny(res) {
 }
 
 function getClientIp(req) {
-  // On Vercel, the platform appends the true client IP as the last entry in
-  // X-Forwarded-For. Using the leftmost entry would trust attacker-controlled
-  // values. Using the rightmost entry trusts only Vercel's own proxy append.
+  // The rightmost X-Forwarded-For entry is used as the IP signal. This is
+  // advisory input for best-effort abuse throttling only and MUST NOT
+  // participate in authentication, authorization, session validity, entitlement
+  // validity, or artifact authorization. An imperfect IP signal is acceptable
+  // because the high-entropy 32-byte credential is the primary brute-force defense.
   const forwarded = req.headers['x-forwarded-for'];
   if (forwarded) {
     const parts = forwarded.split(',');
