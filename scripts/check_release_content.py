@@ -56,10 +56,12 @@ QUICKSTART_BANS = [
 # Design-token drift tripwire (apps/web-shared/design-tokens-v0.1.json is the
 # versioned source of truth). Each practitioner surface must carry the primary
 # color and body font; independent per-file edits fail loudly here.
+# apps/web-marketing/index.html uses build-time partial injection; the canonical
+# token surface for all marketing pages is the shared shell partial.
 TOKEN_SURFACES = [
     "VaultBasis_Practitioner_Quick_Start.html",
     "VaultBasis_Troubleshooting.html",
-    "apps/web-marketing/index.html",
+    "apps/web-marketing/partials/shell.css",
     "apps/web-verifier/index.html",
     "apps/web-dashboard/index.html",
 ]

@@ -17,6 +17,31 @@ const REPO_ROOT = path.resolve(__dirname, '..');
 const DIST_DIR = path.join(REPO_ROOT, 'dist', 'public-web');
 const APPS_DIR = path.join(REPO_ROOT, 'apps');
 const SCHEMAS_DIR = path.join(REPO_ROOT, 'schemas', 'receipt');
+const PARTIALS_DIR = path.join(APPS_DIR, 'web-marketing', 'partials');
+
+// Load shared partials once.
+function loadPartials() {
+  const read = (name) => fs.readFileSync(path.join(PARTIALS_DIR, name), 'utf8');
+  return {
+    header: read('header.html'),
+    footer: read('footer.html'),
+    modal:  read('modal.html'),
+    css:    read('shell.css'),
+    js:     read('shell.js'),
+  };
+}
+
+// Inject partials into a page source.
+// Pages use sentinel comments: <!-- SHELL_CSS -->, <!-- HEADER -->,
+// <!-- FOOTER -->, <!-- MODAL -->, <!-- SHELL_JS -->
+function injectPartials(html, partials) {
+  return html
+    .replace('<!-- SHELL_CSS -->', partials.css)
+    .replace('<!-- HEADER -->',   partials.header)
+    .replace('<!-- FOOTER -->',   partials.footer)
+    .replace('<!-- MODAL -->',    partials.modal)
+    .replace('<!-- SHELL_JS -->',  partials.js);
+}
 
 console.log('================================================================================');
 console.log('       VAULTBASIS — INCREMENTAL VERCEL PUBLIC WEB BUILD PIPELINE                 ');
@@ -49,34 +74,35 @@ fs.mkdirSync(DIST_DIR, { recursive: true });
 fs.mkdirSync(path.join(DIST_DIR, 'schemas'), { recursive: true });
 fs.mkdirSync(path.join(DIST_DIR, 'api', 'data'), { recursive: true });
 
-// 3. Build Marketing Landing Page (dist/public-web/index.html)
+// 3. Load partials and build all marketing pages with shared shell injected.
+const partials = loadPartials();
+
 const marketingSourcePath = path.join(APPS_DIR, 'web-marketing', 'index.html');
 if (!fs.existsSync(marketingSourcePath)) {
   console.error(`❌ ERROR: Marketing site source missing at ${marketingSourcePath}`);
   process.exit(1);
 }
 let marketingHtml = fs.readFileSync(marketingSourcePath, 'utf8');
-
-// Inject build metadata into marketing HTML
+marketingHtml = injectPartials(marketingHtml, partials);
 marketingHtml = marketingHtml.replace(
   '<!-- BUILD_METADATA -->',
   `<!-- VaultBasis Build: ${commitSha} | Timestamp: ${buildTimestamp} -->`
 );
-
 fs.writeFileSync(path.join(DIST_DIR, 'index.html'), marketingHtml, 'utf8');
 console.log('✓ Packaged Public Marketing Portal -> dist/public-web/index.html');
 
-// Copy standalone pages
+// Build standalone pages — inject partials into each before writing.
 const standalonePages = ['privacy-policy', 'terms-of-service', 'contact', 'security-disclosure', 'about', 'trust-assurance', 'faq', 'verifier-access'];
 for (const page of standalonePages) {
   const src = path.join(APPS_DIR, 'web-marketing', `${page}.html`);
-  if (fs.existsSync(src)) {
-    fs.copyFileSync(src, path.join(DIST_DIR, `${page}.html`));
-    console.log(`✓ Packaged ${page} -> dist/public-web/${page}.html`);
-  } else {
+  if (!fs.existsSync(src)) {
     console.error(`❌ ERROR: ${page}.html missing at ${src}`);
     process.exit(1);
   }
+  let html = fs.readFileSync(src, 'utf8');
+  html = injectPartials(html, partials);
+  fs.writeFileSync(path.join(DIST_DIR, `${page}.html`), html, 'utf8');
+  console.log(`✓ Packaged ${page} -> dist/public-web/${page}.html`);
 }
 
 // 4. Web Verifier — served by api/verifier-page.js, NOT as a static file.

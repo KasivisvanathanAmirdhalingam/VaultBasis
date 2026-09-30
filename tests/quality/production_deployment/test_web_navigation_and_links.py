@@ -29,8 +29,9 @@ def client():
 @pytest.mark.regression
 def test_marketing_site_header_footer_and_anchor_links():
     """Validates marketing site headers, footers, and internal anchor integrity."""
-    marketing_file = WORKSPACE_ROOT / "apps" / "web-marketing" / "index.html"
-    assert marketing_file.is_file(), "apps/web-marketing/index.html must exist"
+    # Read from built output — source uses partial sentinels injected at build time.
+    marketing_file = WORKSPACE_ROOT / "dist" / "public-web" / "index.html"
+    assert marketing_file.is_file(), "dist/public-web/index.html must exist (run build first)"
     html = marketing_file.read_text(encoding="utf-8")
 
     # 1. Header Navigation elements (MMP11-WEB-PRES-001: nav renamed from

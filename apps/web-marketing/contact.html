@@ -5,48 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Contact &amp; Report an Issue — VaultBasis</title>
   <meta name="description" content="Contact VaultBasis or report an issue with the design-partner preview.">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --bg: #f8fafc; --surface: #ffffff; --border: #e2e8f0;
-      --text: #0f172a; --text-muted: #475569; --primary: #2563eb;
-      --radius: 12px;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      background-color: var(--bg); color: var(--text);
-      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
-      line-height: 1.7; min-height: 100vh; display: flex; flex-direction: column;
-    }
-    header {
-      background: rgba(255,255,255,0.92); backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border); padding: 1rem 2rem;
-      display: flex; justify-content: space-between; align-items: center;
-      position: sticky; top: 0; z-index: 100;
-    }
-    .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; }
-    .brand-logo {
-      width: 32px; height: 32px;
-      background: linear-gradient(135deg, #2563eb, #0284c7);
-      border-radius: 7px; display: flex; align-items: center; justify-content: center;
-      font-weight: 800; font-size: 1rem; color: white;
-    }
-    .brand-name { font-size: 1.15rem; font-weight: 800; color: #0f172a; }
-    nav a { color: var(--text-muted); text-decoration: none; font-size: 0.92rem; font-weight: 600; }
-    nav a:hover { color: var(--primary); }
-    .container { max-width: 720px; margin: 4rem auto; padding: 0 1.5rem; flex: 1; }
-    h1 { font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem; }
-    .meta { font-size: 0.88rem; color: var(--text-muted); margin-bottom: 2.5rem; }
-    .card {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 2rem; margin-bottom: 1.5rem;
-    }
-    h2 { font-size: 1.15rem; font-weight: 700; margin-bottom: 0.75rem; }
-    p { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 0.75rem; }
+<!-- SHELL_CSS -->
+    /* ── Contact-specific ─────────────────────────────────────────────── */
+    main { flex: 1; }
+    .page-hero { max-width: var(--content-prose); margin: 4rem auto 2rem; padding: 0 1.5rem; text-align: center; }
+    .page-hero .section-tag { font-size: 0.85rem; font-family: 'JetBrains Mono', monospace; color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em; display: block; font-weight: 700; margin-bottom: 0.75rem; }
+    .page-hero h1 { font-size: 2.4rem; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 0.75rem; color: var(--text); }
+    .page-hero p { font-size: 1rem; color: var(--text-muted); line-height: 1.7; }
+    .content-container { max-width: var(--content-prose); margin: 0 auto 5rem; padding: 0 1.5rem; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 2rem; margin-bottom: 1.5rem; }
+    .card h2 { font-size: 1.15rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--text); }
+    .card p { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 0.75rem; line-height: 1.7; }
+    .card ul { color: var(--text-muted); font-size: 0.95rem; margin: 0.5rem 0 0.75rem 1.5rem; }
+    .card ul li { margin-bottom: 0.35rem; line-height: 1.6; }
     .contact-method {
       display: flex; align-items: center; gap: 0.75rem;
-      background: #f1f5f9; border-radius: 8px; padding: 0.9rem 1.1rem;
-      margin-top: 0.75rem; font-size: 0.95rem;
+      background: var(--surface-elevated); border-radius: 8px;
+      padding: 0.9rem 1.1rem; margin-top: 0.75rem; font-size: 0.95rem;
     }
     .contact-method a { color: var(--primary); font-weight: 600; text-decoration: none; }
     .contact-method a:hover { text-decoration: underline; }
@@ -54,68 +31,60 @@
       background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px;
       padding: 1rem; margin-top: 1rem; font-size: 0.88rem; color: #7f1d1d; line-height: 1.6;
     }
-    footer.site-footer {
-      border-top: 1px solid var(--border); background: var(--surface);
-      padding: 2rem; text-align: center; font-size: 0.85rem; color: var(--text-muted);
-    }
-    footer a { color: var(--primary); text-decoration: none; margin: 0 0.5rem; }
+    @media (max-width: 600px) { .page-hero h1 { font-size: 2rem; } }
   </style>
 </head>
 <body>
-  <header role="banner">
-    <a href="/" class="brand">
-      <div class="brand-logo">V</div>
-      <span class="brand-name">VaultBasis</span>
-    </a>
-    <nav><a href="/">← Home</a></nav>
-  </header>
 
-  <main class="container" role="main">
-    <h1>Contact &amp; Report an Issue</h1>
-    <p class="meta">Design-Partner Preview — best-effort response. No guaranteed response time unless separately agreed in writing.</p>
+<!-- HEADER -->
 
-    <div class="card">
-      <h2>General Enquiries</h2>
-      <p>For questions about design-partner access, the evaluation process, or general product questions:</p>
-      <div class="contact-method">
-        Email: <a href="mailto:hello@vaultbasis.com">hello@vaultbasis.com</a>
-      </div>
-      <div class="notice-box">
-        Do not send taxpayer CSV files, source evidence, or other sensitive financial information through this channel. Source evidence should remain on your local device and be processed only within VaultBasis Edge.
-      </div>
+  <main role="main">
+    <div class="page-hero">
+      <span class="section-tag">Support</span>
+      <h1>Contact &amp; Report an Issue</h1>
+      <p>Design-Partner Preview — best-effort response. No guaranteed response time unless separately agreed in writing.</p>
     </div>
 
-    <div class="card">
-      <h2>Report an Issue</h2>
-      <p>If you encounter a problem with VaultBasis Edge or the website during your evaluation, please include:</p>
-      <ul style="color: var(--text-muted); font-size: 0.95rem; margin: 0.5rem 0 0.75rem 1.5rem;">
-        <li>A description of what you expected to happen</li>
-        <li>A description of what actually happened</li>
-        <li>The step sequence that led to the issue</li>
-        <li>Platform and version (shown in VaultBasis Edge title bar)</li>
-      </ul>
-      <div class="contact-method">
-        Email: <a href="mailto:hello@vaultbasis.com">hello@vaultbasis.com</a>
+    <div class="content-container">
+      <div class="card">
+        <h2>General Enquiries</h2>
+        <p>For questions about design-partner access, the evaluation process, or general product questions:</p>
+        <div class="contact-method">
+          Email: <a href="mailto:hello@vaultbasis.com">hello@vaultbasis.com</a>
+        </div>
+        <div class="notice-box">
+          Do not send taxpayer CSV files, source evidence, or other sensitive financial information through this channel. Source evidence should remain on your local device and be processed only within VaultBasis Edge.
+        </div>
       </div>
-      <div class="notice-box">
-        Do not include taxpayer data, account numbers, or source evidence files in issue reports. Describe the problem using only the information needed to reproduce it.
-      </div>
-    </div>
 
-    <div class="card">
-      <h2>Security Concerns</h2>
-      <p>For security vulnerabilities, use the <a href="/security-disclosure" style="color: var(--primary); font-weight: 600;">Security Disclosure route</a> rather than this general contact channel.</p>
+      <div class="card">
+        <h2>Report an Issue</h2>
+        <p>If you encounter a problem with VaultBasis Edge or the website during your evaluation, please include:</p>
+        <ul>
+          <li>A description of what you expected to happen</li>
+          <li>A description of what actually happened</li>
+          <li>The step sequence that led to the issue</li>
+          <li>Platform and version (shown in VaultBasis Edge title bar)</li>
+        </ul>
+        <div class="contact-method">
+          Email: <a href="mailto:hello@vaultbasis.com">hello@vaultbasis.com</a>
+        </div>
+        <div class="notice-box">
+          Do not include taxpayer data, account numbers, or source evidence files in issue reports. Describe the problem using only the information needed to reproduce it.
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Security Concerns</h2>
+        <p>For security vulnerabilities, use the <a href="/security-disclosure" style="color:var(--primary);font-weight:600;">Security Disclosure route</a> rather than this general contact channel.</p>
+      </div>
     </div>
   </main>
 
-  <footer class="site-footer" role="contentinfo">
-    <div>© 2026 VaultBasis. All rights reserved.</div>
-    <div style="margin-top: 0.5rem;">
-      <a href="/">Home</a>
-      <a href="/privacy-policy">Privacy Policy</a>
-      <a href="/terms-of-service">Terms of Service</a>
-      <a href="/security-disclosure">Security Disclosure</a>
-    </div>
-  </footer>
+<!-- MODAL -->
+
+<!-- FOOTER -->
+
+<!-- SHELL_JS -->
 </body>
 </html>

@@ -5,124 +5,87 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Terms of Service — VaultBasis</title>
   <meta name="description" content="VaultBasis Terms of Service — design-partner preview phase terms governing use of VaultBasis Edge and the vaultbasis.com website.">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --bg: #f8fafc; --surface: #ffffff; --border: #e2e8f0;
-      --text: #0f172a; --text-muted: #475569; --primary: #2563eb;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      background-color: var(--bg); color: var(--text);
-      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
-      line-height: 1.7; min-height: 100vh; display: flex; flex-direction: column;
-    }
-    header {
-      background: rgba(255,255,255,0.92); backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border); padding: 1rem 2rem;
-      display: flex; justify-content: space-between; align-items: center;
-      position: sticky; top: 0; z-index: 100;
-    }
-    .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; }
-    .brand-logo {
-      width: 32px; height: 32px;
-      background: linear-gradient(135deg, #2563eb, #0284c7);
-      border-radius: 7px; display: flex; align-items: center; justify-content: center;
-      font-weight: 800; font-size: 1rem; color: white;
-    }
-    .brand-name { font-size: 1.15rem; font-weight: 800; color: #0f172a; }
-    nav a { color: var(--text-muted); text-decoration: none; font-size: 0.92rem; font-weight: 600; }
-    nav a:hover { color: var(--primary); }
-    .container { max-width: 800px; margin: 4rem auto; padding: 0 1.5rem; flex: 1; }
-    h1 { font-size: 2.2rem; font-weight: 800; margin-bottom: 0.5rem; }
-    .meta { font-size: 0.88rem; color: var(--text-muted); margin-bottom: 2.5rem; font-family: 'JetBrains Mono', monospace; }
-    h2 { font-size: 1.25rem; font-weight: 700; margin: 2.5rem 0 0.75rem 0; }
-    p { margin-bottom: 1rem; color: var(--text-muted); font-size: 0.97rem; }
-    ul { margin: 0.5rem 0 1rem 1.5rem; color: var(--text-muted); font-size: 0.97rem; }
-    ul li { margin-bottom: 0.4rem; }
-    .notice-box {
-      background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px;
-      padding: 1.25rem; margin: 2rem 0; font-size: 0.9rem; color: #92400e; line-height: 1.6;
-    }
-    footer.site-footer {
-      border-top: 1px solid var(--border); background: var(--surface);
-      padding: 2rem; text-align: center; font-size: 0.85rem; color: var(--text-muted);
-    }
-    footer a { color: var(--primary); text-decoration: none; margin: 0 0.5rem; }
+<!-- SHELL_CSS -->
+    /* ── Legal prose page ─────────────────────────────────────────────── */
+    main { flex: 1; }
+    .legal-container { max-width: 800px; margin: 4rem auto 5rem; padding: 0 1.5rem; }
+    .legal-container h1 { font-size: 2.2rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--text); }
+    .legal-meta { font-size: 0.88rem; color: var(--text-muted); margin-bottom: 2.5rem; font-family: 'JetBrains Mono', monospace; }
+    .legal-container h2 { font-size: 1.25rem; font-weight: 700; margin: 2.5rem 0 0.75rem; color: var(--text); }
+    .legal-container p { margin-bottom: 1rem; color: var(--text-muted); font-size: 0.97rem; line-height: 1.75; }
+    .legal-container ul { margin: 0.5rem 0 1rem 1.5rem; color: var(--text-muted); font-size: 0.97rem; }
+    .legal-container ul li { margin-bottom: 0.4rem; line-height: 1.7; }
+    .notice-box { background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 1.25rem; margin: 2rem 0; font-size: 0.9rem; color: #92400e; line-height: 1.6; }
   </style>
 </head>
 <body>
-  <header role="banner">
-    <a href="/" class="brand">
-      <div class="brand-logo">V</div>
-      <span class="brand-name">VaultBasis</span>
-    </a>
-    <nav><a href="/">← Home</a></nav>
-  </header>
 
-  <main class="container" role="main">
-    <h1>Terms of Service</h1>
-    <p class="meta">Version: preview-v0.1 &nbsp;|&nbsp; Effective: 2026-09-30 &nbsp;|&nbsp; Design-Partner Preview Phase</p>
+<!-- HEADER -->
 
-    <div class="notice-box">
-      <strong>Preview status.</strong> These terms govern the current design-partner preview phase only. VaultBasis is pre-commercial software undergoing controlled evaluation. These terms will be revised before any general availability release. They do not constitute a commercial service agreement. Counsel review is required before any regulated or commercial deployment.
+  <main role="main">
+    <div class="legal-container">
+      <h1>Terms of Service</h1>
+      <p class="legal-meta">Version: preview-v0.1 &nbsp;|&nbsp; Effective: 2026-09-30 &nbsp;|&nbsp; Design-Partner Preview Phase</p>
+
+      <div class="notice-box">
+        <strong>Preview status.</strong> These terms govern the current design-partner preview phase only. VaultBasis is pre-commercial software undergoing controlled evaluation. These terms will be revised before any general availability release. They do not constitute a commercial service agreement. Counsel review is required before any regulated or commercial deployment.
+      </div>
+
+      <h2>1. Scope</h2>
+      <p>These terms apply to your use of the VaultBasis Edge application and the vaultbasis.com website during the design-partner preview phase. By requesting or using design-partner access, you agree to these terms.</p>
+
+      <h2>2. Preview Software — No Warranty</h2>
+      <p>VaultBasis Edge is provided as preview software for evaluation purposes only. It is not production software. It has not been commercially released, independently audited, or certified by any government authority.</p>
+      <p>VaultBasis Edge is provided "as is" and "as available" without warranty of any kind, express or implied, including but not limited to warranties of merchantability, fitness for a particular purpose, accuracy, reliability, or non-infringement.</p>
+
+      <h2>3. What VaultBasis Does and Does Not Do</h2>
+      <p>VaultBasis Edge deterministically compares supported broker information with supported tax-ledger information and produces signed Outcome Receipts. It does not:</p>
+      <ul>
+        <li>Determine tax correctness or whether a tax position is legally correct, optimal, or acceptable to the IRS.</li>
+        <li>Determine legal compliance with federal, state, or other applicable law.</li>
+        <li>Establish source truth or verify that source files are authentic, complete, or free of error.</li>
+        <li>Replace the professional judgment, due diligence, or signature of a CPA, Enrolled Agent, Tax Attorney, or other qualified professional.</li>
+        <li>File tax returns or prepare tax forms.</li>
+      </ul>
+      <p>An Outcome Receipt records the declared reconciliation outcome under the declared semantics. It is not a professional opinion, legal finding, government approval, or endorsement by the IRS or any other authority.</p>
+
+      <h2>4. Design-Partner Obligations</h2>
+      <p>As a design partner, you agree to:</p>
+      <ul>
+        <li>Use VaultBasis Edge only for evaluation and feedback purposes during the preview phase.</li>
+        <li>Not distribute the preview software or access credentials to third parties.</li>
+        <li>Not use the preview software for production tax filing or to produce documents intended for submission to government authorities.</li>
+        <li>Provide honest feedback on your evaluation experience where requested.</li>
+        <li>Promptly report security concerns through the security disclosure route rather than publicly disclosing unresolved vulnerabilities.</li>
+      </ul>
+
+      <h2>5. Practitioner Responsibility</h2>
+      <p>The practitioner remains solely responsible for professional interpretation of reconciliation results, the application of applicable law, the exercise of professional judgment, and any tax filing or professional work product derived from or related to use of VaultBasis.</p>
+      <p>VaultBasis output does not substitute for a qualified professional's review and does not relieve the practitioner of any professional obligation.</p>
+
+      <h2>6. Sensitive Information</h2>
+      <p>Source evidence files (e.g., taxpayer CSV exports, broker statements) are processed locally by VaultBasis Edge and are not transmitted to VaultBasis. Do not transmit source evidence files or taxpayer financial information to VaultBasis through support channels, email, or any other route.</p>
+
+      <h2>7. Limitation of Liability</h2>
+      <p>To the maximum extent permitted by applicable law, VaultBasis shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits, revenue, data, or goodwill, arising out of or in connection with your use of the preview software or website, even if advised of the possibility of such damages.</p>
+
+      <h2>8. Changes</h2>
+      <p>These terms may be updated during the preview phase. Continued use of design-partner access after an update constitutes acceptance of the revised terms. These terms will be replaced by a commercial agreement before any general availability release.</p>
+
+      <h2>9. Governing Law</h2>
+      <p>These terms are governed by the laws of the jurisdiction in which VaultBasis is incorporated, without regard to conflict of law principles. The specific jurisdiction will be stated in the commercial terms that replace these preview terms.</p>
+
+      <h2>10. Contact</h2>
+      <p>For questions about these terms, use the <a href="/contact" style="color:var(--primary);font-weight:600;">general enquiries route</a>. For security concerns, use the <a href="/security-disclosure" style="color:var(--primary);font-weight:600;">security disclosure route</a>.</p>
     </div>
-
-    <h2>1. Scope</h2>
-    <p>These terms apply to your use of the VaultBasis Edge application and the vaultbasis.com website during the design-partner preview phase. By requesting or using design-partner access, you agree to these terms.</p>
-
-    <h2>2. Preview Software — No Warranty</h2>
-    <p>VaultBasis Edge is provided as preview software for evaluation purposes only. It is not production software. It has not been commercially released, independently audited, or certified by any government authority.</p>
-    <p>VaultBasis Edge is provided "as is" and "as available" without warranty of any kind, express or implied, including but not limited to warranties of merchantability, fitness for a particular purpose, accuracy, reliability, or non-infringement.</p>
-
-    <h2>3. What VaultBasis Does and Does Not Do</h2>
-    <p>VaultBasis Edge deterministically compares supported broker information with supported tax-ledger information and produces signed Outcome Receipts. It does not:</p>
-    <ul>
-      <li>Determine tax correctness or whether a tax position is legally correct, optimal, or acceptable to the IRS.</li>
-      <li>Determine legal compliance with federal, state, or other applicable law.</li>
-      <li>Establish source truth or verify that source files are authentic, complete, or free of error.</li>
-      <li>Replace the professional judgment, due diligence, or signature of a CPA, Enrolled Agent, Tax Attorney, or other qualified professional.</li>
-      <li>File tax returns or prepare tax forms.</li>
-    </ul>
-    <p>An Outcome Receipt records the declared reconciliation outcome under the declared semantics. It is not a professional opinion, legal finding, government approval, or endorsement by the IRS or any other authority.</p>
-
-    <h2>4. Design-Partner Obligations</h2>
-    <p>As a design partner, you agree to:</p>
-    <ul>
-      <li>Use VaultBasis Edge only for evaluation and feedback purposes during the preview phase.</li>
-      <li>Not distribute the preview software or access credentials to third parties.</li>
-      <li>Not use the preview software for production tax filing or to produce documents intended for submission to government authorities.</li>
-      <li>Provide honest feedback on your evaluation experience where requested.</li>
-      <li>Promptly report security concerns through the security disclosure route rather than publicly disclosing unresolved vulnerabilities.</li>
-    </ul>
-
-    <h2>5. Practitioner Responsibility</h2>
-    <p>The practitioner remains solely responsible for professional interpretation of reconciliation results, the application of applicable law, the exercise of professional judgment, and any tax filing or professional work product derived from or related to use of VaultBasis.</p>
-    <p>VaultBasis output does not substitute for a qualified professional's review and does not relieve the practitioner of any professional obligation.</p>
-
-    <h2>6. Sensitive Information</h2>
-    <p>Source evidence files (e.g., taxpayer CSV exports, broker statements) are processed locally by VaultBasis Edge and are not transmitted to VaultBasis. Do not transmit source evidence files or taxpayer financial information to VaultBasis through support channels, email, or any other route.</p>
-
-    <h2>7. Limitation of Liability</h2>
-    <p>To the maximum extent permitted by applicable law, VaultBasis shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits, revenue, data, or goodwill, arising out of or in connection with your use of the preview software or website, even if advised of the possibility of such damages.</p>
-
-    <h2>8. Changes</h2>
-    <p>These terms may be updated during the preview phase. Continued use of design-partner access after an update constitutes acceptance of the revised terms. These terms will be replaced by a commercial agreement before any general availability release.</p>
-
-    <h2>9. Governing Law</h2>
-    <p>These terms are governed by the laws of the jurisdiction in which VaultBasis is incorporated, without regard to conflict of law principles. The specific jurisdiction will be stated in the commercial terms that replace these preview terms.</p>
-
-    <h2>10. Contact</h2>
-    <p>For questions about these terms, use the <a href="/contact">general enquiries route</a>. For security concerns, use the <a href="/security-disclosure">security disclosure route</a>.</p>
   </main>
 
-  <footer class="site-footer" role="contentinfo">
-    <div>© 2026 VaultBasis. All rights reserved.</div>
-    <div style="margin-top: 0.5rem;">
-      <a href="/">Home</a>
-      <a href="/privacy-policy">Privacy Policy</a>
-      <a href="/docs/scope_and_limitations_v0.1.html" target="_blank">Scope &amp; Limitations</a>
-    </div>
-  </footer>
+<!-- MODAL -->
+
+<!-- FOOTER -->
+
+<!-- SHELL_JS -->
 </body>
 </html>
