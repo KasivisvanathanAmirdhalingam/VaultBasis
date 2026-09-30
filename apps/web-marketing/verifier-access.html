@@ -123,9 +123,9 @@
     <div class="error-msg" id="error-msg" role="alert" aria-live="polite"></div>
 
     <form id="access-form" novalidate>
-      <label for="entitlement-id">Entitlement ID</label>
-      <input type="text" id="entitlement-id" name="entitlementId"
-             placeholder="DP-XXXXXXXX" autocomplete="off" spellcheck="false" required>
+      <label for="access-id">Access ID</label>
+      <input type="text" id="access-id" name="accessId"
+             placeholder="VA-XXXXXXXX" autocomplete="off" spellcheck="false" required>
 
       <label for="access-token">Access Token</label>
       <input type="password" id="access-token" name="token"
@@ -179,11 +179,11 @@
     e.preventDefault();
     clearError();
 
-    const entitlementId = document.getElementById('entitlement-id').value.trim();
+    const accessId = document.getElementById('access-id').value.trim();
     const token = document.getElementById('access-token').value.trim();
 
-    if (!entitlementId || !token) {
-      showError('Please enter both your Entitlement ID and Access Token.');
+    if (!accessId || !token) {
+      showError('Please enter both your Access ID and Access Token.');
       return;
     }
 
@@ -194,7 +194,7 @@
       const resp = await fetch('/api/verifier-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, entitlementId }),
+        body: JSON.stringify({ token, accessId }),
         credentials: 'same-origin',
       });
 

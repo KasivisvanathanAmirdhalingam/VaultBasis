@@ -3,35 +3,49 @@
 /**
  * POST /api/verifier-session
  *
- * Validates a design-partner entitlement token and issues a short-lived
- * HttpOnly session cookie granting access to the VaultBasis Web Verifier.
+ * Validates a preview-access credential and issues a short-lived HttpOnly
+ * session cookie granting access to the VaultBasis Web Verifier.
  *
- * Request body (JSON): { token: string, entitlementId: string }
+ * Request body (JSON): { token: string, accessId: string }
  *
- * The session cookie value is a fresh 64-hex-char random token stored
- * server-side in the Blob-backed session namespace. The supplied entitlement
- * token is validated using the existing SEC-002 entitlement store before any
- * session is created.
+ * Trust boundary:
+ *   preview-access credential → authenticated session → Web Verifier UI
+ *   SEC-002 entitlement        → exact qualified artifact → Edge download
+ *
+ *   These are separate. A preview-access credential cannot authorize a
+ *   download; a SEC-002 entitlement is not reused here.
  *
  * Security properties:
- *   - Entitlement must be ACTIVE, unexpired, and correctly bound
+ *   - Preview-access credential must be ACTIVE, unexpired, and ID-bound
+ *   - Rate limited: max RATE_LIMIT_MAX attempts per IP per RATE_LIMIT_WINDOW_MS
  *   - Session token is cryptographically random (32 bytes)
- *   - Session token is stored hashed (SHA-256) in private Blob storage
+ *   - Session token stored hashed (SHA-256) in private Blob under sessions/
  *   - Cookie: HttpOnly, Secure, SameSite=Strict, Max-Age=4h
  *   - Raw bearer token never appears in logs, storage paths, or responses
- *   - Generic error responses — no information disclosure on failure reason
- *   - Rate limiting: enforced via Vercel Edge (see middleware) + fail-closed
+ *   - Generic error responses — no reason codes on the wire
+ *   - Fail-closed: storage errors → 503, never permit
+ *
+ * Rate limiting:
+ *   - Key: SHA-256(IP) — IP is never stored raw
+ *   - Window: 15 minutes
+ *   - Limit: 10 attempts per window per IP
+ *   - Stored as rate-limit/<hash>.json in private Blob
+ *   - Limit exceeded → 429, window and count in response headers only
  */
 
 const crypto = require('crypto');
 const { put, get } = require('@vercel/blob');
-const { isWellFormedToken } = require('./entitlement-store');
+const { isWellFormedToken, validatePreviewAccess } = require('./preview-access-store');
 
 const SESSION_COOKIE_NAME = 'vb_session';
-const SESSION_TTL_MS = 4 * 60 * 60 * 1000; // 4 hours
-const SESSION_MAX_AGE_S = 4 * 60 * 60;      // seconds for Max-Age
+const SESSION_TTL_MS = 4 * 60 * 60 * 1000;
+const SESSION_MAX_AGE_S = 4 * 60 * 60;
 const SESSION_NAMESPACE = 'sessions/';
 const SESSION_BYTE_LENGTH = 32;
+
+const RATE_LIMIT_NAMESPACE = 'rate-limit/';
+const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+const RATE_LIMIT_MAX = 10;
 
 function sessionPathname(rawSessionToken) {
   const digest = crypto.createHash('sha256').update(rawSessionToken, 'utf8').digest('hex');
@@ -46,9 +60,79 @@ function deny(res) {
   return res.status(401).json({ error: 'Access denied.' });
 }
 
+function getClientIp(req) {
+  const forwarded = req.headers['x-forwarded-for'];
+  if (forwarded) return forwarded.split(',')[0].trim();
+  return req.socket?.remoteAddress || 'unknown';
+}
+
+function rateLimitPathname(ip) {
+  const digest = crypto.createHash('sha256').update(ip, 'utf8').digest('hex');
+  return `${RATE_LIMIT_NAMESPACE}${digest}.json`;
+}
+
+/**
+ * Check and increment the rate-limit counter for this IP.
+ * Returns { allowed: true } or { allowed: false }.
+ * Fail-open: if Blob storage is unavailable, allow (don't block legitimate
+ * users due to storage faults — the credential check still applies).
+ */
+async function checkRateLimit(ip) {
+  const pathname = rateLimitPathname(ip);
+  const now = Date.now();
+
+  let record = { windowStart: now, count: 0 };
+  try {
+    const result = await get(pathname, { access: 'private' });
+    if (result) {
+      const chunks = [];
+      const reader = result.stream.getReader();
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        chunks.push(value);
+      }
+      const existing = JSON.parse(Buffer.concat(chunks.map(c => Buffer.from(c))).toString('utf8'));
+      if (now - existing.windowStart < RATE_LIMIT_WINDOW_MS) {
+        record = existing;
+      }
+    }
+  } catch (e) {
+    if (e && e.name !== 'BlobNotFoundError') {
+      console.error('[verifier-session] rate-limit read error:', e.message);
+    }
+    // Fail-open on storage error — credential validation still applies
+    return { allowed: true };
+  }
+
+  record.count += 1;
+
+  // Write back (fire and forget — don't block the response on this)
+  put(pathname, JSON.stringify(record), {
+    access: 'private',
+    contentType: 'application/json',
+    addRandomSuffix: false,
+    allowOverwrite: true,
+  }).catch((e) => console.error('[verifier-session] rate-limit write error:', e.message));
+
+  if (record.count > RATE_LIMIT_MAX) {
+    return { allowed: false };
+  }
+  return { allowed: true };
+}
+
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed.' });
+  }
+
+  const ip = getClientIp(req);
+
+  // Rate limit check — before any credential processing.
+  const rl = await checkRateLimit(ip);
+  if (!rl.allowed) {
+    res.setHeader('Retry-After', String(Math.ceil(RATE_LIMIT_WINDOW_MS / 1000)));
+    return res.status(429).json({ error: 'Too many attempts. Please try again later.' });
   }
 
   let body;
@@ -58,18 +142,15 @@ module.exports = async (req, res) => {
     return deny(res);
   }
 
-  const { token, entitlementId } = body || {};
+  const { token, accessId } = body || {};
 
   // Format gate before any Blob lookup.
-  if (!token || !entitlementId || !isWellFormedToken(token)) {
+  if (!token || !accessId || !isWellFormedToken(token)) {
     return deny(res);
   }
 
-  // Validate the entitlement — reuse existing SEC-002 store but without
-  // artifact binding (verifier access does not require a specific artifact).
-  // We perform a direct entitlement lookup without artifact-hash check.
-  const { validateEntitlementForVerifier } = require('./entitlement-store');
-  const authResult = await validateEntitlementForVerifier(token, entitlementId);
+  // Validate preview-access credential — separate from SEC-002 entitlements.
+  const authResult = await validatePreviewAccess(token, accessId);
   if (!authResult.ok) {
     return deny(res);
   }
@@ -78,7 +159,7 @@ module.exports = async (req, res) => {
   const sessionToken = generateSessionToken();
   const now = Date.now();
   const sessionRecord = {
-    entitlementId: authResult.record.entitlementId,
+    accessId: authResult.record.accessId,
     email: authResult.record.email,
     createdAt: new Date(now).toISOString(),
     expiresAt: new Date(now + SESSION_TTL_MS).toISOString(),
@@ -97,7 +178,6 @@ module.exports = async (req, res) => {
     return res.status(503).json({ error: 'Session could not be created. Please try again.' });
   }
 
-  // Set session cookie — HttpOnly, Secure, SameSite=Strict.
   res.setHeader(
     'Set-Cookie',
     `${SESSION_COOKIE_NAME}=${sessionToken}; HttpOnly; Secure; SameSite=Strict; Max-Age=${SESSION_MAX_AGE_S}; Path=/`

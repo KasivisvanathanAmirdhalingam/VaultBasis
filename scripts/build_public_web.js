@@ -188,9 +188,21 @@ fs.writeFileSync(path.join(DIST_DIR, '404.html'), notFoundHtml, 'utf8');
 console.log('✓ Generated Custom 404 Page -> dist/public-web/404.html');
 
 // 6.5. Generate Vercel Edge Middleware — capability access control
-// PUBLIC_INFORMATIONAL routes pass through anonymously.
-// AUTHENTICATED_CAPABILITY routes (/verifier) require a valid session cookie
-// issued by /api/verifier-session after entitlement token validation.
+//
+// Architecture:
+//   /verifier → api/verifier-page (serverless function)
+//   api/verifier-page performs server-side session validation BEFORE
+//   returning any verifier HTML. The verifier application is never
+//   returned to an unauthenticated request.
+//
+//   This middleware provides defense-in-depth at the edge (early redirect
+//   if no cookie present) but is NOT the authoritative access control layer.
+//   api/verifier-page is authoritative — it validates the session
+//   cryptographically against private Blob storage before serving content.
+//
+// PUBLIC_INFORMATIONAL routes: pass through anonymously.
+// AUTHENTICATED_CAPABILITY routes (/verifier, /api/verifier-page): defense-in-depth
+//   edge redirect when cookie is absent; server-side validation is authoritative.
 const middlewareJs = `
 // Routes that are always publicly accessible without authentication.
 const PUBLIC_PREFIXES = [
@@ -233,11 +245,11 @@ export default function middleware(req) {
     return new Response(null, { headers: { 'x-middleware-next': '1' } });
   }
 
-  // AUTHENTICATED_CAPABILITY: /verifier requires a valid session cookie.
-  // The session value is a 64-hex-char token validated server-side by
-  // api/verifier-session.js — the middleware only checks its presence.
-  // Actual cryptographic validation occurs server-side on each API call.
-  if (pathname.startsWith('/verifier')) {
+  // AUTHENTICATED_CAPABILITY: /verifier and /api/verifier-page require a session.
+  // Defense-in-depth: redirect at edge when cookie is absent.
+  // Authoritative validation is performed by api/verifier-page (server-side,
+  // cryptographic, against private Blob) — a forged cookie is rejected there.
+  if (pathname.startsWith('/verifier') || pathname.startsWith('/api/verifier-page')) {
     const cookies = req.headers.get('cookie') || '';
     const hasSession = cookies.split(';').some((c) => {
       const [name] = c.trim().split('=');
@@ -245,9 +257,8 @@ export default function middleware(req) {
     });
 
     if (!hasSession) {
-      // Redirect to access-required page rather than exposing the verifier UI.
       const dest = new URL('/verifier-access', req.url);
-      dest.searchParams.set('next', pathname);
+      dest.searchParams.set('next', '/verifier');
       return Response.redirect(dest.toString(), 302);
     }
     return new Response(null, { headers: { 'x-middleware-next': '1' } });

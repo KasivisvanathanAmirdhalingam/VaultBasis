@@ -37,7 +37,10 @@ def test_vercel_configuration_validity():
     # Verify rewrites
     rewrites = {r.get("source"): r.get("destination") for r in config.get("rewrites", [])}
     assert "/verifier" in rewrites, "/verifier route must be rewritten"
-    assert rewrites["/verifier"] == "/verifier/index.html"
+    assert rewrites["/verifier"] == "/api/verifier-page", (
+        "/verifier must route to /api/verifier-page (server-authoritative session gate), "
+        "not a static file"
+    )
     assert "/about" in rewrites
     assert "/marketing" in rewrites
 

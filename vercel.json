@@ -9,7 +9,7 @@
   "rewrites": [
     {
       "source": "/verifier",
-      "destination": "/verifier/index.html"
+      "destination": "/api/verifier-page"
     },
     {
       "source": "/schemas/(.*)",
