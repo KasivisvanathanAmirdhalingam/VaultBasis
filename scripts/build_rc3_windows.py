@@ -66,7 +66,10 @@ def launch_gate(exe_path: Path, label: str) -> None:
         stdout_bytes, _ = proc.communicate(timeout=10)
     except subprocess.TimeoutExpired:
         proc.kill()
-        stdout_bytes, _ = proc.communicate()
+        try:
+            stdout_bytes, _ = proc.communicate(timeout=15)
+        except subprocess.TimeoutExpired:
+            stdout_bytes = b"[process did not terminate after kill - Defender/AV hold suspected]"
 
     output = stdout_bytes.decode("utf-8", errors="replace").strip()
     if output:
@@ -118,8 +121,14 @@ def main() -> int:
         elif p.is_dir():
             shutil.rmtree(p)
 
+    # --onedir (not --onefile): extracts once at build time rather than on every
+    # launch.  On GitHub windows-latest, --onefile triggers Windows Defender to
+    # scan every file in the self-extraction temp directory at runtime, which
+    # exceeds the health-poll window and causes proc.communicate() to hang
+    # indefinitely (observed: >2h CI hang).  --onedir pays the extraction cost
+    # once during build where Defender scanning does not block the health gate.
     cmd = [sys.executable, "-m", "PyInstaller", "--clean", "--noconfirm",
-           "--name", "VaultBasis", "--onefile", "--windowed",
+           "--name", "VaultBasis", "--onedir", "--windowed",
            "--exclude-module", "matplotlib", "--exclude-module", "IPython",
            "--exclude-module", "tkinter", "--exclude-module", "sphinx",
            "--exclude-module", "numpy", "--exclude-module", "pandas",
@@ -129,14 +138,16 @@ def main() -> int:
            "main.py"]
     sh(*cmd)
 
-    exe = REPO / "dist" / "VaultBasis.exe"
-    assert exe.is_file(), "VaultBasis.exe missing"
+    # --onedir output: dist/VaultBasis/VaultBasis.exe
+    exe = REPO / "dist" / "VaultBasis" / "VaultBasis.exe"
+    assert exe.is_file(), "VaultBasis.exe missing in onedir output"
     arch = pe_machine(exe)
     assert arch == "x64", f"wrong-arch Windows binary: {arch} (need x64)"
 
     pkg = REPO / "dist" / PACKAGE_NAME
     pkg.mkdir(parents=True)
-    shutil.copy2(exe, pkg / "VaultBasis.exe")
+    # Copy entire onedir bundle (exe + _internal/) into package
+    shutil.copytree(exe.parent, pkg / "VaultBasis", dirs_exist_ok=True)
     guides = {
         "VaultBasis_Practitioner_Quick_Start.html": "VaultBasis-Quick-Start.html",
         "VaultBasis_Troubleshooting.html": "VaultBasis-Troubleshooting.html",
@@ -171,8 +182,8 @@ def main() -> int:
                   "Simulate Audits", "proves you ran", "preview-macOS"]:
             assert b not in text, f"BANNED {b!r} in package file {name}"
 
-    # Launch gate — pre-ZIP: launch the built exe from dist/.
-    launch_gate(exe, "PRE-ZIP: built VaultBasis.exe in dist/")
+    # Launch gate — pre-ZIP: launch the built exe from its onedir location.
+    launch_gate(exe, "PRE-ZIP: built VaultBasis.exe in dist/VaultBasis/")
 
     zip_path = REPO / "dist" / f"{PACKAGE_NAME}.zip"
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as z:
@@ -186,7 +197,8 @@ def main() -> int:
         tmp_path = Path(tmp)
         with zipfile.ZipFile(zip_path) as zf:
             zf.extractall(tmp_path)
-        extracted_exe = tmp_path / PACKAGE_NAME / "VaultBasis.exe"
+        # onedir layout: PACKAGE_NAME/VaultBasis/VaultBasis.exe
+        extracted_exe = tmp_path / PACKAGE_NAME / "VaultBasis" / "VaultBasis.exe"
         assert extracted_exe.is_file(), f"extracted exe missing at {extracted_exe}"
         launch_gate(extracted_exe, "POST-ZIP: extracted VaultBasis.exe from candidate ZIP")
 

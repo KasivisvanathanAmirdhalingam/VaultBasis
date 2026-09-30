@@ -101,6 +101,14 @@ jobs:
     - name: Install dependencies
       run: pip install -r requirements.txt
 
+    - name: Disable Windows Defender real-time monitoring for build directories
+      if: runner.os == 'Windows'
+      shell: powershell
+      run: |
+        Add-MpPreference -ExclusionPath "$env:GITHUB_WORKSPACE\dist"
+        Add-MpPreference -ExclusionPath "$env:GITHUB_WORKSPACE\build"
+        Add-MpPreference -ExclusionPath "$env:TEMP"
+
     - name: Assemble RC3 candidate package
       run: python ${{ matrix.script }}
 
