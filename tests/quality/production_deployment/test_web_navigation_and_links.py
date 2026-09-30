@@ -81,8 +81,8 @@ def test_web_verifier_interactive_controls_and_footer():
     # Results card checklist
     assert "JSON Schema Conformance" in html
     assert "Evidence Contract Version" in html
-    assert "Declared Key Fingerprint Consistency" in html
-    assert "Ed25519 Cryptographic Signature" in html
+    assert "Receipt Key Self-Consistency" in html
+    assert "Signature Verification" in html
 
     # Standard footer (jargon-removal fix 9e68178 renamed
     # "STATUTORY LIMITATION NOTICE (PRD §27 & §44.6)" to plain-language notice)
