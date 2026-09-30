@@ -1,0 +1,95 @@
+That is the right outcome for a Day-0/Day-1 takeover audit. The new developer has resisted the temptation to immediately rewrite the UI, and the two production defects they found are meaningful rather than cosmetic.
+I would now move them from Discovery/Audit → Controlled Implementation, but only after freezing the audit outputs as the implementation contract.
+My assessment of the two newly confirmed defects
+Focus escaping the Request Access dialog is a release blocker for the accessibility qualification. The modal needs a proper dialog lifecycle: focus enters it, remains within it while open, Escape closes it, the close control is keyboard-accessible, and focus returns to the exact triggering control. This belongs under MMP11-A11Y-001, not merely UI polish.
+Unknown URLs returning the homepage with HTTP 200 is also a real defect. It creates a soft-404, masks broken navigation, weakens automated crawling, and makes it possible for bad links to appear functional. Unknown public routes should return the intentional 404 experience with the appropriate HTTP status. This should become a navigation/runtime qualification requirement, with negative tests such as /definitely-not-a-vaultbasis-route.
+Neither requires touching the deterministic assurance kernel.
+Directive for the next session
+I would send the developer this:
+VAULTBASIS — UX CONVERGENCE IMPLEMENTATION AUTHORIZATION
+The takeover audit is accepted as the planning baseline.
+Transition from AUDIT / DOCUMENTATION to CONTROLLED IMPLEMENTATION.
+Before modifying application code, commit/preserve the completed audit artifacts and record their exact source SHA. These documents become the working requirements baseline; implementation may refine them only through explicit documented decisions.
+Protected boundary
+Do not modify deterministic reconciliation, canonicalization, decimal semantics, parsers, supported-source semantics, provenance semantics, Outcome Receipt schema, signing, verification semantics, Golden Corpus or deterministic vectors.
+No MMP-1.5/MMP-2 feature implementation is authorized in the MMP-1.1 recovery branch.
+Phase 1 — establish the UX foundation once
+Implement the approved canonical design system and application shell rather than patching individual pages independently.
+Establish shared tokens/components for typography, spacing, layout widths, logo/brand treatment, header, navigation, buttons, links, cards, forms, dialogs, status/error states, footer, focus treatment and floating Back-to-Top.
+There must be one global web header and one global footer.
+Page-local navigation must be visually and semantically distinguishable from global navigation.
+Do not create another secondary pseudo-header.
+Phase 2 — public experience
+Converge Home, Trust Center, About, Contact, Privacy, Terms, Security Disclosure, Scope & Limitations, Verifier Access, Web Verifier and 404 into the canonical experience architecture.
+Fix the confirmed soft-404 defect so unknown routes return the intentional 404 experience and correct HTTP status.
+Every navigation label must correspond to the content/destination it promises.
+Restore the persistent accessible Back-to-Top affordance on sufficiently long pages.
+Phase 3 — Request Access
+Treat Request Access as a complete state machine rather than a modal.
+Implement:
+closed → open → validation → submitting → accepted/pending/error → understandable next step.
+Fix focus containment and restoration.
+Do not claim that an email/download has been delivered unless the production mechanism actually delivered it.
+The existing Ethereal/test-email limitation must remain truthfully represented until the real provisioning mechanism is implemented and qualified.
+Keep preview-access authentication distinct from SEC-002 artifact entitlement.
+Phase 4 — Edge experience
+Audit the actual packaged Edge candidate, not merely dashboard source.
+Preserve the proven work from fix/mmp11-dist-mac-001 where appropriate.
+Qualify Cases, Sample Case, Case Detail, Finding Why, Outcome Receipt, Offline Verifier, Help, persistence, quit/relaunch and all local/remote navigation.
+Edge must not reproduce the marketing site inside localhost.
+No practitioner-visible raw framework errors, developer terminology, accidental localhost destinations or undeclared network dependencies.
+Phase 5 — NFR qualification
+Apply the documented NFR contract to the actual candidate:
+cross-browser; responsive/mobile; WCAG 2.2 AA engineering target; keyboard; screen reader; zoom/reflow; contrast; reduced motion; error/loading/empty states; browser Back/Forward/deep links; console/network cleanliness; Edge offline behavior; native installation; persistence; supported data-scale behavior.
+Automated accessibility results do not substitute for human keyboard/screen-reader qualification.
+Phase 6 — complete journeys
+Browser automation must exercise behavior, not merely assert text exists.
+At minimum:
+Landing → How It Works → Trust Center → About → Request Access
+Request Access → validation → submit → resulting state
+Verifier Access → authenticated verifier → valid receipt → tampered receipt
+Unknown URL → real 404
+Edge launch → Sample Case → reconciliation → Finding → Outcome Receipt → Offline Verification → tampered rejection → quit → relaunch
+Add negative controls proving that navigation/accessibility tests actually fail when their invariant is deliberately broken.
+Phase 7 — candidate qualification
+Do not deploy production first.
+Produce one coherent candidate and qualify:
+source → automated tests → build → protected pre-production → cross-browser/NFR tests → screenshot matrix → human accessibility smoke → founder review.
+Founder review must occur against the exact deployed candidate.
+Only the founder can assign FOUNDER UX ACCEPTED.
+Do not use that state yourself.
+Stop conditions
+Stop and report rather than workaround if implementation requires:
+- deterministic-kernel modification;
+- weakening access control;
+- weakening entitlement enforcement;
+- changing receipt semantics;
+- inventing unsupported tax behavior;
+- production-first testing;
+- fake email/provisioning behavior;
+- adding substantial infrastructure unrelated to the accepted UX blueprint.
+
+Don't implement all 26 roadmap tasks now
+The five future ledgers are useful, but their immediate value is governance and prioritization, not permission to build everything.
+I would mark the roadmap approximately:
+MMP-1.1   ACTIVE — release recovery/qualification
+MMP-1.5   PLANNED — practitioner workflow
+MMP-2     RESEARCH/LAB — evidence intelligence
+MMP-2.1   PLANNED — integrations/connectivity
+MMP-2.5   PLANNED — firm workflow automation
+MMP-3     DIRECTIONAL — assurance platform
+
+The 26 tasks can then be refined by Associate/CPA evidence rather than becoming a predetermined 26-feature build.
+One additional thing I want from the new developer
+Before implementation begins, have them turn the 25 screenshots into a visual acceptance matrix, not just an archive:
+Surface	Desktop	Mobile	Functional	A11y	UX	Action
+Home	reviewed	reviewed	…	…	…	…
+Trust	reviewed	reviewed	…	…	…	…
+About	reviewed	reviewed	…	…	…	…
+Access modal	reviewed	reviewed	defect	FAIL	…	fix
+Verifier	…	…	pending auth	pending	…	qualify
+404	defect	defect	FAIL	…	…	fix
+
+
+That will stop screenshots from again becoming decorative evidence.
+Most importantly, don't ask for another review after the header and modal alone are fixed. The next founder-facing review should be one coherent candidate containing the complete public experience and, separately, a qualified Edge candidate. That is how you stop the repeated “fix three things, discover five more” cycle that consumed the previous two days.

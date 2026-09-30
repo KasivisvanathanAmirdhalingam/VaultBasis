@@ -1,5 +1,7 @@
 # VaultBasis — Status Under Audit
 
+> Historical dated evidence, not current certification. VB-GOV-001 establishes [current status](../docs/status.md) and mandatory task-linked documentation maintenance.
+
 > **System**: VaultBasis Edge (Independent Outcome Verification Edge)  
 > **Release Target**: v0.1.0-preview (MMP-1 Design-Partner Preview)  
 > **Audit Date**: 2026-09-26  

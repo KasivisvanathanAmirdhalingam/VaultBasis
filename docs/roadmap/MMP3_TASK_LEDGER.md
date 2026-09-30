@@ -30,6 +30,8 @@ See [roadmap](VAULTBASIS_PRODUCT_ROADMAP.md), [Git/evidence governance](../audit
 | Security / Privacy Impact | Potential sensitive case evidence: minimize collection, enforce case/firm permissions, document processing location and retention, prevent secrets/evidence in logs. No new egress or analytics by implication. |
 | Acceptance Criteria | External implementations pass declared conformance vectors; API does not delegate assurance authority to AI. |
 | Evidence Required | Versioned task cases with expected/actual results, relevant negative controls, provenance and isolation checks, practitioner before/after task observations, exact source/artifact identity and reviewer decision. |
+| Implementation commit IDs | None — no implementation yet; record full SHA(s) at task closeout. |
+| Documentation closeout | Required six-category review under [execution standard](../task_execution_standard.md); [registry](../task_registry.json). |
 | Status | PROPOSED; no implementation, measured value or qualification claimed. |
 | Risks | Contract drift, inconsistent verifiers, overbroad API claims. |
 
@@ -56,6 +58,8 @@ See [roadmap](VAULTBASIS_PRODUCT_ROADMAP.md), [Git/evidence governance](../audit
 | Security / Privacy Impact | Potential sensitive case evidence: minimize collection, enforce case/firm permissions, document processing location and retention, prevent secrets/evidence in logs. No new egress or analytics by implication. |
 | Acceptance Criteria | History preserves machine/human/AI distinctions and verifies change lineage without modifying prior signed records. |
 | Evidence Required | Versioned task cases with expected/actual results, relevant negative controls, provenance and isolation checks, practitioner before/after task observations, exact source/artifact identity and reviewer decision. |
+| Implementation commit IDs | None — no implementation yet; record full SHA(s) at task closeout. |
+| Documentation closeout | Required six-category review under [execution standard](../task_execution_standard.md); [registry](../task_registry.json). |
 | Status | PROPOSED; no implementation, measured value or qualification claimed. |
 | Risks | Privacy leakage, ambiguous graph semantics, false tamper-proof claims. |
 
@@ -82,6 +86,8 @@ See [roadmap](VAULTBASIS_PRODUCT_ROADMAP.md), [Git/evidence governance](../audit
 | Security / Privacy Impact | Potential sensitive case evidence: minimize collection, enforce case/firm permissions, document processing location and retention, prevent secrets/evidence in logs. No new egress or analytics by implication. |
 | Acceptance Criteria | Tenant isolation, least privilege, recovery and deployment evidence are qualified; firm policy never becomes a tax determination. |
 | Evidence Required | Versioned task cases with expected/actual results, relevant negative controls, provenance and isolation checks, practitioner before/after task observations, exact source/artifact identity and reviewer decision. |
+| Implementation commit IDs | None — no implementation yet; record full SHA(s) at task closeout. |
+| Documentation closeout | Required six-category review under [execution standard](../task_execution_standard.md); [registry](../task_registry.json). |
 | Status | PROPOSED; no implementation, measured value or qualification claimed. |
 | Risks | Complexity, policy bypass, supply-chain risk, pulling enterprise scope into stabilization. |
 
@@ -108,6 +114,8 @@ See [roadmap](VAULTBASIS_PRODUCT_ROADMAP.md), [Git/evidence governance](../audit
 | Security / Privacy Impact | Potential sensitive case evidence: minimize collection, enforce case/firm permissions, document processing location and retention, prevent secrets/evidence in logs. No new egress or analytics by implication. |
 | Acceptance Criteria | Each new domain has an explicit contract, corpus, uncertainty boundary and independent qualification; no inherited claims of correctness. |
 | Evidence Required | Versioned task cases with expected/actual results, relevant negative controls, provenance and isolation checks, practitioner before/after task observations, exact source/artifact identity and reviewer decision. For AI: grounded/ungrounded and adversarial examples, model/prompt version, uncertainty and override evaluations. |
+| Implementation commit IDs | None — no implementation yet; record full SHA(s) at task closeout. |
+| Documentation closeout | Required six-category review under [execution standard](../task_execution_standard.md); [registry](../task_registry.json). |
 | Status | PROPOSED; no implementation, measured value or qualification claimed. |
 | Risks | Unvalidated generalization, new semantic authority, unbounded connector scope. |
 

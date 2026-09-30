@@ -1,6 +1,6 @@
 # Canonical UX blueprint — MMP11-UX-001
 
-**Proposed for founder IA review. No implementation or acceptance implied.**
+**Accepted by founder as the planning baseline under the subsequent controlled-implementation directive.** Baseline: `95708fade15efe583e25c6f5257e4bebe285f864`. This does not constitute deployed UX acceptance or runtime qualification. Changes to this working contract require documented decisions linked to task IDs.
 
 ## Experience contract
 

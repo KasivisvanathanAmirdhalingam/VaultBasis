@@ -32,6 +32,8 @@ See [roadmap](VAULTBASIS_PRODUCT_ROADMAP.md), [Git/evidence governance](../audit
 | Security / Privacy Impact | Potential sensitive case evidence: minimize collection, enforce case/firm permissions, document processing location and retention, prevent secrets/evidence in logs. No new egress or analytics by implication. |
 | Acceptance Criteria | Unsupported evidence remains visible; duplicate classification has an explicit rule and never silently deletes historical evidence. |
 | Evidence Required | Versioned task cases with expected/actual results, relevant negative controls, provenance and isolation checks, practitioner before/after task observations, exact source/artifact identity and reviewer decision. |
+| Implementation commit IDs | None — no implementation yet; record full SHA(s) at task closeout. |
+| Documentation closeout | Required six-category review under [execution standard](../task_execution_standard.md); [registry](../task_registry.json). |
 | Status | PROPOSED; no implementation, measured value or qualification claimed. |
 | Risks | Workflow state may be mistaken for assurance outcome; unsupported evidence needs safe handling. |
 
@@ -58,6 +60,8 @@ See [roadmap](VAULTBASIS_PRODUCT_ROADMAP.md), [Git/evidence governance](../audit
 | Security / Privacy Impact | Potential sensitive case evidence: minimize collection, enforce case/firm permissions, document processing location and retention, prevent secrets/evidence in logs. No new egress or analytics by implication. |
 | Acceptance Criteria | Every blocker/request traces to actual inventory or declared requirements; readiness never asserts tax correctness; no automatic send. |
 | Evidence Required | Versioned task cases with expected/actual results, relevant negative controls, provenance and isolation checks, practitioner before/after task observations, exact source/artifact identity and reviewer decision. |
+| Implementation commit IDs | None — no implementation yet; record full SHA(s) at task closeout. |
+| Documentation closeout | Required six-category review under [execution standard](../task_execution_standard.md); [registry](../task_registry.json). |
 | Status | PROPOSED; no implementation, measured value or qualification claimed. |
 | Risks | Readiness rules may overstate completeness or imply legal sufficiency. |
 
@@ -84,6 +88,8 @@ See [roadmap](VAULTBASIS_PRODUCT_ROADMAP.md), [Git/evidence governance](../audit
 | Security / Privacy Impact | Potential sensitive case evidence: minimize collection, enforce case/firm permissions, document processing location and retention, prevent secrets/evidence in logs. No new egress or analytics by implication. |
 | Acceptance Criteria | Counts reconcile to defined categories without hidden double counting; agreements and excluded items remain inspectable. |
 | Evidence Required | Versioned task cases with expected/actual results, relevant negative controls, provenance and isolation checks, practitioner before/after task observations, exact source/artifact identity and reviewer decision. |
+| Implementation commit IDs | None — no implementation yet; record full SHA(s) at task closeout. |
+| Documentation closeout | Required six-category review under [execution standard](../task_execution_standard.md); [registry](../task_registry.json). |
 | Status | PROPOSED; no implementation, measured value or qualification claimed. |
 | Risks | Overlapping categories and ranking may hide important evidence. |
 
@@ -110,6 +116,8 @@ See [roadmap](VAULTBASIS_PRODUCT_ROADMAP.md), [Git/evidence governance](../audit
 | Security / Privacy Impact | Potential sensitive case evidence: minimize collection, enforce case/firm permissions, document processing location and retention, prevent secrets/evidence in logs. No new egress or analytics by implication. |
 | Acceptance Criteria | Workflow resolution never changes historical machine state; reevaluation creates traceable new machine evidence; notes are attributable. |
 | Evidence Required | Versioned task cases with expected/actual results, relevant negative controls, provenance and isolation checks, practitioner before/after task observations, exact source/artifact identity and reviewer decision. |
+| Implementation commit IDs | None — no implementation yet; record full SHA(s) at task closeout. |
+| Documentation closeout | Required six-category review under [execution standard](../task_execution_standard.md); [registry](../task_registry.json). |
 | Status | PROPOSED; no implementation, measured value or qualification claimed. |
 | Risks | A workflow RESOLVED label may be confused with deterministic resolution. |
 
@@ -136,6 +144,8 @@ See [roadmap](VAULTBASIS_PRODUCT_ROADMAP.md), [Git/evidence governance](../audit
 | Security / Privacy Impact | Potential sensitive case evidence: minimize collection, enforce case/firm permissions, document processing location and retention, prevent secrets/evidence in logs. No new egress or analytics by implication. |
 | Acceptance Criteria | All included facts trace to their origin; notes are distinguishable from machine facts; signed receipt bytes remain unchanged. |
 | Evidence Required | Versioned task cases with expected/actual results, relevant negative controls, provenance and isolation checks, practitioner before/after task observations, exact source/artifact identity and reviewer decision. |
+| Implementation commit IDs | None — no implementation yet; record full SHA(s) at task closeout. |
+| Documentation closeout | Required six-category review under [execution standard](../task_execution_standard.md); [registry](../task_registry.json). |
 | Status | PROPOSED; no implementation, measured value or qualification claimed. |
 | Risks | Sensitive data disclosure; mismatch between export and signed history. |
 
@@ -162,6 +172,8 @@ See [roadmap](VAULTBASIS_PRODUCT_ROADMAP.md), [Git/evidence governance](../audit
 | Security / Privacy Impact | Potential sensitive case evidence: minimize collection, enforce case/firm permissions, document processing location and retention, prevent secrets/evidence in logs. No new egress or analytics by implication. |
 | Acceptance Criteria | Opening a case cannot show another case’s findings/receipt; readiness displays blockers rather than unsupported certainty. |
 | Evidence Required | Versioned task cases with expected/actual results, relevant negative controls, provenance and isolation checks, practitioner before/after task observations, exact source/artifact identity and reviewer decision. |
+| Implementation commit IDs | None — no implementation yet; record full SHA(s) at task closeout. |
+| Documentation closeout | Required six-category review under [execution standard](../task_execution_standard.md); [registry](../task_registry.json). |
 | Status | PROPOSED; no implementation, measured value or qualification claimed. |
 | Risks | Cross-case privacy leakage; dashboard may precede higher-value practitioner needs. |
 
