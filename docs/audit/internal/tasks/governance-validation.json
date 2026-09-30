@@ -38,7 +38,9 @@
       ]
     }
   },
-  "implementation_state_at_check": "IN_PROGRESS; full real implementation SHA to be recorded after commit",
+  "implementation_state_at_check": "IMPLEMENTED; real governance implementation SHA recorded",
   "runtime_tests": "Not applicable: no application/kernel changes; documentation checker exercised directly",
-  "ci_enforcement": "Not yet wired into CI; standing local task-closeout gate"
+  "ci_enforcement": "Not yet wired into CI; standing local task-closeout gate",
+  "implementation_commit": "dfc176f193cc4e3378bb88189aca35e364496f8d",
+  "final_closeout_check": "python3 scripts/check_task_traceability.py; result recorded after successful execution"
 }

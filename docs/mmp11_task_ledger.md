@@ -7,7 +7,7 @@ Status: ACTIVE — controlled recovery authorized. [Planning baseline](ux/README
 | Task ID | Task | State | Implementation commit IDs | Acceptance / exit evidence |
 |---|---|---|---|---|
 | MMP11-AUDIT-001 | Preserve accepted takeover planning baseline | IMPLEMENTED | `95708fade15efe583e25c6f5257e4bebe285f864` | Planning acceptance and immutable evidence commit; not runtime qualification. |
-| VB-GOV-001 | Establish automatic task/commit/documentation closeout | IN_PROGRESS | None — not implementation-closed | Unique IDs, real implementation SHAs, six documentation dispositions, checker and negative controls. |
+| VB-GOV-001 | Establish automatic task/commit/documentation closeout | IMPLEMENTED | `dfc176f193cc4e3378bb88189aca35e364496f8d` | Unique IDs, real implementation SHAs, six documentation dispositions, checker and negative controls. |
 | MMP11-GIT-001 | Establish verified bounded Web convergence branch | AUTHORIZED | None — not implementation-closed | Fresh refs compared; branch from release baseline; Edge remains independent. |
 | MMP11-UX-001 | Deliver coherent MMP-1.1 practitioner experience | AUTHORIZED | None — not implementation-closed | Complete accepted blueprint and journeys; no kernel changes; one complete candidate review. |
 | MMP11-UX-FOUNDATION-001 | Shared design tokens and application shell | AUTHORIZED | None — not implementation-closed | One header/footer, typography/spacing/controls/status/focus system and distinct local navigation. |
