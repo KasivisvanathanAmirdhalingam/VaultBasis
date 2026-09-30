@@ -15,7 +15,7 @@
       --border: #e2e8f0;
       --border-accent: #cbd5e1;
       --text: #0f172a;
-      --text-muted: #475569;
+      --text-muted: #374151;
       --primary: #2563eb;
       --primary-hover: #2563eb;
       --accent: #0284c7;
@@ -52,16 +52,11 @@
       gap: 12px;
     }
     .brand-logo {
-      width: 32px;
-      height: 32px;
-      background: linear-gradient(135deg, #2563eb, #0284c7);
-      border-radius: 6px;
+      width: 36px;
+      height: 36px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: 800;
-      font-size: 1.1rem;
-      color: white;
     }
     .brand h1 {
       font-family: 'Outfit', sans-serif;
@@ -247,16 +242,17 @@
   <header role="banner">
     <div class="brand" aria-label="VaultBasis Home">
       <div class="brand-logo" aria-hidden="true">
-        <svg width="32" height="32" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <svg width="36" height="36" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect width="38" height="38" rx="9" fill="url(#vb-grad-edge)"/>
           <defs>
             <linearGradient id="vb-grad-edge" x1="0" y1="0" x2="38" y2="38" gradientUnits="userSpaceOnUse">
               <stop offset="0%" stop-color="#2563eb"/>
               <stop offset="100%" stop-color="#0284c7"/>
             </linearGradient>
           </defs>
-          <path d="M6 6 L19 30" stroke="url(#vb-grad-edge)" stroke-width="3.5" stroke-linecap="round"/>
-          <path d="M32 6 L19 30" stroke="url(#vb-grad-edge)" stroke-width="3.5" stroke-linecap="round"/>
-          <path d="M19 6 L19 28" stroke="url(#vb-grad-edge)" stroke-width="2.5" stroke-linecap="round" opacity="0.55"/>
+          <path d="M10 10 L19 26" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M28 10 L19 26" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="19" y1="26" x2="19" y2="30" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
         </svg>
       </div>
       <div>
