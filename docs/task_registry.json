@@ -1172,9 +1172,11 @@
       "stage": "Governance",
       "ledger": "docs/mmp11_task_ledger.md",
       "owner": "Engineering; human acceptance by founder where specified",
-      "state": "IN_PROGRESS",
+      "state": "IMPLEMENTED",
       "acceptance": "Unique IDs, real implementation SHAs, six documentation dispositions, checker and negative controls.",
-      "implementation_commits": [],
+      "implementation_commits": [
+        "dfc176f193cc4e3378bb88189aca35e364496f8d"
+      ],
       "closeout": "docs/audit/internal/tasks/VB-GOV-001.md",
       "documentation": {
         "technical": {

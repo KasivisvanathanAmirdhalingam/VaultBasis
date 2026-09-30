@@ -5,7 +5,7 @@ Updated: 2026-09-30. Controlling tasks: MMP11-AUDIT-001, VB-GOV-001. [Task/commi
 | Area | Current scoped state | Evidence / next gate |
 |---|---|---|
 | Takeover audit | Founder accepted as planning baseline; preserved at commit `95708fade15efe583e25c6f5257e4bebe285f864` | [UX packet](ux/README.md); does not confer founder UI acceptance |
-| Governance maintenance | See VB-GOV-001 in registry for implementation/traceability state | [Execution standard](task_execution_standard.md); six documentation categories maintained automatically |
+| Governance maintenance | IMPLEMENTED at `dfc176f193cc4e3378bb88189aca35e364496f8d`; documentation checker verified | [Execution standard](task_execution_standard.md); six documentation categories maintained automatically |
 | MMP-1.1 | ACTIVE — controlled recovery implementation authorized | [Active task ledger](mmp11_task_ledger.md); application work not begun in this documentation task |
 | Web track | `fix/mmp11-ux-001` to be established from verified release baseline before application changes | Exact SHA CI → protected preview → full qualification → founder decision |
 | Edge track | Existing `83d78db` remediation remains unqualified at recipient boundary | Separate native package audit and per-OS qualification |

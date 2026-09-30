@@ -1,5 +1,7 @@
 # VB-GOV-001 — Task closeout
 
+Implementation state: IMPLEMENTED (governance only). Implementation commit: `dfc176f193cc4e3378bb88189aca35e364496f8d`.
+
 State and exact implementation IDs: [registry](../../../task_registry.json).
 
 Requirement: Unique IDs, real implementation SHAs, six documentation dispositions, checker and negative controls.
