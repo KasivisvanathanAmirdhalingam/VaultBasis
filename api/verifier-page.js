@@ -11,21 +11,23 @@
  *
  * Request flow:
  *   1. Read vb_session cookie from request headers
- *   2. Validate session cryptographically against private Blob storage
- *      (same logic as verifier-session-check.js)
- *   3a. Valid session → read verifier HTML from Blob, stream to client
- *   3b. Invalid/missing session → 302 redirect to /verifier-access
+ *   2. Load session record from private Blob (hash-keyed)
+ *   3. Verify session is ACTIVE and unexpired
+ *   4. Load the underlying preview-access record (stored pathname in session)
+ *   5. Verify preview-access is still ACTIVE and unexpired
+ *      — this propagates revocation: revoking the preview-access credential
+ *        immediately invalidates all sessions it authorized, regardless of
+ *        the session's own 4-hour TTL.
+ *   6a. Both valid → serve verifier HTML
+ *   6b. Any check fails → 302 redirect to /verifier-access
  *
  * The verifier HTML is stored in private Blob at verifier-app/index.html
  * so it is not accessible as a public static file.
  *
- * The build pipeline (build_public_web.js) uploads the verifier HTML to
- * private Blob at deploy time — it is NOT placed in outputDirectory.
- *
  * Security properties:
- *   - Server-side session validation is authoritative (not defense-in-depth)
+ *   - Server-side validation is authoritative (not defense-in-depth)
  *   - Unauthenticated requests never receive verifier application code
- *   - Session must be ACTIVE and unexpired (server-side clock)
+ *   - Revocation propagates: preview-access REVOKED → session denied immediately
  *   - Fail-closed: storage error → 503, never serve verifier
  */
 
@@ -33,6 +35,8 @@ const crypto = require('crypto');
 const { get } = require('@vercel/blob');
 const fs = require('fs');
 const path = require('path');
+
+const PREVIEW_ACCESS_NAMESPACE = 'preview-access/';
 
 const SESSION_COOKIE_NAME = 'vb_session';
 const SESSION_NAMESPACE = 'sessions/';
@@ -117,7 +121,39 @@ module.exports = async (req, res) => {
     return res.redirect(302, '/verifier-access?next=/verifier');
   }
 
-  // Session is valid — serve the verifier application.
+  // Revocation propagation: load the underlying preview-access record and
+  // verify it is still ACTIVE. This ensures that revoking the preview-access
+  // credential immediately invalidates all sessions it authorized, rather than
+  // allowing up to 4h of continued access after revocation.
+  if (!record.previewAccessBlobPathname ||
+      !record.previewAccessBlobPathname.startsWith(PREVIEW_ACCESS_NAMESPACE)) {
+    // Malformed session record — session predates revocation-check or is corrupt.
+    console.error('[verifier-page] session record missing previewAccessBlobPathname');
+    return res.redirect(302, '/verifier-access?next=/verifier');
+  }
+
+  try {
+    const paRaw = await readBlobText(record.previewAccessBlobPathname);
+    if (!paRaw) {
+      return res.redirect(302, '/verifier-access?next=/verifier');
+    }
+    const paRecord = JSON.parse(paRaw);
+    if (paRecord.status !== 'ACTIVE') {
+      return res.redirect(302, '/verifier-access?next=/verifier');
+    }
+    if (Date.now() > new Date(paRecord.expiresAt).getTime()) {
+      return res.redirect(302, '/verifier-access?next=/verifier');
+    }
+  } catch (e) {
+    if (e && e.name === 'BlobNotFoundError') {
+      // Preview-access record deleted — treat as revoked.
+      return res.redirect(302, '/verifier-access?next=/verifier');
+    }
+    console.error('[verifier-page] preview-access lookup error:', e.message);
+    return res.status(503).send('Service temporarily unavailable. Please try again.');
+  }
+
+  // Session is valid and underlying preview-access is still ACTIVE — serve verifier.
   // Try private Blob first; fall back to local filesystem for dev/build environments.
   let verifierHtml;
   try {

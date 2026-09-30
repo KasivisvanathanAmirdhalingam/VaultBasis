@@ -26,16 +26,19 @@
  *   - Fail-closed: storage errors → 503, never permit
  *
  * Rate limiting:
- *   - Key: SHA-256(IP) — IP is never stored raw
- *   - Window: 15 minutes
- *   - Limit: 10 attempts per window per IP
+ *   - Key: SHA-256(rightmost X-Forwarded-For entry) — IP never stored raw
+ *   - Window: 15 minutes; Limit: 10 attempts per window per IP
  *   - Stored as rate-limit/<hash>.json in private Blob
- *   - Limit exceeded → 429, window and count in response headers only
+ *   - Limit exceeded → 429 with Retry-After header
+ *   - NOT a strict distributed rate-limit guarantee: @vercel/blob provides no
+ *     atomic compare-and-swap, so concurrent requests may both read the same
+ *     counter and both increment. This is best-effort abuse throttling.
+ *     The primary brute-force defense is the high-entropy 32-byte credential.
  */
 
 const crypto = require('crypto');
 const { put, get } = require('@vercel/blob');
-const { isWellFormedToken, validatePreviewAccess } = require('./preview-access-store');
+const { isWellFormedToken, validatePreviewAccess, previewAccessPathname } = require('./preview-access-store');
 
 const SESSION_COOKIE_NAME = 'vb_session';
 const SESSION_TTL_MS = 4 * 60 * 60 * 1000;
@@ -61,8 +64,14 @@ function deny(res) {
 }
 
 function getClientIp(req) {
+  // On Vercel, the platform appends the true client IP as the last entry in
+  // X-Forwarded-For. Using the leftmost entry would trust attacker-controlled
+  // values. Using the rightmost entry trusts only Vercel's own proxy append.
   const forwarded = req.headers['x-forwarded-for'];
-  if (forwarded) return forwarded.split(',')[0].trim();
+  if (forwarded) {
+    const parts = forwarded.split(',');
+    return parts[parts.length - 1].trim();
+  }
   return req.socket?.remoteAddress || 'unknown';
 }
 
@@ -161,6 +170,11 @@ module.exports = async (req, res) => {
   const sessionRecord = {
     accessId: authResult.record.accessId,
     email: authResult.record.email,
+    // previewAccessBlobPathname is the SHA-256-keyed Blob path of the preview-access
+    // record that authorized this session. verifier-page.js and verifier-session-check.js
+    // load this on every protected request to verify the underlying access is still
+    // ACTIVE — ensuring revocation of the preview-access propagates to existing sessions.
+    previewAccessBlobPathname: previewAccessPathname(token),
     createdAt: new Date(now).toISOString(),
     expiresAt: new Date(now + SESSION_TTL_MS).toISOString(),
     status: 'ACTIVE',

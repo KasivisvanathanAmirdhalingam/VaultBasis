@@ -3,15 +3,21 @@
 /**
  * GET /api/verifier-session-check
  *
- * Server-side session validation for the Web Verifier.
- * Called by the verifier page on load to confirm the session cookie
- * is valid before rendering the verifier UI.
+ * Server-side session validation for the Web Verifier (defense-in-depth layer).
+ * Called by the verifier page JS on load. The authoritative gate is
+ * api/verifier-page.js which validates before serving any content.
  *
- * Returns 200 { ok: true } if the session is valid and unexpired.
+ * Validation steps (matches verifier-page.js):
+ *   1. Read vb_session cookie
+ *   2. Load session record from private Blob (hash-keyed)
+ *   3. Verify session ACTIVE and unexpired
+ *   4. Load underlying preview-access record (stored pathname in session)
+ *   5. Verify preview-access still ACTIVE and unexpired
+ *      — propagates revocation to existing sessions
+ *
+ * Returns 200 { ok: true } if fully valid.
  * Returns 401 { error: 'Session invalid or expired.' } otherwise.
- *
- * The middleware cookie-presence check is a first layer only.
- * This endpoint performs the cryptographic server-side validation.
+ * Returns 503 on storage errors (fail-closed).
  */
 
 const crypto = require('crypto');
@@ -19,6 +25,7 @@ const { get } = require('@vercel/blob');
 
 const SESSION_COOKIE_NAME = 'vb_session';
 const SESSION_NAMESPACE = 'sessions/';
+const PREVIEW_ACCESS_NAMESPACE = 'preview-access/';
 
 function parseCookies(cookieHeader) {
   const cookies = {};
@@ -43,6 +50,19 @@ function isWellFormedSessionToken(token) {
   );
 }
 
+async function readBlobJson(pathname) {
+  const result = await get(pathname, { access: 'private' });
+  if (!result) return null;
+  const chunks = [];
+  const reader = result.stream.getReader();
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    chunks.push(value);
+  }
+  return JSON.parse(Buffer.concat(chunks.map(c => Buffer.from(c))).toString('utf8'));
+}
+
 module.exports = async (req, res) => {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed.' });
@@ -55,26 +75,18 @@ module.exports = async (req, res) => {
     return res.status(401).json({ error: 'Session invalid or expired.' });
   }
 
+  // Step 1: load and validate session record.
   let record;
   try {
-    const pathname = sessionPathname(sessionToken);
-    const result = await get(pathname, { access: 'private' });
-    if (!result) {
+    record = await readBlobJson(sessionPathname(sessionToken));
+    if (!record) {
       return res.status(401).json({ error: 'Session invalid or expired.' });
     }
-    const chunks = [];
-    const reader = result.stream.getReader();
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      chunks.push(value);
-    }
-    record = JSON.parse(Buffer.concat(chunks.map(c => Buffer.from(c))).toString('utf8'));
   } catch (e) {
     if (e && e.name === 'BlobNotFoundError') {
       return res.status(401).json({ error: 'Session invalid or expired.' });
     }
-    console.error('[verifier-session-check] error:', e.message);
+    console.error('[verifier-session-check] session lookup error:', e.message);
     return res.status(503).json({ error: 'Session check could not be completed.' });
   }
 
@@ -84,6 +96,33 @@ module.exports = async (req, res) => {
 
   if (Date.now() > new Date(record.expiresAt).getTime()) {
     return res.status(401).json({ error: 'Session invalid or expired.' });
+  }
+
+  // Step 2: revocation propagation — verify the underlying preview-access
+  // credential is still ACTIVE. This ensures revoking a preview-access
+  // immediately denies any session it authorized.
+  if (!record.previewAccessBlobPathname ||
+      !record.previewAccessBlobPathname.startsWith(PREVIEW_ACCESS_NAMESPACE)) {
+    return res.status(401).json({ error: 'Session invalid or expired.' });
+  }
+
+  try {
+    const paRecord = await readBlobJson(record.previewAccessBlobPathname);
+    if (!paRecord) {
+      return res.status(401).json({ error: 'Session invalid or expired.' });
+    }
+    if (paRecord.status !== 'ACTIVE') {
+      return res.status(401).json({ error: 'Session invalid or expired.' });
+    }
+    if (Date.now() > new Date(paRecord.expiresAt).getTime()) {
+      return res.status(401).json({ error: 'Session invalid or expired.' });
+    }
+  } catch (e) {
+    if (e && e.name === 'BlobNotFoundError') {
+      return res.status(401).json({ error: 'Session invalid or expired.' });
+    }
+    console.error('[verifier-session-check] preview-access lookup error:', e.message);
+    return res.status(503).json({ error: 'Session check could not be completed.' });
   }
 
   return res.status(200).json({ ok: true });
