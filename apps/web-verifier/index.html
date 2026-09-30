@@ -413,6 +413,27 @@
   </footer>
 
   <script>
+    // Server-side session validation — runs before any verifier UI is usable.
+    // If the session cookie is absent or invalid, redirect to the access gate.
+    (async function checkSession() {
+      try {
+        const resp = await fetch('/api/verifier-session-check', {
+          method: 'GET',
+          credentials: 'same-origin',
+        });
+        if (!resp.ok) {
+          const dest = new URL('/verifier-access', window.location.origin);
+          dest.searchParams.set('next', window.location.pathname);
+          window.location.replace(dest.toString());
+        }
+      } catch (_) {
+        // Network failure — fail closed: redirect to access gate.
+        const dest = new URL('/verifier-access', window.location.origin);
+        dest.searchParams.set('next', window.location.pathname);
+        window.location.replace(dest.toString());
+      }
+    })();
+
     // Dynamic routing to marketing site
     document.addEventListener('DOMContentLoaded', () => {
       const setHref = (id, href) => {

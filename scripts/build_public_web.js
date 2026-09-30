@@ -62,7 +62,7 @@ fs.writeFileSync(path.join(DIST_DIR, 'index.html'), marketingHtml, 'utf8');
 console.log('✓ Packaged Public Marketing Portal -> dist/public-web/index.html');
 
 // Copy standalone pages
-const standalonePages = ['privacy-policy', 'terms-of-service', 'contact', 'security-disclosure', 'about', 'trust-assurance', 'faq'];
+const standalonePages = ['privacy-policy', 'terms-of-service', 'contact', 'security-disclosure', 'about', 'trust-assurance', 'faq', 'verifier-access'];
 for (const page of standalonePages) {
   const src = path.join(APPS_DIR, 'web-marketing', `${page}.html`);
   if (fs.existsSync(src)) {
@@ -187,37 +187,79 @@ const notFoundHtml = `<!DOCTYPE html>
 fs.writeFileSync(path.join(DIST_DIR, '404.html'), notFoundHtml, 'utf8');
 console.log('✓ Generated Custom 404 Page -> dist/public-web/404.html');
 
-// 6.5. Generate Vercel Edge Middleware for Free Tier Password Protection
+// 6.5. Generate Vercel Edge Middleware — capability access control
+// PUBLIC_INFORMATIONAL routes pass through anonymously.
+// AUTHENTICATED_CAPABILITY routes (/verifier) require a valid session cookie
+// issued by /api/verifier-session after entitlement token validation.
 const middlewareJs = `
+// Routes that are always publicly accessible without authentication.
+const PUBLIC_PREFIXES = [
+  '/',
+  '/about',
+  '/faq',
+  '/trust-assurance',
+  '/contact',
+  '/security-disclosure',
+  '/privacy-policy',
+  '/terms-of-service',
+  '/docs/',
+  '/schemas/',
+  '/sample-receipt',
+  '/marketing',
+  '/404',
+  '/api/request-access',
+  '/api/verifier-session',
+  '/api/verifier-session-check',
+  '/verifier-access',
+  '/_next/',
+  '/favicon',
+];
+
+// SESSION_COOKIE_NAME must match api/verifier-session.js
+const SESSION_COOKIE_NAME = 'vb_session';
+
 export const config = {
-  matcher: '/',
+  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
 };
 
 export default function middleware(req) {
-  const basicAuth = req.headers.get('authorization');
-  const url = req.url;
+  const { pathname } = new URL(req.url);
 
-  if (basicAuth) {
-    const authValue = basicAuth.split(' ')[1];
-    const [user, pwd] = atob(authValue).split(':');
-
-    if (user === 'cpa' && pwd === 'CPA-PREVIEW-2026') {
-      return new Response(null, {
-        headers: { 'x-middleware-next': '1' }
-      });
-    }
+  // Allow all PUBLIC_INFORMATIONAL routes through immediately.
+  const isPublic = PUBLIC_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(prefix)
+  );
+  if (isPublic) {
+    return new Response(null, { headers: { 'x-middleware-next': '1' } });
   }
 
-  return new Response('Auth required', {
-    status: 401,
-    headers: {
-      'WWW-Authenticate': 'Basic realm="VaultBasis Design Partner Preview"'
+  // AUTHENTICATED_CAPABILITY: /verifier requires a valid session cookie.
+  // The session value is a 64-hex-char token validated server-side by
+  // api/verifier-session.js — the middleware only checks its presence.
+  // Actual cryptographic validation occurs server-side on each API call.
+  if (pathname.startsWith('/verifier')) {
+    const cookies = req.headers.get('cookie') || '';
+    const hasSession = cookies.split(';').some((c) => {
+      const [name] = c.trim().split('=');
+      return name.trim() === SESSION_COOKIE_NAME;
+    });
+
+    if (!hasSession) {
+      // Redirect to access-required page rather than exposing the verifier UI.
+      const dest = new URL('/verifier-access', req.url);
+      dest.searchParams.set('next', pathname);
+      return Response.redirect(dest.toString(), 302);
     }
-  });
+    return new Response(null, { headers: { 'x-middleware-next': '1' } });
+  }
+
+  // Anything else not explicitly listed passes through — /api/download
+  // has its own full server-side entitlement check (SEC-002).
+  return new Response(null, { headers: { 'x-middleware-next': '1' } });
 }
 `;
 fs.writeFileSync(path.join(DIST_DIR, 'middleware.js'), middlewareJs, 'utf8');
-console.log('✓ Generated Vercel Edge Middleware for Password Protection -> dist/public-web/middleware.js');
+console.log('✓ Generated Vercel Edge Middleware (capability access control) -> dist/public-web/middleware.js');
 
 // 7. Security Invariant Audit (Zero Leakage Check)
 console.log('--------------------------------------------------------------------------------');

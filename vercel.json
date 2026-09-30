@@ -46,6 +46,10 @@
     {
       "source": "/faq",
       "destination": "/faq.html"
+    },
+    {
+      "source": "/verifier-access",
+      "destination": "/verifier-access.html"
     }
   ],
   "headers": [

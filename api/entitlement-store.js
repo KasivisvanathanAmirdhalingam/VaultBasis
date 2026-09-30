@@ -158,11 +158,68 @@ async function validateEntitlement(rawToken, entitlementId, artifactHash) {
   return { ok: true, record };
 }
 
+/**
+ * Validate an entitlement for verifier access — same as validateEntitlement
+ * but without artifact-hash binding. Verifier access requires a valid,
+ * active, unexpired entitlement; it does not bind to a specific artifact.
+ *
+ * @param {string} rawToken       - Supplied bearer token
+ * @param {string} entitlementId  - Supplied entitlement ID
+ */
+async function validateEntitlementForVerifier(rawToken, entitlementId) {
+  if (!isWellFormedToken(rawToken)) {
+    return { ok: false, reason: 'malformed_token' };
+  }
+
+  let record;
+  try {
+    const pathname = entitlementPathname(rawToken);
+    const result = await get(pathname, { access: 'private' });
+    if (!result) {
+      return { ok: false, reason: 'not_found' };
+    }
+    const chunks = [];
+    const reader = result.stream.getReader();
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value);
+    }
+    record = JSON.parse(Buffer.concat(chunks.map(c => Buffer.from(c))).toString('utf8'));
+  } catch (e) {
+    if (e && e.name === 'BlobNotFoundError') {
+      return { ok: false, reason: 'not_found' };
+    }
+    console.error('[entitlement-store] lookup error:', e.message);
+    return { ok: false, reason: 'storage_error' };
+  }
+
+  if (record.status !== 'ACTIVE') {
+    return { ok: false, reason: 'not_active' };
+  }
+
+  if (Date.now() > new Date(record.expiresAt).getTime()) {
+    return { ok: false, reason: 'expired' };
+  }
+
+  const storedIdBuf = Buffer.from(record.entitlementId, 'utf8');
+  const suppliedIdBuf = Buffer.from(String(entitlementId), 'utf8');
+  const idMatch =
+    storedIdBuf.length === suppliedIdBuf.length &&
+    crypto.timingSafeEqual(storedIdBuf, suppliedIdBuf);
+  if (!idMatch) {
+    return { ok: false, reason: 'entitlement_mismatch' };
+  }
+
+  return { ok: true, record };
+}
+
 module.exports = {
   generateToken,
   isWellFormedToken,
   createEntitlement,
   validateEntitlement,
+  validateEntitlementForVerifier,
   entitlementPathname,
   TOKEN_HEX_LENGTH,
   ENTITLEMENT_TTL_MS,
