@@ -40,7 +40,12 @@ if (fs.existsSync(DIST_DIR)) {
   fs.rmSync(DIST_DIR, { recursive: true, force: true });
 }
 fs.mkdirSync(DIST_DIR, { recursive: true });
-fs.mkdirSync(path.join(DIST_DIR, 'verifier'), { recursive: true });
+// NOTE: dist/public-web/verifier/ is intentionally NOT created.
+// The verifier HTML must NOT be a static file in outputDirectory.
+// Vercel serves static files before evaluating rewrites, so placing
+// verifier/index.html here would bypass the /api/verifier-page auth gate.
+// The verifier HTML is served exclusively by api/verifier-page.js after
+// server-side session validation (ACCESS-INV-001).
 fs.mkdirSync(path.join(DIST_DIR, 'schemas'), { recursive: true });
 fs.mkdirSync(path.join(DIST_DIR, 'api', 'data'), { recursive: true });
 
@@ -74,15 +79,16 @@ for (const page of standalonePages) {
   }
 }
 
-// 4. Build Public Web Verifier (dist/public-web/verifier/index.html)
+// 4. Web Verifier — served by api/verifier-page.js, NOT as a static file.
+// The verifier HTML is read from apps/web-verifier/index.html by the serverless
+// function at request time, after server-side session validation.
+// Verify the source exists so build fails fast if it is missing.
 const verifierSourcePath = path.join(APPS_DIR, 'web-verifier', 'index.html');
 if (!fs.existsSync(verifierSourcePath)) {
   console.error(`❌ ERROR: Web verifier source missing at ${verifierSourcePath}`);
   process.exit(1);
 }
-let verifierHtml = fs.readFileSync(verifierSourcePath, 'utf8');
-fs.writeFileSync(path.join(DIST_DIR, 'verifier', 'index.html'), verifierHtml, 'utf8');
-console.log('✓ Packaged Public Offline Verifier -> dist/public-web/verifier/index.html');
+console.log('✓ Web Verifier source verified (served by api/verifier-page.js — not placed in outputDirectory)');
 
 // 5. Copy Normative Schema (dist/public-web/schemas/receipt-v0.1.json)
 const schemaSourcePath = path.join(SCHEMAS_DIR, 'receipt-v0.1.json');

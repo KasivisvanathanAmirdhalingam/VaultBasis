@@ -101,12 +101,19 @@ def test_incremental_build_execution_and_artifacts():
     assert "Outcome Receipt" in marketing_html
     assert "Request Design-Partner Access" in marketing_html
 
-    # 2. Public Offline Verifier
+    # 2. Web Verifier must NOT be a static file in outputDirectory.
+    # Vercel serves static files before rewrites — placing verifier/index.html
+    # here would bypass the /api/verifier-page auth gate (ACCESS-INV-001).
+    # The verifier HTML is served exclusively by api/verifier-page.js.
     verifier_index = dist_dir / "verifier" / "index.html"
-    assert verifier_index.is_file(), "dist/public-web/verifier/index.html must exist"
-    verifier_html = verifier_index.read_text(encoding="utf-8")
-    assert "VaultBasis Verifier" in verifier_html
-    assert "SubtleCrypto" in verifier_html or "crypto.subtle" in verifier_html
+    assert not verifier_index.exists(), (
+        "dist/public-web/verifier/index.html must NOT exist — "
+        "placing the verifier HTML in outputDirectory bypasses the server-side "
+        "auth gate in api/verifier-page.js (Vercel serves static files before rewrites)"
+    )
+    # Verify the verifier source exists (api/verifier-page.js reads it at runtime)
+    verifier_source = WORKSPACE_ROOT / "apps" / "web-verifier" / "index.html"
+    assert verifier_source.is_file(), "apps/web-verifier/index.html must exist (served by api/verifier-page.js)"
 
     # 3. Normative Schema
     schema_file = dist_dir / "schemas" / "receipt-v0.1.json"
