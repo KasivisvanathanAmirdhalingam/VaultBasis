@@ -32,12 +32,20 @@
       "destination": "/security-disclosure.html"
     },
     {
-      "source": "/about",
+      "source": "/marketing",
       "destination": "/index.html"
     },
     {
-      "source": "/marketing",
-      "destination": "/index.html"
+      "source": "/about",
+      "destination": "/about.html"
+    },
+    {
+      "source": "/trust-assurance",
+      "destination": "/trust-assurance.html"
+    },
+    {
+      "source": "/faq",
+      "destination": "/faq.html"
     }
   ],
   "headers": [

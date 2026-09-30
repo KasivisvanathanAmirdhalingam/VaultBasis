@@ -35,10 +35,10 @@ def test_marketing_site_header_footer_and_anchor_links():
 
     # 1. Header Navigation elements (MMP11-WEB-PRES-001: nav renamed from
     # anchor-section names to practitioner-facing IA labels)
-    assert "Product" in html
     assert "How It Works" in html
-    assert "Evidence" in html  # covers "Evidence &amp; Verification"
-    assert "Scope" in html     # covers "Scope &amp; Limitations"
+    assert "Trust &amp; Assurance" in html or "Trust & Assurance" in html
+    assert "About" in html
+    assert "Resources" in html
     assert "Verify an Outcome Receipt" in html
     assert "Request Design-Partner Access" in html
 
@@ -87,6 +87,7 @@ def test_web_verifier_interactive_controls_and_footer():
     # "STATUTORY LIMITATION NOTICE (PRD §27 & §44.6)" to plain-language notice)
     assert 'class="site-footer"' in html
     assert "IMPORTANT NOTICE:" in html
+    assert "FAQ" in html  # verifier links to FAQ
 
 
 @pytest.mark.regression

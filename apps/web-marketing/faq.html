@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FAQ — VaultBasis</title>
+  <meta name="description" content="Frequently asked questions about VaultBasis — independent evidence assurance for digital-asset broker and tax-ledger reconciliation.">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --surface-elevated: #f1f5f9;
+      --border: #e2e8f0;
+      --border-accent: #cbd5e1;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --accent: #0284c7;
+      --success: #059669;
+      --radius: 12px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; scroll-padding-top: 6.5rem; }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      line-height: 1.6;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    header {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+    }
+    .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: inherit; }
+    .brand-logo {
+      width: 38px; height: 38px;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+    }
+    .brand-info { display: flex; flex-direction: column; }
+    .brand-name { font-family: 'Outfit', sans-serif; font-size: 1.35rem; font-weight: 800; letter-spacing: -0.01em; color: #0f172a; }
+
+    nav.nav-main { display: flex; gap: 2rem; align-items: center; }
+    nav.nav-main a { color: var(--text-muted); text-decoration: none; font-size: 0.95rem; font-weight: 600; transition: color 0.2s; }
+    nav.nav-main a:hover { color: var(--text); }
+
+    .header-actions { display: flex; gap: 1rem; align-items: center; }
+    .btn {
+      padding: 10px 22px; border-radius: 8px; font-size: 0.95rem; font-weight: 600; text-decoration: none;
+      transition: all 0.2s; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; border: 1px solid transparent;
+    }
+    .btn-primary { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); }
+    .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
+    .btn-secondary { background: #fff; color: var(--text); border-color: var(--border-accent); box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+    .btn-secondary:hover { background: var(--surface-elevated); }
+    .btn-sm { padding: 8px 16px; font-size: 0.88rem; }
+
+    main { flex: 1; }
+
+    .page-hero {
+      max-width: 900px;
+      margin: 4rem auto 3rem auto;
+      padding: 0 1.5rem;
+    }
+    .page-hero .section-tag {
+      font-size: 0.85rem; font-family: 'JetBrains Mono', monospace; color: var(--accent);
+      text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem; display: block; font-weight: 700;
+    }
+    .page-hero h1 {
+      font-size: 2.8rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1.15;
+      margin-bottom: 1.25rem; color: #0f172a;
+    }
+    .page-hero p {
+      font-size: 1.1rem; color: var(--text-muted); max-width: 780px; line-height: 1.7;
+    }
+
+    .faq-container {
+      max-width: 900px;
+      margin: 0 auto 5rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .faq-section-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin: 2.5rem 0 1rem 0;
+      color: var(--text);
+    }
+
+    details {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 0.75rem;
+      overflow: hidden;
+    }
+    details[open] {
+      border-color: var(--border-accent);
+    }
+    summary {
+      padding: 1.1rem 1.5rem;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.95rem;
+      list-style: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--surface);
+    }
+    summary::-webkit-details-marker { display: none; }
+    summary::after {
+      content: '+';
+      font-size: 1.2rem;
+      color: var(--text-muted);
+      transition: transform 0.2s;
+      flex-shrink: 0;
+      margin-left: 1rem;
+    }
+    details[open] summary::after {
+      content: '−';
+    }
+    summary:hover {
+      background: var(--surface-elevated);
+    }
+    .faq-answer {
+      padding: 0 1.5rem 1.25rem 1.5rem;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .faq-answer p { margin-top: 1rem; }
+    .faq-answer p:first-child { margin-top: 1rem; }
+    .faq-answer a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .faq-answer a:hover { text-decoration: underline; }
+
+    footer.site-footer { border-top: 1px solid var(--border); background: var(--surface); margin-top: auto; padding: 4rem 2rem 2rem 2rem; }
+    .footer-grid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 2rem; padding-bottom: 3rem; border-bottom: 1px solid var(--border); }
+    .footer-col h4 { font-size: 0.88rem; font-family: 'JetBrains Mono', monospace; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text); margin-bottom: 1.25rem; font-weight: 700; }
+    .footer-col ul { list-style: none; }
+    .footer-col ul li { margin-bottom: 0.85rem; }
+    .footer-col ul li a { color: var(--text-muted); text-decoration: none; font-size: 0.92rem; transition: color 0.2s; font-weight: 500; }
+    .footer-col ul li a:hover { color: var(--primary); }
+    .disclaimer-box { max-width: 1200px; margin: 2.5rem auto 0 auto; padding: 1.5rem; background: var(--surface-elevated); border: 1px solid var(--border); border-radius: 8px; font-size: 0.82rem; color: var(--text-muted); line-height: 1.6; }
+    .footer-bottom { max-width: 1200px; margin: 2rem auto 0 auto; display: flex; justify-content: space-between; align-items: center; font-size: 0.88rem; color: var(--text-muted); }
+
+    @media (max-width: 900px) {
+      .footer-grid { grid-template-columns: 1fr; }
+      .page-hero h1 { font-size: 2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <header role="banner">
+    <a href="/" class="brand">
+      <div class="brand-logo">
+        <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect width="38" height="38" rx="9" fill="url(#vb-grad)"/>
+          <defs>
+            <linearGradient id="vb-grad" x1="0" y1="0" x2="38" y2="38" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#2563eb"/>
+              <stop offset="100%" stop-color="#0284c7"/>
+            </linearGradient>
+          </defs>
+          <path d="M10 10 L19 26" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M28 10 L19 26" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="19" y1="26" x2="19" y2="30" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="brand-info">
+        <span class="brand-name">VaultBasis</span>
+      </div>
+    </a>
+    <nav class="nav-main">
+      <a href="/#comparison">How It Works</a>
+      <a href="/trust-assurance">Trust &amp; Assurance</a>
+      <a href="/#trust">Resources</a>
+      <a href="/about">About</a>
+    </nav>
+    <div class="header-actions">
+      <a href="/verifier" class="btn btn-secondary btn-sm">Verify an Outcome Receipt ↗</a>
+      <a href="/" class="btn btn-primary btn-sm">Request Design-Partner Access</a>
+    </div>
+  </header>
+
+  <main role="main">
+
+    <div class="page-hero">
+      <span class="section-tag">Frequently Asked Questions</span>
+      <h1>FAQ</h1>
+      <p>Answers to common questions about VaultBasis, how reconciliation works, the Outcome Receipt, and the Design-Partner Preview.</p>
+    </div>
+
+    <div class="faq-container">
+
+      <!-- Section: Understanding VaultBasis -->
+      <h2 class="faq-section-title" id="understanding">Understanding VaultBasis</h2>
+
+      <details>
+        <summary>What is VaultBasis?</summary>
+        <div class="faq-answer">
+          <p>VaultBasis is an independent evidence-assurance system that deterministically reconciles supported digital-asset broker and tax-ledger information. It identifies agreements, differences, and unresolved information, and produces a signed Outcome Receipt that can be independently verified.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>What problem does it solve?</summary>
+        <div class="faq-answer">
+          <p>Tax software and brokers can produce different gain/loss or cost-basis figures for the same transactions. VaultBasis independently compares both, identifies where they agree or differ, and records the outcome in a verifiable signed receipt — without deciding which source is legally correct.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Who is VaultBasis intended for?</summary>
+        <div class="faq-answer">
+          <p>Tax practitioners, enrolled agents, CPAs, reviewers, and enterprise evaluators who need an independent comparison of supported digital-asset information sources and a verifiable record of that comparison.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Is VaultBasis tax preparation software?</summary>
+        <div class="faq-answer">
+          <p>No. VaultBasis compares information. It does not prepare tax returns, calculate tax liability, provide tax advice, or determine correct tax treatment.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Does VaultBasis decide which source is correct?</summary>
+        <div class="faq-answer">
+          <p>No. VaultBasis identifies agreements, differences, and unresolved information. Professional judgment about which source is accurate and what the correct tax treatment is remains the practitioner's responsibility.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>What does "independent reconciliation" mean?</summary>
+        <div class="faq-answer">
+          <p>VaultBasis is deliberately separate from both the broker and the tax-ledger system. It applies fixed, published comparison rules to the information both sources provide, without a stake in either outcome.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>What information sources are currently supported?</summary>
+        <div class="faq-answer">
+          <p>The current Design-Partner Preview supports Form 1099-DA (U.S. digital asset broker reporting) and Koinly Capital Gains CSV. See <a href="/docs/scope_and_limitations_v0.1.html" target="_blank">Scope &amp; Limitations</a> for the exact supported format specifications.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>What happens when information is missing?</summary>
+        <div class="faq-answer">
+          <p>Missing basis, dates, prices, or other information is preserved as Unresolved. VaultBasis never substitutes a default value, zero, or assumption for missing information.</p>
+        </div>
+      </details>
+
+      <!-- Section: Outcomes and Findings -->
+      <h2 class="faq-section-title" id="outcomes">Outcomes and Findings</h2>
+
+      <details>
+        <summary>What does a matched outcome mean?</summary>
+        <div class="faq-answer">
+          <p>The supported information from both sources agrees under the declared reconciliation rules.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>What is a declared difference?</summary>
+        <div class="faq-answer">
+          <p>The two sources report different values for the same item — for example different cost basis figures for the same asset. VaultBasis records the exact difference without determining which source is correct.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>What does Unresolved mean?</summary>
+        <div class="faq-answer">
+          <p>Required information is missing from one or both sources. The reconciliation cannot reach a definite agreement or difference conclusion for that item.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Why doesn't VaultBasis automatically resolve missing information?</summary>
+        <div class="faq-answer">
+          <p>Because assuming a value would introduce an error that is not visible in the Outcome Receipt. Preserving Unresolved keeps the evidence honest and flags the item for practitioner review.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>What information does provenance provide?</summary>
+        <div class="faq-answer">
+          <p>Each item in an Outcome Receipt references the source rows and file hashes it came from, so the receipt can be traced back to its source evidence.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>What should a practitioner do after a difference is identified?</summary>
+        <div class="faq-answer">
+          <p>Review the original source documents to understand why the sources differ. Apply professional judgment to determine the correct treatment. VaultBasis provides the comparison; the practitioner determines the appropriate response.</p>
+        </div>
+      </details>
+
+      <!-- Section: Outcome Receipt -->
+      <h2 class="faq-section-title" id="receipt">Outcome Receipt</h2>
+
+      <details>
+        <summary>What is an Outcome Receipt?</summary>
+        <div class="faq-answer">
+          <p>A digitally signed JSON document recording the outcome of a VaultBasis reconciliation. It contains the case summary, differences, provenance references, and a cryptographic signature.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Why is an Outcome Receipt signed?</summary>
+        <div class="faq-answer">
+          <p>The signature allows any reviewer to verify that the receipt has not been changed since it was created and that the signature matches the key declared in the receipt.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Can another person verify it?</summary>
+        <div class="faq-answer">
+          <p>Yes. The independent Web Verifier at <a href="/verifier">/verifier</a> verifies any supported Outcome Receipt in a browser without a VaultBasis account. The specification and test vectors are public.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>What does successful verification establish?</summary>
+        <div class="faq-answer">
+          <p>That the receipt conforms to the declared evidence contract, that its cryptographic signature is valid for the key declared in the receipt, and that the receipt has not been altered since signing.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>What does successful verification NOT establish?</summary>
+        <div class="faq-answer">
+          <p>It does not determine tax correctness, source accuracy or completeness, legal compliance, or professional judgment. It does not independently authenticate the originating VaultBasis installation. It does not constitute government approval or IRS endorsement.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Does a valid signature prove the tax treatment is correct?</summary>
+        <div class="faq-answer">
+          <p>No. The signature proves the receipt has not been altered. Tax correctness is not determined by VaultBasis and is shown as NOT DETERMINED in the verifier.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>What happens if a receipt is modified?</summary>
+        <div class="faq-answer">
+          <p>Signature verification will fail. The verifier will report FAIL (TAMPERED / INVALID).</p>
+        </div>
+      </details>
+
+      <!-- Section: Privacy and Security -->
+      <h2 class="faq-section-title" id="privacy-security">Privacy and Security</h2>
+
+      <details>
+        <summary>Where is source evidence processed?</summary>
+        <div class="faq-answer">
+          <p>Source evidence is processed within the local VaultBasis Edge application on your device. It does not leave the Edge application boundary during reconciliation or signing.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Does the Web Verifier upload my receipt?</summary>
+        <div class="faq-answer">
+          <p>No. Verification runs entirely in your browser using WebCrypto. Receipt contents are not sent to VaultBasis.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Where is the signing key stored?</summary>
+        <div class="faq-answer">
+          <p>The Ed25519 signing key is generated locally and stored within the VaultBasis Edge application on your device.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>What should I send when requesting support?</summary>
+        <div class="faq-answer">
+          <p>Describe the issue and the steps to reproduce it. Do not send taxpayer CSV files, receipts containing real taxpayer data, or other sensitive evidence in support correspondence.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>How do I report a security concern?</summary>
+        <div class="faq-answer">
+          <p>Use the security disclosure route at <a href="/security-disclosure">/security-disclosure</a>.</p>
+        </div>
+      </details>
+
+      <!-- Section: Design-Partner Preview -->
+      <h2 class="faq-section-title" id="preview">Design-Partner Preview</h2>
+
+      <details>
+        <summary>What does Design-Partner Preview mean?</summary>
+        <div class="faq-answer">
+          <p>VaultBasis is currently available to invited participants for evaluation using supported sample or test data. This is a controlled evaluation release, not a production service. Provisioning is not automatic.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>How do I get access?</summary>
+        <div class="faq-answer">
+          <p>Use the Request Design-Partner Access form on the <a href="/">home page</a>. Access is reviewed and provisioned individually.</p>
+        </div>
+      </details>
+
+    </div>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-grid">
+      <div class="footer-col">
+        <div class="brand" style="margin-bottom: 1.25rem;">
+          <div class="brand-logo" style="width: 30px; height: 30px;">
+            <svg width="30" height="30" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <rect width="38" height="38" rx="9" fill="url(#vb-grad-footer)"/>
+              <defs>
+                <linearGradient id="vb-grad-footer" x1="0" y1="0" x2="38" y2="38" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stop-color="#2563eb"/>
+                  <stop offset="100%" stop-color="#0284c7"/>
+                </linearGradient>
+              </defs>
+              <path d="M10 10 L19 26" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+              <path d="M28 10 L19 26" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+              <line x1="19" y1="26" x2="19" y2="30" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <span class="brand-name" style="font-size: 1.15rem;">VaultBasis</span>
+        </div>
+        <p style="color: var(--text-muted); margin-bottom: 1.25rem; line-height: 1.6; font-size: 0.9rem;">Deterministic, independent evidence reconciliation of supported digital-asset information sources.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Product</h4>
+        <ul>
+          <li><a href="/#comparison">How It Works</a></li>
+          <li><a href="/#comparison">Evaluation Boundary</a></li>
+          <li><a href="/#security">Local Evidence</a></li>
+          <li><a href="/">Request Access</a></li>
+          <li><a href="/about">About VaultBasis</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Trust &amp; Resources</h4>
+        <ul>
+          <li><a href="/verifier">Verify an Outcome Receipt</a></li>
+          <li><a href="/schemas/receipt-v0.1.json" target="_blank">Outcome Receipt Specification</a></li>
+          <li><a href="/sample-receipt.json" download>Verification Test Receipts</a></li>
+          <li><a href="/docs/scope_and_limitations_v0.1.html" target="_blank">Scope &amp; Limitations</a></li>
+          <li><a href="/trust-assurance">Trust &amp; Assurance</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Legal &amp; Support</h4>
+        <ul>
+          <li><a href="/privacy-policy" target="_blank">Privacy Policy</a></li>
+          <li><a href="/terms-of-service" target="_blank">Terms of Service</a></li>
+          <li><a href="/contact" target="_blank">Contact</a></li>
+          <li><a href="/security-disclosure" target="_blank">Security Disclosure</a></li>
+          <li><a href="/contact" target="_blank">Report an Issue</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="disclaimer-box">
+      <strong>IMPORTANT LIMITATION NOTICE:</strong> VaultBasis independently compares supported sources under fixed, published rules. It does not assess tax correctness, establish legal compliance, or determine whether source information is complete or accurate. An Outcome Receipt records the declared reconciliation outcome and can be cryptographically verified for payload integrity and signature validity. It does not constitute a professional opinion, legal finding, government approval, or endorsement by the IRS or any other government authority. The practitioner remains responsible for professional interpretation and application of applicable law.
+    </div>
+    <div class="footer-bottom">
+      <div>© 2026 VaultBasis. All rights reserved.</div>
+    </div>
+  </footer>
+
+</body>
+</html>

@@ -62,7 +62,7 @@ fs.writeFileSync(path.join(DIST_DIR, 'index.html'), marketingHtml, 'utf8');
 console.log('✓ Packaged Public Marketing Portal -> dist/public-web/index.html');
 
 // Copy standalone pages
-const standalonePages = ['privacy-policy', 'terms-of-service', 'contact', 'security-disclosure'];
+const standalonePages = ['privacy-policy', 'terms-of-service', 'contact', 'security-disclosure', 'about', 'trust-assurance', 'faq'];
 for (const page of standalonePages) {
   const src = path.join(APPS_DIR, 'web-marketing', `${page}.html`);
   if (fs.existsSync(src)) {
