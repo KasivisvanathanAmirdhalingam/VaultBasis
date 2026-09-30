@@ -1,0 +1,207 @@
+{
+  "snapshot_date": "2026-09-30",
+  "baseline_source_sha": "70606ff49050141f70d28e6cae988f399ceee062",
+  "note": "Unsigned documentation snapshot; excludes this manifest itself. Regenerate after packet changes. Not an independent attestation.",
+  "files": [
+    {
+      "path": "docs/audit/README.md",
+      "sha256": "86401224cae289f2a5220ec4dfb518d2cdb76d83b3c83935e47fb88931c8549b"
+    },
+    {
+      "path": "docs/audit/git-and-evidence-governance.md",
+      "sha256": "70efeb972a94024831f1d8d084205d4801c07f19484c10723da888452756d23a"
+    },
+    {
+      "path": "docs/audit/status.md",
+      "sha256": "2e8cc02eab411de4a6c4b79f24565be87533e4f93c1a9d05c1059cf5f247bc4d"
+    },
+    {
+      "path": "docs/audit/traceability-matrix.md",
+      "sha256": "d65c909d9ea36024b7565201ae5d17c544850477ee041596d8cfc8fab5e58823"
+    },
+    {
+      "path": "docs/audit/validation-2026-09-30.json",
+      "sha256": "4b27c0ee6139610f749a121435e54ed8e4b137f7e05ea0c28162d5471f9e2fdb"
+    },
+    {
+      "path": "docs/handover/directives/01-experience-convergence.txt",
+      "sha256": "b262deb0cc1c90082ae02b094cf5f63e09c1fb57bc290e7fce3beb43286682f4"
+    },
+    {
+      "path": "docs/handover/directives/02-runtime-qualification.txt",
+      "sha256": "9a5a7d9c830d7488e283fe61603c0ed7dd1ee53bc42cd0916450336dfcb20b17"
+    },
+    {
+      "path": "docs/handover/directives/03-product-evolution-and-git-governance.txt",
+      "sha256": "84a7856fd56b592488fdfcf7ce34330fa40702cfbbfacb770e27974f591edbe7"
+    },
+    {
+      "path": "docs/master_tasks_ledger.md",
+      "sha256": "e2387e4b2bcc335d56fb62de8128e883a972c2c77469d6d082b5ac9f8ca5f22b"
+    },
+    {
+      "path": "docs/mmp11_task_ledger.md",
+      "sha256": "fd94da9c5aeffa42a04e4272b499f83e42d3026f9b881e0ba68cddb580419480"
+    },
+    {
+      "path": "docs/non_functional_requirements.md",
+      "sha256": "c7b1318e3ab11a9cf3bb15504f371591451f41de009084a1b1055a139b55da6e"
+    },
+    {
+      "path": "docs/roadmap/MMP15_TASK_LEDGER.md",
+      "sha256": "482064807c72a6f43537ee5f74a76689663ad6a9b5eb82d1ed2619854164fc5d"
+    },
+    {
+      "path": "docs/roadmap/MMP21_TASK_LEDGER.md",
+      "sha256": "5c15f8f6283b4b38b60bcb0930e6b277e262d09a1ffc477aa30408c8f904ae67"
+    },
+    {
+      "path": "docs/roadmap/MMP25_TASK_LEDGER.md",
+      "sha256": "82bc183ade663d2f79f6f4787a95870a95aac4403a1406254a0460204c558301"
+    },
+    {
+      "path": "docs/roadmap/MMP2_TASK_LEDGER.md",
+      "sha256": "def0daa8c600b69392645552b8483ec5a8e6b914308e2fa30a8697be78a6f330"
+    },
+    {
+      "path": "docs/roadmap/MMP3_TASK_LEDGER.md",
+      "sha256": "29e9ca490424df129abbb8fd0c7287892341f0b8c4e8953c0bd5adb422898e9e"
+    },
+    {
+      "path": "docs/roadmap/VAULTBASIS_PRODUCT_ROADMAP.md",
+      "sha256": "d5c7ff48dc42cdb54debc29e063d371d07a2cf41becc60a90c3116324a05279e"
+    },
+    {
+      "path": "docs/ux/README.md",
+      "sha256": "977bbb0a08c3bc1bd7c8d6da8d18380aab708bdd0508b1a6385c238948730c8d"
+    },
+    {
+      "path": "docs/ux/canonical-ux-blueprint.md",
+      "sha256": "1a7cfaf44b6fb9cf0dfd66982a6ad06e540b351e798e0d29a63fbf0a96b5f29f"
+    },
+    {
+      "path": "docs/ux/current-experience-map.md",
+      "sha256": "737ae1a9418bc9f91c09c0f642c8cc76eb1d059c4cd5da34b328284a7fbffcce"
+    },
+    {
+      "path": "docs/ux/evidence/2026-09-30/README.md",
+      "sha256": "f9a86fd67b0d2dc453d16201bae166b5c593f3f7bf3629f16742fb76756312a6"
+    },
+    {
+      "path": "docs/ux/evidence/2026-09-30/SHA256SUMS",
+      "sha256": "ee2eb28d833005a9c0894a7dd8211c8729f804798be10c292db409f62f9f00c1"
+    },
+    {
+      "path": "docs/ux/evidence/2026-09-30/_about-1440.png",
+      "sha256": "35d957f8c566abfa518d7e3404efd76f63bd21164888fabd6cb48c6cec5e548e"
+    },
+    {
+      "path": "docs/ux/evidence/2026-09-30/_about-390.png",
+      "sha256": "f98dfb2ebb766f3095b62cee673955acf6b423212ca0a21c91f2d034a89e8f31"
+    },
+    {
+      "path": "docs/ux/evidence/2026-09-30/_contact-1440.png",
+      "sha256": "f94a7c28458de6250bc3b777440f5ea3a2d8fdc6051a034f5968825816a5c101"
+    },
+    {
+      "path": "docs/ux/evidence/2026-09-30/_contact-390.png",
+      "sha256": "b9501ba33ae838c801e5c6a32f64773d77f3471535211481d75d28b9fcd4240d"
+    },
+    {
+      "path": "docs/ux/evidence/2026-09-30/_docs_scope_and_limitations_v0_1_html-1440.png",
+      "sha256": "974c6c814c3396639d9564f336736247b71aa41544ac62def10b46003350baaa"
+    },
+    {
+      "path": "docs/ux/evidence/2026-09-30/_docs_scope_and_limitations_v0_1_html-390.png",
+      "sha256": "3a4be9ee1e06a2c455dace83dfefbfa52e6fd613469f7a9dec42ec0244b6e003"
+    },
+    {
+      "path": "docs/ux/evidence/2026-09-30/_faq-1440.png",
+      "sha256": "c49907b0f729845a9f26d2b4ec6c69f8c88b95a29f6e81ef4cfa28f7b4c1686c"
+    },
+    {
+      "path": "docs/ux/evidence/2026-09-30/_faq-390.png",
+      "sha256": "fdfa100932a76e5b41070d1aa3b5a8dfa70d0ad54933032751099030d1439725"
+    },
+    {
+      "path": "docs/ux/evidence/2026-09-30/_privacy-policy-1440.png",
+      "sha256": "046fe08f536e2b691af91f1de29b08f46b2ca3b27126012321235bab36e23962"
+    },
+    {
+      "path": "docs/ux/evidence/2026-09-30/_privacy-policy-390.png",
+      "sha256": "d8f2b14cd840aa4149b09922224ee53037f60321868b3fe0084d1f0abfaef952"
+    },
+    {
+      "path": "docs/ux/evidence/2026-09-30/_security-disclosure-1440.png",
+      "sha256": "38e8bf2050707cc41da17277926c60fc853a5155ee16e0b9799352d670806bf6"
+    },
+    {
+      "path": "docs/ux/evidence/2026-09-30/_security-disclosure-390.png",
+      "sha256": "ce3a2059eedcd1d86d73a9c9933493ebec49c38d6bf5335d4316fb8579f906c1"
+    },
+    {
+      "path": "docs/ux/evidence/2026-09-30/_terms-of-service-1440.png",
+      "sha256": "8c2ae659f16f4539e583c4dff3aaca94e6b8530cfa87c489709f92c813a9dd13"
+    },
+    {
+      "path": "docs/ux/evidence/2026-09-30/_terms-of-service-390.png",
+      "sha256": "39963a6eb66c93911d88fe84f8b6f2d35b7f705b0aa10d657c7981bd492bcf03"
+    },
+    {
+      "path": "docs/ux/evidence/2026-09-30/_trust-assurance-1440.png",
+      "sha256": "6021c950308251e3b7da5cd1faf02717dd06c69cf0486742fe3d31f2c8c8d865"
+    },
+    {
+      "path": "docs/ux/evidence/2026-09-30/_trust-assurance-390.png",
+      "sha256": "f4577a4a8c83c1d161d9ac33fcc54361e050630f2e1364144bea84e377240677"
+    },
+    {
+      "path": "docs/ux/evidence/2026-09-30/_ux-audit-missing-page-1440.png",
+      "sha256": "749cb5d9e2c7090f224ee4afdd2ca2cbb8e8ec930bbd1d4031e9361273b29ceb"
+    },
+    {
+      "path": "docs/ux/evidence/2026-09-30/_ux-audit-missing-page-390.png",
+      "sha256": "329b3c2245f5dca8d1f0204e793ebdd144c44edfbb507b3bb78587e4ab13a5fa"
+    },
+    {
+      "path": "docs/ux/evidence/2026-09-30/_verifier-1440.png",
+      "sha256": "ededd9de53a4736a9d42c9f217783eac253f7179f05a3c762740a23b21899f31"
+    },
+    {
+      "path": "docs/ux/evidence/2026-09-30/_verifier-390.png",
+      "sha256": "7d351583480c28ebbc79cb87ccdc9de91548306e30ca8fa39dfa8512bd41f722"
+    },
+    {
+      "path": "docs/ux/evidence/2026-09-30/_verifier-access-1440.png",
+      "sha256": "ededd9de53a4736a9d42c9f217783eac253f7179f05a3c762740a23b21899f31"
+    },
+    {
+      "path": "docs/ux/evidence/2026-09-30/_verifier-access-390.png",
+      "sha256": "7d351583480c28ebbc79cb87ccdc9de91548306e30ca8fa39dfa8512bd41f722"
+    },
+    {
+      "path": "docs/ux/evidence/2026-09-30/access-open-1440.png",
+      "sha256": "5e2f879ebc8ea71084cac7ae481898d6b5c98a9b1f00ee5a6aaf597d2dc1aed0"
+    },
+    {
+      "path": "docs/ux/evidence/2026-09-30/capture.cjs",
+      "sha256": "a61fadfa2506265d00c8630507c750a40b89cd7c6e866e9c7dfed0cc1265d4f0"
+    },
+    {
+      "path": "docs/ux/evidence/2026-09-30/home-1440.png",
+      "sha256": "749cb5d9e2c7090f224ee4afdd2ca2cbb8e8ec930bbd1d4031e9361273b29ceb"
+    },
+    {
+      "path": "docs/ux/evidence/2026-09-30/home-390.png",
+      "sha256": "329b3c2245f5dca8d1f0204e793ebdd144c44edfbb507b3bb78587e4ab13a5fa"
+    },
+    {
+      "path": "docs/ux/evidence/2026-09-30/production-observations.json",
+      "sha256": "0ae935d0ab79ceb8f1f800640eecf9122f7fbf700aa832c8965a5e5911191a60"
+    },
+    {
+      "path": "docs/ux/evidence-register.md",
+      "sha256": "0961aea46b2f35449c13a094db2cd443abb6d1e8e4c2066176f0786aaf902d6b"
+    }
+  ]
+}

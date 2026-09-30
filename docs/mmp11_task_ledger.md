@@ -1,5 +1,7 @@
 # VaultBasis MMP-1.1 Task Ledger
 
+> Current audit-first direction (2026-09-30): [experience packet](ux/README.md), [side-by-side evidence](audit/traceability-matrix.md), [NFR qualification](non_functional_requirements.md), and [Git governance](audit/git-and-evidence-governance.md). Earlier statuses below are historical and do not confer current production/native/founder qualification. PRES-003 is rejected history; UX-001 is the proposed convergence workstream. Public information access is separate from protected product capability access.
+
 > **Release**: MMP-1.1 — Practitioner-Ready Stabilization  
 > **Directive**: VB-DIR-2026-09-30-MMP11-PRACTITIONER-READINESS-001  
 > **Purpose**: Make the MMP-1 capability distributable, secure, professionally presented, institutionally credible and suitable for Associate and CPA/EA validation.  

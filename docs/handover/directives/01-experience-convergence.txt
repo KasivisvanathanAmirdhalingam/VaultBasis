@@ -1,0 +1,343 @@
+Handover directive for the new developer
+Give the following as the controlling directive. I would retire PRES-003 rather than ask another developer to keep repairing it.
+MMP11-UX-001 — ENTERPRISE PRACTITIONER EXPERIENCE CONVERGENCE
+Mission
+VaultBasis is an independent evidence-assurance product intended for tax practitioners and other users operating in high-trust, regulated professional environments.
+The product must create confidence before the user understands its cryptography or architecture.
+The experience must communicate:
+independence → determinism → evidence preservation → verifiability → professional boundaries.
+The user should never have to understand the internal release architecture, engineering terminology, implementation topology, localhost routing, development history, MMP/RC nomenclature or infrastructure in order to use or trust the product.
+This is not a cosmetic redesign.
+It is the final convergence of:
+brand + information architecture + interaction design + accessibility + functional journeys + Edge/web continuity.
+Absolute technical boundary
+Do not modify:
+- deterministic reconciliation semantics;
+- canonicalization;
+- decimal semantics;
+- supported-source interpretation;
+- outcome-state rules;
+- provenance semantics;
+- Outcome Receipt schema;
+- receipt signing;
+- signature verification semantics;
+- Golden Corpus;
+- deterministic test vectors;
+- evidence contract;
+- unresolved-information behavior.
+The assurance kernel remains authoritative and isolated.
+UI code may invoke those capabilities. It must not reinterpret them.
+Day-one success definition
+A CPA/EA seeing VaultBasis for the first time should be able to answer within roughly one minute:
+What does this product do?
+Independent reconciliation of supported broker and tax-ledger information.
+Why would I use it?
+To independently identify agreements, differences and unresolved evidence and retain a portable verifiable record.
+What doesn't it do?
+It doesn't decide tax correctness, legal compliance, source truth or professional judgment.
+Where does my evidence go?
+The Edge evidence-processing boundary is local as declared; website/access/distribution activities are separate.
+What do I do next?
+Request access, evaluate the product, or verify an Outcome Receipt.
+And the interface should visually communicate that this is professional assurance software—not a developer demonstration.
+One experience architecture
+Do not invent separate navigation taxonomies on different pages.
+Use one global shell.
+Header
+VaultBasis
+
+How It Works
+Trust Center
+About
+
+Verify Receipt ↗
+Request Access
+
+Exactly one global header.
+No second menu beneath the hero.
+No floating row of:
+How It Works / Evaluation Boundary / Evidence Processing / Resources
+No page-specific pseudo-header competing with the real header.
+A Trust Center may have a local table of contents, but it must visually look like page navigation rather than another global menu.
+Footer
+The footer is not a sitemap.
+Use:
+VaultBasis
+
+Product
+  How It Works
+  Verify Receipt
+  Request Access
+
+Trust
+  Trust Center
+  Scope & Limitations
+  Security
+
+Company
+  About
+  Contact
+
+Legal
+  Privacy
+  Terms
+
+One logo/brand presentation.
+No redundant Report an Issue pointing to Contact.
+No duplicate Evidence Schema/Samples/etc. in global navigation; those live inside Trust Center.
+The limitation notice remains, but its visual treatment must not dominate an entire viewport.
+Back to top
+Restore a persistent accessible floating Back-to-Top control on sufficiently long pages.
+It should appear after meaningful scrolling and remain available until near the top.
+Requirements include keyboard operation, visible focus state, accessible name, non-obstruction of page controls, reduced-motion respect, and mobile-safe positioning.
+Homepage
+The homepage should be a sales-and-trust narrative, not product documentation.
+Use this sequence:
+Hero
+↓
+3 core value propositions
+↓
+How It Works
+↓
+Assurance Boundary — concise
+↓
+Local Evidence Processing
+↓
+Outcome Receipt
+↓
+Trust proof / Trust Center bridge
+↓
+Design-partner CTA
+↓
+Footer
+
+Remove resource directories and engineering catalogs from the homepage.
+Technical proof belongs in Trust Center.
+Trust Center
+This is where rigor belongs.
+Use:
+Trust Center
+
+Assurance Boundary
+Local Evidence Processing
+Outcome Receipt
+Verification
+Technical Evidence
+Security
+Privacy / governance references
+
+A local table of contents is acceptable here because this is a long reference page.
+But it must be visibly subordinate to the global header.
+No competing taxonomy.
+About
+About is not another product specification.
+It answers:
+Why VaultBasis exists
+Our principles
+What we are building
+Current preview status
+How to evaluate it
+
+Avoid repeating the entire homepage.
+Request Access must become an end-to-end journey
+This needs explicit state design.
+Request Access
+    ↓
+Name + email
+    ↓
+Submit
+    ↓
+Submitting…
+    ↓
+Accepted / Pending / Error
+    ↓
+Clear explanation of what happens next
+    ↓
+Provisioning
+    ↓
+Access credential / entitlement
+    ↓
+Qualified artifact download
+    ↓
+Install / Quick Start
+
+Do not promise that an email has been sent unless an actual qualified email-delivery mechanism sent it.
+Do not show a fake download if provisioning has not occurred.
+Do not expose Ethereal/test SMTP to a practitioner.
+Do not silently submit and close the modal.
+The user must always know:
+what happened, what happens next, and what they should do.
+SEC-002 entitlement rules remain authoritative for artifact download. Preview-access authentication remains distinct from artifact entitlement.
+Verifier journey
+Treat it as a first-class product, not an accessory.
+The user should encounter:
+Verify an Outcome Receipt
+
+Drop / select receipt
+
+→ Schema Conformance
+→ Contract Compatibility
+→ Receipt Key Self-Consistency
+→ Signature Verification
+→ Tax Correctness: NOT DETERMINED
+
+And a concise limitation:
+Verification establishes receipt-declared cryptographic properties. It does not independently authenticate the originating installation, establish source truth, determine tax correctness or establish legal compliance.
+Do not conflate Web Verifier access control with Edge's offline verifier.
+Edge needs its own UX audit
+Do not assume Edge is acceptable because its routing bugs were fixed.
+The new developer must separately audit the actual packaged Mac application, not source HTML.
+The application should have an application IA such as:
+Cases
+Sample Case
+Verify Receipt / Offline Verification
+Help
+
+with secondary trust/documentation destinations where necessary.
+It should not reproduce the marketing website inside localhost.
+Every visible Edge element must be classified:
+EDGE ACTION
+EDGE LOCAL PAGE
+PACKAGED RESOURCE
+PUBLIC WEBSITE
+WEB VERIFIER
+
+No accidental relative URL may inherit 127.0.0.1.
+And no raw FastAPI JSON such as:
+{"detail":"Not Found"}
+
+may ever reach a practitioner.
+Accessibility is a release gate, not a checkbox
+I would target WCAG 2.2 AA as the engineering accessibility baseline.
+Do not claim “ADA compliant.” ADA applicability/compliance is a legal determination; engineering can demonstrate conformance evidence against a declared accessibility standard.
+Create:
+MMP11-A11Y-001 — WCAG 2.2 AA Qualification
+Test every public page, access modal, verifier and practitioner Edge UI for:
+- semantic landmarks and heading hierarchy;
+- keyboard-only operation;
+- no keyboard traps;
+- logical focus order;
+- visible focus indicators;
+- modal focus containment and restoration;
+- Escape behavior;
+- accessible names for icon-only controls;
+- form labels/instructions/errors;
+- programmatic error association;
+- status messages announced appropriately;
+- color contrast;
+- text contrast;
+- non-text contrast;
+- zoom to 200%;
+- text spacing;
+- reflow at 320 CSS px;
+- target sizes;
+- hover/focus equivalence;
+- skip-to-content;
+- page titles;
+- link purpose;
+- duplicate IDs;
+- language declaration;
+- reduced-motion handling;
+- accessible downloads;
+- tables with correct headers;
+- mobile keyboard/touch behavior.
+Automate with axe-core/Playwright where possible.
+But automated accessibility scanning cannot qualify accessibility alone. Add manual keyboard testing and at least VoiceOver on macOS/iOS or equivalent screen-reader testing.
+Zero serious/critical automated accessibility violations is required, but it is not sufficient.
+Add interaction contracts, not HTML-presence tests
+The previous developer could pass tests while the real experience remained wrong because the tests asked questions such as:
+Does "Trust Center" exist in the HTML?
+
+Instead ask:
+When a user clicks Trust Center, where do they arrive and what do they see?
+
+For every interactive element create:
+surface
+element
+user intent
+expected action
+destination/state
+loading state
+success state
+failure state
+keyboard behavior
+mobile behavior
+accessibility requirement
+
+Then exercise it in a browser.
+That includes every:
+header link, footer link, CTA, modal button, form, close control, download, sample receipt, schema link, Help item, verifier action, back-to-top control and Edge application action.
+The new developer must test production, not localhost alone
+This is now a permanent invariant:
+UX-QUAL-INV-001 — USER EXPERIENCE IS QUALIFIED AT THE USER-REACHABLE BOUNDARY
+Source PASS ≠ generated HTML PASS.
+Generated HTML PASS ≠ localhost PASS.
+Localhost PASS ≠ Preview PASS.
+Preview PASS ≠ Production PASS.
+For an externally reachable experience, qualification ends only after the exact deployed candidate is tested through its user-facing URL.
+Your previous developer's visual packet was explicitly captured from localhost.    Pasted markdown Yet the report concluded “FOUNDER UX REVIEW PASS.”    Pasted markdown That class of evidence substitution must end.
+One convergence cycle
+Tell the new developer not to show you another partially fixed deployment.
+The execution sequence should be:
+1. Audit current production
+2. Audit current Edge candidate
+3. Inventory every route/action/state
+4. Produce UX defect register
+5. Produce canonical IA + interaction contract
+6. Implement shared shell/design system
+7. Implement complete journeys
+8. Run unit/integration/navigation/a11y tests
+9. Build exact candidate
+10. Deploy protected pre-production candidate
+11. Browser crawl every route/action
+12. Desktop + mobile screenshot matrix
+13. Keyboard + screen-reader smoke
+14. Founder reviews ONE complete candidate
+15. Fix only acceptance defects
+16. Requalify
+17. Promote exact immutable candidate
+18. Production smoke
+19. Freeze
+
+No production-first development.
+No “I fixed the header, please check.”
+No “tests pass, therefore UX passes.”
+No visual approval based on localhost.
+No piecemeal founder debugging.
+Acceptance matrix
+Before you are asked to review again, require all of these simultaneously:
+Dimension	Required result
+Brand	One VaultBasis identity across public web, verifier and Edge
+Global header	One header, one taxonomy
+Footer	Concise, balanced, non-duplicative
+Navigation	Every label predicts its destination
+Homepage	One continuous story
+Trust	Technical rigor available without overwhelming landing page
+Access	Complete truthful request→next-state journey
+Verifier	Complete understandable verification journey
+Edge	No broken/local accidental routing or developer surfaces
+Mobile	Fully usable at supported breakpoints
+Keyboard	Entire experience operable
+WCAG	WCAG 2.2 AA engineering evidence
+Errors	Designed human-readable states
+Loading	Designed where asynchronous
+Empty states	Designed
+Security	Access controls server-side; no UI-only protection
+Claims	Bounded and evidence-backed
+Browser crawl	0 broken destinations/actions
+Console	0 unexplained errors
+Screenshots	Complete desktop/mobile matrix
+Core engine	No semantic changes
+Founder review	Actual deployed candidate, not screenshots claimed on founder's behalf
+
+
+The last row matters: the developer never gets to write FOUNDER UX REVIEW PASS. Only you can issue founder acceptance.
+Time protection
+I would also impose a hard rule now: do not spend another two days polishing the website while Associate work waits.
+Split execution.
+Track A — new UX developer: web + Edge experience convergence.
+Track B — release/security: artifact qualification, entitlement/access-control production checks.
+Track C — MMP-1.5/MMP-2: documentation, ledger, architecture and non-conflicting research/prototyping can continue, but nothing touches the MMP-1.1 assurance kernel/release branches.
+Associate-001 begins immediately after the bounded external-release gates pass. Don't hold it for P2 aesthetic perfection. But don't send an associate into a product with broken navigation, incomplete access, inaccessible controls or contradictory branding either.
+Your current reaction is itself useful acceptance evidence: if the founder who knows every architectural distinction is repeatedly confused or repelled by the navigation and presentation, sending an uninformed practitioner into it would give you noisy product-validation evidence rather than clean evidence about whether the underlying problem is valuable.
+The next developer's job is therefore not to make VaultBasis prettier. It is to make the interface disappear between practitioner intent and the deterministic assurance system. That's the standard I would use for the handover.

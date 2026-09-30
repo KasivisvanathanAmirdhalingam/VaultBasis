@@ -1,5 +1,7 @@
 # VaultBasis — Master Tasks Ledger (MMP-1 Scope)
 
+> Scope clarification (2026-09-30): retain this ledger as historical implementation evidence. The [current roadmap](roadmap/VAULTBASIS_PRODUCT_ROADMAP.md) and [audit index](audit/README.md) govern current/future planning. Commercialization, billing, analytics and future intelligence/workflows are not authorized MMP-1.1 stabilization work. Historical PASS language is not current release qualification.
+
 > **Document Version**: v1.0.0-MMP1  
 > **PRD Source**: `VaultBasis — Product Requirements Document v26.1 (v26.0 Reference)`  
 > **Status**: APPROVED EXECUTION CONTROL PLANE  
