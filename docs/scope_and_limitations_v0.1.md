@@ -1,7 +1,7 @@
 # VaultBasis Supported Scope & Limitations
 
 **Version:** v0.1  
-**Release:** VaultBasis Edge v0.1.0 / RC3 Candidate
+**Release:** VaultBasis Edge v0.1.0 / Design-Partner Preview
 
 ---
 
