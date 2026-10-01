@@ -2359,7 +2359,62 @@
       "docs_updated": [
         "MMP11_TASK_LEDGER",
         "MMP11_STATUS"
-      ]
+      ],
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "owner": "Engineering",
+      "acceptance": "Execute OCC flow using stripped ETag and explicit allowOverwrite without 503 error, passing concurrency tests.",
+      "implementation_commits": [
+        "57799f7a6a95f3d5c177815d4f0c4733e873503f",
+        "309aea359571a6379b735e2ee3f4b32ad46b301e",
+        "5b78e4800bfa734679045b362f3abf1e06406fa2",
+        "d402b26db4dee8d3e896be6dd9195478a2531704"
+      ],
+      "closeout": "docs/audit/internal/tasks/MMP11-EXEC-008.md",
+      "documentation": {
+        "technical": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/mmp11_task_ledger.md"
+          ],
+          "rationale": "Recorded Candidate 5 implementation."
+        },
+        "knowledge_base": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/knowledge_base.md"
+          ],
+          "rationale": "Updated OCC ETag stripping knowledge."
+        },
+        "status": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/status.md"
+          ],
+          "rationale": "Updated with Candidate 5 exact-SHA resolution."
+        },
+        "adr": {
+          "disposition": "NO_CHANGE",
+          "paths": [
+            "docs/adr/README.md"
+          ],
+          "rationale": "No ADR change required for native SDK option usage."
+        },
+        "internal_audit": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/mmp11_task_ledger.md"
+          ],
+          "rationale": "Completed Candidate 5 regression verification local suite."
+        },
+        "external_audit": {
+          "disposition": "NO_CHANGE",
+          "paths": [
+            "docs/audit/README.md"
+          ],
+          "rationale": "No external claims impacted."
+        }
+      }
     }
   ]
 }
