@@ -1544,6 +1544,13 @@
           ],
           "rationale": "Records bounded first-batch behavior, evidence and open actual-boundary gates."
         }
+      },
+      "latest_automated_evidence": {
+        "state": "AUTOMATED_VALIDATION_PASS",
+        "source_sha": "1bfaf377aab5b61c234e03d59fda78d1eb398e34",
+        "run_id": 36822478917,
+        "url": "https://github.com/KasivisvanathanAmirdhalingam/VaultBasis/actions/runs/36822478917",
+        "scope": "Generated public-web qualification in Chromium, Firefox and WebKit plus Python, canonical gates, security, protected paths and traceability; no deployed or human qualification"
       }
     },
     {
@@ -1675,6 +1682,13 @@
           ],
           "rationale": "Expanded browser-engine validation and WebKit focus correction; full deployed and human qualification remains open."
         }
+      },
+      "latest_automated_evidence": {
+        "state": "AUTOMATED_VALIDATION_PASS",
+        "source_sha": "1bfaf377aab5b61c234e03d59fda78d1eb398e34",
+        "run_id": 36822478917,
+        "url": "https://github.com/KasivisvanathanAmirdhalingam/VaultBasis/actions/runs/36822478917",
+        "scope": "Generated public-web qualification in Chromium, Firefox and WebKit plus Python, canonical gates, security, protected paths and traceability; no deployed or human qualification"
       }
     },
     {
@@ -1798,6 +1812,13 @@
           ],
           "rationale": "Records bounded first-batch behavior, evidence and open actual-boundary gates."
         }
+      },
+      "latest_automated_evidence": {
+        "state": "AUTOMATED_VALIDATION_PASS",
+        "source_sha": "1bfaf377aab5b61c234e03d59fda78d1eb398e34",
+        "run_id": 36822478917,
+        "url": "https://github.com/KasivisvanathanAmirdhalingam/VaultBasis/actions/runs/36822478917",
+        "scope": "Generated public-web qualification in Chromium, Firefox and WebKit plus Python, canonical gates, security, protected paths and traceability; no deployed or human qualification"
       }
     },
     {
@@ -2308,7 +2329,14 @@
         "1d7cfe9217f6c67b915fc14890db42355b1cdf3c",
         "8a04fa44f7a87ff21eee1949e3ea152b770bc0bc",
         "ff360e5cafb450ba384c72a301347dac7010283b"
-      ]
+      ],
+      "latest_automated_evidence": {
+        "state": "AUTOMATED_VALIDATION_PASS",
+        "source_sha": "1bfaf377aab5b61c234e03d59fda78d1eb398e34",
+        "run_id": 36822478917,
+        "url": "https://github.com/KasivisvanathanAmirdhalingam/VaultBasis/actions/runs/36822478917",
+        "scope": "Generated public-web qualification in Chromium, Firefox and WebKit plus Python, canonical gates, security, protected paths and traceability; no deployed or human qualification"
+      }
     }
   ]
 }

@@ -68,3 +68,5 @@ Prior ledger entries are preserved in the [historical snapshot](handover/MMP11_T
 ## Completion rule
 
 Every task requires a unique ID, implementation SHA(s), linked evidence and six documentation dispositions. Do not close with “pending commit” or generic PASS. Follow [development workflow](development_workflow.md) for source → CI → Preview → human/founder → release → production → main, with independent Edge qualification. No future roadmap features or protected kernel changes in this line.
+
+MMP11-NFR-001 / MMP11-CI-UX-001 follow-up: source `1bfaf377aab5b61c234e03d59fda78d1eb398e34` passed [CI 36822478917](https://github.com/KasivisvanathanAmirdhalingam/VaultBasis/actions/runs/36822478917). Broader NFR and release tasks remain open; implementation identities are unchanged by this evidence-only update.

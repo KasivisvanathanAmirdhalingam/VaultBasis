@@ -20,3 +20,5 @@ Implementation source: `1d7cfe9217f6c67b915fc14890db42355b1cdf3c`, `8a04fa44f7a8
 Observed remote evidence: [run 36820918387](https://github.com/KasivisvanathanAmirdhalingam/VaultBasis/actions/runs/36820918387), SHA `3ddbbf34d834d03d516e0a10bb68caf0af164a24`, completed success. This qualifies the original source workflow only; see the separate NFR task for the expanded engine matrix.
 
 Browser-matrix/focus implementation commit: `ff360e5cafb450ba384c72a301347dac7010283b`. Local validation above applies to these changes; release qualification remains open.
+
+Exact-SHA remote result: **AUTOMATED_VALIDATION_PASS** — [run 36822478917](https://github.com/KasivisvanathanAmirdhalingam/VaultBasis/actions/runs/36822478917), source `1bfaf377aab5b61c234e03d59fda78d1eb398e34`. All workflow steps succeeded, including the three-engine browser matrix. This observation does not qualify later runtime changes or assign Preview/human/founder/production acceptance. The following evidence-only commit records the result; the qualified source remains the SHA above.
