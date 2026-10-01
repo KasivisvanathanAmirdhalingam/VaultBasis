@@ -63,7 +63,9 @@ test('malformed input denied before storage and API methods bounded',async()=>{
 test('storage/config failures do not leak data or pretend success',async()=>{
  fail=true;let logs=[];const old=console.error;console.error=(s)=>logs.push(s);
  try{assert.equal((await call(input())).code,503);delete process.env.ACCESS_REQUEST_SECRET;assert.equal((await call(input())).code,503);}finally{console.error=old;}
- assert.ok(logs.every(s=>s==='[access-request] storage_or_configuration_unavailable'));assert.equal(records.size,0);
+ assert.ok(logs.every(s=>s==='[access-request] storage_or_configuration_unavailable' || (typeof s === 'string' && s.startsWith('[access-request-store] operation=write failure_class='))));
+ assert.ok(logs.includes('[access-request] storage_or_configuration_unavailable'));
+ assert.equal(records.size,0);
 });
 test('platform identity required; spoofed generic forwarding headers ignored',async()=>{
  process.env.VERCEL='1';const old=console.error;console.error=()=>{};

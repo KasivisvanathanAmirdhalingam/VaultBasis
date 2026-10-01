@@ -37,6 +37,7 @@ async function transact(change) {
     } catch (err) {
       // Re-read and recompute after concurrent writes or unknown outcomes.
       // Never overwrite another writer or claim an unpersisted success.
+      console.error(`[access-request-store] operation=write failure_class=${err.name} attempt=${attempt}`);
       if (attempt === 5) throw new Error('Intake storage unavailable');
     }
   }
