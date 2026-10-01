@@ -1,4 +1,4 @@
-  <footer class="site-footer" role="contentinfo">
+  <footer class="site-footer">
     <div class="footer-grid">
       <div class="footer-col">
         <a href="/" class="brand" style="margin-bottom:1.25rem; display:inline-flex;">
@@ -18,44 +18,27 @@
           </div>
           <span class="brand-name" style="font-size:1.15rem;">VaultBasis</span>
         </a>
-        <p style="color:var(--text-muted);line-height:1.6;font-size:0.9rem;">Deterministic, independent evidence reconciliation of supported digital-asset information sources.</p>
       </div>
-      <div class="footer-col">
-        <h4>Product</h4>
-        <ul>
-          <li><a href="/#how-it-works">How It Works</a></li>
-          <li><a href="/#comparison">Evaluation Boundary</a></li>
-          <li><a href="/#security">Local Evidence</a></li>
-          <li><button class="footer-link-btn" onclick="openAccessModal()">Request Access</button></li>
-          <li><a href="/about">About VaultBasis</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h4>Trust &amp; Resources</h4>
-        <ul>
-          <li><a href="/verifier">Verify an Outcome Receipt</a></li>
-          <li><a href="/schemas/receipt-v0.1.json" target="_blank" rel="noopener">Outcome Receipt Specification</a></li>
-          <li><a href="/sample-receipt.json" download>Verification Test Receipts</a></li>
-          <li><a href="/docs/scope_and_limitations_v0.1.html" target="_blank" rel="noopener">Scope &amp; Limitations</a></li>
-          <li><a href="/trust-assurance">Trust &amp; Assurance</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h4>Legal &amp; Support</h4>
-        <ul>
-          <li><a href="/privacy-policy">Privacy Policy</a></li>
-          <li><a href="/terms-of-service">Terms of Service</a></li>
-          <li><a href="/contact">Contact</a></li>
-          <li><a href="/security-disclosure">Security Disclosure</a></li>
-          <li><a href="/contact">Report an Issue</a></li>
-        </ul>
-      </div>
+      <div class="footer-col"><h2>Product</h2><ul>
+        <li><a href="/#how-it-works">How It Works</a></li>
+        <li><a href="/verifier">Verify Receipt</a></li>
+        <li><button type="button" class="footer-link-btn" onclick="openAccessModal()">Request Access</button></li>
+      </ul></div>
+      <div class="footer-col"><h2>Trust</h2><ul>
+        <li><a href="/trust-assurance">Trust Center</a></li>
+        <li><a href="/docs/scope_and_limitations_v0.1.html">Scope & Limitations</a></li>
+        <li><a href="/security-disclosure">Security</a></li>
+      </ul></div>
+      <div class="footer-col"><h2>Company</h2><ul>
+        <li><a href="/about">About</a></li>
+        <li><a href="/contact">Contact</a></li>
+      </ul></div>
+      <div class="footer-col"><h2>Legal</h2><ul>
+        <li><a href="/privacy-policy">Privacy</a></li>
+        <li><a href="/terms-of-service">Terms</a></li>
+      </ul></div>
     </div>
-    <div class="disclaimer-box">
-      <strong>IMPORTANT LIMITATION NOTICE:</strong> VaultBasis independently compares supported sources under fixed, published rules. It does not assess tax correctness, establish legal compliance, or determine whether source information is complete or accurate. An Outcome Receipt records the declared reconciliation outcome and can be cryptographically verified for payload integrity and signature validity. It does not constitute a professional opinion, legal finding, government approval, or endorsement by the IRS or any other government authority. The practitioner remains responsible for professional interpretation and application of applicable law.
-    </div>
-    <div class="footer-bottom">
-      <div>© 2026 VaultBasis. All rights reserved.</div>
-      <button onclick="window.scrollTo({top:0,behavior:'smooth'})" class="back-to-top" aria-label="Back to top">↑ Back to top</button>
-    </div>
+    <p class="disclaimer-box"><strong>Scope of assurance.</strong> VaultBasis compares supported evidence under fixed rules. It does not determine source truth, tax correctness or legal compliance. Receipt verification checks declared cryptographic properties; professional judgment remains yours. <a href="/docs/scope_and_limitations_v0.1.html">Scope &amp; Limitations</a></p>
+    <div class="footer-bottom">© 2026 VaultBasis. All rights reserved.</div>
   </footer>
+  <button type="button" class="back-to-top" aria-label="Back to top" hidden>↑ Back to top</button>

@@ -1,28 +1,30 @@
-  <div id="access-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <dialog role="dialog" aria-modal="true" id="access-modal" class="modal-overlay" aria-labelledby="modal-title" aria-describedby="modal-description">
     <div class="modal-card">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
-        <h3 id="modal-title" style="font-size:1.4rem;color:#0f172a;font-weight:800;">Request VaultBasis Access</h3>
-        <button onclick="closeAccessModal()" style="background:none;border:none;color:#94a3b8;font-size:1.8rem;cursor:pointer;line-height:1;" aria-label="Close">&times;</button>
+      <div class="modal-heading">
+        <h2 id="modal-title">Request Access</h2>
+        <button type="button" onclick="closeAccessModal()" class="dialog-close" aria-label="Close Request Access">×</button>
       </div>
-      <p style="color:#475569;font-size:1rem;margin-bottom:1.75rem;">VaultBasis Edge runs as a local offline executable. Enter your details to request design-partner access for the controlled preview.</p>
-      <div id="request-form-container">
-        <div style="margin-bottom:1.25rem;">
-          <label for="req-name" style="display:block;color:#334155;font-size:0.88rem;margin-bottom:0.5rem;font-weight:600;">Full Name</label>
-          <input type="text" id="req-name" name="name" placeholder="Jane Doe" autocomplete="name" style="width:100%;padding:12px;border-radius:8px;background:#f8fafc;border:1px solid #cbd5e1;color:#0f172a;font-family:inherit;font-size:1rem;">
+      <p id="modal-description">Request design-partner access to the controlled preview. Evidence processing takes place locally in VaultBasis Edge. Do not include taxpayer information here.</p>
+      <form id="request-form-container" novalidate>
+        <div class="form-field">
+          <label for="req-name">Full name</label>
+          <input type="text" id="req-name" name="name" autocomplete="name" required maxlength="200" aria-describedby="req-name-error">
+          <p id="req-name-error" class="field-error" hidden></p>
         </div>
-        <div style="margin-bottom:1.75rem;">
-          <label for="req-email" style="display:block;color:#334155;font-size:0.88rem;margin-bottom:0.5rem;font-weight:600;">Contact Email</label>
-          <input type="email" id="req-email" name="email" placeholder="jane@cpa-firm.com" autocomplete="email" style="width:100%;padding:12px;border-radius:8px;background:#f8fafc;border:1px solid #cbd5e1;color:#0f172a;font-family:inherit;font-size:1rem;">
+        <div class="form-field">
+          <label for="req-email">Contact email</label>
+          <input type="email" id="req-email" name="email" autocomplete="email" required maxlength="254" aria-describedby="req-email-error">
+          <p id="req-email-error" class="field-error" hidden></p>
         </div>
-        <button onclick="submitAccessRequest()" id="btn-submit-req" class="btn btn-primary" style="width:100%;justify-content:center;padding:13px;font-size:1.05rem;">Submit Request</button>
-      </div>
-      <div id="request-success" style="display:none;padding:1.5rem;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:12px;text-align:center;">
-        <h4 style="color:#059669;margin-bottom:0.75rem;font-size:1.15rem;font-weight:700;">Request Received</h4>
-        <p style="color:#064e3b;font-size:0.95rem;margin-bottom:1.5rem;line-height:1.6;">Your design-partner access request has been submitted and is under review. Access is provisioned individually during the controlled preview.</p>
-        <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;">
-          <button onclick="closeAccessModal()" class="btn btn-secondary btn-sm">← Return to VaultBasis</button>
-          <a href="/#how-it-works" onclick="closeAccessModal()" class="btn btn-primary btn-sm">See How It Works →</a>
-        </div>
+        <p class="form-note">Your name and email are sent to VaultBasis to handle your request. <a href="/privacy-policy">Privacy Policy</a></p>
+        <button type="submit" id="btn-submit-req" class="btn btn-primary">Submit Request</button>
+      </form>
+      <p id="request-status" role="status" aria-live="polite" aria-atomic="true"></p>
+      <div id="request-success" hidden>
+        <h3 tabindex="-1" id="request-success-title">Request processed</h3>
+        <p>Access delivery is not yet confirmed. Contact VaultBasis for the next step; this confirmation does not grant access or authorize a download.</p>
+        <a href="/contact" class="btn btn-secondary">Contact VaultBasis</a>
+        <button type="button" onclick="closeAccessModal()" class="btn btn-primary">Return to VaultBasis</button>
       </div>
     </div>
-  </div>
+  </dialog>

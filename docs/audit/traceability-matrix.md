@@ -38,3 +38,7 @@ Snapshot: 2026-09-30. Owners below are accountable roles, not assigned individua
 |---|---|---|---|---|
 | Audit/blueprint/NFR documentation | UX-001, A11Y-001, RELEASE-001 | Public live capture, source map, explicit gaps | Documentation links/schema/hash checks recorded in packet | No application or release change |
 | Roadmap/Git/audit documentation | ROADMAP-001, AI-INV-001 | Founder brief, locally observed refs, future task ledgers | All task fields present; stages marked proposed | No branches, merges, tags or future implementation |
+
+## First implementation update — 2026-10-01
+
+D01–D04 and D13 have bounded source/local remediation under [the first batch](../ux/implementation-batch-a.md); they are not marked production-resolved. D05/D06 operational provisioning remains open. All runtime/native/human gaps retain their prior scope. Exact task SHAs and documentation dispositions are in [the registry](../task_registry.json).

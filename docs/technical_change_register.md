@@ -8,3 +8,7 @@ Maintained for every task under [VB-GOV-001](task_execution_standard.md). Detail
 | VB-GOV-001 | Repository task/commit index, automatic documentation instructions, closeout checker and promotion procedure | [Execution standard](task_execution_standard.md), [ADR-007](adr/ADR-007-task-traceability-and-evidence-lifecycle.md) | `dfc176f193cc4e3378bb88189aca35e364496f8d`; no application/API/kernel change |
 
 For future tasks, update the actual impacted technical guide/API/state contract as well as this impact index. “Register updated” alone does not document a behavior change.
+
+## First recovery batch
+
+MMP11-GIT-001, MMP11-NAV-404-001, MMP11-UX-FOUNDATION-001, MMP11-NAV-TOP-001, MMP11-A11Y-001, MMP11-ACCESS-001, MMP11-JOURNEY-001 and MMP11-CI-UX-001: [technical implementation and limits](ux/implementation-batch-a.md). Full SHA(s) in task registry; protected engine/schema/verifier code unchanged.

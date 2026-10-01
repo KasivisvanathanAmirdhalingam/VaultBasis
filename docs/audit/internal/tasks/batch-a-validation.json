@@ -1,0 +1,54 @@
+{
+  "date": "2026-10-01",
+  "branch": "fix/mmp11-ux-001",
+  "source": "Working-tree first batch; implementation SHA attached in follow-up closeout",
+  "boundary": "Local generated-output browser, source regression and security stubs; no deployed qualification",
+  "browser": {
+    "engine": "Chromium",
+    "widths": [
+      1440,
+      1280,
+      768,
+      390,
+      320
+    ],
+    "tests_passed": 13,
+    "failed": 0,
+    "axe": "Zero serious/critical violations on tested nine public pages at five widths plus tested dialog/error states",
+    "negative_controls": [
+      "Home/200 rejected by 404 check",
+      "dead link rejected by crawl",
+      "non-modal dialog rejected by focus contract",
+      "missing dialog label detected by axe"
+    ]
+  },
+  "python": {
+    "passed": 235,
+    "skipped": 1,
+    "log_summary": "235 passed, 1 skipped in 3.30s"
+  },
+  "canonical_gates": {
+    "passed": 11,
+    "failed": 0,
+    "command": "PYTHONPYCACHEPREFIX=/private/tmp/vb-pycache NO_COLOR=1 bash scripts/validate_before_commit.sh",
+    "environment_note": "Runner now uses sys.executable for pytest. Initial PATH chose Anaconda; initial cache writes denied by Mac sandbox. Neither is reported as a product pass."
+  },
+  "javascript_security": {
+    "SEC-002": 27,
+    "SEC-003": 6,
+    "failures": 0
+  },
+  "protected_kernel": "UNCHANGED; diff against origin/release/mmp-1.1 checked",
+  "ci": "NOT RUN (not yet pushed at local capture)",
+  "preprod": "NOT DEPLOYED",
+  "human_a11y": "NOT RUN",
+  "founder": "NOT REQUESTED",
+  "production": "NOT PROMOTED",
+  "remaining": [
+    "Full page convergence",
+    "Real/manual operational provisioning and credential/entitlement journey",
+    "Authenticated verifier/browser matrix",
+    "Human VoiceOver/device/native qualification",
+    "Actual Preview 404 and routing precedence"
+  ]
+}

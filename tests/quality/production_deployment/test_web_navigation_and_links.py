@@ -37,22 +37,22 @@ def test_marketing_site_header_footer_and_anchor_links():
     # 1. Header Navigation elements (MMP11-WEB-PRES-001: nav renamed from
     # anchor-section names to practitioner-facing IA labels)
     assert "How It Works" in html
-    assert "Trust &amp; Assurance" in html or "Trust & Assurance" in html
+    assert "Trust Center" in html
     assert "About" in html
     assert "Resources" in html
     assert "Verify an Outcome Receipt" in html
     assert "Request Design-Partner Access" in html
 
     # 2. Extract all href="#..." anchors and assert matching id="..." exists
-    anchors = set(re.findall(r'href="#([a-zA-Z0-9_\-]+)"', html))
-    assert len(anchors) >= 4, f"Expected multiple section anchors, found: {anchors}"
+    anchors = set(re.findall(r'href="/?#([a-zA-Z0-9_\-]+)"', html))
+    assert {"main-content", "how-it-works"} <= anchors
     for anchor in anchors:
         assert f'id="{anchor}"' in html, f"Broken link: href='#{anchor}' found but id='{anchor}' does not exist in DOM"
 
     # 3. Standard multi-column footer presence (entity fix 9e68178:
     # "TecTixBase EURL" attribution intentionally removed — must not reappear)
     assert 'class="site-footer"' in html
-    assert "IMPORTANT LIMITATION NOTICE" in html
+    assert "Scope of assurance." in html
     assert "© 2026 VaultBasis" in html
     assert "TecTixBase" not in html
 

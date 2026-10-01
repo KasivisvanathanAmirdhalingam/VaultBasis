@@ -2,24 +2,26 @@
 
 Status: ACTIVE — controlled recovery authorized. [Planning baseline](ux/README.md) accepted by founder; UI acceptance is separate. [Execution standard](task_execution_standard.md) is mandatory without repeated requests. [Registry](task_registry.json) supplies full implementation SHAs and documentation dispositions.
 
+Execution: MMP11-EXEC-001 — IN_PROGRESS; source pending implementation commit. [First bounded batch](ux/implementation-batch-a.md); controlled implementation directive 06 applies.
+
 ## Current recovery tasks
 
 | Task ID | Task | State | Implementation commit IDs | Acceptance / exit evidence |
 |---|---|---|---|---|
 | MMP11-AUDIT-001 | Preserve accepted takeover planning baseline | IMPLEMENTED | `95708fade15efe583e25c6f5257e4bebe285f864` | Planning acceptance and immutable evidence commit; not runtime qualification. |
 | VB-GOV-001 | Establish automatic task/commit/documentation closeout | IMPLEMENTED | `dfc176f193cc4e3378bb88189aca35e364496f8d` | Unique IDs, real implementation SHAs, six documentation dispositions, checker and negative controls. |
-| MMP11-GIT-001 | Establish verified bounded Web convergence branch | AUTHORIZED | None — not implementation-closed | Fresh refs compared; branch from release baseline; Edge remains independent. |
+| MMP11-GIT-001 | Establish verified bounded Web convergence branch | IN_PROGRESS | None — not implementation-closed | Fresh refs compared; branch from release baseline; Edge remains independent. |
 | MMP11-UX-001 | Deliver coherent MMP-1.1 practitioner experience | AUTHORIZED | None — not implementation-closed | Complete accepted blueprint and journeys; no kernel changes; one complete candidate review. |
-| MMP11-UX-FOUNDATION-001 | Shared design tokens and application shell | AUTHORIZED | None — not implementation-closed | One header/footer, typography/spacing/controls/status/focus system and distinct local navigation. |
+| MMP11-UX-FOUNDATION-001 | Shared design tokens and application shell | IN_PROGRESS | None — not implementation-closed | One header/footer, typography/spacing/controls/status/focus system and distinct local navigation. |
 | MMP11-UX-PAGES-001 | Converge all public/reference/verifier surfaces | AUTHORIZED | None — not implementation-closed | Home, Trust, About, Contact, Privacy, Terms, Security, Scope, access/verifier and 404 follow canonical IA. |
-| MMP11-NAV-404-001 | Return intentional unknown-route HTTP 404 | AUTHORIZED | None — not implementation-closed | Unknown path including negative control returns 404 and usable recovery on actual candidate. |
-| MMP11-NAV-TOP-001 | Accessible persistent Back-to-Top | AUTHORIZED | None — not implementation-closed | Keyboard/focus, scroll threshold, mobile-safe placement and reduced motion verified. |
-| MMP11-A11Y-001 | Dialog lifecycle and WCAG 2.2 AA qualification | AUTHORIZED | None — not implementation-closed | Focus enters/contained/restored to exact invoker; Escape; labels/errors/status; axe plus human keyboard/VoiceOver. |
-| MMP11-ACCESS-001 | Truthful access and provisioning state machine | AUTHORIZED | None — not implementation-closed | Validation/submitting/accepted-pending-error match durable service state; real or explicit manual provisioning; separate credentials/entitlements. |
+| MMP11-NAV-404-001 | Return intentional unknown-route HTTP 404 | IN_PROGRESS | None — not implementation-closed | Unknown path including negative control returns 404 and usable recovery on actual candidate. |
+| MMP11-NAV-TOP-001 | Accessible persistent Back-to-Top | IN_PROGRESS | None — not implementation-closed | Keyboard/focus, scroll threshold, mobile-safe placement and reduced motion verified. |
+| MMP11-A11Y-001 | Dialog lifecycle and WCAG 2.2 AA qualification | IN_PROGRESS | None — not implementation-closed | Focus enters/contained/restored to exact invoker; Escape; labels/errors/status; axe plus human keyboard/VoiceOver. |
+| MMP11-ACCESS-001 | Truthful access and provisioning state machine | IN_PROGRESS | None — not implementation-closed | Validation/submitting/accepted-pending-error match durable service state; real or explicit manual provisioning; separate credentials/entitlements. |
 | MMP11-EDGE-AUDIT-001 | Audit exact packaged Edge and remediate experience | AUTHORIZED | None — not implementation-closed | Cases/sample/finding/receipt/offline valid+tampered/help/navigation/persistence/quit/relaunch on recipient artifact; independently qualified track. |
 | MMP11-NFR-001 | Supported environments and runtime qualification | AUTHORIZED | None — not implementation-closed | All NFR Q01–Q19 applicable evidence on exact candidate; no source-only substitution. |
-| MMP11-JOURNEY-001 | Behavioral journeys and negative controls | AUTHORIZED | None — not implementation-closed | Full public/access/verifier/Edge journeys; dead-link/focus/404/offline negative controls demonstrably fail. |
-| MMP11-CI-UX-001 | Exact-SHA CI for bounded recovery branches | AUTHORIZED | None — not implementation-closed | Preserve canonical gates and add UX/NFR coverage; retain exact SHA/run/artifact evidence; CI triggers cover intended branch/PR. |
+| MMP11-JOURNEY-001 | Behavioral journeys and negative controls | IN_PROGRESS | None — not implementation-closed | Full public/access/verifier/Edge journeys; dead-link/focus/404/offline negative controls demonstrably fail. |
+| MMP11-CI-UX-001 | Exact-SHA CI for bounded recovery branches | IN_PROGRESS | None — not implementation-closed | Preserve canonical gates and add UX/NFR coverage; retain exact SHA/run/artifact evidence; CI triggers cover intended branch/PR. |
 | MMP11-VISUAL-001 | Maintain visual acceptance matrix | AUTHORIZED | None — not implementation-closed | Every captured surface mapped to desktop/mobile/functional/a11y/UX/action; gaps explicit; baseline is not design acceptance. |
 | MMP11-PREPROD-001 | Deploy exact CI-green Web candidate to protected Preview | AUTHORIZED | None — not implementation-closed | Immutable URL/deployment identity/source/run/time recorded; no production-first deployment. |
 | MMP11-FOUNDER-001 | Complete candidate founder review | PENDING | None — not implementation-closed | Founder reviews exact coherent deployed candidate after engineering qualification; only founder assigns acceptance. |

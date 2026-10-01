@@ -1,116 +1,125 @@
   <script>
-    /* ── VaultBasis Canonical Shell JS ───────────────────────────────────── */
-
-    /* Mobile nav toggle */
-    function toggleNav() {
-      const nav = document.getElementById('main-nav');
-      const actions = document.querySelector('.header-actions');
-      const btn = document.querySelector('.mobile-menu-btn');
-      const open = nav.classList.toggle('open');
-      if (actions) actions.classList.toggle('open', open);
-      btn.setAttribute('aria-expanded', String(open));
-      btn.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
+    // Shared navigation/dialog lifecycle; no assurance semantics here.
+    function setNavOpen(open, restoreFocus = false) {
+      const button = document.querySelector('.mobile-menu-btn');
+      document.getElementById('main-nav')?.classList.toggle('open', open);
+      document.querySelector('.header-actions')?.classList.toggle('open', open);
+      button?.setAttribute('aria-expanded', String(open));
+      button?.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
+      if (restoreFocus) button?.focus();
     }
-    /* Close nav on outside click */
-    document.addEventListener('click', function(e) {
-      const nav = document.getElementById('main-nav');
-      if (!nav) return;
-      if (!nav.contains(e.target) && !e.target.closest('.mobile-menu-btn') && !e.target.closest('.header-actions')) {
-        nav.classList.remove('open');
-        const actions = document.querySelector('.header-actions');
-        if (actions) actions.classList.remove('open');
-        const btn = document.querySelector('.mobile-menu-btn');
-        if (btn) { btn.setAttribute('aria-expanded', 'false'); btn.setAttribute('aria-label', 'Open navigation'); }
-      }
+    function toggleNav() {
+      setNavOpen(document.querySelector('.mobile-menu-btn')?.getAttribute('aria-expanded') !== 'true');
+    }
+    document.addEventListener('click', (event) => {
+      if (!event.target.closest('header, #access-modal') && !document.getElementById('access-modal')?.open) setNavOpen(false);
+      if (event.target.closest('#main-nav a')) setNavOpen(false);
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && !document.getElementById('access-modal')?.open &&
+          document.querySelector('.mobile-menu-btn')?.getAttribute('aria-expanded') === 'true') setNavOpen(false, true);
     });
 
-    /* Access modal */
+    const accessDialog = document.getElementById('access-modal');
+    let accessInvoker = null;
+    let accessPending = false;
     function openAccessModal() {
-      const modal = document.getElementById('access-modal');
-      if (!modal) return;
-      modal.style.display = 'flex';
-      setTimeout(function() { const n = document.getElementById('req-name'); if (n) n.focus(); }, 50);
-      document.addEventListener('keydown', _modalKeyHandler);
+      if (!accessDialog || accessDialog.open) return;
+      accessInvoker = document.activeElement;
+      accessDialog.showModal(); // Native modality makes the background inert.
+      document.body.classList.add('dialog-open');
+      const target = document.getElementById('request-success').hidden
+        ? document.getElementById('req-name') : document.getElementById('request-success-title');
+      target.focus();
     }
-    function closeAccessModal() {
-      const modal = document.getElementById('access-modal');
-      if (!modal) return;
-      modal.style.display = 'none';
-      const form = document.getElementById('request-form-container');
-      const success = document.getElementById('request-success');
+    function closeAccessModal() { accessDialog?.close(); }
+    accessDialog?.addEventListener('close', () => {
+      document.body.classList.remove('dialog-open');
+      if (accessInvoker?.isConnected) accessInvoker.focus({ preventScroll: true });
+    });
+    accessDialog?.addEventListener('keydown', (event) => {
+      if (event.key !== 'Tab') return;
+      const controls = [...accessDialog.querySelectorAll('a[href],button,input,[tabindex="0"]')]
+        .filter(control => !control.disabled && control.getClientRects().length);
+      const first = controls[0], last = controls[controls.length - 1];
+      if (event.shiftKey && (document.activeElement === first || !controls.includes(document.activeElement))) {
+        event.preventDefault(); last?.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault(); first?.focus();
+      }
+    });
+    // Escape uses native cancel behavior. Closing preserves in-flight state.
+    accessDialog?.addEventListener('click', (event) => {
+      if (event.target !== accessDialog) return;
+      const box = accessDialog.getBoundingClientRect();
+      if (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom) closeAccessModal();
+    });
+
+    async function submitAccessRequest(event) {
+      event?.preventDefault();
+      if (accessPending) return;
       const name = document.getElementById('req-name');
       const email = document.getElementById('req-email');
-      const btn = document.getElementById('btn-submit-req');
-      if (form) form.style.display = 'block';
-      if (success) success.style.display = 'none';
-      if (name) name.value = '';
-      if (email) email.value = '';
-      if (btn) { btn.innerText = 'Submit Request'; btn.disabled = false; }
-      document.removeEventListener('keydown', _modalKeyHandler);
-    }
-    function _modalKeyHandler(e) {
-      if (e.key === 'Escape') closeAccessModal();
-    }
-    /* Close modal on overlay click */
-    document.addEventListener('click', function(e) {
-      const modal = document.getElementById('access-modal');
-      if (modal && e.target === modal) closeAccessModal();
-    });
-
-    async function submitAccessRequest() {
-      const name = document.getElementById('req-name').value.trim();
-      const email = document.getElementById('req-email').value.trim();
-      const btn = document.getElementById('btn-submit-req');
-      if (!name || !email) { alert('Please provide a name and email address.'); return; }
-      btn.innerText = 'Submitting…';
-      btn.disabled = true;
+      const status = document.getElementById('request-status');
+      let firstError = null;
+      for (const [field, message] of [[name, 'Enter your full name.'], [email, 'Enter a valid contact email.']]) {
+        field.value = field.value.trim();
+        const valid = field.value.length > 0 && field.validity.valid;
+        const error = document.getElementById(field.id + '-error');
+        error.textContent = valid ? '' : message;
+        error.hidden = valid;
+        field.setAttribute('aria-invalid', String(!valid));
+        if (!valid && !firstError) firstError = field;
+      }
+      if (firstError) { status.textContent = 'Check the highlighted fields.'; firstError.focus(); return; }
+      const button = document.getElementById('btn-submit-req');
+      accessPending = true;
+      button.disabled = true;
+      button.textContent = 'Submitting…';
+      status.textContent = 'Submitting your request…';
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 20000);
       try {
-        const res = await fetch('/api/request-access', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, email })
+        const response = await fetch('/api/request-access', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: name.value, email: email.value }), signal: controller.signal
         });
-        const data = await res.json();
-        if (res.ok) {
-          document.getElementById('request-form-container').style.display = 'none';
-          document.getElementById('request-success').style.display = 'block';
-        } else {
-          alert(data.error || 'Request could not be submitted. Please try again.');
-          btn.innerText = 'Submit Request';
-          btn.disabled = false;
+        if (!response.ok) {
+          status.textContent = response.status === 503
+            ? 'Access requests are temporarily unavailable. Your access has not been confirmed. Contact VaultBasis or try again later.'
+            : 'We could not confirm your request. Contact VaultBasis or try again later.';
+          return;
         }
-      } catch (_err) {
-        alert('A network error occurred. Please check your connection and try again.');
-        btn.innerText = 'Submit Request';
-        btn.disabled = false;
+        const result = await response.json();
+        if (result.status !== 'success') throw new Error('Unconfirmed request response');
+        // The legacy endpoint does not prove real delivery or human review.
+        document.getElementById('request-form-container').hidden = true;
+        document.getElementById('request-success').hidden = false;
+        status.textContent = 'Request processed. Access delivery is not yet confirmed.';
+        if (accessDialog.open) document.getElementById('request-success-title').focus();
+      } catch (_) {
+        status.textContent = 'We could not confirm the outcome. The request may have reached VaultBasis. Contact us before submitting again.';
+      } finally {
+        clearTimeout(timeout);
+        accessPending = false;
+        button.disabled = false;
+        button.textContent = 'Submit Request';
       }
     }
+    document.getElementById('request-form-container')?.addEventListener('submit', submitAccessRequest);
 
-    /* Smooth scroll for same-page anchors */
-    document.querySelectorAll('a[href^="/#"]').forEach(function(anchor) {
-      if (window.location.pathname !== '/') return;
-      anchor.addEventListener('click', function(e) {
-        const id = this.getAttribute('href').substring(2);
-        const el = document.getElementById(id);
-        if (!el) return;
-        e.preventDefault();
-        const hdr = document.querySelector('header');
-        const offset = hdr ? hdr.offsetHeight + 24 : 80;
-        window.scrollTo({ top: el.getBoundingClientRect().top + window.pageYOffset - offset, behavior: 'smooth' });
-        history.pushState(null, null, '#' + id);
-      });
+    // Native fragment/history behavior preserves reload, Back and Forward.
+    const main = document.querySelector('main');
+    if (main) { main.id ||= 'main-content'; main.setAttribute('tabindex', '-1'); }
+    const topButton = document.querySelector('.back-to-top');
+    function updateTopButton() { if (topButton) topButton.hidden = window.scrollY < window.innerHeight; }
+    window.addEventListener('scroll', updateTopButton, { passive: true });
+    updateTopButton();
+    topButton?.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
+      main?.focus({ preventScroll: true });
     });
-    document.querySelectorAll('a[href^="#"]').forEach(function(anchor) {
-      anchor.addEventListener('click', function(e) {
-        const href = this.getAttribute('href');
-        if (href === '#' || href.length < 2) return;
-        const el = document.getElementById(href.substring(1));
-        if (!el) return;
-        e.preventDefault();
-        const hdr = document.querySelector('header');
-        const offset = hdr ? hdr.offsetHeight + 24 : 80;
-        window.scrollTo({ top: el.getBoundingClientRect().top + window.pageYOffset - offset, behavior: 'smooth' });
-        history.pushState(null, null, href);
-      });
+    document.querySelectorAll('#main-nav a').forEach(link => {
+      if (link.getAttribute('href') === location.pathname) link.setAttribute('aria-current', 'page');
     });
   </script>

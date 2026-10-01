@@ -13,3 +13,10 @@ Current operational knowledge; update during every task under [the execution sta
 | KB-007 / VB-GOV-001 | Public marketing and protected product access have different access rules | [Promotion workflow](development_workflow.md); do not solve capability security by inventing a whole-domain requirement |
 
 Add task-linked facts and troubleshooting as behavior changes. Do not store secrets, tokens, taxpayer data or unverified operational claims here.
+
+## First implementation findings
+
+- MMP11-CI-UX-001: use the gate runner’s Python interpreter for subprocess pytest; PATH selected Anaconda locally. Sandbox bytecode-cache failures are environment failures, not syntax failures; use a writable cache prefix.
+- MMP11-A11Y-001: native dialog modality plus keyboard wrapping keeps focus within content; preserve the mobile menu when closing a dialog so the exact invoking control remains focusable.
+- MMP11-NAV-404-001: a rendered 404 file does not by itself prove the deployed route returns HTTP 404. Test status and content at the actual Preview URL.
+- MMP11-ACCESS-001: service success is not email delivery or a preview credential. Interim presentation states unconfirmed delivery; operational provisioning remains open.

@@ -1230,9 +1230,57 @@
       "stage": "MMP-1.1",
       "ledger": "docs/mmp11_task_ledger.md",
       "owner": "Engineering; human acceptance by founder where specified",
-      "state": "AUTHORIZED",
+      "state": "IN_PROGRESS",
       "acceptance": "Fresh refs compared; branch from release baseline; Edge remains independent.",
-      "implementation_commits": []
+      "implementation_commits": [],
+      "closeout": "docs/audit/internal/tasks/MMP11-GIT-001.md",
+      "documentation": {
+        "technical": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/ux/implementation-batch-a.md",
+            "docs/technical_change_register.md"
+          ],
+          "rationale": "Records bounded first-batch behavior, evidence and open actual-boundary gates."
+        },
+        "knowledge_base": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/knowledge_base.md"
+          ],
+          "rationale": "Records bounded first-batch behavior, evidence and open actual-boundary gates."
+        },
+        "status": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/status.md"
+          ],
+          "rationale": "Records bounded first-batch behavior, evidence and open actual-boundary gates."
+        },
+        "adr": {
+          "disposition": "NO_CHANGE",
+          "paths": [
+            "docs/adr/ADR-007-task-traceability-and-evidence-lifecycle.md",
+            "docs/adr/ADR-003-zero-token-bleed-and-local-edge-boundary.md"
+          ],
+          "rationale": "Presentation, routing and test orchestration preserve assurance and access authority; no protected architectural decision changed."
+        },
+        "internal_audit": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/audit/internal/tasks/batch-a-validation.json",
+            "docs/ux/implementation-batch-a.md"
+          ],
+          "rationale": "Records bounded first-batch behavior, evidence and open actual-boundary gates."
+        },
+        "external_audit": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/audit/external/README.md"
+          ],
+          "rationale": "Records bounded first-batch behavior, evidence and open actual-boundary gates."
+        }
+      }
     },
     {
       "id": "MMP11-UX-001",
@@ -1250,9 +1298,57 @@
       "stage": "MMP-1.1",
       "ledger": "docs/mmp11_task_ledger.md",
       "owner": "Engineering; human acceptance by founder where specified",
-      "state": "AUTHORIZED",
+      "state": "IN_PROGRESS",
       "acceptance": "One header/footer, typography/spacing/controls/status/focus system and distinct local navigation.",
-      "implementation_commits": []
+      "implementation_commits": [],
+      "closeout": "docs/audit/internal/tasks/MMP11-UX-FOUNDATION-001.md",
+      "documentation": {
+        "technical": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/ux/implementation-batch-a.md",
+            "docs/technical_change_register.md"
+          ],
+          "rationale": "Records bounded first-batch behavior, evidence and open actual-boundary gates."
+        },
+        "knowledge_base": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/knowledge_base.md"
+          ],
+          "rationale": "Records bounded first-batch behavior, evidence and open actual-boundary gates."
+        },
+        "status": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/status.md"
+          ],
+          "rationale": "Records bounded first-batch behavior, evidence and open actual-boundary gates."
+        },
+        "adr": {
+          "disposition": "NO_CHANGE",
+          "paths": [
+            "docs/adr/ADR-007-task-traceability-and-evidence-lifecycle.md",
+            "docs/adr/ADR-003-zero-token-bleed-and-local-edge-boundary.md"
+          ],
+          "rationale": "Presentation, routing and test orchestration preserve assurance and access authority; no protected architectural decision changed."
+        },
+        "internal_audit": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/audit/internal/tasks/batch-a-validation.json",
+            "docs/ux/implementation-batch-a.md"
+          ],
+          "rationale": "Records bounded first-batch behavior, evidence and open actual-boundary gates."
+        },
+        "external_audit": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/audit/external/README.md"
+          ],
+          "rationale": "Records bounded first-batch behavior, evidence and open actual-boundary gates."
+        }
+      }
     },
     {
       "id": "MMP11-UX-PAGES-001",
@@ -1270,9 +1366,57 @@
       "stage": "MMP-1.1",
       "ledger": "docs/mmp11_task_ledger.md",
       "owner": "Engineering; human acceptance by founder where specified",
-      "state": "AUTHORIZED",
+      "state": "IN_PROGRESS",
       "acceptance": "Unknown path including negative control returns 404 and usable recovery on actual candidate.",
-      "implementation_commits": []
+      "implementation_commits": [],
+      "closeout": "docs/audit/internal/tasks/MMP11-NAV-404-001.md",
+      "documentation": {
+        "technical": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/ux/implementation-batch-a.md",
+            "docs/technical_change_register.md"
+          ],
+          "rationale": "Records bounded first-batch behavior, evidence and open actual-boundary gates."
+        },
+        "knowledge_base": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/knowledge_base.md"
+          ],
+          "rationale": "Records bounded first-batch behavior, evidence and open actual-boundary gates."
+        },
+        "status": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/status.md"
+          ],
+          "rationale": "Records bounded first-batch behavior, evidence and open actual-boundary gates."
+        },
+        "adr": {
+          "disposition": "NO_CHANGE",
+          "paths": [
+            "docs/adr/ADR-007-task-traceability-and-evidence-lifecycle.md",
+            "docs/adr/ADR-003-zero-token-bleed-and-local-edge-boundary.md"
+          ],
+          "rationale": "Presentation, routing and test orchestration preserve assurance and access authority; no protected architectural decision changed."
+        },
+        "internal_audit": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/audit/internal/tasks/batch-a-validation.json",
+            "docs/ux/implementation-batch-a.md"
+          ],
+          "rationale": "Records bounded first-batch behavior, evidence and open actual-boundary gates."
+        },
+        "external_audit": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/audit/external/README.md"
+          ],
+          "rationale": "Records bounded first-batch behavior, evidence and open actual-boundary gates."
+        }
+      }
     },
     {
       "id": "MMP11-NAV-TOP-001",
@@ -1280,9 +1424,57 @@
       "stage": "MMP-1.1",
       "ledger": "docs/mmp11_task_ledger.md",
       "owner": "Engineering; human acceptance by founder where specified",
-      "state": "AUTHORIZED",
+      "state": "IN_PROGRESS",
       "acceptance": "Keyboard/focus, scroll threshold, mobile-safe placement and reduced motion verified.",
-      "implementation_commits": []
+      "implementation_commits": [],
+      "closeout": "docs/audit/internal/tasks/MMP11-NAV-TOP-001.md",
+      "documentation": {
+        "technical": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/ux/implementation-batch-a.md",
+            "docs/technical_change_register.md"
+          ],
+          "rationale": "Records bounded first-batch behavior, evidence and open actual-boundary gates."
+        },
+        "knowledge_base": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/knowledge_base.md"
+          ],
+          "rationale": "Records bounded first-batch behavior, evidence and open actual-boundary gates."
+        },
+        "status": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/status.md"
+          ],
+          "rationale": "Records bounded first-batch behavior, evidence and open actual-boundary gates."
+        },
+        "adr": {
+          "disposition": "NO_CHANGE",
+          "paths": [
+            "docs/adr/ADR-007-task-traceability-and-evidence-lifecycle.md",
+            "docs/adr/ADR-003-zero-token-bleed-and-local-edge-boundary.md"
+          ],
+          "rationale": "Presentation, routing and test orchestration preserve assurance and access authority; no protected architectural decision changed."
+        },
+        "internal_audit": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/audit/internal/tasks/batch-a-validation.json",
+            "docs/ux/implementation-batch-a.md"
+          ],
+          "rationale": "Records bounded first-batch behavior, evidence and open actual-boundary gates."
+        },
+        "external_audit": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/audit/external/README.md"
+          ],
+          "rationale": "Records bounded first-batch behavior, evidence and open actual-boundary gates."
+        }
+      }
     },
     {
       "id": "MMP11-A11Y-001",
@@ -1290,9 +1482,57 @@
       "stage": "MMP-1.1",
       "ledger": "docs/mmp11_task_ledger.md",
       "owner": "Engineering; human acceptance by founder where specified",
-      "state": "AUTHORIZED",
+      "state": "IN_PROGRESS",
       "acceptance": "Focus enters/contained/restored to exact invoker; Escape; labels/errors/status; axe plus human keyboard/VoiceOver.",
-      "implementation_commits": []
+      "implementation_commits": [],
+      "closeout": "docs/audit/internal/tasks/MMP11-A11Y-001.md",
+      "documentation": {
+        "technical": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/ux/implementation-batch-a.md",
+            "docs/technical_change_register.md"
+          ],
+          "rationale": "Records bounded first-batch behavior, evidence and open actual-boundary gates."
+        },
+        "knowledge_base": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/knowledge_base.md"
+          ],
+          "rationale": "Records bounded first-batch behavior, evidence and open actual-boundary gates."
+        },
+        "status": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/status.md"
+          ],
+          "rationale": "Records bounded first-batch behavior, evidence and open actual-boundary gates."
+        },
+        "adr": {
+          "disposition": "NO_CHANGE",
+          "paths": [
+            "docs/adr/ADR-007-task-traceability-and-evidence-lifecycle.md",
+            "docs/adr/ADR-003-zero-token-bleed-and-local-edge-boundary.md"
+          ],
+          "rationale": "Presentation, routing and test orchestration preserve assurance and access authority; no protected architectural decision changed."
+        },
+        "internal_audit": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/audit/internal/tasks/batch-a-validation.json",
+            "docs/ux/implementation-batch-a.md"
+          ],
+          "rationale": "Records bounded first-batch behavior, evidence and open actual-boundary gates."
+        },
+        "external_audit": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/audit/external/README.md"
+          ],
+          "rationale": "Records bounded first-batch behavior, evidence and open actual-boundary gates."
+        }
+      }
     },
     {
       "id": "MMP11-ACCESS-001",
@@ -1300,9 +1540,57 @@
       "stage": "MMP-1.1",
       "ledger": "docs/mmp11_task_ledger.md",
       "owner": "Engineering; human acceptance by founder where specified",
-      "state": "AUTHORIZED",
+      "state": "IN_PROGRESS",
       "acceptance": "Validation/submitting/accepted-pending-error match durable service state; real or explicit manual provisioning; separate credentials/entitlements.",
-      "implementation_commits": []
+      "implementation_commits": [],
+      "closeout": "docs/audit/internal/tasks/MMP11-ACCESS-001.md",
+      "documentation": {
+        "technical": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/ux/implementation-batch-a.md",
+            "docs/technical_change_register.md"
+          ],
+          "rationale": "Records bounded first-batch behavior, evidence and open actual-boundary gates."
+        },
+        "knowledge_base": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/knowledge_base.md"
+          ],
+          "rationale": "Records bounded first-batch behavior, evidence and open actual-boundary gates."
+        },
+        "status": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/status.md"
+          ],
+          "rationale": "Records bounded first-batch behavior, evidence and open actual-boundary gates."
+        },
+        "adr": {
+          "disposition": "NO_CHANGE",
+          "paths": [
+            "docs/adr/ADR-007-task-traceability-and-evidence-lifecycle.md",
+            "docs/adr/ADR-003-zero-token-bleed-and-local-edge-boundary.md"
+          ],
+          "rationale": "Presentation, routing and test orchestration preserve assurance and access authority; no protected architectural decision changed."
+        },
+        "internal_audit": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/audit/internal/tasks/batch-a-validation.json",
+            "docs/ux/implementation-batch-a.md"
+          ],
+          "rationale": "Records bounded first-batch behavior, evidence and open actual-boundary gates."
+        },
+        "external_audit": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/audit/external/README.md"
+          ],
+          "rationale": "Records bounded first-batch behavior, evidence and open actual-boundary gates."
+        }
+      }
     },
     {
       "id": "MMP11-EDGE-AUDIT-001",
@@ -1330,9 +1618,57 @@
       "stage": "MMP-1.1",
       "ledger": "docs/mmp11_task_ledger.md",
       "owner": "Engineering; human acceptance by founder where specified",
-      "state": "AUTHORIZED",
+      "state": "IN_PROGRESS",
       "acceptance": "Full public/access/verifier/Edge journeys; dead-link/focus/404/offline negative controls demonstrably fail.",
-      "implementation_commits": []
+      "implementation_commits": [],
+      "closeout": "docs/audit/internal/tasks/MMP11-JOURNEY-001.md",
+      "documentation": {
+        "technical": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/ux/implementation-batch-a.md",
+            "docs/technical_change_register.md"
+          ],
+          "rationale": "Records bounded first-batch behavior, evidence and open actual-boundary gates."
+        },
+        "knowledge_base": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/knowledge_base.md"
+          ],
+          "rationale": "Records bounded first-batch behavior, evidence and open actual-boundary gates."
+        },
+        "status": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/status.md"
+          ],
+          "rationale": "Records bounded first-batch behavior, evidence and open actual-boundary gates."
+        },
+        "adr": {
+          "disposition": "NO_CHANGE",
+          "paths": [
+            "docs/adr/ADR-007-task-traceability-and-evidence-lifecycle.md",
+            "docs/adr/ADR-003-zero-token-bleed-and-local-edge-boundary.md"
+          ],
+          "rationale": "Presentation, routing and test orchestration preserve assurance and access authority; no protected architectural decision changed."
+        },
+        "internal_audit": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/audit/internal/tasks/batch-a-validation.json",
+            "docs/ux/implementation-batch-a.md"
+          ],
+          "rationale": "Records bounded first-batch behavior, evidence and open actual-boundary gates."
+        },
+        "external_audit": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/audit/external/README.md"
+          ],
+          "rationale": "Records bounded first-batch behavior, evidence and open actual-boundary gates."
+        }
+      }
     },
     {
       "id": "MMP11-CI-UX-001",
@@ -1340,9 +1676,57 @@
       "stage": "MMP-1.1",
       "ledger": "docs/mmp11_task_ledger.md",
       "owner": "Engineering; human acceptance by founder where specified",
-      "state": "AUTHORIZED",
+      "state": "IN_PROGRESS",
       "acceptance": "Preserve canonical gates and add UX/NFR coverage; retain exact SHA/run/artifact evidence; CI triggers cover intended branch/PR.",
-      "implementation_commits": []
+      "implementation_commits": [],
+      "closeout": "docs/audit/internal/tasks/MMP11-CI-UX-001.md",
+      "documentation": {
+        "technical": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/ux/implementation-batch-a.md",
+            "docs/technical_change_register.md"
+          ],
+          "rationale": "Records bounded first-batch behavior, evidence and open actual-boundary gates."
+        },
+        "knowledge_base": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/knowledge_base.md"
+          ],
+          "rationale": "Records bounded first-batch behavior, evidence and open actual-boundary gates."
+        },
+        "status": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/status.md"
+          ],
+          "rationale": "Records bounded first-batch behavior, evidence and open actual-boundary gates."
+        },
+        "adr": {
+          "disposition": "NO_CHANGE",
+          "paths": [
+            "docs/adr/ADR-007-task-traceability-and-evidence-lifecycle.md",
+            "docs/adr/ADR-003-zero-token-bleed-and-local-edge-boundary.md"
+          ],
+          "rationale": "Presentation, routing and test orchestration preserve assurance and access authority; no protected architectural decision changed."
+        },
+        "internal_audit": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/audit/internal/tasks/batch-a-validation.json",
+            "docs/ux/implementation-batch-a.md"
+          ],
+          "rationale": "Records bounded first-batch behavior, evidence and open actual-boundary gates."
+        },
+        "external_audit": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/audit/external/README.md"
+          ],
+          "rationale": "Records bounded first-batch behavior, evidence and open actual-boundary gates."
+        }
+      }
     },
     {
       "id": "MMP11-VISUAL-001",
@@ -1839,6 +2223,16 @@
       "implementation_commits": [],
       "historical_import": true,
       "historical_note": "Original historical/deferred row; attribution not independently requalified. Commercialization is not MMP-1.1 scope."
+    },
+    {
+      "id": "MMP11-EXEC-001",
+      "title": "Controlled implementation and qualification through the external evidence gates",
+      "stage": "MMP-1.1",
+      "ledger": "docs/mmp11_task_ledger.md",
+      "state": "IN_PROGRESS",
+      "owner": "Engineering / release; founder and practitioners own their acceptance",
+      "acceptance": "Execute founder directive 06 without kernel changes or production-first testing; exact candidate evidence at each gate.",
+      "implementation_commits": []
     }
   ]
 }

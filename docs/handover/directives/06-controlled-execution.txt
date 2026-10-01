@@ -1,0 +1,655 @@
+Yes. Governance is now sufficiently explicit. The next developer session should stop extending governance unless implementation exposes a genuine governance gap and begin controlled MMP-1.1 execution.
+The repository instructions correctly establish that application work starts on fix/mmp11-ux-001 from the verified release/mmp-1.1 baseline, while Edge remains independently qualified on fix/mmp11-dist-mac-001. That is consistent with the handover, where release/mmp-1.1 was the stabilization baseline and the Edge remediation was isolated separately.    Pasted markdown
+Give the new developer this directive.
+MMP11-EXEC-001 — Controlled Implementation & Qualification
+Mission
+Move VaultBasis from audited but unqualified MMP-1.1 to a single coherent practitioner-grade release candidate.
+Do not create more process for its own sake. The governance system now exists to support delivery.
+The execution priority is:
+1. Establish exact branch truth
+2. Fix public practitioner experience
+3. Fix complete access/provisioning journey
+4. Qualify Web Verifier
+5. Qualify accessibility + cross-browser/device NFRs
+6. Requalify Edge Mac candidate
+7. Qualify Windows candidate
+8. Integrate accepted changes into release/mmp-1.1
+9. Qualify complete release candidate
+10. Promote exact qualified candidate
+11. Production smoke
+12. Update main
+13. Associate-001
+14. CPA-001
+
+Do not start MMP-1.5/MMP-2 implementation during this sequence.
+Phase 0 — Push the governance baseline first
+Current governance commits are local:
+95708fa  audit baseline
+dfc176f  governance implementation
+defaf5a  SHA-linked closeout
+
+Before application implementation, establish where these commits live.
+They must not accidentally become application changes on main simply because they are useful.
+First:
+fetch origin
+compare local/remote refs
+verify current branch
+verify working tree
+verify the three commits
+run task traceability validator
+
+Then push the governance branch containing those commits to origin.
+Record:
+branch
+95708fa
+dfc176f
+defaf5a
+remote ref
+validator result
+
+Do not deploy this documentation/governance branch.
+DoD
+GOVERNANCE_BASELINE_PUSHED
+
+means:
+✓ exact commits on remote
+✓ validator green
+✓ negative controls evidenced
+✓ no application deployment
+✓ no accidental merge into main
+
+Phase 1 — Establish the active MMP-1.1 implementation branch
+Verify:
+origin/main
+origin/release/mmp-1.1
+origin/fix/mmp11-dist-mac-001
+origin/fix/mmp11-pres-003
+origin/lab/mmp-2-ai
+
+against the takeover documentation.
+Do not assume the September 30 handover branch matrix remains current merely because it was once verified.
+Then create/verify:
+fix/mmp11-ux-001
+
+from the verified release/mmp-1.1 baseline.
+Bring the new governance requirements into the working branch through an intentional bounded integration mechanism so that the new branch actually runs under AGENTS.md, task registry and task-execution standard.
+Do not accidentally import rejected 586a83c as the new UX implementation.
+Its ideas can be inspected. Its qualification state cannot be inherited.
+Branch topology
+                         main
+                          │
+                    accepted truth
+                          │
+                          ▼
+                  release/mmp-1.1
+                    /           \
+                   /             \
+                  ▼               ▼
+      fix/mmp11-ux-001    fix/mmp11-dist-mac-001
+          WEB / UX              EDGE
+
+Future AI remains:
+lab/mmp-2-ai
+
+completely outside this path.
+Phase 2 — Convert the audit into an implementation queue
+Do not start from aesthetics.
+Take the completed:
+experience map
+UX defect register
+canonical UX blueprint
+visual acceptance matrix
+NFR specification
+accessibility requirements
+
+and produce a bounded implementation order.
+I recommend:
+Batch A — Structural correctness
+Fix first:
+real HTTP 404
+canonical routing
+one global header
+one global footer
+navigation semantics
+deep links
+external/local destination classification
+Back-to-Top behavior
+
+Why first?
+Because there is little value polishing components while route semantics remain wrong.
+Batch B — Interaction foundation
+Then:
+buttons
+links
+forms
+dialog/modal
+focus management
+validation
+loading
+success
+failure
+disabled states
+mobile navigation
+
+The known access-dialog focus escape belongs here.
+Batch C — Page convergence
+Then converge:
+Home
+Trust Center
+About
+Contact
+Verifier Access
+Privacy
+Terms
+Security Disclosure
+Scope & Limitations
+404
+
+Do not independently redesign each page.
+Use the shared system.
+Batch D — Web Verifier
+Then qualify:
+access gate
+session behavior
+receipt input
+verification results
+invalid receipt
+tampered receipt
+expired/revoked session
+error handling
+mobile
+keyboard
+
+Do not alter protected receipt-verification semantics while improving its presentation.
+Phase 3 — Fix the access journey as a business workflow
+This is more important than another visual polish pass.
+The old handover explicitly records that the existing provisioning path uses Ethereal and therefore does not deliver the provisioning email to the practitioner.    Pasted markdown
+Treat this as a full task family:
+Request Access
+      ↓
+validate
+      ↓
+submit
+      ↓
+request recorded
+      ↓
+approved/provisioned
+      ↓
+practitioner receives actionable access
+      ↓
+credential/session
+      ↓
+artifact entitlement
+      ↓
+qualified download
+
+There are two acceptable MMP-1.1 solutions.
+Option A — real automated provisioning
+Use an actual qualified transactional email mechanism.
+Or:
+Option B — explicit manual design-partner provisioning
+The UI truthfully says the request was received and that VaultBasis will review/provision it manually.
+For the current low-volume design-partner phase, Option B is entirely acceptable and may actually be preferable if it avoids premature infrastructure.
+What is unacceptable is:
+UI says email sent
+        +
+Ethereal captures it
+        +
+practitioner receives nothing
+
+Do not build CRM/account/billing infrastructure to solve this.
+Phase 4 — Local implementation qualification
+Before every candidate push, run the applicable repository contract.
+At minimum:
+task traceability validator
+full Python regression
+canonical 11 gates
+public web build
+web navigation/link tests
+security tests
+new UX interaction tests
+new accessibility automated tests
+
+The historical commands and validation model are documented in the handover.    Pasted markdown
+Also add tests for the two new production findings:
+A11Y:
+focus cannot escape open access dialog
+
+ROUTING:
+unknown path returns 404,
+not homepage + 200
+
+Both need negative controls.
+For example, prove the route test fails when a fallback intentionally returns 200.
+Phase 5 — Push bounded implementation commits
+Push fix/mmp11-ux-001.
+Each implementation commit must carry its task ID according to the new governance contract.
+Do not wait until the end to produce one enormous commit.
+But do not create meaningless one-line task fragmentation either.
+A sensible structure might resemble:
+MMP11-UX-001 canonical application shell
+MMP11-NAV-001 route/navigation convergence
+MMP11-A11Y-001 accessibility foundation
+MMP11-ACCESS-001 access workflow
+MMP11-VERIFIER-001 verifier experience
+MMP11-NFR-001 runtime/browser qualification
+
+Use the actual IDs in the new registry rather than inventing duplicates if these concepts are already indexed.
+Phase 6 — CI qualification
+Every pushed candidate goes through GitHub CI.
+CI is allowed to assign only:
+IMPLEMENTED
+        ↓
+AUTOMATED_VALIDATION_PASS
+
+and, where applicable:
+BUILD_VERIFIED
+
+CI does not assign:
+PREPROD_QUALIFIED
+FOUNDER_UX_ACCEPTED
+PRODUCTION_VERIFIED
+PRACTITIONER_QUALIFIED
+
+CI DoD
+Exact SHA must have:
+✓ task traceability validator
+✓ canonical 11 gates
+✓ deterministic regression
+✓ web build
+✓ route/navigation contract
+✓ 404 negative test
+✓ dialog accessibility contract
+✓ automated WCAG tests
+✓ security regression
+✓ generated-output crawl
+✓ console/runtime checks where automated
+✓ no protected-kernel semantic changes
+
+Record the Git SHA and CI run identity.
+Phase 7 — Vercel Preview, not production
+After CI passes the exact SHA:
+CI-GREEN SHA
+      ↓
+VERCEL PREVIEW
+
+State:
+PREPROD_DEPLOYED
+
+This is where the actual browser qualification begins.
+Do not use vaultbasis.com as the first runtime for the new candidate.
+Do not qualify localhost as production-equivalent.
+Phase 8 — Browser/device/NFR qualification
+Run the actual Preview deployment through the NFR contract.
+At minimum:
+Chrome
+Edge
+Firefox
+Safari
+
+1440 desktop
+1280 laptop
+tablet
+390 mobile
+320 reflow
+
+plus practical iPhone Safari and Android Chrome validation.
+Qualify:
+navigation
+deep links
+refresh
+Back/Forward
+modal
+forms
+keyboard
+focus
+zoom
+reflow
+contrast
+mobile nav
+Back-to-Top
+loading
+errors
+404
+sessions
+Verifier
+Request Access
+console
+network requests
+
+No unexplained:
+404
+500
+JS exception
+failed required asset
+mixed content
+unexpected external dependency
+
+Phase 9 — Human accessibility qualification
+Automated accessibility is not sufficient.
+Perform at least:
+keyboard-only journey
+VoiceOver + Safari
+200% zoom
+400% where applicable/reflow
+mobile touch
+visible focus
+dialog announcements
+form error announcements
+status/success announcements
+
+Do not claim legal “ADA compliance.”
+Record:
+WCAG 2.2 AA ENGINEERING QUALIFICATION
+
+with exceptions if any.
+P0/P1 accessibility defects block promotion.
+Phase 10 — Founder Preview review
+Only when the developer has a coherent Preview candidate.
+Provide:
+exact SHA
+CI run
+immutable Vercel Preview URL
+qualification summary
+desktop screenshots
+mobile screenshots
+known limitations
+
+State before review:
+READY_FOR_FOUNDER_REVIEW
+
+Not:
+FOUNDER PASS
+
+The founder reviews the deployed Preview URL, not screenshots of localhost.
+Only founder may assign:
+FOUNDER_UX_ACCEPTED
+
+If rejected:
+same fix branch
+      ↓
+bounded corrections
+      ↓
+CI again
+      ↓
+new Preview
+      ↓
+requalification
+
+Do not start a new redesign branch for every feedback cycle.
+Phase 11 — Edge proceeds in parallel but separately
+Once Web work is underway, resume:
+fix/mmp11-dist-mac-001
+
+The old handover identifies 83d78db as the remediation candidate but explicitly says founder recipient-path qualification had not been completed.    Pasted markdown
+Do not rewrite that work from scratch.
+First inspect what 83d78db actually solves.
+Then CI must produce a new exact Mac candidate.
+Founder tests the actual packaged application:
+Download ZIP
+   ↓
+Finder extract
+   ↓
+Open VaultBasis.app
+   ↓
+Cases
+   ↓
+Sample Case
+   ↓
+Reconcile
+   ↓
+Finding
+   ↓
+Outcome Receipt
+   ↓
+Offline Verifier
+   ↓
+valid → VALID
+tampered → INVALID
+   ↓
+Help
+   ↓
+Quit
+   ↓
+Relaunch
+   ↓
+Persistence
+
+No Terminal/Python/Docker/chmod/xattr during recipient execution.
+That requirement follows the handover's recipient-path qualification model.    Pasted markdown
+Then:
+DISTRIBUTION_QUALIFIED_MAC
+
+Phase 12 — Windows is independent
+Do not infer Windows qualification from Mac.
+Establish current Windows source and CI truth first because the handover explicitly did not establish the artifact identity or qualification state.    Pasted markdown
+Then:
+build
+→ inspect
+→ extract/install
+→ launch
+→ sample
+→ receipt
+→ verify
+→ quit
+→ relaunch
+→ persistence
+
+Record:
+source SHA
+CI run
+artifact wrapper identity
+inner ZIP/package SHA-256
+OS
+architecture
+qualification evidence
+
+Then:
+DISTRIBUTION_QUALIFIED_WINDOWS
+
+or explicitly exclude Windows from the first external release if that becomes an approved product decision.
+Phase 13 — Integrate only qualified changes
+Once Web passes:
+fix/mmp11-ux-001
+        ↓
+release/mmp-1.1
+
+Once Edge passes:
+fix/mmp11-dist-mac-001
+        ↓
+release/mmp-1.1
+
+Do not merge the rejected PRES-003 branch.
+Run CI again on the resulting release SHA.
+This is important:
+Qualification of two parent branches does not automatically qualify their integration.
+
+Phase 14 — Full MMP-1.1 release qualification
+Now qualify the integrated release.
+Functional
+✓ supported evidence
+✓ reconciliation
+✓ findings
+✓ receipt
+✓ verification
+✓ persistence
+
+Experience
+✓ public web
+✓ access
+✓ Web Verifier
+✓ Edge
+✓ Help
+✓ mobile
+✓ accessibility
+
+Distribution
+✓ Mac
+✓ Windows if in declared release scope
+✓ exact hashes
+✓ correct platform mapping
+
+Security
+At minimum resolve/verify the outstanding production controls identified in the handover: entitlement, trusted public URL behavior and the remaining signing-key/identity limitation decisions.    Pasted markdown
+Governance
+✓ task registry
+✓ technical change register
+✓ knowledge base
+✓ status
+✓ ADR disposition
+✓ internal audit
+✓ bounded external audit
+✓ actual commit SHAs
+✓ known limitations
+
+Then:
+RELEASE_QUALIFIED
+
+Phase 15 — Production promotion
+Only after release qualification.
+Promote the exact qualified web candidate to Vercel production.
+Prefer immutable promotion/alias movement rather than rebuilding an unverified “equivalent” candidate.
+State:
+PRODUCTION_PROMOTED
+
+Then immediately smoke the actual production boundary.
+Phase 16 — Production smoke
+Against vaultbasis.com, verify at least:
+Home
+How It Works
+Trust Center
+About
+Contact
+Request Access
+Verifier Access
+Web Verifier
+Privacy
+Terms
+Security
+Scope
+404
+mobile navigation
+keyboard-critical actions
+
+Then security-critical:
+anonymous protected capability denied
+valid access succeeds
+revoked/expired access denied
+invalid entitlement denied
+valid entitlement exact artifact
+wrong artifact denied
+trusted PUBLIC_BASE_URL behavior
+
+Only after that:
+PRODUCTION_VERIFIED
+
+Phase 17 — main becomes the accepted truth
+Only now integrate the qualified release into:
+main
+
+Then create the appropriate qualified release tag/record.
+This gives main its intended meaning:
+latest integrated state backed by accepted qualification evidence
+
+rather than:
+latest code somebody pushed.
+
+Phase 18 — External evidence begins
+After PRODUCTION_VERIFIED:
+Associate-001
+
+The associate should be uninformed enough to expose assumptions the team no longer notices.
+Then:
+Associate evidence
+      ↓
+bounded fixes if required
+      ↓
+requalification
+      ↓
+CPA-001
+
+CPA-001 is the first serious evidence about whether the product solves a sufficiently valuable practitioner problem.
+Do not jump directly from internal confidence to MMP-1.5 feature construction.
+What is explicitly NOT next
+Until the above reaches the relevant gate, do not divert into:
+MMP-1.5 implementation
+MMP-2 product implementation
+new AI capabilities
+large connector development
+Dockerizing Edge
+Terraform
+billing
+Stripe
+analytics
+CRM
+large account system
+new tax semantics
+kernel refactoring
+
+The future roadmap ledgers are there to capture and evaluate opportunities, not authorize implementation.
+Required reporting format from now on
+At the end of every meaningful task, ask the developer to report something like:
+TASK
+MMP11-XXXX-001
+
+BRANCH
+fix/mmp11-ux-001
+
+SOURCE SHA
+<full SHA>
+
+IMPLEMENTATION
+IMPLEMENTED
+
+LOCAL VALIDATION
+PASS / FAIL
+<tests>
+
+CI
+AUTOMATED_VALIDATION_PASS / FAIL / NOT RUN
+Run:
+SHA:
+
+PREPROD
+PREPROD_DEPLOYED / NOT DEPLOYED
+Deployment ID:
+Immutable URL:
+
+AUTOMATED PREPROD
+PASS / FAIL / NOT RUN
+
+HUMAN A11Y
+PASS / FAIL / NOT RUN
+
+FOUNDER
+READY_FOR_FOUNDER_REVIEW /
+FOUNDER_UX_ACCEPTED /
+REJECTED /
+NOT REQUESTED
+
+PRODUCTION
+NOT PROMOTED /
+PRODUCTION_PROMOTED /
+PRODUCTION_VERIFIED
+
+DOCUMENTATION
+Technical:
+Knowledge Base:
+Status:
+ADR:
+Internal Audit:
+External Audit:
+
+PROTECTED KERNEL
+UNCHANGED / STOPPED FOR ARCHITECTURE REVIEW
+
+OPEN DEFECTS
+P0:
+P1:
+P2:
+
+NEXT AUTHORIZED STEP
+<one concrete step>
+
+That reporting format plus the new task traceability system should eliminate a major historical problem: “PASS” without knowing whether it meant source tests, CI, packaging, localhost, Preview, founder review, production, or practitioner validation.
+The immediate next move is therefore straightforward: push and freeze the governance baseline, establish fix/mmp11-ux-001 from verified release/mmp-1.1, and begin the first bounded implementation batch with the known structural defects—real 404 behavior, canonical navigation/shell, and the accessible Request Access dialog—before moving into full page polish or production deployment.

@@ -30,3 +30,7 @@ build/
 node_modules/
 
 .env*
+
+# Local browser qualification outputs
+test-results/
+playwright-report/

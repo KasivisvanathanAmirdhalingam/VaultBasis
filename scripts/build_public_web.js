@@ -40,7 +40,8 @@ function injectPartials(html, partials) {
     .replace('<!-- HEADER -->',   partials.header)
     .replace('<!-- FOOTER -->',   partials.footer)
     .replace('<!-- MODAL -->',    partials.modal)
-    .replace('<!-- SHELL_JS -->',  partials.js);
+    .replace('<!-- SHELL_JS -->',  partials.js)
+    .replace(/<main(?![^>]*\bid=)/, '<main id="main-content" tabindex="-1"');
 }
 
 console.log('================================================================================');
@@ -160,64 +161,12 @@ if (fs.existsSync(scopeDocSource)) {
 // No RC1 fallback. No unqualified binary served.
 console.log('✓ Distribution endpoint configured — awaiting RC3 artifact promotion to controlled storage.');
 
-// 6. Generate Custom 404 Fallback Page
-const notFoundHtml = `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>404 Not Found — VaultBasis</title>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700&display=swap" rel="stylesheet">
-  <style>
-    body {
-      background: #07090e;
-      color: #f1f5f9;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      margin: 0;
-      text-align: center;
-      padding: 1rem;
-    }
-    .card {
-      background: #0e121a;
-      border: 1px solid #21293a;
-      border-radius: 12px;
-      padding: 3rem 2rem;
-      max-width: 520px;
-    }
-    h1 { font-size: 3rem; margin-bottom: 0.5rem; color: #3b82f6; }
-    p { color: #94a3b8; line-height: 1.6; margin-bottom: 2rem; }
-    .btn {
-      display: inline-block;
-      background: #3b82f6;
-      color: white;
-      padding: 10px 20px;
-      border-radius: 6px;
-      text-decoration: none;
-      font-weight: 600;
-      margin: 0 6px;
-    }
-    .btn-secondary {
-      background: #161c28;
-      border: 1px solid #334155;
-    }
-  </style>
-</head>
-<body>
-  <div class="card">
-    <h1>404</h1>
-    <h2>Resource Not Found</h2>
-    <p>The requested public resource does not exist. For local reconciliation operations, ensure your local Edge daemon is running.</p>
-    <a href="/" class="btn">Return to Home</a>
-    <a href="/verifier" class="btn btn-secondary">Open Verifier</a>
-  </div>
-</body>
-</html>`;
-fs.writeFileSync(path.join(DIST_DIR, '404.html'), notFoundHtml, 'utf8');
-console.log('✓ Generated Custom 404 Page -> dist/public-web/404.html');
+// 6. The not-found page uses the same public shell. The unmatched-route
+// function returns it with HTTP 404; it is also Vercel's static fallback.
+fs.writeFileSync(path.join(DIST_DIR, '404.html'), injectPartials(
+  fs.readFileSync(path.join(APPS_DIR, 'web-marketing', '404.html'), 'utf8'), partials
+));
+console.log('✓ Built shared-shell 404 page');
 
 // 6.5. Generate Vercel Edge Middleware — capability access control
 //

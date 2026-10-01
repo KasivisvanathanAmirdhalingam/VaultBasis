@@ -50,6 +50,10 @@
     {
       "source": "/verifier-access",
       "destination": "/verifier-access.html"
+    },
+    {
+      "source": "/:path*",
+      "destination": "/api/not-found"
     }
   ],
   "headers": [
@@ -95,5 +99,10 @@
         }
       ]
     }
-  ]
+  ],
+  "functions": {
+    "api/not-found.js": {
+      "includeFiles": "dist/public-web/404.html"
+    }
+  }
 }
