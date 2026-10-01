@@ -78,6 +78,8 @@
       if (firstError) { status.textContent = 'Check the highlighted fields.'; firstError.focus(); return; }
       const button = document.getElementById('btn-submit-req');
       accessPending = true;
+      status.setAttribute('tabindex', '-1');
+      status.focus();
       button.disabled = true;
       button.textContent = 'Submitting…';
       status.textContent = 'Submitting your request…';
@@ -114,6 +116,9 @@
         accessPending = false;
         button.disabled = false;
         button.textContent = 'Submit Request';
+        if (accessDialog && accessDialog.open && !document.getElementById('request-form-container').hidden) {
+          button.focus();
+        }
       }
     }
     document.getElementById('request-form-container')?.addEventListener('submit', submitAccessRequest);
