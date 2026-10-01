@@ -8,7 +8,9 @@
     "validate": "./scripts/validate_before_commit.sh",
     "start:edge": "./scripts/launch.sh",
     "deploy:preview": "npx -y vercel@latest deploy",
-    "deploy:prod": "npx -y vercel@latest deploy --prod"
+    "deploy:prod": "npx -y vercel@latest deploy --prod",
+    "test:ux": "playwright test",
+    "validate:tasks": "python3 scripts/check_task_traceability.py"
   },
   "keywords": [
     "vaultbasis",
@@ -20,8 +22,12 @@
   "author": "VaultBasis Core Team",
   "license": "UNLICENSED",
   "dependencies": {
+    "@vercel/blob": "^2.8.0",
     "express": "^5.2.1",
-    "nodemailer": "^10.0.11",
-    "@vercel/blob": "^2.8.0"
+    "nodemailer": "^10.0.11"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "axe-core": "4.10.3"
   }
 }

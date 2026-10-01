@@ -156,7 +156,7 @@ def run_pytest_gate(
     potential_cause_hint: str,
 ) -> GateResult:
     t0 = time.time()
-    code, stdout, stderr = run_cmd(["pytest", test_path, "-v", "--no-header"])
+    code, stdout, stderr = run_cmd([sys.executable, "-m", "pytest", test_path, "-v", "--no-header"])
     dur = time.time() - t0
 
     # Extract test count summary
