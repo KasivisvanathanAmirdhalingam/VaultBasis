@@ -84,7 +84,7 @@
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 20000);
       try {
-        const fields = { name: name.value, email: email.value, context: document.getElementById('req-context').value.trim() };
+        const fields = { name: name.value, email: email.value };
         const fingerprint = JSON.stringify(fields);
         if (!accessSubmission || accessSubmission.fingerprint !== fingerprint) {
           accessSubmission = { fingerprint, requestId: crypto.randomUUID() };

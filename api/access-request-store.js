@@ -42,18 +42,18 @@ async function transact(change) {
 }
 function validate(body) {
   if (!body || typeof body !== 'object' || Array.isArray(body)) return null;
-  const { name, email, context = '', requestId } = body;
-  if (![name, email, context, requestId].every(v => typeof v === 'string')) return null;
-  const normalized = { name: name.trim(), email: email.trim().toLowerCase(), context: context.trim() };
+  const { name, email, requestId } = body;
+  if (![name, email, requestId].every(v => typeof v === 'string')) return null;
+  const normalized = { name: name.trim(), email: email.trim().toLowerCase() };
   if (!normalized.name || normalized.name.length > 200 || normalized.email.length > 254 ||
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized.email) || normalized.context.length > 500 ||
-      /[\x00-\x1f\x7f]/.test(normalized.name + normalized.email + normalized.context) ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized.email) ||
+      /[\x00-\x1f\x7f]/.test(normalized.name + normalized.email) ||
       !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(requestId)) return null;
   return { ...normalized, requestId };
 }
 async function submit(input, clientIp) {
   const retryKey = digest(`retry:${input.requestId}`);
-  const fingerprint = digest(JSON.stringify([input.name, input.email, input.context]));
+  const fingerprint = digest(JSON.stringify([input.name, input.email]));
   return transact((data, now) => {
     const previous = data.requests.find(r => r.retryKey === retryKey);
     if (previous) return { code: previous.fingerprint === fingerprint ? 202 : 409 };
@@ -70,7 +70,7 @@ async function submit(input, clientIp) {
     if (data.requests.some(r => r.email === input.email && ['PENDING_REVIEW', 'PROVISIONING', 'APPROVED'].includes(r.state))) return { code: 202 };
     if (data.requests.length >= 500) return { code: 503 };
     data.requests.push({ id: crypto.randomUUID(), retryKey, fingerprint, name: input.name,
-      email: input.email, context: input.context, createdAt: new Date(now).toISOString(), state: 'PENDING_REVIEW' });
+      email: input.email, createdAt: new Date(now).toISOString(), state: 'PENDING_REVIEW' });
     return { code: 202 };
   });
 }

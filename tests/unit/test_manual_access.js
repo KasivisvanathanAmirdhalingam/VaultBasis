@@ -28,7 +28,7 @@ const handler = require('../../api/request-access');
 const operator = require('../../scripts/lib/manual-provisioning');
 const preview = require('../../api/preview-access-store');
 const entitlement = require('../../api/entitlement-store');
-const input = (email = 'reviewer@example.invalid') => ({ name: 'Synthetic Reviewer', email, context: 'Evaluate sample', requestId: crypto.randomUUID() });
+const input = (email = 'reviewer@example.invalid') => ({ name: 'Synthetic Reviewer', email, requestId: crypto.randomUUID() });
 function response() { return { headers: {}, setHeader(k,v) { this.headers[k]=v; }, status(s) { this.code=s; return this; }, json(b) { this.body=b; return this; } }; }
 async function call(body, headers = {}) { const res=response(); await handler({method:'POST',body,headers:{'content-type':'application/json',...headers},socket:{remoteAddress:'192.0.2.1'}},res);return res; }
 beforeEach(() => { records=new Map();version=0;fail=false;unknown=false;process.env.ACCESS_REQUEST_NAMESPACE='test-only';process.env.ACCESS_REQUEST_SECRET='x'.repeat(64);process.env.PUBLIC_BASE_URL='https://preview.example.invalid';delete process.env.VERCEL; });
@@ -56,7 +56,7 @@ test('email and global budgets survive changed network identity',async()=>{
  await store.transact(data=>{data.limits.global={count:60,until:Date.now()+10000};});assert.equal((await store.submit(input('new@example.invalid'),'d')).code,429);
 });
 test('malformed input denied before storage and API methods bounded',async()=>{
- for(const body of [null,{}, { ...input(),email:'no-at' }, {...input(),name:'x'.repeat(201)}, {...input(),context:'x'.repeat(501)}, {...input(),context:'a\nb'}, {...input(),requestId:'bad'}]) assert.equal((await call(body)).code,400);
+ for(const body of [null,{}, { ...input(),email:'no-at' }, {...input(),name:'x'.repeat(201)}, {...input(),requestId:'bad'}]) assert.equal((await call(body)).code,400);
  assert.equal(records.size,0);assert.equal((await call(input(),{'content-type':'text/plain'})).code,415);
  const res=response();await handler({method:'GET'},res);assert.equal(res.code,405);
 });
