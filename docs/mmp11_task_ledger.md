@@ -70,7 +70,17 @@ Prior ledger entries are preserved in the [historical snapshot](handover/MMP11_T
 | Task ID | Task | Status |
 |---|---|---|
 | MMP15-SEC-001 | Formal Architecture Decision for Source Obfuscation (PyArmor / Cython) vs deterministic equivalence and supply chain risks. | DEFERRED TO MMP-1.5 |
-| MMP15-ID | Free Verifier Subscriber Identity: Require free VaultBasis account/sign-in for hosted web verifier to measure population growth. | DEFERRED TO MMP-1.5 |
+| MMP15-ID | Epic: Free Verifier Subscriber & Identity | DEFERRED TO MMP-1.5 |
+| MMP15-ID-001 | Identity architecture | DEFERRED TO MMP-1.5 |
+| MMP15-ID-002 | Registration | DEFERRED TO MMP-1.5 |
+| MMP15-ID-003 | Sign-in/session lifecycle | DEFERRED TO MMP-1.5 |
+| MMP15-ID-004 | Email verification | DEFERRED TO MMP-1.5 |
+| MMP15-ID-005 | Free verifier authorization | DEFERRED TO MMP-1.5 |
+| MMP15-ID-006 | Verification activity attribution | DEFERRED TO MMP-1.5 |
+| MMP15-ID-007 | Subscriber metrics/cohorts | DEFERRED TO MMP-1.5 |
+| MMP15-ID-008 | Verification history | DEFERRED TO MMP-1.5 |
+| MMP15-ID-009 | Consent/preferences | DEFERRED TO MMP-1.5 |
+| MMP15-ID-010 | Account lifecycle/export/deletion | DEFERRED TO MMP-1.5 |
 
 ## Completion rule
 

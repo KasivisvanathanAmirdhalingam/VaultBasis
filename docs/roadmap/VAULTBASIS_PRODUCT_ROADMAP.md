@@ -39,3 +39,16 @@ Documentation, stage planning, isolated lab research and connector research can 
 ## Shared task evidence rules
 
 Every task ledger records problem, practitioner job, proposed feature/value/priority, computation type, inputs/outputs, human judgment boundary, dependencies, security/privacy impact, acceptance criteria, required evidence, status and risks. Each entry is PROPOSED, not implemented or accepted. On implementation, add named owner, source/PR, exact tests/results, immutable artifact/deployment identity and acceptance decision using the [change record](../audit/git-and-evidence-governance.md). Keep observed evidence beside the requirement; do not erase failed runs when a fix passes.
+
+## Subscriber Growth and Measurement
+
+**VB-GROWTH-INV-001 — Free Verifier Subscriber Measurement Epoch**
+The authoritative Free Verifier subscriber measurement period begins with the first qualified production release of MMP-1.5 containing VaultBasis Account + authenticated Free Verifier. No pre-MMP-1.5 access-request records shall be retrospectively represented as Free Verifier subscribers. Subscriber, activated verifier, active verifier, returning verifier, professional subscriber and paid conversion are distinct metrics.
+
+Define:
+- **REGISTERED**: account created
+- **ACTIVATED**: completed ≥1 successful verifier interaction
+- **ACTIVE**: used verifier within declared measurement window
+- **RETURNING**: used verifier on distinct occasions
+- **PROFESSIONAL**: self-identified/qualified according to future policy
+- **CONVERTED**: became associated with paid VaultBasis service
