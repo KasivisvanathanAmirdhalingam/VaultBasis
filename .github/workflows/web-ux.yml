@@ -31,6 +31,7 @@ jobs:
         run: python3 scripts/check_task_traceability.py
       - name: Protected subsystem unchanged
         run: |
+          git fetch origin release/mmp-1.1
           git diff --exit-code origin/release/mmp-1.1...HEAD -- edge/assurance edge/connectors edge/receipts schemas apps/verifier apps/web-verifier tests/quality/golden tests/fixtures
       - name: Generated public web
         run: npm run build
