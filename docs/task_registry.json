@@ -666,7 +666,7 @@
     },
     {
       "id": "MMP11-DIST-WIN-001",
-      "title": "Windows RC3: switch `--onefile` \u2192 `--onedir`, hard timeout on communicate(), Defender exclusion in CI",
+      "title": "Windows RC3: switch `--onefile` → `--onedir`, hard timeout on communicate(), Defender exclusion in CI",
       "stage": "MMP-1.1",
       "ledger": "docs/mmp11_task_ledger.md",
       "state": "HISTORICAL_RECORDED",
@@ -680,7 +680,7 @@
     },
     {
       "id": "MMP11-SEC-002",
-      "title": "Blob-backed expiring entitlement: token \u2192 `sha256(token).json`, 72h TTL, timing-safe comparison, artifact-hash binding, fail-closed",
+      "title": "Blob-backed expiring entitlement: token → `sha256(token).json`, 72h TTL, timing-safe comparison, artifact-hash binding, fail-closed",
       "stage": "MMP-1.1",
       "ledger": "docs/mmp11_task_ledger.md",
       "state": "HISTORICAL_RECORDED",
@@ -812,7 +812,7 @@
     },
     {
       "id": "MMP11-WEB-007",
-      "title": "Practitioner-readiness convergence: About, Trust & Assurance, FAQ pages; nav updated; \"Golden Test Vectors\" \u2192 \"Verification Test Receipts\"; vercel.json + build script updated",
+      "title": "Practitioner-readiness convergence: About, Trust & Assurance, FAQ pages; nav updated; \"Golden Test Vectors\" → \"Verification Test Receipts\"; vercel.json + build script updated",
       "stage": "MMP-1.1",
       "ledger": "docs/mmp11_task_ledger.md",
       "state": "HISTORICAL_RECORDED",
@@ -948,7 +948,7 @@
     },
     {
       "id": "MMP11-SMOKE-FOUNDER",
-      "title": "Founder recipient-path smoke: exact production bytes, Finder extraction, launch, sample case, receipt, verify \u2014 no developer intervention",
+      "title": "Founder recipient-path smoke: exact production bytes, Finder extraction, launch, sample case, receipt, verify — no developer intervention",
       "stage": "MMP-1.1",
       "ledger": "docs/mmp11_task_ledger.md",
       "state": "HISTORICAL_RECORDED",
@@ -960,7 +960,7 @@
     },
     {
       "id": "Associate-001A",
-      "title": "Distribution canary: download \u2192 extract \u2192 launch \u2192 sample \u2192 receipt \u2192 verify \u2192 quit \u2192 relaunch \u2192 help",
+      "title": "Distribution canary: download → extract → launch → sample → receipt → verify → quit → relaunch → help",
       "stage": "MMP-1.1",
       "ledger": "docs/mmp11_task_ledger.md",
       "state": "HISTORICAL_RECORDED",
@@ -972,7 +972,7 @@
     },
     {
       "id": "Associate-001B",
-      "title": "Zero-knowledge practitioner rehearsal: website \u2192 understand \u2192 access \u2192 download \u2192 use \u2192 verify \u2192 find support",
+      "title": "Zero-knowledge practitioner rehearsal: website → understand → access → download → use → verify → find support",
       "stage": "MMP-1.1",
       "ledger": "docs/mmp11_task_ledger.md",
       "state": "HISTORICAL_RECORDED",
@@ -1631,7 +1631,7 @@
       "ledger": "docs/mmp11_task_ledger.md",
       "owner": "Engineering; human acceptance by founder where specified",
       "state": "IN_PROGRESS",
-      "acceptance": "All NFR Q01\u2013Q19 applicable evidence on exact candidate; no source-only substitution.",
+      "acceptance": "All NFR Q01–Q19 applicable evidence on exact candidate; no source-only substitution.",
       "implementation_commits": [
         "ff360e5cafb450ba384c72a301347dac7010283b"
       ],
@@ -1929,7 +1929,7 @@
       "ledger": "docs/roadmap/MMP15_TASK_LEDGER.md",
       "state": "PLANNED",
       "owner": "Unassigned product/architecture",
-      "acceptance": "Opening a case cannot show another case\u2019s findings/receipt; readiness displays blockers rather than unsupported certainty.",
+      "acceptance": "Opening a case cannot show another case’s findings/receipt; readiness displays blockers rather than unsupported certainty.",
       "implementation_commits": []
     },
     {
@@ -2348,6 +2348,18 @@
       "state": "PLANNED",
       "acceptance": "Approved future architecture for anonymous basic verification and optional free accounts/history; separate explicit marketing consent and later professional conversion. No MMP-1.1 implementation.",
       "implementation_commits": []
+    },
+    {
+      "id": "MMP11-EXEC-008",
+      "title": "Candidate 5 Request-Access Recovery (OCC fix)",
+      "state": "IMPLEMENTED",
+      "current_commits": [
+        "d402b26002fcd2e71d2b8b9bdfa0d0d8299298cc"
+      ],
+      "docs_updated": [
+        "MMP11_TASK_LEDGER",
+        "MMP11_STATUS"
+      ]
     }
   ]
 }
