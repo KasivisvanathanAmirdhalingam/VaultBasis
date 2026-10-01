@@ -28,14 +28,16 @@ async function transact(change) {
     for (const [key, limit] of Object.entries(data.limits)) if (limit.until <= now) delete data.limits[key];
     const result = change(data, now);
     try {
+      const cleanEtag = etag ? etag.replace(/^W\//, '') : null;
       await blob.put(config().pathname, JSON.stringify(data), {
         access: 'private', contentType: 'application/json', addRandomSuffix: false,
-        ...(etag ? { ifMatch: etag } : { allowOverwrite: false }),
+        ...(cleanEtag ? { ifMatch: cleanEtag, allowOverwrite: true } : { allowOverwrite: false }),
       });
       return result;
-    } catch (_) {
+    } catch (err) {
       // Re-read and recompute after concurrent writes or unknown outcomes.
       // Never overwrite another writer or claim an unpersisted success.
+      console.error(`[access-request-store] attempt ${attempt} failed:`, err.name, err.message);
       if (attempt === 5) throw new Error('Intake storage unavailable');
     }
   }
