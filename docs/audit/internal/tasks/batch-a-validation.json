@@ -39,7 +39,14 @@
     "failures": 0
   },
   "protected_kernel": "UNCHANGED; diff against origin/release/mmp-1.1 checked",
-  "ci": "NOT RUN (not yet pushed at local capture)",
+  "ci": {
+    "state": "AUTOMATED_VALIDATION_PASS",
+    "run_id": 36820918387,
+    "source_sha": "3ddbbf34d834d03d516e0a10bb68caf0af164a24",
+    "url": "https://github.com/KasivisvanathanAmirdhalingam/VaultBasis/actions/runs/36820918387",
+    "completed_at": "2026-10-01T05:42:16Z",
+    "scope": "Original Chromium-only foundation workflow; later changes require a new run."
+  },
   "preprod": "NOT DEPLOYED",
   "human_a11y": "NOT RUN",
   "founder": "NOT REQUESTED",

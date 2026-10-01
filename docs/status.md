@@ -19,6 +19,10 @@ Historical `audit/status.md`, `docs/audit/status.md` and old ledgers retain thei
 
 ## Controlled execution — first batch
 
-MMP11-EXEC-001 IN_PROGRESS on `fix/mmp11-ux-001`. Governance baseline pushed to its documentation branch. Web branch created from verified release baseline with only governance cherry-picks. Public navigation/404/dialog foundation implemented locally; exact commits recorded at closeout. See [batch report](ux/implementation-batch-a.md). CI, Preview, human accessibility, founder, production and native qualification are separate pending states. No deployment/promotion performed.
+MMP11-EXEC-001 IN_PROGRESS on `fix/mmp11-ux-001`. Governance baseline pushed to its documentation branch. Web branch created from verified release baseline with only governance cherry-picks. Public navigation/404/dialog foundation implemented locally; exact commits recorded at closeout. See [batch report](ux/implementation-batch-a.md). The original foundation CI passed; Preview, human accessibility, founder, production and native qualification remain pending. No deployment/promotion performed.
 
-First batch committed: `1d7cfe9217f6c67b915fc14890db42355b1cdf3c`; test/CI implementation: `8a04fa44f7a87ff21eee1949e3ea152b770bc0bc`. Local Python 235 passed/1 skipped; canonical gates 11/11; security checks 33 passed; Chromium suite 13 passed. Exact remote CI result not yet observed at this update. No Preview or production promotion.
+First batch committed: `1d7cfe9217f6c67b915fc14890db42355b1cdf3c`; test/CI implementation: `8a04fa44f7a87ff21eee1949e3ea152b770bc0bc`. Local Python 235 passed/1 skipped; canonical gates 11/11; security checks 33 passed; Chromium suite 13 passed. Exact remote CI completed successfully: [run 36820918387](https://github.com/KasivisvanathanAmirdhalingam/VaultBasis/actions/runs/36820918387), SHA `3ddbbf34d834d03d516e0a10bb68caf0af164a24`. No Preview or production promotion.
+
+MMP11-NFR-001 IN_PROGRESS: expanding source-browser coverage to Chromium, Firefox and WebKit. This does not close the complete deployed NFR contract.
+
+Local follow-up validation: 39/39 browser tests passed (13 per engine), all 11 canonical gates passed, full Python regression 235 passed/1 skipped, SEC-002 27 passed and SEC-003 6 passed. Task traceability: 142 IDs, 0 errors. Protected-path diff against release: unchanged. The new exact-SHA CI run remains separate from these local results.

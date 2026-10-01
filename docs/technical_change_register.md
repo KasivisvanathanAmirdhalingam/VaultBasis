@@ -12,3 +12,5 @@ For future tasks, update the actual impacted technical guide/API/state contract 
 ## First recovery batch
 
 MMP11-GIT-001, MMP11-NAV-404-001, MMP11-UX-FOUNDATION-001, MMP11-NAV-TOP-001, MMP11-A11Y-001, MMP11-ACCESS-001, MMP11-JOURNEY-001 and MMP11-CI-UX-001: [technical implementation and limits](ux/implementation-batch-a.md). Full SHA(s) in task registry; protected engine/schema/verifier code unchanged.
+
+MMP11-NFR-001 / MMP11-CI-UX-001: the same generated-output contract now runs in Chromium, Firefox and WebKit, locally and in CI. This covers browser engines, not branded Safari/Edge or physical devices. See [NFR evidence](audit/internal/tasks/MMP11-NFR-001.md).

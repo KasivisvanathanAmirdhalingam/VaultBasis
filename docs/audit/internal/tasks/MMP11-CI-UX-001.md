@@ -16,3 +16,5 @@ Implementation, validation and remaining scope: [batch report](../../../ux/imple
 | external_audit | UPDATED | [README.md](../../../audit/external/README.md); Records bounded first-batch behavior, evidence and open actual-boundary gates. |
 
 Implementation source: `1d7cfe9217f6c67b915fc14890db42355b1cdf3c`, `8a04fa44f7a87ff21eee1949e3ea152b770bc0bc`. State: IMPLEMENTED. Actual-boundary qualification remains separate.
+
+Observed remote evidence: [run 36820918387](https://github.com/KasivisvanathanAmirdhalingam/VaultBasis/actions/runs/36820918387), SHA `3ddbbf34d834d03d516e0a10bb68caf0af164a24`, completed success. This qualifies the original source workflow only; see the separate NFR task for the expanded engine matrix.

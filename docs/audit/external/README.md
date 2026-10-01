@@ -13,3 +13,5 @@ Status: local disclosure draft, not published or independently certified. Update
 Change log: VB-GOV-001 establishes ongoing task documentation and audience-separated audit summaries. Evidence package IDs and implementation revisions can be supplied through an approved disclosure process; private operational records, unresolved vulnerability detail, credentials and taxpayer evidence are excluded. This document must track actual evidence as tasks progress, or record why no external claim changes.
 
 Implementation update (2026-10-01): public navigation, error-page and form-accessibility improvements are undergoing automated qualification. Local automated results do not establish supported-device, human accessibility, provisioning, native-distribution or production qualification. Existing product/verification limitations remain unchanged.
+
+Automated qualification update (2026-10-01): the public foundation passed a source-linked CI run. Browser-engine coverage is being extended; human accessibility, complete access delivery and deployed release qualification remain pending. No production or practitioner acceptance is implied.

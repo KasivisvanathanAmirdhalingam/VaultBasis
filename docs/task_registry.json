@@ -1621,9 +1621,58 @@
       "stage": "MMP-1.1",
       "ledger": "docs/mmp11_task_ledger.md",
       "owner": "Engineering; human acceptance by founder where specified",
-      "state": "AUTHORIZED",
+      "state": "IN_PROGRESS",
       "acceptance": "All NFR Q01\u2013Q19 applicable evidence on exact candidate; no source-only substitution.",
-      "implementation_commits": []
+      "implementation_commits": [],
+      "scope": "Extend generated-public-web automated checks to Chromium, Firefox and WebKit; real browsers/devices, protected Preview and human checks remain required.",
+      "closeout": "docs/audit/internal/tasks/MMP11-NFR-001.md",
+      "documentation": {
+        "technical": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/audit/internal/tasks/MMP11-NFR-001.md",
+            "docs/technical_change_register.md"
+          ],
+          "rationale": "Expanded browser-engine validation and WebKit focus correction; full deployed and human qualification remains open."
+        },
+        "knowledge_base": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/knowledge_base.md"
+          ],
+          "rationale": "Expanded browser-engine validation and WebKit focus correction; full deployed and human qualification remains open."
+        },
+        "status": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/status.md"
+          ],
+          "rationale": "Expanded browser-engine validation and WebKit focus correction; full deployed and human qualification remains open."
+        },
+        "adr": {
+          "disposition": "NO_CHANGE",
+          "paths": [
+            "docs/adr/ADR-007-task-traceability-and-evidence-lifecycle.md",
+            "docs/adr/ADR-003-zero-token-bleed-and-local-edge-boundary.md"
+          ],
+          "rationale": "ADR-003 and ADR-007 reviewed; test coverage and focus handling change no trust boundary or assurance semantics."
+        },
+        "internal_audit": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/audit/internal/tasks/MMP11-NFR-001.md",
+            "docs/audit/internal/tasks/MMP11-NFR-001.md"
+          ],
+          "rationale": "Expanded browser-engine validation and WebKit focus correction; full deployed and human qualification remains open."
+        },
+        "external_audit": {
+          "disposition": "UPDATED",
+          "paths": [
+            "docs/audit/external/README.md"
+          ],
+          "rationale": "Expanded browser-engine validation and WebKit focus correction; full deployed and human qualification remains open."
+        }
+      }
     },
     {
       "id": "MMP11-JOURNEY-001",

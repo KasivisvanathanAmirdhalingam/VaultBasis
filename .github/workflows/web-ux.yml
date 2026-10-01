@@ -42,8 +42,8 @@ jobs:
         run: |
           node tests/unit/test_sec002_entitlement_auth.js
           node tests/unit/test_sec003_host_poisoning.js
-      - name: Install browser
-        run: npx playwright install --with-deps chromium
+      - name: Install browser engines
+        run: npx playwright install --with-deps chromium firefox webkit
       - name: Generated-output interactions, reflow, axe and negative controls
         run: npm run test:ux
       - name: Retain exact-SHA evidence

@@ -23,3 +23,5 @@ This directory documents all architecturally significant decisions made for Vaul
 3. Every task records ADR impact under [the execution standard](../task_execution_standard.md). Add a decision for architecture changes; otherwise link the reviewed decision and explain no change. ADR-007 governs process and does not amend frozen assurance semantics.
 
 First implementation batch disposition (MMP11-EXEC-001, 2026-10-01): reviewed ADR-003 and ADR-007; presentation/routing/test changes do not change assurance semantics or authorization authority. No new ADR required; detailed rationale in per-task closeouts.
+
+MMP11-NFR-001: reviewed ADR-003 and ADR-007. Extending the existing browser test matrix changes validation coverage only; no runtime trust boundary or assurance semantics change, so no new ADR is required.

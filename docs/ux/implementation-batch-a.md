@@ -42,3 +42,7 @@ No Firefox/Edge/Safari/iPhone/Android, VoiceOver, authenticated live verifier, r
 Next order remains Batch C full page convergence and access-service completion, followed by authenticated verifier and complete candidate qualification; Edge Mac/Windows remain independent. Do not deploy this partial batch for founder acceptance.
 
 Implementation identities: `1d7cfe9217f6c67b915fc14890db42355b1cdf3c` (public foundation) and `8a04fa44f7a87ff21eee1949e3ea152b770bc0bc` (browser/CI gates). Follow-up evidence commit records these real SHAs without changing runtime code.
+
+Remote foundation evidence: [CI run 36820918387](https://github.com/KasivisvanathanAmirdhalingam/VaultBasis/actions/runs/36820918387) completed successfully at exact SHA `3ddbbf34d834d03d516e0a10bb68caf0af164a24` on 2026-10-01. This is AUTOMATED_VALIDATION_PASS for the original Chromium-only workflow. Subsequent browser-matrix changes require their own exact-SHA run.
+
+Expanded NFR follow-up found WebKit focus failures and corrected explicit invoker capture and modal Tab traversal. See [engine evidence](../audit/internal/tasks/MMP11-NFR-001.md); original CI evidence remains tied to its original SHA.

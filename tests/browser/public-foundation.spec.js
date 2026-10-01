@@ -10,6 +10,9 @@ async function checkA11y(page) {
   expect(results.map(v => ({ id: v.id, nodes: v.nodes.map(n => n.target) }))).toEqual([]);
 }
 async function assertFocusContained(page) {
+  // Check the starting state too: the next Tab can re-enter an already
+  // escaped dialog and otherwise conceal the broken containment.
+  expect(await page.evaluate(() => !!document.activeElement.closest('#access-modal'))).toBe(true);
   for (let i = 0; i < 12; i++) {
     await page.keyboard.press('Tab');
     expect(await page.evaluate(() => !!document.activeElement.closest('#access-modal'))).toBe(true);

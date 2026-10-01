@@ -20,3 +20,7 @@ Add task-linked facts and troubleshooting as behavior changes. Do not store secr
 - MMP11-A11Y-001: native dialog modality plus keyboard wrapping keeps focus within content; preserve the mobile menu when closing a dialog so the exact invoking control remains focusable.
 - MMP11-NAV-404-001: a rendered 404 file does not by itself prove the deployed route returns HTTP 404. Test status and content at the actual Preview URL.
 - MMP11-ACCESS-001: service success is not email delivery or a preview credential. Interim presentation states unconfirmed delivery; operational provisioning remains open.
+
+- MMP11-NFR-001: Playwright WebKit is engine evidence; it cannot substitute for Safari/VoiceOver or an iPhone recipient check. Firefox and Chromium results likewise do not establish physical-device acceptance.
+
+- MMP11-A11Y-001: pointer activation in WebKit may leave the invoking button unfocused. Pass the invoking element explicitly; modal keyboard traversal must also account for platform settings that skip buttons/links. The expanded tests exposed both behaviors.

@@ -23,9 +23,10 @@
     const accessDialog = document.getElementById('access-modal');
     let accessInvoker = null;
     let accessPending = false;
-    function openAccessModal() {
+    function openAccessModal(invoker) {
       if (!accessDialog || accessDialog.open) return;
-      accessInvoker = document.activeElement;
+      // Pointer activation does not focus buttons in every browser.
+      accessInvoker = invoker || document.activeElement;
       accessDialog.showModal(); // Native modality makes the background inert.
       document.body.classList.add('dialog-open');
       const target = document.getElementById('request-success').hidden
@@ -41,12 +42,14 @@
       if (event.key !== 'Tab') return;
       const controls = [...accessDialog.querySelectorAll('a[href],button,input,[tabindex="0"]')]
         .filter(control => !control.disabled && control.getClientRects().length);
-      const first = controls[0], last = controls[controls.length - 1];
-      if (event.shiftKey && (document.activeElement === first || !controls.includes(document.activeElement))) {
-        event.preventDefault(); last?.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault(); first?.focus();
-      }
+      // Traverse the modal's controls explicitly: platform keyboard settings
+      // can otherwise skip links/buttons and move focus to browser chrome.
+      event.preventDefault();
+      if (!controls.length) return;
+      const current = controls.indexOf(document.activeElement);
+      const next = current < 0 ? (event.shiftKey ? controls.length - 1 : 0)
+        : (current + (event.shiftKey ? -1 : 1) + controls.length) % controls.length;
+      controls[next].focus();
     });
     // Escape uses native cancel behavior. Closing preserves in-flight state.
     accessDialog?.addEventListener('click', (event) => {
