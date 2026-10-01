@@ -65,6 +65,13 @@ Prior ledger entries are preserved in the [historical snapshot](handover/MMP11_T
 | MMP11-TEST-001 | Golden fixture defect: new test-only signing key, regenerate correctly-formed signed receipt | UNRESOLVED — no verified attribution | Not requalified; see historical record and current workflow |
 | BRAND-001 | VaultBasis distinctive identity system: geometric mark concepts, trademark search, favicon/app-icon system | UNRESOLVED — no verified attribution | Not requalified; see historical record and current workflow |
 
+## Future Stage Tasks (MMP-1.5+)
+
+| Task ID | Task | Status |
+|---|---|---|
+| MMP15-SEC-001 | Formal Architecture Decision for Source Obfuscation (PyArmor / Cython) vs deterministic equivalence and supply chain risks. | DEFERRED TO MMP-1.5 |
+| MMP15-ID | Free Verifier Subscriber Identity: Require free VaultBasis account/sign-in for hosted web verifier to measure population growth. | DEFERRED TO MMP-1.5 |
+
 ## Completion rule
 
 Every task requires a unique ID, implementation SHA(s), linked evidence and six documentation dispositions. Do not close with “pending commit” or generic PASS. Follow [development workflow](development_workflow.md) for source → CI → Preview → human/founder → release → production → main, with independent Edge qualification. No future roadmap features or protected kernel changes in this line.

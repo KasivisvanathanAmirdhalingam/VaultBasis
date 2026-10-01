@@ -13,6 +13,7 @@ Protected: reconciliation, decimal arithmetic, parsers, canonicalization, suppor
 ## One public information architecture
 
 Exactly one global header: **VaultBasis · How It Works · Trust Center · About | Verify Receipt · Request Access**. Brand returns home. How It Works points to `/#how-it-works`. Trust Center retains `/trust-assurance` initially to preserve links; its visible label is Trust Center everywhere. Verify Receipt goes to `/verifier`, preserving the server-side gate. Request Access opens the shared dialog, with a proposed `/request-access` full-page fallback using the same form/state model. No automatic new tab for internal routes; use external-context indicators only where an actual context change occurs.
+*(MMP-1.5 Future-State Identity Placeholder: The header will evolve to include **Verify Receipt | Sign In | Create Free Account** to mandate authentication for hosted verification. Do not expose these as dead buttons in MMP-1.1 production.)*
 
 Footer: one brand presentation and four groups:
 
