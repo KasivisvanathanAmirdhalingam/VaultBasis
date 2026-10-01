@@ -24,3 +24,5 @@ These are Playwright browser-engine checks on generated local output, not brande
 | External audit | UPDATED: [local disclosure draft](../../external/README.md); bounded automated coverage only. |
 
 Local follow-up validation: 39/39 browser tests passed (13 per engine), all 11 canonical gates passed, full Python regression 235 passed/1 skipped, SEC-002 27 passed and SEC-003 6 passed. Task traceability: 142 IDs, 0 errors. Protected-path diff against release: unchanged. The new exact-SHA CI run remains separate from these local results.
+
+Browser-matrix/focus implementation commit: `ff360e5cafb450ba384c72a301347dac7010283b`. Local validation above applies to these changes; release qualification remains open.

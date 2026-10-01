@@ -26,3 +26,5 @@ First batch committed: `1d7cfe9217f6c67b915fc14890db42355b1cdf3c`; test/CI imple
 MMP11-NFR-001 IN_PROGRESS: expanding source-browser coverage to Chromium, Firefox and WebKit. This does not close the complete deployed NFR contract.
 
 Local follow-up validation: 39/39 browser tests passed (13 per engine), all 11 canonical gates passed, full Python regression 235 passed/1 skipped, SEC-002 27 passed and SEC-003 6 passed. Task traceability: 142 IDs, 0 errors. Protected-path diff against release: unchanged. The new exact-SHA CI run remains separate from these local results.
+
+Browser-matrix/focus implementation commit: `ff360e5cafb450ba384c72a301347dac7010283b`. Local validation above applies to these changes; release qualification remains open.

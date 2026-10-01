@@ -1494,7 +1494,8 @@
       "acceptance": "Focus enters/contained/restored to exact invoker; Escape; labels/errors/status; axe plus human keyboard/VoiceOver.",
       "implementation_commits": [
         "1d7cfe9217f6c67b915fc14890db42355b1cdf3c",
-        "8a04fa44f7a87ff21eee1949e3ea152b770bc0bc"
+        "8a04fa44f7a87ff21eee1949e3ea152b770bc0bc",
+        "ff360e5cafb450ba384c72a301347dac7010283b"
       ],
       "closeout": "docs/audit/internal/tasks/MMP11-A11Y-001.md",
       "documentation": {
@@ -1623,7 +1624,9 @@
       "owner": "Engineering; human acceptance by founder where specified",
       "state": "IN_PROGRESS",
       "acceptance": "All NFR Q01\u2013Q19 applicable evidence on exact candidate; no source-only substitution.",
-      "implementation_commits": [],
+      "implementation_commits": [
+        "ff360e5cafb450ba384c72a301347dac7010283b"
+      ],
       "scope": "Extend generated-public-web automated checks to Chromium, Firefox and WebKit; real browsers/devices, protected Preview and human checks remain required.",
       "closeout": "docs/audit/internal/tasks/MMP11-NFR-001.md",
       "documentation": {
@@ -1745,7 +1748,8 @@
       "acceptance": "Preserve canonical gates and add UX/NFR coverage; retain exact SHA/run/artifact evidence; CI triggers cover intended branch/PR.",
       "implementation_commits": [
         "1d7cfe9217f6c67b915fc14890db42355b1cdf3c",
-        "8a04fa44f7a87ff21eee1949e3ea152b770bc0bc"
+        "8a04fa44f7a87ff21eee1949e3ea152b770bc0bc",
+        "ff360e5cafb450ba384c72a301347dac7010283b"
       ],
       "closeout": "docs/audit/internal/tasks/MMP11-CI-UX-001.md",
       "documentation": {
@@ -2302,7 +2306,8 @@
       "acceptance": "Execute founder directive 06 without kernel changes or production-first testing; exact candidate evidence at each gate.",
       "implementation_commits": [
         "1d7cfe9217f6c67b915fc14890db42355b1cdf3c",
-        "8a04fa44f7a87ff21eee1949e3ea152b770bc0bc"
+        "8a04fa44f7a87ff21eee1949e3ea152b770bc0bc",
+        "ff360e5cafb450ba384c72a301347dac7010283b"
       ]
     }
   ]
