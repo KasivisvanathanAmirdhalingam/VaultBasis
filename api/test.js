@@ -1,23 +1,14 @@
+const store = require('./access-request-store.js');
 const blob = require('@vercel/blob');
 
 module.exports = exports = async function (req, res) {
   try {
-    const config = { pathname: `test-blob-${Date.now()}.json` };
-    
-    // 1. Create
-    await blob.put(config.pathname, JSON.stringify({ version: 1 }), {
-      access: 'private', contentType: 'application/json', addRandomSuffix: false, allowOverwrite: true,
-    });
-
-    // 2. Read
-    const getRes = await blob.get(config.pathname, { access: 'private', useCache: false });
-    const etag = getRes.blob.etag;
-
+    const { data, etag } = await store.read();
     let results = [];
 
-    // 3. Update without explicit allowOverwrite
+    // 1. Try to put with current etag and NO explicit allowOverwrite
     try {
-      await blob.put(config.pathname, JSON.stringify({ version: 2 }), {
+      await blob.put(`access-requests/${process.env.ACCESS_REQUEST_NAMESPACE}/ledger.json`, JSON.stringify(data), {
         access: 'private', contentType: 'application/json', addRandomSuffix: false,
         ifMatch: etag,
       });
@@ -26,22 +17,26 @@ module.exports = exports = async function (req, res) {
       results.push(`FAIL_NO_OVERWRITE: ${err.name} - ${err.message}`);
     }
 
-    // 4. Read again
-    const getRes2 = await blob.get(config.pathname, { access: 'private', useCache: false });
-    const etag2 = getRes2.blob.etag;
-
-    // 5. Update WITH explicit allowOverwrite: true
+    // 2. Read again
+    const read2 = await store.read();
+    
+    // 3. Try to put WITH explicit allowOverwrite
     try {
-      await blob.put(config.pathname, JSON.stringify({ version: 3 }), {
+      await blob.put(`access-requests/${process.env.ACCESS_REQUEST_NAMESPACE}/ledger.json`, JSON.stringify(read2.data), {
         access: 'private', contentType: 'application/json', addRandomSuffix: false,
-        ifMatch: etag2, allowOverwrite: true,
+        ifMatch: read2.etag, allowOverwrite: true,
       });
       results.push('SUCCESS_WITH_OVERWRITE');
     } catch (err) {
       results.push(`FAIL_WITH_OVERWRITE: ${err.name} - ${err.message}`);
     }
 
-    res.status(200).json({ results, etag1: etag, etag2: etag2 });
+    res.status(200).json({ 
+      results, 
+      namespace: process.env.ACCESS_REQUEST_NAMESPACE,
+      etag1: etag, 
+      etag2: read2.etag 
+    });
   } catch (err) {
     res.status(500).json({ error: err.message, stack: err.stack });
   }
