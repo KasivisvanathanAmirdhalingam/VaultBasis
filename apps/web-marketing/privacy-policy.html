@@ -48,7 +48,7 @@
       <p>The vaultbasis.com website is hosted on Vercel. Vercel may collect standard web server log data (IP address, request path, timestamp, browser user agent) as part of hosting operations. VaultBasis does not control Vercel's infrastructure-level logging. See Vercel's privacy documentation for details.</p>
 
       <h3>1.2 Design-Partner Access Requests</h3>
-      <p>When you submit a design-partner access request, you provide your name and email address. This information is used solely to provision and communicate your design-partner entitlement. It is transmitted to a server-side function hosted on Vercel.</p>
+      <p>When you submit a design-partner access request, you provide your name, business email and optional evaluation context. These details are recorded in private server-side storage on Vercel for manual review and operational contact after approval. A request does not create an account or grant verifier access or download rights. Your email is not added to a marketing subscription. Do not submit taxpayer or client evidence.</p>
 
       <h3>1.3 Entitlement Provisioning</h3>
       <p>When access is provisioned, an entitlement record is created in private server-side storage. This record contains your email address, an entitlement identifier, a hashed token, and an expiry timestamp. The raw bearer token is never stored — only its SHA-256 hash is retained. Entitlements expire 72 hours after creation.</p>
@@ -80,7 +80,7 @@
       <p>The current preview release does not include usage telemetry, crash reporting, or diagnostic data transmission. If this changes in a future release, this policy will be updated and design partners will be notified.</p>
 
       <h2>Section 3 — Data Retention</h2>
-      <p>Access request information and entitlement records are retained for the duration of the design-partner preview phase and a reasonable period thereafter for accountability purposes. When the preview phase concludes, retention will be governed by the updated privacy policy in effect at that time.</p>
+      <p>Access requests are scheduled for removal after 90 days through the operational purge process and are also removed during subsequent request updates. Short-lived, keyed hashes support abuse throttling without storing raw IP addresses in the request ledger. Separate credentials expire after 72 hours; their operational records remain subject to the design-partner retention process. Contact VaultBasis to request removal of your access-request data.</p>
 
       <h2>Section 4 — Contact</h2>
       <p>For privacy enquiries, use the <a href="/contact" style="color:var(--primary);font-weight:600;">general enquiries route</a>. For security concerns, use the <a href="/security-disclosure" style="color:var(--primary);font-weight:600;">security disclosure route</a>. Do not include source evidence files or taxpayer financial information in any communication.</p>

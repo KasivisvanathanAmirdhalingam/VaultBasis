@@ -94,7 +94,7 @@ async function validatePreviewAccess(rawToken, accessId) {
   let record;
   try {
     const pathname = previewAccessPathname(rawToken);
-    const result = await get(pathname, { access: 'private' });
+    const result = await get(pathname, { access: 'private', useCache: false });
     if (!result) {
       return { ok: false, reason: 'not_found' };
     }

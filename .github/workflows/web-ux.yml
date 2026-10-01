@@ -42,6 +42,7 @@ jobs:
         run: |
           node tests/unit/test_sec002_entitlement_auth.js
           node tests/unit/test_sec003_host_poisoning.js
+          node --test tests/unit/test_manual_access.js
       - name: Install browser engines
         run: npx playwright install --with-deps chromium firefox webkit
       - name: Generated-output interactions, reflow, axe and negative controls

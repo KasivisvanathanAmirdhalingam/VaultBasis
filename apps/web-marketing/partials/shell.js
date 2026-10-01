@@ -23,6 +23,7 @@
     const accessDialog = document.getElementById('access-modal');
     let accessInvoker = null;
     let accessPending = false;
+    let accessSubmission = null;
     function openAccessModal(invoker) {
       if (!accessDialog || accessDialog.open) return;
       // Pointer activation does not focus buttons in every browser.
@@ -83,25 +84,31 @@
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 20000);
       try {
+        const fields = { name: name.value, email: email.value, context: document.getElementById('req-context').value.trim() };
+        const fingerprint = JSON.stringify(fields);
+        if (!accessSubmission || accessSubmission.fingerprint !== fingerprint) {
+          accessSubmission = { fingerprint, requestId: crypto.randomUUID() };
+        }
         const response = await fetch('/api/request-access', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: name.value, email: email.value }), signal: controller.signal
+          body: JSON.stringify({ ...fields, requestId: accessSubmission.requestId }), signal: controller.signal
         });
         if (!response.ok) {
-          status.textContent = response.status === 503
+          status.textContent = response.status === 429
+            ? 'Too many requests. Please wait before trying again. Your access has not been granted.'
+            : response.status === 503
             ? 'Access requests are temporarily unavailable. Your access has not been confirmed. Contact VaultBasis or try again later.'
             : 'We could not confirm your request. Contact VaultBasis or try again later.';
           return;
         }
         const result = await response.json();
-        if (result.status !== 'success') throw new Error('Unconfirmed request response');
-        // The legacy endpoint does not prove real delivery or human review.
+        if (response.status !== 202 || result.status !== 'pending_review') throw new Error('Unconfirmed request response');
         document.getElementById('request-form-container').hidden = true;
         document.getElementById('request-success').hidden = false;
-        status.textContent = 'Request processed. Access delivery is not yet confirmed.';
+        status.textContent = 'Request submitted. Pending review and manual provisioning. VaultBasis will contact you using your submitted email after approval.';
         if (accessDialog.open) document.getElementById('request-success-title').focus();
       } catch (_) {
-        status.textContent = 'We could not confirm the outcome. The request may have reached VaultBasis. Contact us before submitting again.';
+        status.textContent = 'We could not confirm the outcome. The request may have reached VaultBasis. Retry with the same details; this will not create another request.';
       } finally {
         clearTimeout(timeout);
         accessPending = false;

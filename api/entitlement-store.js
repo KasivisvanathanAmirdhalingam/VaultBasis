@@ -108,7 +108,7 @@ async function validateEntitlement(rawToken, entitlementId, artifactHash) {
   let record;
   try {
     const pathname = entitlementPathname(rawToken);
-    const result = await get(pathname, { access: 'private' });
+    const result = await get(pathname, { access: 'private', useCache: false });
     if (!result) {
       return { ok: false, reason: 'not_found' };
     }

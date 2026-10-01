@@ -100,7 +100,7 @@ function isWellFormedSessionToken(token) {
 }
 
 async function readBlobText(pathname) {
-  const result = await get(pathname, { access: 'private' });
+  const result = await get(pathname, { access: 'private', useCache: false });
   if (!result) return null;
   const chunks = [];
   const reader = result.stream.getReader();
@@ -181,27 +181,11 @@ module.exports = async (req, res) => {
     return res.status(503).send('Service temporarily unavailable. Please try again.');
   }
 
-  // Session is valid and underlying preview-access is still ACTIVE — serve verifier.
-  // Try private Blob first; fall back to local filesystem for dev/build environments.
+  // Serve the exact deployed source after authorization; never a mutable
+  // shared Blob HTML pointer from another candidate.
   let verifierHtml;
-  try {
-    verifierHtml = await readBlobText(VERIFIER_HTML_BLOB_PATHNAME);
-  } catch (e) {
-    if (e && e.name !== 'BlobNotFoundError') {
-      console.error('[verifier-page] verifier HTML blob read error:', e.message);
-    }
-    verifierHtml = null;
-  }
-
-  if (!verifierHtml) {
-    // Fallback: serve from local filesystem (dev environment / first deploy before upload).
-    try {
-      verifierHtml = fs.readFileSync(VERIFIER_HTML_LOCAL_PATH, 'utf8');
-    } catch (e) {
-      console.error('[verifier-page] verifier HTML local read error:', e.message);
-      return res.status(503).send('Verifier application is temporarily unavailable.');
-    }
-  }
+  try { verifierHtml = require('./web-presentation').renderVerifier(); }
+  catch (_) { return res.status(503).send('Verifier application is temporarily unavailable.'); }
 
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');

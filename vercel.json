@@ -103,6 +103,9 @@
   "functions": {
     "api/not-found.js": {
       "includeFiles": "dist/public-web/404.html"
+    },
+    "api/verifier-page.js": {
+      "includeFiles": "{apps/web-verifier/index.html,apps/web-marketing/partials/**}"
     }
   }
 }

@@ -51,7 +51,7 @@ function isWellFormedSessionToken(token) {
 }
 
 async function readBlobJson(pathname) {
-  const result = await get(pathname, { access: 'private' });
+  const result = await get(pathname, { access: 'private', useCache: false });
   if (!result) return null;
   const chunks = [];
   const reader = result.stream.getReader();

@@ -148,6 +148,13 @@ if (fs.existsSync(scopeDocSource)) {
     scopeDocSource,
     path.join(DIST_DIR, 'docs', 'scope_and_limitations_v0.1.html'),
   ], { stdio: 'inherit' });
+  const scopePath = path.join(DIST_DIR, 'docs', 'scope_and_limitations_v0.1.html');
+  const scopeHtml = fs.readFileSync(scopePath, 'utf8');
+  const scopeContent = scopeHtml.match(/<div class="card">([\s\S]*?)<\/div>\s*<footer>/)[1]
+    .replace(/<li>([^\n]*)<\/li>\n(<ul[^>]*>)([\s\S]*?)<\/ul>/g, '<li>$1$2$3</ul></li>');
+  fs.writeFileSync(scopePath, `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Scope &amp; Limitations — VaultBasis</title><style>${partials.css}
+  .scope-content{width:100%;max-width:800px;margin:3rem auto;padding:0 1.5rem;overflow-wrap:anywhere}.scope-content h1{font-size:2rem}.scope-content h2,.scope-content h3{margin:2rem 0 1rem}.scope-content p,.scope-content ul,.scope-content ol{margin:1rem 0}.scope-content li{margin-left:1.5rem}
+  </style></head><body>${partials.header}<main id="main-content" tabindex="-1" class="scope-content">${scopeContent}</main>${partials.footer}${partials.modal}${partials.js}</body></html>`);
   console.log('✓ Rendered Scope & Limitations page -> dist/public-web/docs/scope_and_limitations_v0.1.html');
 }
 

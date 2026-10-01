@@ -12,17 +12,22 @@
           <p id="req-name-error" class="field-error" hidden></p>
         </div>
         <div class="form-field">
-          <label for="req-email">Contact email</label>
+          <label for="req-email">Business email</label>
           <input type="email" id="req-email" name="email" autocomplete="email" required maxlength="254" aria-describedby="req-email-error">
           <p id="req-email-error" class="field-error" hidden></p>
         </div>
-        <p class="form-note">Your name and email are sent to VaultBasis to handle your request. <a href="/privacy-policy">Privacy Policy</a></p>
+        <div class="form-field">
+          <label for="req-context">What would you like to evaluate? (optional)</label>
+          <input type="text" id="req-context" name="context" maxlength="500" aria-describedby="req-context-help">
+          <p id="req-context-help" class="form-note">A short description is enough. Do not include taxpayer or client information.</p>
+        </div>
+        <p class="form-note">We use these details to review your request and contact you after approval. Submitting does not create an account, grant access or subscribe you to marketing. <a href="/privacy-policy">Privacy Policy</a></p>
         <button type="submit" id="btn-submit-req" class="btn btn-primary">Submit Request</button>
       </form>
       <p id="request-status" role="status" aria-live="polite" aria-atomic="true"></p>
       <div id="request-success" hidden>
-        <h3 tabindex="-1" id="request-success-title">Request processed</h3>
-        <p>Access delivery is not yet confirmed. Contact VaultBasis for the next step; this confirmation does not grant access or authorize a download.</p>
+        <h3 tabindex="-1" id="request-success-title">Request submitted — pending review</h3>
+        <p>VaultBasis will review your request and contact you using your submitted email after approval. This request does not grant verifier access or authorize an Edge download. No email delivery is confirmed by this message.</p>
         <a href="/contact" class="btn btn-secondary">Contact VaultBasis</a>
         <button type="button" onclick="closeAccessModal()" class="btn btn-primary">Return to VaultBasis</button>
       </div>

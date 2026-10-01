@@ -1,7 +1,7 @@
 const { test, expect } = require('@playwright/test');
 const fs = require('fs');
 const axe = fs.readFileSync(require.resolve('axe-core/axe.min.js'), 'utf8');
-const pages = ['/', '/trust-assurance', '/about', '/contact', '/verifier-access', '/privacy-policy', '/terms-of-service', '/security-disclosure', '/faq'];
+const pages = ['/', '/trust-assurance', '/about', '/contact', '/verifier-access', '/privacy-policy', '/terms-of-service', '/security-disclosure', '/faq', '/docs/scope_and_limitations_v0.1.html'];
 async function checkA11y(page) {
   await page.addScriptTag({ content: axe });
   const results = await page.evaluate(async () => (await axe.run(document, {
@@ -70,7 +70,7 @@ test('request working, failure, retry and response states never imply delivery',
   await page.route('**/api/request-access', async route => {
     requests++;
     await new Promise(resolve => setTimeout(resolve, 150));
-    await route.fulfill({ status: requests === 1 ? 503 : 200, contentType: 'application/json', body: JSON.stringify({ status: 'success' }) });
+    await route.fulfill({ status: requests === 1 ? 503 : 202, contentType: 'application/json', body: JSON.stringify({ status: 'pending_review' }) });
   });
   await page.goto('/');
   await page.locator('header').getByRole('button', { name: 'Request Access', exact: true }).click();
@@ -83,7 +83,7 @@ test('request working, failure, retry and response states never imply delivery',
   await expect(button).toBeEnabled();
   await button.click();
   await expect(page.locator('#request-success')).toBeVisible();
-  await expect(page.locator('#request-status')).toContainText('delivery is not yet confirmed');
+  await expect(page.locator('#request-status')).toContainText('Pending review and manual provisioning');
   await expect(page.locator('#request-success-title')).toBeFocused();
   await assertFocusContained(page);
   expect(requests).toBe(2);
