@@ -1,7 +1,7 @@
 name: MMP11 Web UX Qualification
 on:
   push:
-    branches: [fix/mmp11-ux-001]
+    branches: [fix/mmp11-ux-001, fix/mmp11-ux-002]
   pull_request:
     branches: [release/mmp-1.1]
   workflow_dispatch:
