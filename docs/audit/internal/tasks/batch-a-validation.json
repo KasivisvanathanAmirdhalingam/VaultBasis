@@ -1,7 +1,7 @@
 {
   "date": "2026-10-01",
   "branch": "fix/mmp11-ux-001",
-  "source": "Working-tree first batch; implementation SHA attached in follow-up closeout",
+  "source": "Committed first-batch implementation and test commits; evidence-closeout commit is metadata only",
   "boundary": "Local generated-output browser, source regression and security stubs; no deployed qualification",
   "browser": {
     "engine": "Chromium",
@@ -50,5 +50,9 @@
     "Authenticated verifier/browser matrix",
     "Human VoiceOver/device/native qualification",
     "Actual Preview 404 and routing precedence"
+  ],
+  "source_implementation_commits": [
+    "1d7cfe9217f6c67b915fc14890db42355b1cdf3c",
+    "8a04fa44f7a87ff21eee1949e3ea152b770bc0bc"
   ]
 }

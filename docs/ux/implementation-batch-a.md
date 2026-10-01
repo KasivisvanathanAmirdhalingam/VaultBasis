@@ -40,3 +40,5 @@ See [batch validation](../audit/internal/tasks/batch-a-validation.json), [regist
 No Firefox/Edge/Safari/iPhone/Android, VoiceOver, authenticated live verifier, real provisioning, native package or production qualification is implied. CI cannot assign founder acceptance. No request for piecemeal founder review is made.
 
 Next order remains Batch C full page convergence and access-service completion, followed by authenticated verifier and complete candidate qualification; Edge Mac/Windows remain independent. Do not deploy this partial batch for founder acceptance.
+
+Implementation identities: `1d7cfe9217f6c67b915fc14890db42355b1cdf3c` (public foundation) and `8a04fa44f7a87ff21eee1949e3ea152b770bc0bc` (browser/CI gates). Follow-up evidence commit records these real SHAs without changing runtime code.

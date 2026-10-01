@@ -14,3 +14,5 @@ Implementation, validation and remaining scope: [batch report](../../../ux/imple
 | adr | NO_CHANGE | [ADR-007-task-traceability-and-evidence-lifecycle.md](../../../adr/ADR-007-task-traceability-and-evidence-lifecycle.md), [ADR-003-zero-token-bleed-and-local-edge-boundary.md](../../../adr/ADR-003-zero-token-bleed-and-local-edge-boundary.md); Presentation, routing and test orchestration preserve assurance and access authority; no protected architectural decision changed. |
 | internal_audit | UPDATED | [batch-a-validation.json](../../../audit/internal/tasks/batch-a-validation.json), [implementation-batch-a.md](../../../ux/implementation-batch-a.md); Records bounded first-batch behavior, evidence and open actual-boundary gates. |
 | external_audit | UPDATED | [README.md](../../../audit/external/README.md); Records bounded first-batch behavior, evidence and open actual-boundary gates. |
+
+Implementation source: `1d7cfe9217f6c67b915fc14890db42355b1cdf3c`, `8a04fa44f7a87ff21eee1949e3ea152b770bc0bc`. State: IMPLEMENTED. Actual-boundary qualification remains separate.

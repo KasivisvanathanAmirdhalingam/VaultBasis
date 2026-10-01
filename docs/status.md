@@ -20,3 +20,5 @@ Historical `audit/status.md`, `docs/audit/status.md` and old ledgers retain thei
 ## Controlled execution — first batch
 
 MMP11-EXEC-001 IN_PROGRESS on `fix/mmp11-ux-001`. Governance baseline pushed to its documentation branch. Web branch created from verified release baseline with only governance cherry-picks. Public navigation/404/dialog foundation implemented locally; exact commits recorded at closeout. See [batch report](ux/implementation-batch-a.md). CI, Preview, human accessibility, founder, production and native qualification are separate pending states. No deployment/promotion performed.
+
+First batch committed: `1d7cfe9217f6c67b915fc14890db42355b1cdf3c`; test/CI implementation: `8a04fa44f7a87ff21eee1949e3ea152b770bc0bc`. Local Python 235 passed/1 skipped; canonical gates 11/11; security checks 33 passed; Chromium suite 13 passed. Exact remote CI result not yet observed at this update. No Preview or production promotion.
