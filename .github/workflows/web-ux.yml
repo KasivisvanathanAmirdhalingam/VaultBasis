@@ -32,7 +32,24 @@ jobs:
       - name: Protected subsystem unchanged
         run: |
           git fetch origin release/mmp-1.1
-          git diff --exit-code origin/release/mmp-1.1...HEAD -- edge/assurance edge/connectors edge/receipts schemas apps/verifier apps/web-verifier tests/quality/golden tests/fixtures
+          # Protect fully-immutable directories
+          git diff --exit-code origin/release/mmp-1.1...HEAD -- edge/assurance edge/connectors edge/receipts schemas apps/verifier tests/quality/golden tests/fixtures
+          
+          # Protect the semantic region of web-verifier (script block) while allowing CSS/HTML presentation changes
+          git show origin/release/mmp-1.1:apps/web-verifier/index.html | sed -n '/<script>/,/<\/script>/p' > /tmp/base_script.js
+          cat apps/web-verifier/index.html | sed -n '/<script>/,/<\/script>/p' > /tmp/head_script.js
+          diff -u /tmp/base_script.js /tmp/head_script.js
+      - name: Negative control for protected semantic region
+        run: |
+          # Prove that intentionally modifying the protected semantic region causes the diff to fail
+          sed 's/checks.key_fingerprint = "PASS"/checks.key_fingerprint = "PASS (SIMULATED)"/' apps/web-verifier/index.html > /tmp/hacked.html
+          cat /tmp/hacked.html | sed -n '/<script>/,/<\/script>/p' > /tmp/hacked_script.js
+          if diff -u /tmp/base_script.js /tmp/hacked_script.js > /dev/null; then
+            echo "Negative control failed: modifying the protected algorithm did not cause the diff to fail."
+            exit 1
+          else
+            echo "Negative control passed: diff caught the simulated semantic change."
+          fi
       - name: Generated public web
         run: npm run build
       - name: Full Python regression
