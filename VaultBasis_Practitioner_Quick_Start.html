@@ -17,7 +17,7 @@
     body { background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; line-height: 1.7; }
     .container { max-width: 720px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
     header.brand { display: flex; align-items: center; gap: 12px; margin-bottom: 2.5rem; }
-    .brand-logo { width: 36px; height: 36px; background: linear-gradient(135deg, #2563eb, #0284c7); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.2rem; color: #fff; font-family: 'Outfit', sans-serif; }
+    .brand-logo { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; }
     .brand-name { font-family: 'Outfit', sans-serif; font-size: 1.35rem; font-weight: 800; letter-spacing: -0.01em; }
     .badge { display: inline-block; padding: 4px 14px; border: 1px solid rgba(37,99,235,.3); background: rgba(37,99,235,.08); color: var(--primary); border-radius: 999px; font-size: .75rem; font-weight: 600; letter-spacing: .05em; }
     h1 { font-family: 'Outfit', sans-serif; font-size: 2rem; font-weight: 800; letter-spacing: -0.02em; margin: 1rem 0 .75rem; }
@@ -40,7 +40,20 @@
 <div class="container">
 
   <header class="brand">
-    <div class="brand-logo">V</div>
+    <div class="brand-logo">
+      <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect width="38" height="38" rx="9" fill="url(#vb-grad-hdr)"/>
+        <defs>
+          <linearGradient id="vb-grad-hdr" x1="0" y1="0" x2="38" y2="38" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#2563eb"/>
+            <stop offset="100%" stop-color="#0284c7"/>
+          </linearGradient>
+        </defs>
+        <path d="M10 10 L19 26" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M28 10 L19 26" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="19" y1="26" x2="19" y2="30" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+    </div>
     <span class="brand-name">VaultBasis</span>
   </header>
 
@@ -49,25 +62,35 @@
   <p class="lede">VaultBasis independently compares supported broker information with supported tax-ledger information and shows what agrees, what differs, and what remains unresolved.</p>
 
   <div class="step">
-    <h2><span class="step-num">1</span> Install VaultBasis</h2>
-    <p>Open the VaultBasis installer you downloaded and follow the onscreen instructions.</p>
-    <p><strong>macOS:</strong> open the installer, then open VaultBasis from Applications.</p>
-    <p><strong>Windows:</strong> open the installer, then open VaultBasis from the Start menu.</p>
+    <h2><span class="step-num">1</span> Download and Extract</h2>
+    <p>Download the VaultBasis ZIP for your operating system.</p>
+    <p>Extract it using the normal operating-system extraction function.</p>
   </div>
 
   <div class="step">
     <h2><span class="step-num">2</span> Open VaultBasis</h2>
-    <p>VaultBasis opens your local workspace automatically.</p>
+    <p><strong>macOS:</strong> open VaultBasis.app. If Gatekeeper blocks the unsigned preview, use System Settings &rarr; Privacy &amp; Security &rarr; Open Anyway.</p>
+    <p><strong>Windows:</strong> open VaultBasis.exe from the extracted VaultBasis folder. Do not move VaultBasis.exe out of the extracted VaultBasis folder. Keep the _internal folder and other packaged files together with the executable.</p>
   </div>
 
   <div class="step">
-    <h2><span class="step-num">3</span> Try the Sample Case</h2>
+    <h2><span class="step-num">3</span> Open the Local Workspace</h2>
+    <p>Open/continue into the local VaultBasis workspace.</p>
+  </div>
+
+  <div class="step">
+    <h2><span class="step-num">4</span> Run Sample Case</h2>
     <p>Start with the included sample case to see how VaultBasis identifies agreements, differences, and unresolved information.</p>
   </div>
 
   <div class="step">
-    <h2><span class="step-num">4</span> Review your Outcome Receipt</h2>
+    <h2><span class="step-num">5</span> Review Finding and Outcome Receipt</h2>
     <p>When reconciliation is complete, VaultBasis can produce a signed Outcome Receipt. Its payload integrity and signature can be independently verified.</p>
+  </div>
+
+  <div class="step">
+    <h2><span class="step-num">6</span> Use the Offline Verifier</h2>
+    <p>Use the included Offline Verifier to verify the original receipt and observe tampered receipt rejection.</p>
   </div>
 
   <div class="help">
@@ -79,7 +102,7 @@
     <strong>Important limitation:</strong> VaultBasis performs bounded deterministic reconciliation of supported information under declared semantics. It does not determine tax correctness, legal compliance, or whether source information is complete or factually accurate.
   </div>
 
-  <footer>© 2026 VaultBasis. All rights reserved. &middot; Design Partner Preview &middot; Strictly Confidential</footer>
+  <footer>© 2026 VaultBasis. All rights reserved. &middot; Design Partner Preview</footer>
 
 </div>
 </body>

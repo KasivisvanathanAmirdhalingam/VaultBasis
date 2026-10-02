@@ -44,129 +44,95 @@
 </head>
 <body>
 <div class="container">
-  <div class="brandbar"><div class="brand-logo">V</div><span class="brand-name">VaultBasis</span></div>
+  <div class="brandbar">
+    <div class="brand-logo">
+      <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect width="38" height="38" rx="9" fill="url(#vb-grad-hdr)"/>
+        <defs>
+          <linearGradient id="vb-grad-hdr" x1="0" y1="0" x2="38" y2="38" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#2563eb"/>
+            <stop offset="100%" stop-color="#0284c7"/>
+          </linearGradient>
+        </defs>
+        <path d="M10 10 L19 26" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M28 10 L19 26" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="19" y1="26" x2="19" y2="30" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <span class="brand-name">VaultBasis</span>
+  </div>
   <div class="header">
     <h1>Troubleshooting</h1>
     <p>VaultBasis Edge &middot; Design Partner Preview &middot; Start with what happened below</p>
-    <span class="badge">CONFIDENTIAL &middot; DESIGN PARTNER ONLY</span>
+    <span class="badge">DESIGN PARTNER ONLY</span>
   </div>
 
   <div class="card">
     <h2>What happened?</h2>
     <ol>
-      <li><strong>macOS says there is no application to open the document</strong> → Section A0</li>
       <li><strong>macOS says the app "cannot be verified" or "cannot be opened"</strong> → Section A</li>
-      <li><strong>VaultBasis starts but the workspace does not appear</strong> → Section B</li>
-      <li><strong>Browser says "cannot connect"</strong> → Section C</li>
-      <li><strong>Windows SmartScreen blue screen</strong> → Section D</li>
-      <li><strong>Receipt will not download or will not verify</strong> → Section E</li>
+      <li><strong>Windows shows a SmartScreen blue screen</strong> → Section B</li>
+      <li><strong>VaultBasis starts but the workspace does not appear</strong> → Section C</li>
+      <li><strong>Receipt will not verify</strong> → Section D</li>
     </ol>
-  </div>
-
-  <div class="card">
-    <h2>A0. macOS treats the file as a Document — "no application to open"</h2>
-    <div class="alert alert-danger"><strong>Do not use "Choose Application" to force it to run.</strong> A file macOS cannot recognize as an application is not a qualified VaultBasis installer. Forcing it open is not the practitioner journey and may leave your machine in an unknown state.</div>
-    <p>Stop here and reply to your download email with a screenshot. You have encountered a packaging defect: the distributed file is not a launchable macOS application. Your files have not been changed.</p>
   </div>
 
   <div class="card">
     <h2>A. macOS — security message on first launch</h2>
-    <p>This preview build is distributed outside the Mac App Store and is not yet Apple-notarized. macOS Gatekeeper will block it the first time. That block is expected.</p>
-
-    <h3>All supported macOS versions (13 Ventura, 14 Sonoma, 15 Sequoia)</h3>
+    <p>After ZIP extraction, if macOS Gatekeeper blocks the unsigned preview VaultBasis.app on first launch, that block is expected.</p>
     <ol>
       <li>Double-click <code class="inline">VaultBasis.app</code> in Finder. macOS will show a security dialog — click <strong>Done</strong>.</li>
       <li>Open <strong>System Settings → Privacy &amp; Security</strong> and scroll down to the Security section.</li>
       <li>You will see a message that VaultBasis was blocked. Click <strong>Open Anyway</strong>.</li>
-      <li>Enter your Mac password if asked. You only do this once — macOS remembers.</li>
+      <li>Enter your Mac password if asked. You only do this once.</li>
     </ol>
-    <p>After clicking Open Anyway, double-click <code class="inline">VaultBasis.app</code> again and it will open normally.</p>
+    <p>After clicking Open Anyway, double-click <code class="inline">VaultBasis.app</code> again to open it. If it still fails to launch, stop and report the issue.</p>
   </div>
 
   <div class="card">
-    <h2>B. VaultBasis starts but the browser does not open</h2>
-    <p>The current preview build does <strong>not</strong> auto-open the browser on all machines. This is a known preview limitation, not a failure.</p>
-    <ol>
-      <li>Leave the black terminal window open.</li>
-      <li>Open Chrome, Safari, or Edge manually.</li>
-      <li>Type this address exactly:</li>
-    </ol>
-    <div class="terminal">http://127.0.0.1:8000</div>
-    <p>If the dashboard loads, continue with your case. No further fix is needed.</p>
-  </div>
-
-  <div class="card">
-    <h2>C. Browser says "cannot connect" or "refused to connect"</h2>
-    <ol>
-      <li>Check the black terminal window is still open. If it is closed, restart VaultBasis.</li>
-      <li>Wait 5 seconds after launch, then refresh the browser.</li>
-      <li>If another program already uses port 8000, quit that program and restart VaultBasis.</li>
-      <li>Try a different browser (Chrome → Safari, or Safari → Chrome).</li>
-    </ol>
-    <div class="alert alert-info"><strong>What this address means:</strong> <code class="inline">127.0.0.1:8000</code> is your own computer talking to itself. Nothing is sent over the internet. If your firewall asks, allow local connections only.</div>
-  </div>
-
-  <div class="card">
-    <h2>D. Windows — "Windows protected your PC" blue screen</h2>
-    <div class="alert alert-danger"><strong>Status:</strong> The Windows build is still under qualification. Only follow this section if you were explicitly given a Windows installer. The macOS file does not run on Windows.</div>
+    <h2>B. Windows — SmartScreen blue screen</h2>
+    <p>After extracting the ZIP package, ensure you keep the package contents together (do not move VaultBasis.exe out of the extracted folder). When you launch VaultBasis.exe, Windows SmartScreen may block the preview.</p>
     <ol>
       <li>Click the underlined <strong>"More info"</strong> text.</li>
       <li>Click <strong>"Run anyway"</strong> at the bottom.</li>
       <li>Click <strong>Yes</strong> if Windows asks for permission.</li>
     </ol>
-    <p>You only do this once. If Windows still blocks it after these steps, stop and reply to your download email — do not disable SmartScreen or antivirus globally.</p>
+    <p>You only do this once. If Windows still blocks it after these steps, stop and report the issue. <strong>Never disable Defender or SmartScreen globally.</strong></p>
   </div>
 
   <div class="card">
-    <h2>E. Receipt will not download or will not verify</h2>
+    <h2>C. VaultBasis starts but the workspace does not appear</h2>
+    <p>If the local VaultBasis workspace does not appear immediately after launch:</p>
     <ol>
-      <li>A receipt is only produced <strong>after</strong> a reconciliation run completes. Run <strong>"Run Deterministic Reconciliation"</strong> first, then open the Receipt screen.</li>
-      <li>The Evidence Bundle (.zip) contains the signed receipt, the source files you uploaded, the schema, and an offline verifier. All four must stay together for independent verification.</li>
-      <li>To verify on a clean machine, use the included <code class="inline">verify_receipt.py</code> or the web verifier — no VaultBasis account or network connection is required.</li>
+      <li>Wait a few seconds for the application to fully initialize.</li>
+      <li>If it still does not appear, quit the application and relaunch it once.</li>
+      <li>If the workspace is still unavailable after relaunch, stop and report the issue.</li>
     </ol>
-    <div class="alert alert-warning"><strong>What the signature means — and does not mean:</strong> The signature proves the receipt content has not been altered since it was signed by your local installation key, under the verification scheme in the bundle. It does not by itself prove where the software was run, and it does not determine tax or legal compliance. VaultBasis reports what matches, what differs, and what is unresolved. Your reviewer makes the compliance determination.</div>
   </div>
 
   <div class="card">
-    <h2>Advanced — if Open Anyway does not appear (macOS, technical support)</h2>
-    <p>Only use this if System Settings → Privacy &amp; Security does not show an Open Anyway button after the first blocked launch attempt.</p>
-    <details>
-      <summary>Advanced diagnostics (for technical support)</summary>
-      <div class="body">
-        <ol>
-          <li>Open <strong>Terminal</strong> (press ⌘ Space, type <strong>Terminal</strong>, press Enter).</li>
-          <li>Paste the following line, then press Enter. Enter your Mac password when asked (nothing appears while typing — that is normal):</li>
-        </ol>
-        <div class="terminal"><button class="copy-btn" onclick="copyCmd(this)">Copy</button><span class="prompt">$ </span>xattr -d com.apple.quarantine ~/Downloads/VaultBasis.app</div>
-        <p>If you see <em>No such xattr</em>, the flag is already cleared — skip ahead.</p>
-        <ol start="3">
-          <li>Double-click <code class="inline">VaultBasis.app</code> in Finder. It will launch.</li>
-        </ol>
-        <div class="alert alert-info"><strong>Different folder?</strong> Replace <code class="inline">~/Downloads/</code> with the path to wherever VaultBasis.app is located. Tip: drag the app from Finder into the Terminal window to paste its path automatically.</div>
-      </div>
-    </details>
-  </div>
-
-  <div class="card">
-    <h2>Still blocked? Send this</h2>
-    <p>Reply to the email that contained your download link and include:</p>
+    <h2>D. Receipt will not verify</h2>
     <ol>
-      <li>Your operating system and version (Apple menu → About This Mac, or Windows Settings → System → About).</li>
-      <li>Your chip: Apple Silicon M1/M2/M3/M4, Intel, or Windows x64/ARM.</li>
-      <li>The exact message on screen (screenshot if possible).</li>
-      <li>Which section of this guide you followed.</li>
+      <li>Use the included Offline Verifier included in your package. A verification of the original Outcome Receipt will display <strong>VALID</strong>.</li>
+      <li>If the receipt is modified, it will display <strong>INVALID</strong>.</li>
     </ol>
-    <div class="alert alert-warning"><strong>Not supported in this preview:</strong> Intel Macs (untested), Linux desktop, iPadOS / iOS, Android, ChromeOS. The macOS preview binary is Apple Silicon (arm64) only. Running it on any other architecture will fail.</div>
+    <div class="alert alert-warning"><strong>What the signature means — and does not mean:</strong> The signature proves the receipt content has not been altered since it was signed by your local installation key, under the verification scheme in the bundle. It does not by itself prove where the software was run, and it does not determine tax correctness, legal compliance, or whether source information is complete or factually accurate. Your reviewer makes the compliance determination.</div>
   </div>
 
-  <div class="footer">© 2026 VaultBasis. All rights reserved. &middot; Design Partner Preview &middot; Strictly Confidential</div>
+  <div class="card">
+    <h2>Support: Reporting an Issue</h2>
+    <p>If you remain blocked, stop and report the issue to your technical contact. Please include:</p>
+    <ol>
+      <li>Your operating system and version.</li>
+      <li>Your system architecture (Apple Silicon, Intel, or Windows x64).</li>
+      <li>The exact on-screen error message (screenshot if possible).</li>
+      <li>The exact step you reached.</li>
+    </ol>
+    <div class="alert alert-info"><strong>Important:</strong> Do not send taxpayer source files unless specifically requested through an approved support process.</div>
+    <div class="alert alert-warning"><strong>Not supported in this preview:</strong> Intel Macs (untested), Linux desktop, iPadOS / iOS, Android, ChromeOS. The macOS preview binary is Apple Silicon (arm64) only.</div>
+  </div>
+
+  <div class="footer">© 2026 VaultBasis. All rights reserved. &middot; Design Partner Preview</div>
 </div>
-<script>
-  function copyCmd(btn) {
-    const t = btn.closest('.terminal');
-    const text = t.innerText.replace('Copy','').replace(/^\$\s+/,'').trim();
-    navigator.clipboard.writeText(text).then(() => { btn.textContent='Copied!'; setTimeout(()=>btn.textContent='Copy',2000); });
-  }
-</script>
 </body>
 </html>
