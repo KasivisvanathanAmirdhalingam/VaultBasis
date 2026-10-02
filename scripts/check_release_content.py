@@ -48,8 +48,10 @@ QUICKSTART_BANS = [
     "xattr",
     "chmod",
     "PowerShell",
-    "Open Anyway",
-    "Run anyway",
+    "com.apple.quarantine",
+    "spctl --master-disable",
+    "disable Windows Defender",
+    "disable SmartScreen",
 ]
 
 
@@ -121,8 +123,10 @@ ZIP_QUICKSTART_MEMBER = "VaultBasis-Quick-Start.html"
 ZIP_QUICKSTART_BANNED_CONTENT = [
     "xattr",
     "chmod",
-    "Open Anyway",
-    "Run anyway",
+    "com.apple.quarantine",
+    "spctl --master-disable",
+    "disable Windows Defender",
+    "disable SmartScreen",
 ]
 
 
