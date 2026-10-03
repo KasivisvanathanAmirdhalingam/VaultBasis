@@ -5,21 +5,29 @@
 
 ---
 
-## 1. Candidate Identity Freeze
+## 1. Candidate Identity & Governance Freeze
 
-### Active Candidate (MMP11-DIST-MAC-003 Replacement)
-- **Source SHA:** `160f4d7f8cfceebbcac2b33a12d1c0e67b7d0659`
-- **CI Run ID:** `37123027673`
-- **Mac arm64 Inner-ZIP SHA-256:** `4f6c0f1cc98319e5f21e4beb2a00c7ee54260c2e2a9eeb421884a8e0e633e832`
-- **Windows x64 Inner-ZIP SHA-256:** `7b9a99c6af97dbaf2ee896938e67df41181c125e2095296da57498843f8c2061`
+### Active Candidate Under CI / Packaging (Candidate 3)
+- **Source SHA:** `377c0562d095e9d2e18e303c91c432d4fb7362f1`
+- **Candidate Governance State:** `LOCAL_AUTOMATED_VALIDATION_PASS / CI_PENDING`
+- **CI Run ID:** `[PENDING CI EXECUTION]`
+- **Mac arm64 Inner-ZIP SHA-256:** `[PENDING CI BUILD]`
+- **Windows x64 Inner-ZIP SHA-256:** `[PENDING CI BUILD]`
+- **Included Task Scope & Dispositions:**
+  - `MMP11-DIST-WIN-002`: Explicit `encoding="utf-8"` in `edge/api/app.py` for all template/static reads on Windows non-UTF8 locales.
+  - `MMP11-DIST-GATE-002`: Strengthened packager launch gates (`build_rc3_windows.py` and `build_rc3_macos.py`) asserting `GET /api/health` == 200, `GET /` == 200 + HTML marker, and `POST /api/sample-case/load` == 200.
+  - `VB-CASE-INV-001` / `MMP11-CASE-001`: In-memory draft case isolation — canceling, abandoning, or uploading invalid evidence creates zero additional persistent SQLite records.
+  - `MMP11-UI-HDR-001`: Streamlined single-line non-wrapping header navigation layout.
+  - `VB-REG-GAP-001`: Form 1099-DA / TD 10000 / Rev. Proc. 2024-28 regulatory evidence context disposition.
+  - `MMP11-TEST-SMPL-001`: 3 Conformance test sample datasets in `samples/`.
 
 ### Historical Failed Candidates (Preserved Failure Evidence)
-- **Candidate 1 (Mac Failure):** Source SHA `641d2b135ab0dcfa3bdf3b5edc95f4d1a3d5511d` (CI Run `37120319044`)
+- **Candidate 1 (Mac Launch Failure):** Source SHA `641d2b135ab0dcfa3bdf3b5edc95f4d1a3d5511d` (CI Run `37120319044`)
   - Mac arm64 Inner-ZIP SHA-256: `8e8e77290a8544c0e9fe72f5c862cb942e2dcc293ce80b9f8d93ff7565c2bb24` (FAILED: Gatekeeper / port contention)
   - Windows x64 Inner-ZIP SHA-256: `6f25843188aaf91b6688902e87bc487f68bc76999f077745876ca0b926bc52f3`
 - **Candidate 2 (Windows HTTP 500 Failure):** Source SHA `160f4d7f8cfceebbcac2b33a12d1c0e67b7d0659` (CI Run `37123027673`)
   - Mac arm64 Inner-ZIP SHA-256: `4f6c0f1cc98319e5f21e4beb2a00c7ee54260c2e2a9eeb421884a8e0e633e832`
-  - Windows x64 Inner-ZIP SHA-256: `7b9a99c6af97dbaf2ee896938e67df41181c125e2095296da57498843f8c2061` (FAILED: Workspace response `GET /` returned HTTP 500 "Internal Server Error" due to unencoded `read_text()` with Windows `cp1252` locale)
+  - Windows x64 Inner-ZIP SHA-256: `7b9a99c6af97dbaf2ee896938e67df41181c125e2095296da57498843f8c2061` (FAILED: `GET /` returned HTTP 500 "Internal Server Error" on physical Windows machine)
 
 ---
 
