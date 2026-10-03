@@ -55,6 +55,8 @@
 | MMP11-UX-STORY-001 | Practitioner mental model: Client/Year Context, Source A (Broker) vs Source B (Tax Ledger), readiness layer, 4-stage workflow, sensitized results | READY_FOR_PHYSICAL_RECIPIENT_QUALIFICATION | Current | 11/11 gates PASS; physical test pending |
 | MMP11-SAMPLE-001 | 1-Click zero-knowledge sample case onboarding (`POST /api/sample-case/load`) | READY_FOR_PHYSICAL_RECIPIENT_QUALIFICATION | Current | 11/11 gates PASS; physical test pending |
 | MMP11-VERIFY-UX-001 | GUI Offline Verifier practitioner journey; bundle restructuring for secondary technical tools | READY_FOR_PHYSICAL_RECIPIENT_QUALIFICATION | Current | 11/11 gates PASS; physical test pending |
+| MMP11-CASE-001 | Empty case persistence containment (`VB-CASE-INV-001`) + non-wrapping header streamline | AUTOMATED_VALIDATION_PASS | Current | In-memory draft wizard; persists only upon first valid evidence ingestion; 11/11 gates PASS |
+| VB-REG-GAP-001 | Form 1099-DA / Basis Reconciliation Regulatory & Evidence Context Analysis | RESEARCH_DISPOSITION_RECORDED | Current | Triaged: 1.1 unknown-never-zero invariant verified; 1.5 Evidence Context scheduled; tax characterization claims rejected |
 | VB-DOC-INV-001 | Canonical docs architecture: `case_model`, `domain_model`, `practitioner_journey`, `evidence_readiness`, `visual_semantics`, `MMP15-COMM-001`, `MMP15-PRACTICE-001` | VERIFIED | Current | Included in repo |
 | MMP11-QUAL-PHYS-001 | Physical recipient qualification execution on Mac arm64 & Windows x64 | PENDING | — | Governed by `docs/qualification/MMP11_EXEC_009A_physical_qualification_record.md` |
 

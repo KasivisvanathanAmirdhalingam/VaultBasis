@@ -31,7 +31,9 @@ REPO = Path(__file__).resolve().parent.parent
 APP_NAME = "VaultBasis.app"
 PACKAGE_NAME = "VaultBasis-RC3-macOS-arm64"
 
+ROOT_URL = "http://127.0.0.1:8000/"
 HEALTH_URL = "http://127.0.0.1:8000/api/health"
+SAMPLE_URL = "http://127.0.0.1:8000/api/sample-case/load"
 LAUNCH_TIMEOUT_S = 30   # max seconds to wait for health endpoint to respond
 POLL_INTERVAL_S = 1
 
@@ -51,7 +53,8 @@ def sha256_of(path: Path) -> str:
 
 def launch_gate(app_path: Path, label: str) -> None:
     """
-    Launch the .app, wait for the health endpoint, then terminate cleanly.
+    Launch the .app, wait for the health endpoint, verify root dashboard (GET /)
+    renders without 500 errors, test sample case load, then terminate cleanly.
     Raises SystemExit(1) on any failure — a binary that cannot bootstrap
     its bundled runtime cannot become a BUILD_VERIFIED candidate.
     """
@@ -79,12 +82,29 @@ def launch_gate(app_path: Path, label: str) -> None:
     # Poll health endpoint until ready or timeout
     deadline = time.monotonic() + LAUNCH_TIMEOUT_S
     healthy = False
+    dashboard_ok = False
+    sample_ok = False
     last_err = None
     while time.monotonic() < deadline:
         try:
             with urllib.request.urlopen(HEALTH_URL, timeout=2) as resp:
                 if resp.status == 200:
-                    healthy = True
+                    health_body = resp.read().decode("utf-8")
+                    if '"HEALTHY"' in health_body:
+                        healthy = True
+            if healthy:
+                with urllib.request.urlopen(ROOT_URL, timeout=2) as resp:
+                    if resp.status == 200:
+                        dash_body = resp.read().decode("utf-8")
+                        if "VaultBasis Edge" in dash_body:
+                            dashboard_ok = True
+                req = urllib.request.Request(SAMPLE_URL, data=b"", method="POST")
+                with urllib.request.urlopen(req, timeout=2) as resp:
+                    if resp.status == 200:
+                        sample_body = resp.read().decode("utf-8")
+                        if "CASE-SAMPLE-2025" in sample_body:
+                            sample_ok = True
+                if healthy and dashboard_ok and sample_ok:
                     break
         except Exception as e:
             last_err = e
@@ -107,6 +127,18 @@ def launch_gate(app_path: Path, label: str) -> None:
         print(f"  Last error: {last_err}")
         print(f"  EXIT CODE: {label} — BUILD_VERIFIED BLOCKED")
         sys.exit(1)
+
+    if not dashboard_ok:
+        print(f"  FAIL: root dashboard GET / did not return 200 with 'VaultBasis Edge' within {LAUNCH_TIMEOUT_S}s")
+        print(f"  Last error: {last_err}")
+        sys.exit(1)
+
+    if not sample_ok:
+        print(f"  FAIL: sample case load POST /api/sample-case/load did not succeed")
+        print(f"  Last error: {last_err}")
+        sys.exit(1)
+
+    print("  PASS: health, root dashboard (GET /), and sample case load verified successfully")
 
     print(f"  PASS: health endpoint responded within deadline")
     print(f"  Process exit code: {proc.returncode}")
