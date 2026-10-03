@@ -60,6 +60,15 @@ def launch_gate(app_path: Path, label: str) -> None:
     print(f"  app:  {app_path}")
     print(f"  exe:  {exe}")
 
+    # Verify code signature structure and bundle integrity
+    cs = subprocess.run(["codesign", "--verify", "--deep", "--strict", str(app_path)],
+                        capture_output=True, text=True)
+    if cs.returncode != 0:
+        print(f"  FAIL: codesign verification failed:\n{cs.stderr}")
+        sys.exit(1)
+    print("  PASS: codesign verified bundle integrity")
+
+    # 1. Piped stdio test
     proc = subprocess.Popen(
         [str(exe)],
         stdout=subprocess.PIPE,
@@ -101,6 +110,36 @@ def launch_gate(app_path: Path, label: str) -> None:
 
     print(f"  PASS: health endpoint responded within deadline")
     print(f"  Process exit code: {proc.returncode}")
+
+    # 2. Disconnected stdio test (reproduces Finder double-click environment)
+    print(f"  [LAUNCH-GATE] Disconnected DEVNULL Launch (Finder mode): {label}")
+    proc_gui = subprocess.Popen(
+        [str(exe)],
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        cwd=str(app_path.parent),
+    )
+    time.sleep(2)
+    healthy_gui = False
+    for _ in range(20):
+        try:
+            with urllib.request.urlopen(HEALTH_URL, timeout=1) as resp:
+                if resp.status == 200:
+                    healthy_gui = True
+                    break
+        except Exception:
+            time.sleep(0.25)
+    proc_gui.terminate()
+    try:
+        proc_gui.wait(timeout=5)
+    except subprocess.TimeoutExpired:
+        proc_gui.kill()
+    if not healthy_gui:
+        print(f"  FAIL: Disconnected DEVNULL GUI mode did not respond")
+        sys.exit(1)
+    print("  PASS: Disconnected DEVNULL GUI mode responded healthy")
+
 
 
 def main() -> int:

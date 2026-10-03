@@ -1,5 +1,6 @@
 import io
 import os
+import socket
 import subprocess
 import sys
 import threading
@@ -16,43 +17,79 @@ if sys.stderr is None:
 import uvicorn
 from edge.api.app import app
 
-URL = "http://127.0.0.1:8000"
 
-
-def _open_workspace_when_ready():
-    # VaultBasis Edge launcher: present the local workspace automatically once healthy.
-    for _ in range(40):
-        try:
-            with urllib.request.urlopen(URL + "/api/health", timeout=1) as resp:
-                if resp.status == 200:
-                    break
-        except Exception:
-            time.sleep(0.25)
+def _open_url(url: str):
     try:
         if sys.platform == "darwin":
-            # On macOS, 'open' from shell is authoritative for opening in default browser from .app
-            subprocess.run(["open", URL], check=False)
+            subprocess.run(["open", url], check=False)
         elif sys.platform == "win32":
             try:
-                os.startfile(URL)
+                os.startfile(url)
             except Exception:
-                webbrowser.open(URL)
+                webbrowser.open(url)
         else:
             try:
-                subprocess.run(["xdg-open", URL], check=False)
+                subprocess.run(["xdg-open", url], check=False)
             except Exception:
-                webbrowser.open(URL)
+                webbrowser.open(url)
     except Exception:
         try:
-            webbrowser.open(URL)
+            webbrowser.open(url)
         except Exception:
             pass
 
 
+def _open_workspace_when_ready(port: int):
+    url = f"http://127.0.0.1:{port}"
+    for _ in range(40):
+        try:
+            with urllib.request.urlopen(f"{url}/api/health", timeout=1) as resp:
+                if resp.status == 200:
+                    break
+        except Exception:
+            time.sleep(0.25)
+    _open_url(url)
+
+
+def _check_existing_vaultbasis_instance(port: int) -> bool:
+    """Check if an active VaultBasis Edge instance is already responding on this port."""
+    try:
+        with urllib.request.urlopen(f"http://127.0.0.1:{port}/api/health", timeout=0.5) as resp:
+            if resp.status == 200:
+                data = resp.read().decode("utf-8", errors="ignore")
+                return "HEALTHY" in data
+    except Exception:
+        return False
+    return False
+
+
+def _find_available_port(start_port: int = 8000, max_port: int = 8010) -> int:
+    """Find a port that can be bound on 127.0.0.1."""
+    for p in range(start_port, max_port + 1):
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                s.bind(("127.0.0.1", p))
+                return p
+        except OSError:
+            continue
+    return start_port
+
+
 if __name__ == "__main__":
-    # VaultBasis Edge Local Service (MMP-1.1 candidate entry point)
-    # Strictly binds to localhost (127.0.0.1).
-    opener = threading.Thread(target=_open_workspace_when_ready, daemon=True)
+    # 1. Single-Instance Check: If VaultBasis is already running on port 8000,
+    # bring the existing workspace to the front by opening browser and exit cleanly.
+    if _check_existing_vaultbasis_instance(8000):
+        _open_url("http://127.0.0.1:8000")
+        sys.exit(0)
+
+    # 2. Select port: Default to 8000, fallback to 8001..8010 if occupied by non-VaultBasis process
+    port = _find_available_port(8000, 8010)
+
+    # 3. Launch background browser opener
+    opener = threading.Thread(target=_open_workspace_when_ready, args=(port,), daemon=True)
     opener.start()
+
+    # 4. Start Uvicorn daemon
     # log_config=None prevents uvicorn dictConfig formatter exceptions in frozen GUI executables
-    uvicorn.run(app, host="127.0.0.1", port=8000, log_config=None, log_level="info")
+    uvicorn.run(app, host="127.0.0.1", port=port, log_config=None, log_level="info")

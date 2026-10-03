@@ -1,7 +1,9 @@
 # MMP11-WEB-REG-001 — Public Website Regression Containment & Restoration
 
 > **Directive Reference:** `MMP11-WEB-REG-001`  
-> **Status:** `REMEDIATION_COMPLETE — LOCAL_GATES_PASS (11/11)`  
+> **Status:** `MMP11-WEB-REG-001 = AUTOMATED_VALIDATION_PASS / CI_VERIFIED`  
+> **Web Remediation SHA:** `dd4230c97ba98d5fbab7738efdc80c089a9e9ee7` (CI Run `37121404625`)  
+> **Frozen Edge Candidate:** `641d2b135ab0dcfa3bdf3b5edc95f4d1a3d5511d` (CI Run `37120319044`) — *Preserved & Untouched*  
 > **Priority:** Release Blocker  
 > **Scope:** Public Marketing & Trust Website (`apps/web-marketing/`, `dist/public-web/`)  
 
