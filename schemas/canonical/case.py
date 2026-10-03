@@ -25,6 +25,7 @@ class CanonicalCase(BaseModel):
     reconciliation outcomes, and signed receipt reference.
     """
     case_id: str = Field(..., description="Unique case identifier (e.g. CASE-2026-US-001)")
+    client_reference: Optional[str] = Field("Sample Client", description="Local practitioner client or engagement reference")
     tax_year: int = Field(2025, description="Target tax year for review")
     jurisdiction: str = Field("US", description="Regulatory jurisdiction")
     case_status: str = Field(

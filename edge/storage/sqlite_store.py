@@ -35,6 +35,7 @@ class SQLiteStore:
             conn.executescript("""
                 CREATE TABLE IF NOT EXISTS cases (
                     case_id TEXT PRIMARY KEY,
+                    client_reference TEXT DEFAULT 'Sample Client',
                     tax_year INTEGER NOT NULL,
                     jurisdiction TEXT NOT NULL,
                     case_status TEXT NOT NULL,
@@ -75,14 +76,22 @@ class SQLiteStore:
                     FOREIGN KEY (case_id) REFERENCES cases (case_id) ON DELETE CASCADE
                 );
             """)
+            # Migration check: ensure client_reference column exists
+            cursor = conn.cursor()
+            cursor.execute("PRAGMA table_info(cases)")
+            columns = [row[1] for row in cursor.fetchall()]
+            if "client_reference" not in columns:
+                cursor.execute("ALTER TABLE cases ADD COLUMN client_reference TEXT DEFAULT 'Sample Client'")
 
     def save_case(self, case: CanonicalCase):
         now_utc = datetime.now(timezone.utc).isoformat()
+        client_ref = getattr(case, "client_reference", "Sample Client") or "Sample Client"
         with self._get_connection() as conn:
             conn.execute("""
-                INSERT INTO cases (case_id, tax_year, jurisdiction, case_status, outcome_state, assurance_level, receipt_id, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO cases (case_id, client_reference, tax_year, jurisdiction, case_status, outcome_state, assurance_level, receipt_id, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(case_id) DO UPDATE SET
+                    client_reference=excluded.client_reference,
                     case_status=excluded.case_status,
                     outcome_state=excluded.outcome_state,
                     assurance_level=excluded.assurance_level,
@@ -90,6 +99,7 @@ class SQLiteStore:
                     updated_at=excluded.updated_at;
             """, (
                 case.case_id,
+                client_ref,
                 case.tax_year,
                 case.jurisdiction,
                 case.case_status,
@@ -122,8 +132,10 @@ class SQLiteStore:
             for t_row in conn.execute("SELECT data_json FROM transactions WHERE case_id = ?", (case_id,)).fetchall():
                 transactions.append(CanonicalTransaction.model_validate_json(t_row["data_json"]))
 
+            client_ref = row["client_reference"] if "client_reference" in row.keys() and row["client_reference"] else "Sample Client"
             return CanonicalCase(
                 case_id=row["case_id"],
+                client_reference=client_ref,
                 tax_year=row["tax_year"],
                 jurisdiction=row["jurisdiction"],
                 case_status=row["case_status"],

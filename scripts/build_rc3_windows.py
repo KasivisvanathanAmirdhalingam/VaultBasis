@@ -9,7 +9,8 @@ as PLANNED in the manifest and required before qualification. Stdlib +
 PyInstaller only. Exit non-zero on any assertion.
 
 Launch gate: BUILD_VERIFIED requires the packaged executable to boot
-successfully on the native CI runner, both pre-ZIP and post-ZIP-extraction.
+successfully on the native CI runner, both pre-ZIP and post-ZIP-extraction,
+under both piped stdio and disconnected windowed (DEVNULL) modes.
 """
 import hashlib
 import json
@@ -33,20 +34,28 @@ LAUNCH_TIMEOUT_S = 30
 POLL_INTERVAL_S = 1
 
 
-def launch_gate(exe_path: Path, label: str) -> None:
+def launch_gate(exe_path: Path, label: str, disconnected_stdio: bool = False) -> None:
     """
     Launch VaultBasis.exe, wait for the health endpoint, then terminate cleanly.
+    Tests standard launch and explorer-equivalent (disconnected stdio) launch.
     Raises SystemExit(1) on any failure.
     """
-    print(f"\n[LAUNCH-GATE] {label}")
+    mode_str = "DISCONNECTED_STDIO (Explorer GUI mode)" if disconnected_stdio else "PIPED_STDIO"
+    print(f"\n[LAUNCH-GATE] {label} [{mode_str}]")
     print(f"  exe: {exe_path}")
 
-    proc = subprocess.Popen(
-        [str(exe_path)],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        cwd=str(exe_path.parent),
-    )
+    popen_kwargs = {
+        "cwd": str(exe_path.parent),
+    }
+    if disconnected_stdio:
+        popen_kwargs["stdin"] = subprocess.DEVNULL
+        popen_kwargs["stdout"] = subprocess.DEVNULL
+        popen_kwargs["stderr"] = subprocess.DEVNULL
+    else:
+        popen_kwargs["stdout"] = subprocess.PIPE
+        popen_kwargs["stderr"] = subprocess.STDOUT
+
+    proc = subprocess.Popen([str(exe_path)], **popen_kwargs)
 
     deadline = time.monotonic() + LAUNCH_TIMEOUT_S
     healthy = False
@@ -62,18 +71,26 @@ def launch_gate(exe_path: Path, label: str) -> None:
         time.sleep(POLL_INTERVAL_S)
 
     proc.terminate()
-    try:
-        stdout_bytes, _ = proc.communicate(timeout=10)
-    except subprocess.TimeoutExpired:
-        proc.kill()
+    stdout_bytes = b""
+    if not disconnected_stdio:
         try:
-            stdout_bytes, _ = proc.communicate(timeout=15)
+            stdout_bytes, _ = proc.communicate(timeout=10)
         except subprocess.TimeoutExpired:
-            stdout_bytes = b"[process did not terminate after kill - Defender/AV hold suspected]"
+            proc.kill()
+            try:
+                stdout_bytes, _ = proc.communicate(timeout=15)
+            except subprocess.TimeoutExpired:
+                stdout_bytes = b"[process did not terminate after kill - Defender/AV hold suspected]"
 
-    output = stdout_bytes.decode("utf-8", errors="replace").strip()
-    if output:
-        print(f"  [app output]\n{output}\n  [/app output]")
+        output = stdout_bytes.decode("utf-8", errors="replace").strip()
+        if output:
+            print(f"  [app output]\n{output}\n  [/app output]")
+    else:
+        try:
+            proc.wait(timeout=10)
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            proc.wait()
 
     if not healthy:
         print(f"  FAIL: health endpoint did not respond within {LAUNCH_TIMEOUT_S}s")
@@ -121,20 +138,25 @@ def main() -> int:
         elif p.is_dir():
             shutil.rmtree(p)
 
-    # --onedir (not --onefile): extracts once at build time rather than on every
-    # launch.  On GitHub windows-latest, --onefile triggers Windows Defender to
-    # scan every file in the self-extraction temp directory at runtime, which
-    # exceeds the health-poll window and causes proc.communicate() to hang
-    # indefinitely (observed: >2h CI hang).  --onedir pays the extraction cost
-    # once during build where Defender scanning does not block the health gate.
     cmd = [sys.executable, "-m", "PyInstaller", "--clean", "--noconfirm",
            "--name", "VaultBasis", "--onedir", "--windowed",
            "--exclude-module", "matplotlib", "--exclude-module", "IPython",
            "--exclude-module", "tkinter", "--exclude-module", "sphinx",
            "--exclude-module", "numpy", "--exclude-module", "pandas",
            "--exclude-module", "scipy", "--exclude-module", "docutils",
+           "--hidden-import", "uvicorn.logging",
+           "--hidden-import", "uvicorn.loops",
+           "--hidden-import", "uvicorn.loops.auto",
+           "--hidden-import", "uvicorn.protocols",
+           "--hidden-import", "uvicorn.protocols.http",
+           "--hidden-import", "uvicorn.protocols.http.auto",
+           "--hidden-import", "uvicorn.lifespans",
+           "--hidden-import", "uvicorn.lifespans.auto",
            "--add-data", f"apps{os.pathsep}apps",
            "--add-data", f"schemas{os.pathsep}schemas",
+           "--add-data", f"docs{os.pathsep}docs",
+           "--add-data", f"tests/fixtures/golden_receipt_valid.json{os.pathsep}sample",
+           "--add-data", f"tests/fixtures/golden_receipt_tampered.json{os.pathsep}sample",
            "main.py"]
     sh(*cmd)
 
@@ -184,6 +206,7 @@ def main() -> int:
 
     # Launch gate — pre-ZIP: launch the built exe from its onedir location.
     launch_gate(exe, "PRE-ZIP: built VaultBasis.exe in dist/VaultBasis/")
+    launch_gate(exe, "PRE-ZIP (GUI Mode): built VaultBasis.exe in dist/VaultBasis/", disconnected_stdio=True)
 
     zip_path = REPO / "dist" / f"{PACKAGE_NAME}.zip"
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as z:
@@ -201,6 +224,7 @@ def main() -> int:
         extracted_exe = tmp_path / PACKAGE_NAME / "VaultBasis" / "VaultBasis.exe"
         assert extracted_exe.is_file(), f"extracted exe missing at {extracted_exe}"
         launch_gate(extracted_exe, "POST-ZIP: extracted VaultBasis.exe from candidate ZIP")
+        launch_gate(extracted_exe, "POST-ZIP (GUI Mode): extracted VaultBasis.exe from candidate ZIP", disconnected_stdio=True)
 
     manifest = {
         "manifest_version": "v0.1",

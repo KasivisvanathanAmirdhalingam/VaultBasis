@@ -36,6 +36,7 @@ def test_atdd_cpa_reconciliation_workflow(client):
     # Step 1: Create Case
     case_res = client.post("/api/cases", json={
         "case_id": "CASE-CPA-2025-SMITH",
+        "client_reference": "Smith Family Trust",
         "tax_year": 2025,
         "jurisdiction": "US"
     })
@@ -94,6 +95,96 @@ BTC,2025-11-20,18400.00,2025-02-11,12100.00,YES
     ver_res = verify_outcome_receipt(receipt)
     assert ver_res.is_valid is True
     assert ver_res.outcome_state == "BASIS_DIFFERENCE"
+
+
+@pytest.mark.atdd
+@pytest.mark.smoke
+def test_atdd_zero_knowledge_sample_case_journey(client):
+    """
+    Scenario: Unfamiliar practitioner opens VaultBasis and clicks 'Explore Sample Case'.
+    1. Sample case is preloaded with Source A (Broker Form 1099-DA) and Source B (Tax-Ledger Koinly).
+    2. Zero external file crafting is required.
+    3. Reconciling executes deterministically and yields multi-asset findings (differences + unresolved).
+    4. Signed Outcome Receipt is generated and verifies valid offline.
+    """
+    # 1. Load Sample Case
+    preload_res = client.post("/api/sample-case/load")
+    assert preload_res.status_code == 200
+    case_data = preload_res.json()
+
+    assert case_data["case_id"] == "CASE-SAMPLE-2025"
+    assert "Acme Holdings" in case_data["client_reference"]
+    assert len(case_data["sources"]) == 2
+
+    # 2. Run Reconciliation
+    recon_res = client.post("/api/cases/CASE-SAMPLE-2025/reconcile")
+    assert recon_res.status_code == 200
+    data = recon_res.json()
+
+    diffs = data["reconciliation"]["material_differences"]
+    assert len(diffs) >= 1
+    assert data["outcome_state"] is not None
+
+    # Receipt validity
+    receipt = data["receipt"]
+    ver = verify_outcome_receipt(receipt)
+    assert ver.is_valid is True
+
+
+@pytest.mark.atdd
+@pytest.mark.regression
+def test_atdd_client_context_persistence(client):
+    """
+    Scenario: Practitioner organizes case under specific client reference.
+    Case context must persist across retrieval and case list queries.
+    """
+    case_id = "CASE-CLIENT-CTX-001"
+    client_name = "Redwood Consulting LLC"
+    res = client.post("/api/cases", json={
+        "case_id": case_id,
+        "client_reference": client_name,
+        "tax_year": 2025
+    })
+    assert res.status_code == 201
+
+    get_res = client.get(f"/api/cases/{case_id}")
+    assert get_res.status_code == 200
+    assert get_res.json()["client_reference"] == client_name
+
+    list_res = client.get("/api/cases")
+    assert list_res.status_code == 200
+    matched_case = next((c for c in list_res.json() if c["case_id"] == case_id), None)
+    assert matched_case is not None
+    assert matched_case["client_reference"] == client_name
+
+
+@pytest.mark.atdd
+@pytest.mark.regression
+def test_atdd_negative_control_single_source_rejected(client):
+    """
+    Negative control: Reconciling with only 1 source must return HTTP 400 with clear explanation.
+    """
+    case_id = "CASE-SINGLE-SRC-NEG"
+    client.post("/api/cases", json={"case_id": case_id, "tax_year": 2025})
+    csv_1099 = b"Property,Date sold,Proceeds,Date acquired,Cost basis,Box 2\nBTC,2025-11-20,1000.00,2025-01-01,800.00,YES\n"
+    client.post(f"/api/cases/{case_id}/sources", files={"file": ("1099.csv", csv_1099, "text/csv")})
+
+    recon_res = client.post(f"/api/cases/{case_id}/reconcile")
+    assert recon_res.status_code == 400
+    assert "at least two source documents" in recon_res.json()["detail"]
+
+
+@pytest.mark.atdd
+@pytest.mark.regression
+def test_atdd_negative_control_empty_file_rejected(client):
+    """
+    Negative control: Uploading an empty file must return HTTP 400.
+    """
+    case_id = "CASE-EMPTY-SRC-NEG"
+    client.post("/api/cases", json={"case_id": case_id, "tax_year": 2025})
+    res = client.post(f"/api/cases/{case_id}/sources", files={"file": ("empty.csv", b"", "text/csv")})
+    assert res.status_code == 400
+    assert "Uploaded file is empty" in res.json()["detail"]
 
 
 @pytest.mark.atdd
@@ -158,7 +249,6 @@ SOL,2025-08-14,4500.00,2025-01-10,,NO
     ver = verify_outcome_receipt(receipt)
     assert ver.is_valid is True
     assert ver.outcome_state == "REPORTING_SCOPE_DIFFERENCE"
-
 
 
 @pytest.mark.atdd
@@ -410,6 +500,3 @@ def test_atdd_idempotent_re_reconciliation_journey(client):
     assert len(r1["reconciliation"]["material_differences"]) == len(r2["reconciliation"]["material_differences"]) == 0
     assert r1["receipt"]["signer_key_id"] == r2["receipt"]["signer_key_id"]
     assert r1["receipt"]["outcome_state"] == r2["receipt"]["outcome_state"]
-
-
-

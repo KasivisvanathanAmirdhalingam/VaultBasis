@@ -87,8 +87,6 @@ app = FastAPI(
 )
 
 # CORS locked to loopback origins only — Edge is a local-only application.
-# allow_credentials requires explicit origin list (wildcard + credentials is rejected by browsers
-# and is a security defect: any site could XHR the local API while Edge runs).
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -107,12 +105,14 @@ app.add_middleware(
 
 class CreateCaseRequest(BaseModel):
     case_id: Optional[str] = Field(None, description="Optional custom case ID (defaults to UUID)")
+    client_reference: Optional[str] = Field("Sample Client", description="Client or engagement reference (e.g. Acme Holdings LLC)")
     tax_year: int = Field(2025, description="Target tax year")
     jurisdiction: str = Field("US", description="Regulatory jurisdiction")
 
 
 class CaseSummaryResponse(BaseModel):
     case_id: str
+    client_reference: Optional[str] = "Sample Client"
     tax_year: int
     jurisdiction: str
     case_status: str
@@ -121,6 +121,27 @@ class CaseSummaryResponse(BaseModel):
     receipt_id: Optional[str]
     created_at: str
     updated_at: str
+
+
+# ------------------------------------------------------------------------------
+# Sample Case Fixtures
+# ------------------------------------------------------------------------------
+
+SAMPLE_1099DA_CSV = b"""Property,Date sold,Proceeds,Date acquired,Cost basis,Box 2
+BTC,2025-11-20,18400.00,2025-02-11,12100.00,YES
+ETH,2025-12-05,3200.00,2025-03-01,2800.00,YES
+SOL,2025-08-14,4500.00,2025-01-10,,NO
+AVAX,2025-09-10,9950.00,2025-01-01,8000.00,YES
+LINK,2025-10-01,1500.00,2025-04-01,1200.00,YES
+"""
+
+SAMPLE_KOINLY_CSV = b"""Date,Asset,Amount,Cost basis,Proceeds,Gain / loss,Date acquired
+2025-11-20,BTC,1.0,16300.00,18400.00,2100.00,2025-02-11
+2025-12-05,ETH,1.0,2800.00,3200.00,400.00,2025-03-01
+2025-08-14,SOL,30.0,4000.00,4500.00,500.00,2025-01-10
+2025-09-10,AVAX,500.0,8000.00,10000.00,2000.00,2025-01-01
+2025-10-01,LINK,100.0,1200.00,1500.00,300.00,2025-04-01
+"""
 
 
 # ------------------------------------------------------------------------------
@@ -139,14 +160,67 @@ def health_check():
     }
 
 
+@app.post("/api/sample-case/load")
+def load_sample_case():
+    """
+    Preload the canonical Sample Case for zero-knowledge onboarding.
+    Populates Source A (Broker Form 1099-DA) and Source B (Tax-Ledger Koinly Report).
+    """
+    case_id = "CASE-SAMPLE-2025"
+    client_ref = "Sample Client (Acme Holdings LLC)"
+    now_utc = datetime.now(timezone.utc).isoformat()
+
+    existing = db_store.get_case(case_id)
+    if not existing:
+        case = CanonicalCase(
+            case_id=case_id,
+            client_reference=client_ref,
+            tax_year=2025,
+            jurisdiction="US",
+            case_status="CREATED",
+            created_at=now_utc,
+            updated_at=now_utc
+        )
+        db_store.save_case(case)
+
+    # Ingest Source A (Broker 1099-DA) if not already present
+    src_a_id = f"SRC-SAMPLE_1099DA"
+    try:
+        meta_a, txs_a = IntakeDispatcher.ingest_document(
+            data_bytes=SAMPLE_1099DA_CSV,
+            filename="Sample_Coinbase_1099DA.csv",
+            source_id=src_a_id,
+            declared_schema="AUTO"
+        )
+        db_store.add_source_and_transactions(case_id, meta_a, SAMPLE_1099DA_CSV, txs_a)
+    except EvidenceCollisionError:
+        pass
+
+    # Ingest Source B (Tax-Ledger Koinly) if not already present
+    src_b_id = f"SRC-SAMPLE_KOINLY"
+    try:
+        meta_b, txs_b = IntakeDispatcher.ingest_document(
+            data_bytes=SAMPLE_KOINLY_CSV,
+            filename="Sample_Koinly_Capital_Gains.csv",
+            source_id=src_b_id,
+            declared_schema="AUTO"
+        )
+        db_store.add_source_and_transactions(case_id, meta_b, SAMPLE_KOINLY_CSV, txs_b)
+    except EvidenceCollisionError:
+        pass
+
+    return get_case(case_id)
+
+
 @app.post("/api/cases", response_model=CaseSummaryResponse, status_code=status.HTTP_201_CREATED)
 def create_case(req: CreateCaseRequest):
     case_id = req.case_id or f"CASE-{uuid.uuid4().hex[:8].upper()}"
+    client_ref = req.client_reference or "Sample Client"
     existing = db_store.get_case(case_id)
     if existing:
-        # Per PRD §62.2 (Idempotency): return existing case if already created
         return CaseSummaryResponse(
             case_id=existing.case_id,
+            client_reference=existing.client_reference,
             tax_year=existing.tax_year,
             jurisdiction=existing.jurisdiction,
             case_status=existing.case_status,
@@ -160,6 +234,7 @@ def create_case(req: CreateCaseRequest):
     now_utc = datetime.now(timezone.utc).isoformat()
     case = CanonicalCase(
         case_id=case_id,
+        client_reference=client_ref,
         tax_year=req.tax_year,
         jurisdiction=req.jurisdiction,
         case_status="CREATED",
@@ -169,6 +244,7 @@ def create_case(req: CreateCaseRequest):
     db_store.save_case(case)
     return CaseSummaryResponse(
         case_id=case.case_id,
+        client_reference=case.client_reference,
         tax_year=case.tax_year,
         jurisdiction=case.jurisdiction,
         case_status=case.case_status,
@@ -194,6 +270,7 @@ def get_case(case_id: str):
     # Return structured case details
     return {
         "case_id": case.case_id,
+        "client_reference": getattr(case, "client_reference", "Sample Client") or "Sample Client",
         "tax_year": case.tax_year,
         "jurisdiction": case.jurisdiction,
         "case_status": case.case_status,
@@ -257,7 +334,6 @@ def reconcile_case(case_id: str):
         )
 
     # Compute a manifest hash of the current source set (sorted for determinism).
-    # Used to detect whether sources changed after a receipt was previously issued.
     current_manifest = hashlib.sha256(
         json.dumps(
             sorted((sid, s.sha256_hash) for sid, s in case.sources.items())
@@ -268,7 +344,6 @@ def reconcile_case(case_id: str):
     recon_result = DeterministicReconciliationEngine.reconcile_case(case)
 
     # Return existing receipt only if sources are identical to when it was issued.
-    # A receipt for a different source set must not masquerade as the current result.
     if case.receipt_id:
         existing_receipt = db_store.get_receipt(case.receipt_id)
         if existing_receipt:
@@ -287,8 +362,6 @@ def reconcile_case(case_id: str):
                     "receipt": existing_receipt,
                     "message": "Receipt already exists for this case. View it via /cases/{case_id}/receipt.",
                 }
-            # Sources changed after receipt was issued — fall through to re-reconcile
-            # and issue a new receipt. The old receipt remains in the DB as an audit record.
 
     # Build Outcome Receipt Payload
     receipt_id = str(uuid.uuid4())
@@ -364,37 +437,45 @@ def export_evidence_bundle(case_id: str):
 
     zip_buffer = io.BytesIO()
     with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
-        # 1. Signed Outcome Receipt
+        # 1. Primary Signed Outcome Receipt
         zip_file.writestr(
             "receipt-v0.1.json",
             json.dumps(receipt, indent=2)
         )
-        # 2. Standalone offline verifier script
-        verifier_cli_path = RESOURCE_BASE / "apps" / "verifier" / "verify_receipt.py"
-        if verifier_cli_path.exists():
-            zip_file.writestr("verify_receipt.py", verifier_cli_path.read_text())
-        # 3. Normative Schema
+        # 2. Normative JSON Schema
         schema_path = RESOURCE_BASE / "schemas" / "receipt" / "receipt-v0.1.json"
         if schema_path.exists():
             zip_file.writestr("schemas/receipt-v0.1.json", schema_path.read_text())
-        # 4. Source Files
+        # 3. Source Evidence Files
         for source_id, s_meta in case.sources.items():
             raw_bytes = db_store.get_source_file_bytes(source_id)
             if raw_bytes:
                 zip_file.writestr(f"evidence/{source_id}_{s_meta.filename}", raw_bytes)
+        # 4. Secondary Technical Verification Tooling (clearly placed)
+        verifier_cli_path = RESOURCE_BASE / "apps" / "verifier" / "verify_receipt.py"
+        if verifier_cli_path.exists():
+            zip_file.writestr("verify_receipt.py", verifier_cli_path.read_text())
+            zip_file.writestr("technical-verification/verify_receipt.py", verifier_cli_path.read_text())
         # 5. Verification Readme
         zip_file.writestr(
             "VERIFY_INSTRUCTIONS.txt",
             f"""VAULTBASIS OUTCOME RECEIPT VERIFICATION INSTRUCTIONS
 Case ID: {case.case_id}
+Client: {getattr(case, 'client_reference', 'Sample Client')}
 Receipt ID: {case.receipt_id}
 
-To verify this receipt independently on any clean machine without internet access:
-1. Ensure Python 3.8+ and 'cryptography' library are installed.
-2. Run:
-   python3 verify_receipt.py receipt-v0.1.json --evidence-dir evidence/
+HOW TO VERIFY THIS RECEIPT:
 
-IMPORTANT NOTICE:
+PRIMARY PRACTITIONER PATH (GUI / Offline Verifier):
+1. Open VaultBasis Edge or navigate to http://127.0.0.1:8000/offline-verifier (or https://vaultbasis.com/verifier).
+2. Select or drag-and-drop 'receipt-v0.1.json' into the verifier window.
+3. Review the automated verification checklist (Schema Conformance, Contract Version, Key Consistency, Signature Verification).
+
+SECONDARY TECHNICAL AUDIT PATH (Air-gapped Python CLI):
+For independent technical auditors wishing to verify via command line:
+1. python3 verify_receipt.py receipt-v0.1.json --evidence-dir evidence/
+
+IMPORTANT REGULATORY & ASSURANCE BOUNDARY:
 VaultBasis performs bounded, deterministic reconciliation of supported sources under declared semantics. It does not assess tax correctness, establish legal compliance, or determine whether source information is complete or accurate. Successful verification confirms that the receipt signature is valid for the declared installation public key and that the signed receipt content has not changed relative to that signature. Verification does not constitute a professional opinion, legal finding, government approval, or endorsement by the IRS or any other government authority. The practitioner remains responsible for professional interpretation and application of applicable law.
 """
         )
@@ -439,9 +520,6 @@ def serve_dashboard():
 
 @app.get("/verifier")
 def verifier_redirect():
-    # The production Web Verifier is a separate, independently authenticated service.
-    # Edge does not host it locally. Redirect to the canonical production URL.
-    from fastapi.responses import RedirectResponse
     return RedirectResponse(url="https://vaultbasis.com/verifier", status_code=302)
 
 @app.get("/offline-verifier", response_class=HTMLResponse)
@@ -460,8 +538,6 @@ def serve_marketing():
     return HTMLResponse("<h2>VaultBasis Marketing building...</h2>")
 
 
-
-
 _SCHEMA_ALLOWLIST = {"receipt-v0.1.json"}
 
 @app.get("/schemas/{filename:path}")
@@ -470,7 +546,6 @@ def serve_schema(filename: str):
         raise HTTPException(status_code=404, detail="Schema file not found")
     schema_dir = (RESOURCE_BASE / "schemas" / "receipt").resolve()
     schema_path = (schema_dir / filename).resolve()
-    # Reject any path that escapes the schema directory
     if not str(schema_path).startswith(str(schema_dir)):
         raise HTTPException(status_code=404, detail="Schema file not found")
     if schema_path.is_file():
@@ -480,16 +555,11 @@ def serve_schema(filename: str):
 
 @app.get("/docs/scope_and_limitations_v0.1.md", include_in_schema=False)
 def scope_and_limitations_legacy_url():
-    # Old bookmarks/old deployments link the raw .md URL: never serve raw
-    # markdown as a page. Redirect to the rendered document.
-    return RedirectResponse(url="/docs/scope_and_limitations_v0.1.html",
-                            status_code=308)
+    return RedirectResponse(url="/docs/scope_and_limitations_v0.1.html", status_code=308)
 
 
 @app.get("/docs/scope_and_limitations_v0.1.html", response_class=HTMLResponse)
 def serve_scope_and_limitations():
-    # Rendered via the single stdlib renderer (scripts/md_to_html.py), same as
-    # the Vercel bundle — practitioners never receive raw markdown.
     from scripts.md_to_html import render_page
     doc_path = RESOURCE_BASE / "docs" / "scope_and_limitations_v0.1.md"
     if not doc_path.is_file():
@@ -523,4 +593,3 @@ def get_sample_receipt_tampered():
     if sample_path.is_file():
         return JSONResponse(content=json.loads(sample_path.read_text()))
     raise HTTPException(status_code=404, detail="Tampered sample receipt not found")
-

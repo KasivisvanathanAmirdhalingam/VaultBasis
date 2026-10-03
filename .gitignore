@@ -30,3 +30,10 @@ build/
 node_modules/
 
 .env*
+.vercel
+.claude/
+test-results/
+*.js
+*.txt
+patch_html.py
+
