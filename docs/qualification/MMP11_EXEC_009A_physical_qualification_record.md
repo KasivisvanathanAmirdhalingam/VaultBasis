@@ -25,8 +25,8 @@
 - **Candidate 1 (Mac Launch Failure):** Source SHA `641d2b135ab0dcfa3bdf3b5edc95f4d1a3d5511d` (CI Run `37120319044`)
   - Mac arm64 Inner-ZIP SHA-256: `8e8e77290a8544c0e9fe72f5c862cb942e2dcc293ce80b9f8d93ff7565c2bb24` (FAILED: Gatekeeper / port contention)
   - Windows x64 Inner-ZIP SHA-256: `6f25843188aaf91b6688902e87bc487f68bc76999f077745876ca0b926bc52f3`
-- **Candidate 2 (Windows HTTP 500 Failure):** Source SHA `160f4d7f8cfceebbcac2b33a12d1c0e67b7d0659` (CI Run `37123027673`)
-  - Mac arm64 Inner-ZIP SHA-256: `4f6c0f1cc98319e5f21e4beb2a00c7ee54260c2e2a9eeb421884a8e0e633e832`
+- **Candidate 2 (Windows HTTP 500 & Mac LaunchServices -47 Failures):** Source SHA `160f4d7f8cfceebbcac2b33a12d1c0e67b7d0659` (CI Run `37123027673`)
+  - Mac arm64 Inner-ZIP SHA-256: `4f6c0f1cc98319e5f21e4beb2a00c7ee54260c2e2a9eeb421884a8e0e633e832` (FAILED: LaunchServices OSStatus error -47 on physical Mac recipient launch)
   - Windows x64 Inner-ZIP SHA-256: `7b9a99c6af97dbaf2ee896938e67df41181c125e2095296da57498843f8c2061` (FAILED: `GET /` returned HTTP 500 "Internal Server Error" on physical Windows machine)
 
 ---
