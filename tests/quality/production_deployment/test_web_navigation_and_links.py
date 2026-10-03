@@ -43,11 +43,11 @@ def test_marketing_site_header_footer_and_anchor_links():
     assert "Verify an Outcome Receipt" in html
     assert "Request Design-Partner Access" in html
 
-    # 2. Extract all href="#..." anchors and assert matching id="..." exists
-    anchors = set(re.findall(r'href="#([a-zA-Z0-9_\-]+)"', html))
-    assert len(anchors) >= 4, f"Expected multiple section anchors, found: {anchors}"
+    # 2. Extract all href="/#..." and href="#..." anchors and assert matching id="..." exists
+    anchors = set(re.findall(r'href="(?:/)?#([a-zA-Z0-9_\-]+)"', html))
+    assert len(anchors) >= 2, f"Expected section anchors, found: {anchors}"
     for anchor in anchors:
-        assert f'id="{anchor}"' in html, f"Broken link: href='#{anchor}' found but id='{anchor}' does not exist in DOM"
+        assert f'id="{anchor}"' in html, f"Broken link: href='...#{anchor}' found but id='{anchor}' does not exist in DOM"
 
     # 3. Standard multi-column footer presence (entity fix 9e68178:
     # "TecTixBase EURL" attribution intentionally removed — must not reappear)

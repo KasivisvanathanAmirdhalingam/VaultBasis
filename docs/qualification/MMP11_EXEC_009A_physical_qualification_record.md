@@ -6,10 +6,10 @@
 ---
 
 ## 1. Candidate Identity Freeze
-- **Source SHA:** [To be populated from exact frozen git commit]
-- **CI Run ID:** [To be populated from exact GitHub Actions run]
-- **Mac arm64 Inner-ZIP SHA-256:** [To be populated from inspection report]
-- **Windows x64 Inner-ZIP SHA-256:** [To be populated from inspection report]
+- **Source SHA:** `641d2b135ab0dcfa3bdf3b5edc95f4d1a3d5511d`
+- **CI Run ID:** `37120319044`
+- **Mac arm64 Inner-ZIP SHA-256:** `8e8e77290a8544c0e9fe72f5c862cb942e2dcc293ce80b9f8d93ff7565c2bb24`
+- **Windows x64 Inner-ZIP SHA-256:** `6f25843188aaf91b6688902e87bc487f68bc76999f077745876ca0b926bc52f3`
 
 ---
 
@@ -23,8 +23,8 @@
 | Check | Gate Description | Expected | Actual Result |
 |---|---|---|---|
 | **NORMAL EXTRACTION** | Extract ZIP via Windows Explorer standard Extract All | Clean folder layout, `VaultBasis.exe` beside `_internal/` | PENDING / `PASS` / `FAIL` |
-| **NORMAL GUI LAUNCH** | Double-click `VaultBasis.exe` in Explorer (handle SmartScreen "Run anyway") | No console crash, no `formatter 'default'` exception | PENDING / `PASS` / `FAIL` |
-| **WORKSPACE OPEN** | Local workspace appears or reachable at `http://127.0.0.1:8000` | Edge UI displays active dashboard | PENDING / `PASS` / `FAIL` |
+| **APPLICATION_RUNTIME** | Double-click `VaultBasis.exe` in Explorer (handle SmartScreen "Run anyway") | No console crash, no `Unable to configure formatter 'default'` | PENDING / `PASS` / `FAIL` |
+| **AUTO_WORKSPACE_OPEN** | Default web browser automatically launches and opens workspace | Browser loads `http://127.0.0.1:8000` automatically | PENDING / `PASS` / `FAIL` |
 | **CASE MEANING UNDERSTOOD** | Practitioner understands what a Case represents | Bounded reconciliation activity for a tax year | PENDING / `PASS` / `FAIL` |
 | **CLIENT / TAX-YEAR CONTEXT CLEAR** | Client reference (e.g. Redwood Consulting) & 2025 clearly visible | Context visible at top of case | PENDING / `PASS` / `FAIL` |
 | **TWO EVIDENCE ROLES UNDERSTOOD** | Clear distinction between Source A (Broker) and Source B (Tax Ledger) | Roles and extracted fields explicit | PENDING / `PASS` / `FAIL` |
@@ -34,17 +34,22 @@
 | **RECONCILIATION** | Click "⚡ Run Deterministic Reconciliation" executes cleanly | Deterministic output generated | PENDING / `PASS` / `FAIL` |
 | **RESULT NARRATIVE** | Evaluated count, Agreed (Green), Differences (Amber), Unresolved (Orange) | Attention items highlighted | PENDING / `PASS` / `FAIL` |
 | **FINDING WHY** | Open Finding Why: explains what was compared, values, rule, and provenance | Explainable without tax advice | PENDING / `PASS` / `FAIL` |
-| **OUTCOME RECEIPT** | Open Outcome Receipt screen; understand integrity vs. Tax Correctness = NOT DETERMINED | Receipt metadata & boundaries clear | PENDING / `PASS` / `FAIL` |
-| **ORIGINAL RECEIPT** | Drop `receipt-v0.1.json` into GUI Offline Verifier | Displays `PASS — Receipt Valid` | PENDING / `VALID` / `FAIL` |
-| **TAMPERED RECEIPT** | Drop `golden_receipt_tampered.json` into GUI Offline Verifier | Displays `FAIL — Receipt Invalid or Tampered` | PENDING / `INVALID` / `FAIL` |
+| **OUTCOME RECEIPT GENERATION** | Generate case's live signed Outcome Receipt and download/export JSON | Live receipt JSON generated and exported | PENDING / `PASS` / `FAIL` |
+| **LIVE RECEIPT VERIFICATION** | Drop generated live receipt into GUI Offline Verifier | Displays `PASS — Receipt Valid` | PENDING / `VALID` / `FAIL` |
+| **TAMPERED RECEIPT VERIFICATION** | Make copy of live receipt, edit 1 value, drop into GUI Offline Verifier | Displays `FAIL — Receipt Invalid or Tampered` | PENDING / `INVALID` / `FAIL` |
 | **QUIT** | Terminate VaultBasis process cleanly | Process exits | PENDING / `PASS` / `FAIL` |
 | **RELAUNCH** | Double-click `VaultBasis.exe` again in Explorer | Boots cleanly | PENDING / `PASS` / `FAIL` |
 | **PERSISTENCE** | Confirm previously created cases and receipts persist | Data intact in local SQLite | PENDING / `PASS` / `FAIL` |
 | **INTERVENTION REQUIRED** | Developer tools, Terminal, Python, or code repair | Must be `NONE` | PENDING / `NONE` |
 
-**Recipient Explanation (In their own words):**  
-> *"What did VaultBasis just do, and what would you investigate next?"*  
+**Recipient Explanation (Verbatim Unprompted Response):**  
+> *"In your own words, what did VaultBasis just do, and what would you investigate next?"*  
 > [Record verbatim response]
+
+**Logged Findings Classification:**
+- `BLOCKER`: [None]
+- `COMPREHENSION FAILURE`: [None]
+- `OBSERVATION`: [None]
 
 **Windows x64 Result:** `PENDING`  
 **Stopped At:** `N/A`
@@ -61,8 +66,8 @@
 | Check | Gate Description | Expected | Actual Result |
 |---|---|---|---|
 | **NORMAL EXTRACTION** | Extract ZIP via Archive Utility in Finder | `VaultBasis.app` intact | PENDING / `PASS` / `FAIL` |
-| **NORMAL GUI LAUNCH** | Open `VaultBasis.app` (handle Gatekeeper via System Settings → Open Anyway) | App starts cleanly | PENDING / `PASS` / `FAIL` |
-| **WORKSPACE OPEN** | Browser automatically opens workspace (`MMP11-DIST-MAC-002`) | Default browser loads workspace | PENDING / `PASS` / `FAIL` |
+| **APPLICATION_RUNTIME** | Open `VaultBasis.app` (handle Gatekeeper via System Settings → Open Anyway) | App starts cleanly | PENDING / `PASS` / `FAIL` |
+| **AUTO_WORKSPACE_OPEN** | Browser automatically opens workspace without manual URL entry | Default browser opens `http://127.0.0.1:8000` | PENDING / `PASS` / `FAIL` |
 | **CASE MEANING UNDERSTOOD** | Practitioner understands what a Case represents | Bounded reconciliation activity | PENDING / `PASS` / `FAIL` |
 | **CLIENT / TAX-YEAR CONTEXT CLEAR** | Client reference & 2025 tax year clear | Context visible | PENDING / `PASS` / `FAIL` |
 | **TWO EVIDENCE ROLES UNDERSTOOD** | Source A (Broker) vs Source B (Tax Ledger) | Roles and extracted fields explicit | PENDING / `PASS` / `FAIL` |
@@ -72,17 +77,22 @@
 | **RECONCILIATION** | Click "⚡ Run Deterministic Reconciliation" executes cleanly | Deterministic output generated | PENDING / `PASS` / `FAIL` |
 | **RESULT NARRATIVE** | Evaluated count, Agreed (Green), Differences (Amber), Unresolved (Orange) | Attention items highlighted | PENDING / `PASS` / `FAIL` |
 | **FINDING WHY** | Open Finding Why: explains what was compared, values, rule, provenance | Explainable without tax advice | PENDING / `PASS` / `FAIL` |
-| **OUTCOME RECEIPT** | Open Outcome Receipt screen; understand integrity vs. Tax Correctness = NOT DETERMINED | Receipt metadata & boundaries clear | PENDING / `PASS` / `FAIL` |
-| **ORIGINAL RECEIPT** | Drop `receipt-v0.1.json` into GUI Offline Verifier | Displays `PASS — Receipt Valid` | PENDING / `VALID` / `FAIL` |
-| **TAMPERED RECEIPT** | Drop `golden_receipt_tampered.json` into GUI Offline Verifier | Displays `FAIL — Receipt Invalid or Tampered` | PENDING / `INVALID` / `FAIL` |
+| **OUTCOME RECEIPT GENERATION** | Generate case's live signed Outcome Receipt and download/export JSON | Live receipt JSON generated and exported | PENDING / `PASS` / `FAIL` |
+| **LIVE RECEIPT VERIFICATION** | Drop generated live receipt into GUI Offline Verifier | Displays `PASS — Receipt Valid` | PENDING / `VALID` / `FAIL` |
+| **TAMPERED RECEIPT VERIFICATION** | Make copy of live receipt, edit 1 value, drop into GUI Offline Verifier | Displays `FAIL — Receipt Invalid or Tampered` | PENDING / `INVALID` / `FAIL` |
 | **QUIT** | Terminate VaultBasis process cleanly | Process exits | PENDING / `PASS` / `FAIL` |
 | **RELAUNCH** | Double-click `VaultBasis.app` again in Finder | Boots cleanly | PENDING / `PASS` / `FAIL` |
 | **PERSISTENCE** | Confirm previously created cases and receipts persist | Data intact in local SQLite | PENDING / `PASS` / `FAIL` |
 | **INTERVENTION REQUIRED** | Terminal, xattr, chmod, Python, or developer repair | Must be `NONE` | PENDING / `NONE` |
 
-**Recipient Explanation (In their own words):**  
-> *"What did VaultBasis just do, and what would you investigate next?"*  
+**Recipient Explanation (Verbatim Unprompted Response):**  
+> *"In your own words, what did VaultBasis just do, and what would you investigate next?"*  
 > [Record verbatim response]
+
+**Logged Findings Classification:**
+- `BLOCKER`: [None]
+- `COMPREHENSION FAILURE`: [None]
+- `OBSERVATION`: [None]
 
 **macOS arm64 Result:** `PENDING`  
 **Stopped At:** `N/A`
@@ -94,3 +104,4 @@
   `READY_FOR_PHYSICAL_RECIPIENT_QUALIFICATION` ➔ `DISTRIBUTION_QUALIFIED`
 - If Mac passes and is the designated Associate-001 environment while Windows is pending/blocked:  
   Mac can proceed to `Associate-001` (with Windows explicitly marked unqualified/blocked).
+

@@ -33,6 +33,7 @@ node_modules/
 .vercel
 .claude/
 test-results/
+ci_artifacts/
 *.js
 *.txt
 patch_html.py

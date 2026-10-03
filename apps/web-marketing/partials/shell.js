@@ -24,18 +24,15 @@
       }
     });
 
-    /* Access modal */
-    function openAccessModal() {
+    /* Access modal state management (VB-WEB-INV-003) */
+    let _lastFocusedElement = null;
+
+    function openAccessModal(triggerEl) {
       const modal = document.getElementById('access-modal');
       if (!modal) return;
-      modal.style.display = 'flex';
-      setTimeout(function() { const n = document.getElementById('req-name'); if (n) n.focus(); }, 50);
-      document.addEventListener('keydown', _modalKeyHandler);
-    }
-    function closeAccessModal() {
-      const modal = document.getElementById('access-modal');
-      if (!modal) return;
-      modal.style.display = 'none';
+      _lastFocusedElement = triggerEl || document.activeElement;
+
+      // Always reset to initial FORM state
       const form = document.getElementById('request-form-container');
       const success = document.getElementById('request-success');
       const name = document.getElementById('req-name');
@@ -46,11 +43,42 @@
       if (name) name.value = '';
       if (email) email.value = '';
       if (btn) { btn.innerText = 'Submit Request'; btn.disabled = false; }
-      document.removeEventListener('keydown', _modalKeyHandler);
+
+      modal.style.display = 'flex';
+      setTimeout(function() {
+        const n = document.getElementById('req-name');
+        if (n) n.focus();
+      }, 50);
+      document.addEventListener('keydown', _modalKeyHandler);
     }
+
+    function closeAccessModal() {
+      const modal = document.getElementById('access-modal');
+      if (!modal) return;
+      modal.style.display = 'none';
+
+      const form = document.getElementById('request-form-container');
+      const success = document.getElementById('request-success');
+      const name = document.getElementById('req-name');
+      const email = document.getElementById('req-email');
+      const btn = document.getElementById('btn-submit-req');
+      if (form) form.style.display = 'block';
+      if (success) success.style.display = 'none';
+      if (name) name.value = '';
+      if (email) email.value = '';
+      if (btn) { btn.innerText = 'Submit Request'; btn.disabled = false; }
+
+      document.removeEventListener('keydown', _modalKeyHandler);
+      if (_lastFocusedElement && typeof _lastFocusedElement.focus === 'function') {
+        _lastFocusedElement.focus();
+        _lastFocusedElement = null;
+      }
+    }
+
     function _modalKeyHandler(e) {
       if (e.key === 'Escape') closeAccessModal();
     }
+
     /* Close modal on overlay click */
     document.addEventListener('click', function(e) {
       const modal = document.getElementById('access-modal');

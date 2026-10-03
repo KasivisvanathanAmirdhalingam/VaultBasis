@@ -92,11 +92,6 @@
     /* Resources grid (2-col) */
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
 
-    /* Page anchor nav strip */
-    .page-nav-strip { max-width: var(--content-width); margin: 0 auto; padding: 0 1.5rem 0; display: flex; gap: 0.5rem; flex-wrap: wrap; }
-    .page-nav-strip a { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 6px 14px; font-size: 0.88rem; font-weight: 600; color: var(--text-muted); text-decoration: none; transition: all 0.2s; }
-    .page-nav-strip a:hover, .page-nav-strip a:focus { border-color: var(--primary); color: var(--primary); }
-
     /* CTA Banner */
     .banner {
       background: linear-gradient(135deg,#0f172a,#1e293b); border: 1px solid #334155;
@@ -157,14 +152,6 @@
         </div>
       </div>
     </section>
-
-    <!-- Page quick-jump nav -->
-    <nav class="page-nav-strip" aria-label="Page sections">
-      <a href="#how-it-works">How It Works</a>
-      <a href="#comparison">Evaluation Boundary</a>
-      <a href="#security">Evidence Processing</a>
-      <a href="#resources">Resources</a>
-    </nav>
 
     <!-- How It Works -->
     <section id="how-it-works" class="section-container">
