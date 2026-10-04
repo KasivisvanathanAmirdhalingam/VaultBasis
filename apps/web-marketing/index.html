@@ -310,10 +310,10 @@
       <div class="section-header">
         <span class="section-tag">Pricing &amp; Licensing</span>
         <h2>Transparent, Predictable Licensing</h2>
-        <p>No sales contact required. Evaluate bundled samples for free, or select an annual tier sized for your practice with full offline durability and independent evidence verification.</p>
+        <p>No sales negotiation required. Evaluate bundled sample data for free, or request a license tier sized for your practice with full offline durability and independent evidence verification.</p>
       </div>
 
-      <div class="grid-3" style="grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 3rem;">
+      <div class="grid-3" style="grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 2.5rem;">
         <!-- Tier 1: Free Evaluation -->
         <div class="feature-card" style="display: flex; flex-direction: column; justify-content: space-between; border-color: var(--border);">
           <div>
@@ -321,39 +321,39 @@
             <h3 style="font-size: 1.3rem; margin-bottom: 0.5rem;">Sample Data Mode</h3>
             <div style="margin-bottom: 1.25rem;">
               <span style="font-size: 2.2rem; font-weight: 800; color: var(--text);">$0</span>
-              <span style="color: var(--text-muted); font-size: 0.9rem;">/ forever</span>
+              <span style="color: var(--text-muted); font-size: 0.9rem;">/ no time limit</span>
             </div>
-            <p style="font-size: 0.9rem; margin-bottom: 1.5rem; color: var(--text-muted);">Explore reconciliation math &amp; test evidence verification with pre-loaded sample cases.</p>
+            <p style="font-size: 0.9rem; margin-bottom: 1.5rem; color: var(--text-muted);">No credit card. Explore deterministic reconciliation math &amp; test evidence verification with pre-loaded samples.</p>
             <ul style="list-style: none; padding: 0; margin: 0 0 1.5rem 0; font-size: 0.88rem; color: var(--text); line-height: 1.8;">
               <li>✓ Bundled sample case intake</li>
-              <li>✓ Unmetered reconciliation</li>
+              <li>✓ Unlimited reconciliation of samples</li>
               <li>✓ Signed receipt generation</li>
-              <li>✓ Independent verification</li>
+              <li>✓ Independent offline verification</li>
               <li style="color: #94a3b8;">✗ Production client data</li>
             </ul>
           </div>
-          <button onclick="openAccessModal(this, 'TRIAL')" class="btn btn-secondary" style="width: 100%; justify-content: center;">Try Sample Data</button>
+          <button onclick="openAccessModal(this, 'TRIAL')" class="btn btn-secondary" style="width: 100%; justify-content: center;">Start Free Evaluation</button>
         </div>
 
         <!-- Tier 2: Essential (Solo) -->
         <div class="feature-card" style="display: flex; flex-direction: column; justify-content: space-between; border-color: var(--border);">
           <div>
             <div style="font-size: 0.8rem; font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--primary); text-transform: uppercase; margin-bottom: 0.5rem;">Solo Practitioner</div>
-            <h3 style="font-size: 1.3rem; margin-bottom: 0.5rem;">Essential</h3>
+            <h3 style="font-size: 1.3rem; margin-bottom: 0.5rem;">Solo License</h3>
             <div style="margin-bottom: 1.25rem;">
               <span style="font-size: 2.2rem; font-weight: 800; color: var(--text);">$499</span>
-              <span style="color: var(--text-muted); font-size: 0.9rem;">/ year</span>
+              <span style="color: var(--text-muted); font-size: 0.9rem;">/ license term</span>
             </div>
             <p style="font-size: 0.9rem; margin-bottom: 1.5rem; color: var(--text-muted);">Ideal for solo CPAs and EAs handling digital-asset returns with Form 1099-DA.</p>
             <ul style="list-style: none; padding: 0; margin: 0 0 1.5rem 0; font-size: 0.88rem; color: var(--text); line-height: 1.8;">
-              <li>✓ <strong>10 production cases</strong> / tax year</li>
+              <li>✓ <strong>10 production cases</strong> / term</li>
               <li>✓ Form 1099-DA &amp; tax ledger intake</li>
               <li>✓ Ed25519 signed outcome receipts</li>
               <li>✓ Full offline local persistence</li>
               <li>✓ Offline verifier CLI tool</li>
             </ul>
           </div>
-          <button onclick="openAccessModal(this, 'ESSENTIAL')" class="btn btn-secondary" style="width: 100%; justify-content: center;">Acquire Essential</button>
+          <button onclick="openAccessModal(this, 'ESSENTIAL')" class="btn btn-secondary" style="width: 100%; justify-content: center;">Request Solo License</button>
         </div>
 
         <!-- Tier 3: Practice (Most Popular) -->
@@ -361,38 +361,37 @@
           <div style="position: absolute; top: -12px; right: 16px; background: var(--primary); color: white; padding: 2px 10px; border-radius: 999px; font-size: 0.72rem; font-family: 'JetBrains Mono', monospace; font-weight: 700; text-transform: uppercase;">Most Popular</div>
           <div>
             <div style="font-size: 0.8rem; font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--primary); text-transform: uppercase; margin-bottom: 0.5rem;">Tax &amp; Accounting Firm</div>
-            <h3 style="font-size: 1.3rem; margin-bottom: 0.5rem;">Practice</h3>
+            <h3 style="font-size: 1.3rem; margin-bottom: 0.5rem;">Practice License</h3>
             <div style="margin-bottom: 1.25rem;">
               <span style="font-size: 2.2rem; font-weight: 800; color: var(--text);">$1,499</span>
-              <span style="color: var(--text-muted); font-size: 0.9rem;">/ year</span>
+              <span style="color: var(--text-muted); font-size: 0.9rem;">/ license term</span>
             </div>
             <p style="font-size: 0.9rem; margin-bottom: 1.5rem; color: var(--text-muted);">Sized for multi-preparer CPA firms reconciling medium client volumes.</p>
             <ul style="list-style: none; padding: 0; margin: 0 0 1.5rem 0; font-size: 0.88rem; color: var(--text); line-height: 1.8;">
-              <li>✓ <strong>50 production cases</strong> / tax year</li>
+              <li>✓ <strong>50 production cases</strong> / term</li>
               <li>✓ Firm &amp; preparer identity on receipts</li>
               <li>✓ Sanitized diagnostic support packager</li>
-              <li>✓ 1-click database backup &amp; restore</li>
-              <li>✓ Priority practitioner support</li>
+              <li>✓ Local backup &amp; recovery</li>
+              <li>✓ Practitioner email support</li>
             </ul>
           </div>
-          <button onclick="openAccessModal(this, 'PRACTICE')" class="btn btn-primary" style="width: 100%; justify-content: center;">Acquire Practice</button>
+          <button onclick="openAccessModal(this, 'PRACTICE')" class="btn btn-primary" style="width: 100%; justify-content: center;">Request Practice License</button>
         </div>
 
         <!-- Tier 4: Enterprise -->
         <div class="feature-card" style="display: flex; flex-direction: column; justify-content: space-between; border-color: var(--border);">
           <div>
-            <div style="font-size: 0.8rem; font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--accent); text-transform: uppercase; margin-bottom: 0.5rem;">Multi-Seat / Enterprise</div>
+            <div style="font-size: 0.8rem; font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--accent); text-transform: uppercase; margin-bottom: 0.5rem;">High Volume / Firm</div>
             <h3 style="font-size: 1.3rem; margin-bottom: 0.5rem;">Enterprise</h3>
             <div style="margin-bottom: 1.25rem;">
-              <span style="font-size: 2.2rem; font-weight: 800; color: var(--text);">$3,999+</span>
-              <span style="color: var(--text-muted); font-size: 0.9rem;">/ year</span>
+              <span style="font-size: 1.8rem; font-weight: 800; color: var(--text);">Contact us</span>
             </div>
-            <p style="font-size: 0.9rem; margin-bottom: 1.5rem; color: var(--text-muted);">Custom capacity for high-volume practices with enterprise IT compliance requirements.</p>
+            <p style="font-size: 0.9rem; margin-bottom: 1.5rem; color: var(--text-muted);">Higher installation/case capacity, enterprise security documentation, and dedicated support.</p>
             <ul style="list-style: none; padding: 0; margin: 0 0 1.5rem 0; font-size: 0.88rem; color: var(--text); line-height: 1.8;">
-              <li>✓ <strong>250+ production cases</strong></li>
-              <li>✓ Multi-seat deployment licensing</li>
+              <li>✓ <strong>250+ production cases</strong> (custom)</li>
               <li>✓ Enterprise IT deployment profile &amp; SBOM</li>
-              <li>✓ Custom capacity add-ons</li>
+              <li>✓ MDM &amp; endpoint allowlisting guidance</li>
+              <li>✓ Custom capacity expansion blocks</li>
               <li>✓ Dedicated technical support</li>
             </ul>
           </div>
@@ -400,7 +399,15 @@
         </div>
       </div>
 
-      <!-- Licensing Assurance FAQ Strip -->
+      <!-- Local Reassurance Strip -->
+      <div style="background: rgba(37,99,235,0.04); border: 1px solid rgba(37,99,235,0.15); border-radius: var(--radius); padding: 1.25rem 1.75rem; margin-bottom: 2.5rem; text-align: center;">
+        <p style="margin: 0; font-size: 0.95rem; color: var(--text); line-height: 1.6;">
+          <strong>Your license is validated locally.</strong> VaultBasis does not require an internet connection to reconcile client records or verify evidence. Expiration does not remove access to existing case records. Independent receipt verification remains free.
+          <a href="/trust-assurance" style="color: var(--primary); font-weight: 600; margin-left: 6px;">Learn more in Trust &amp; Assurance →</a>
+        </p>
+      </div>
+
+      <!-- Licensing Assurance FAQ Grid -->
       <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.75rem 2rem; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
         <div>
           <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem; color: var(--text);">How offline licensing works</h4>

@@ -83,6 +83,11 @@ During UAT and production operations, non-happy path conditions must map determi
 * **Trust Level Before Download (1–5):** `[   ]`
 * **Trust Level After Running Sample (1–5):** `[   ]`
 * **Primary Trust Driver / Blocker:** `[ ] Publisher Identity / Signature  [ ] OS Security Warning  [ ] Website Assurance / Trust Center  [ ] Enterprise IT Docs  [ ] Email Legitimacy  [ ] Other: ____________`
+* **Unprompted Tier Selection Inquiry:** *Under DISCOVERY / PRICING, ask: "Without asking us, which plan would you choose for your practice and why?"*
+  - Selected Plan: `[ ] Free Evaluation  [ ] Solo License ($499)  [ ] Practice License ($1,499)  [ ] Enterprise`
+  - Rationale stated by participant: `___________________________________________________`
+  - *Comprehension Check:* Did they understand that Evaluation is sample-only? `[ ] Yes  [ ] No`
+  - *Distinction Check:* Did they understand capacity & scope differences between Solo and Practice? `[ ] Yes  [ ] No`
 * **License Mode Comprehension:** *Did the participant understand what changes between unmetered evaluation mode and licensed production mode?* `[ ] Fully Understood  [ ] Partially  [ ] Confused`
 * **Independent Verification Comprehension:** *Did the participant understand that the verifier runs independently offline and what a PASS actually proves?* `[ ] Fully Understood  [ ] Partially  [ ] Confused`
 * **Value Comprehension:** `[ ] Fully Clear  [ ] Partially Clear  [ ] Confused`
