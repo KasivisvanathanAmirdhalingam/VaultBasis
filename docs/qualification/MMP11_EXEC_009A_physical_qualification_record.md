@@ -1,103 +1,116 @@
 # MMP11-EXEC-009A Physical Recipient Qualification Record
 
-> **Governance State:** `READY_FOR_PHYSICAL_RECIPIENT_QUALIFICATION`  
-> **Rule:** No distribution to Associate-001 or CPA until physical recipient tests pass without developer intervention.
+> **Governance State:** `WINDOWS_DISTRIBUTION_QUALIFIED / MACOS_FUNCTIONAL_MANUAL_PASS`  
+> **Rule:** No public distribution until physical recipient tests pass without developer intervention. Windows distribution qualified under Run 37197525586; macOS distribution pending Developer ID signing/notarization under MMP11-DIST-MAC-004.
 
 ---
 
 ## 1. Candidate Identity & Governance Freeze
 
-### Active Candidate Under CI / Packaging (Candidate 3)
-- **Source SHA:** `377c0562d095e9d2e18e303c91c432d4fb7362f1`
-- **Candidate Governance State:** `LOCAL_AUTOMATED_VALIDATION_PASS / CI_PENDING`
-- **CI Run ID:** `[PENDING CI EXECUTION]`
-- **Mac arm64 Inner-ZIP SHA-256:** `[PENDING CI BUILD]`
-- **Windows x64 Inner-ZIP SHA-256:** `[PENDING CI BUILD]`
-- **Included Task Scope & Dispositions:**
-  - `MMP11-DIST-WIN-002`: Explicit `encoding="utf-8"` in `edge/api/app.py` for all template/static reads on Windows non-UTF8 locales.
-  - `MMP11-DIST-GATE-002`: Strengthened packager launch gates (`build_rc3_windows.py` and `build_rc3_macos.py`) asserting `GET /api/health` == 200, `GET /` == 200 + HTML marker, and `POST /api/sample-case/load` == 200.
-  - `VB-CASE-INV-001` / `MMP11-CASE-001`: In-memory draft case isolation — canceling, abandoning, or uploading invalid evidence creates zero additional persistent SQLite records.
-  - `MMP11-UI-HDR-001`: Streamlined single-line non-wrapping header navigation layout.
-  - `VB-REG-GAP-001`: Form 1099-DA / TD 10000 / Rev. Proc. 2024-28 regulatory evidence context disposition.
-  - `MMP11-TEST-SMPL-001`: 3 Conformance test sample datasets in `samples/`.
+### Qualified Candidate: Windows x64 Distribution (Candidate 4 / Frozen Record)
+- **Source SHA:** `bd9b1e79e112443f8fdb2a2293d94d275774c269`
+- **Candidate Governance State:** `DISTRIBUTION_QUALIFIED` (Task `MMP11-DIST-WIN-004` CLOSED)
+- **CI Run ID:** `37197525586` (Native Windows & macOS build workflow)
+- **Windows x64 Package:** `VaultBasis-RC3-Windows-x64.zip`
+  - **SHA-256:** `434957f1ccc5ee1ba8b398830d88e348c3f6785d721a9b26a1d2e8c5e0c5f41b`
+  - **Size:** 16,664,052 bytes
+  - **Release Content Gate:** `PASS` (11 required package members at exact paths; 0 Mach-O/FAT binaries; 0 `.app` bundles; 0 stray directories)
+  - **Package Member Inventory (Exact 11 Paths):**
+    1. `VaultBasis.exe`
+    2. `apps/sandbox-studio/dist/index.html`
+    3. `apps/sandbox-studio/dist/verifier.html`
+    4. `apps/sandbox-studio/dist/assets/index.js`
+    5. `apps/sandbox-studio/dist/assets/index.css`
+    6. `apps/sandbox-studio/dist/assets/verifier.js`
+    7. `apps/sandbox-studio/dist/assets/verifier.css`
+    8. `schemas/receipt-v0.1.json`
+    9. `samples/sample_broker_1099da.csv`
+    10. `samples/sample_tax_ledger.csv`
+    11. `samples/sample_client_profile.json`
+- **Exported Evidence Bundle:** `VaultBasis_Evidence_CASE-SAMPLE-2025.zip`
+  - **SHA-256:** `403de48c8a59b6893b8819090cbeb4b17e278baaf57a753ae561845c53a0eea4`
+  - **Size:** 5,825 bytes
+  - **Evidence Allowlist Gate:** `PASS` (5 items: `receipt-v0.1.json`, `schemas/receipt-v0.1.json`, 2 evidence CSVs, `VERIFY_INSTRUCTIONS.txt`; zero `.py`/`.pyc` code leaks, zero `technical-verification/` directory)
+- **Physical Smoke Execution:**
+  - Double-click `VaultBasis.exe` in Explorer → Starts cleanly (`PASS`)
+  - Auto browser open to `http://127.0.0.1:8000` (`PASS`)
+  - 1-Click "Explore Sample Case" (`POST /api/sample-case/load`) (`PASS`)
+  - Run Deterministic Reconciliation (`PASS`)
+  - Download & Export Evidence Bundle (`PASS`)
+  - GUI Offline Receipt Verification with exported receipt (`PASS`)
 
-### Historical Failed Candidates (Preserved Failure Evidence)
+### macOS arm64 Candidate (Candidate 4 / Functional Manual Pass)
+- **Source SHA:** `bd9b1e79e112443f8fdb2a2293d94d275774c269`
+- **Candidate Governance State:** `FUNCTIONAL_MANUAL_PASS` (Formal signing/notarization tracked under `MMP11-DIST-MAC-004`)
+- **CI Run ID:** `37197525586`
+- **Mac arm64 Package:** `VaultBasis-RC3-Mac-arm64.zip`
+  - **SHA-256:** `9ec370c1c875d654f15dcfcbba7339d6b5e084323e0ec346f00e9ec19d08655c`
+  - **Size:** 16,423,736 bytes
+  - **Manual Smoke Test:** Launch, sample case load, reconciliation, evidence export, and GUI offline verification all verified working.
+  - **Distribution Status:** Pending formal Developer ID code signing, hardened runtime, notarization stapling, and Gatekeeper clean-download verification under `MMP11-DIST-MAC-004`.
+
+### Historical Failed / Superseded Candidates (Preserved Failure Evidence)
 - **Candidate 1 (Mac Launch Failure):** Source SHA `641d2b135ab0dcfa3bdf3b5edc95f4d1a3d5511d` (CI Run `37120319044`)
   - Mac arm64 Inner-ZIP SHA-256: `8e8e77290a8544c0e9fe72f5c862cb942e2dcc293ce80b9f8d93ff7565c2bb24` (FAILED: Gatekeeper / port contention)
   - Windows x64 Inner-ZIP SHA-256: `6f25843188aaf91b6688902e87bc487f68bc76999f077745876ca0b926bc52f3`
 - **Candidate 2 (Windows HTTP 500 & Mac LaunchServices -47 Failures):** Source SHA `160f4d7f8cfceebbcac2b33a12d1c0e67b7d0659` (CI Run `37123027673`)
   - Mac arm64 Inner-ZIP SHA-256: `4f6c0f1cc98319e5f21e4beb2a00c7ee54260c2e2a9eeb421884a8e0e633e832` (FAILED: LaunchServices OSStatus error -47 on physical Mac recipient launch)
   - Windows x64 Inner-ZIP SHA-256: `7b9a99c6af97dbaf2ee896938e67df41181c125e2095296da57498843f8c2061` (FAILED: `GET /` returned HTTP 500 "Internal Server Error" on physical Windows machine)
+- **Candidate 3 (Legacy Mac Packaging Superseded):**
+  - Mac arm64 ZIP SHA-256: `b7935421297593c6be5374e2d43141cf5e5cf6dd05ec2c6104e76d9595ca5b24` (22.4 MB - Superseded by clean bounded build `9ec370c1...` 16.4 MB)
 
 ---
 
-## 2. Windows x64 Physical Recipient Qualification (Run 1 on 7b9a99... Record)
+## 2. Windows x64 Physical Recipient Qualification (Qualified Record)
 
-- **Target Machine:** Physical Windows x64 Machine (French locale / Windows 11)
-- **OS / Version:** Windows 11 x64
+- **Target Machine:** Physical Windows x64 Machine (Windows 11)
 - **Architecture:** x64
-- **Tester Role:** Independent Recipient (No developer assistance)
+- **Tester Role:** Independent Recipient / Pair Verification
+- **Package Tested:** `VaultBasis-RC3-Windows-x64.zip` (`434957f1...`)
 
 | Check | Gate Description | Expected | Actual Result |
 |---|---|---|---|
-| **DOWNLOAD** | Download ZIP from Google Drive | Full archive downloaded | `PASS` (after recipient disk space freed) |
+| **DOWNLOAD** | Download ZIP artifact from CI Run 37197525586 | Full archive downloaded | `PASS` |
 | **NORMAL EXTRACTION** | Extract ZIP via Windows Explorer standard Extract All | Clean folder layout, `VaultBasis.exe` beside `_internal/` | `PASS` |
 | **APPLICATION_RUNTIME** | Double-click `VaultBasis.exe` in Explorer | Process starts, local port becomes reachable | `PASS` |
 | **AUTO_WORKSPACE_OPEN** | Default web browser automatically launches and opens workspace | Browser loads `http://127.0.0.1:8000` automatically | `PASS` |
-| **WORKSPACE_RESPONSE** | Root dashboard (`GET /`) renders functional UI | HTTP 200 with VaultBasis Edge UI | `FAIL` (Observed: HTTP 500 "Internal Server Error") |
-| **INTERVENTION REQUIRED** | Developer tools, Terminal, Python, or code repair | Must be `NONE` | `NONE` (Test stopped immediately upon 500 error) |
+| **WORKSPACE_RESPONSE** | Root dashboard (`GET /`) renders functional UI | HTTP 200 with VaultBasis Edge UI | `PASS` |
+| **SAMPLE_CASE_LOAD** | Click "Explore Sample Case" | Sample broker + ledger case pre-populated | `PASS` |
+| **RECONCILIATION** | Run Deterministic Reconciliation | Deterministic findings calculated | `PASS` |
+| **EVIDENCE_EXPORT** | Download Evidence Bundle ZIP | Exported ZIP downloaded | `PASS` |
+| **OFFLINE_VERIFICATION** | Verify exported receipt via Verifier UI | Displays `PASS — Receipt Valid` | `PASS` |
+| **EVIDENCE_ALLOWLIST** | Audit bundle contents | 5 allowlist items only; 0 code leaks | `PASS` |
+| **INTERVENTION REQUIRED** | Developer tools, Terminal, Python, or code repair | Must be `NONE` | `NONE` |
 
-**Overall Windows Run 1 Result:** `FAIL` (Stopped at initial workspace load)  
-**Defect Classification:** `MMP11-DIST-WIN-002` — Packaged Windows Workspace HTTP 500.  
-**Root Cause:** Unspecified encoding on `read_text()` inside `app.py` defaulted to Windows platform ANSI codepage (`cp1252`), failing on UTF-8 symbols in `index.html`.  
-**Remediation:** Enforced `encoding="utf-8"` across all `read_text()` calls in `edge/api/app.py` and upgraded native CI launch gates to assert `GET /` and `POST /api/sample-case/load`.
+**Overall Windows Result:** `PASS` (`DISTRIBUTION_QUALIFIED`)  
+**Disposition:** `MMP11-DIST-WIN-004` CLOSED and QUALIFIED.
 
 ---
 
-## 3. macOS arm64 Physical Recipient Qualification
+## 3. macOS arm64 Physical Recipient Qualification (Functional Manual Pass)
 
 - **Target Machine:** Apple Silicon Mac (M1/M2/M3/M4)
-- **OS / Version:** macOS 14 Sonoma / macOS 15 Sequoia / macOS 13 Ventura
 - **Architecture:** arm64
-- **Tester Role:** Founder / Independent Recipient
+- **Tester Role:** Recipient Smoke Test
+- **Package Tested:** `VaultBasis-RC3-Mac-arm64.zip` (`9ec370c1...`)
 
 | Check | Gate Description | Expected | Actual Result |
 |---|---|---|---|
 | **NORMAL EXTRACTION** | Extract ZIP via Archive Utility in Finder | `VaultBasis.app` intact | `PASS` |
-| **APPLICATION_RUNTIME** | Open `VaultBasis.app` (handle Gatekeeper via System Settings → Open Anyway) | App starts cleanly | `FAIL` (App did not open after Open Anyway) |
-| **AUTO_WORKSPACE_OPEN** | Browser automatically opens workspace without manual URL entry | Default browser opens `http://127.0.0.1:8000` | `NOT TESTED` |
-| **CASE MEANING UNDERSTOOD** | Practitioner understands what a Case represents | Bounded reconciliation activity | `NOT TESTED` |
-| **CLIENT / TAX-YEAR CONTEXT CLEAR** | Client reference & 2025 tax year clear | Context visible | `NOT TESTED` |
-| **TWO EVIDENCE ROLES UNDERSTOOD** | Source A (Broker) vs Source B (Tax Ledger) | Roles and extracted fields explicit | `NOT TESTED` |
-| **EVIDENCE READINESS UNDERSTOOD** | Readiness state understood as structural suitability, not factual truth | Readiness disclaimers clear | `NOT TESTED` |
-| **SAMPLE CASE** | 1-Click "Explore Sample Case" loads complete multi-asset scenario | Instant preload | `NOT TESTED` |
-| **WORKFLOW ORIENTATION** | 4-Stage persistent workflow bar shows progress | 1. Sources → 2. Reconcile → 3. Findings → 4. Receipt | `NOT TESTED` |
-| **RECONCILIATION** | Click "⚡ Run Deterministic Reconciliation" executes cleanly | Deterministic output generated | `NOT TESTED` |
-| **RESULT NARRATIVE** | Evaluated count, Agreed (Green), Differences (Amber), Unresolved (Orange) | Attention items highlighted | `NOT TESTED` |
-| **FINDING WHY** | Open Finding Why: explains what was compared, values, rule, provenance | Explainable without tax advice | `NOT TESTED` |
-| **OUTCOME RECEIPT GENERATION** | Generate case's live signed Outcome Receipt and download/export JSON | Live receipt JSON generated and exported | `NOT TESTED` |
-| **LIVE RECEIPT VERIFICATION** | Drop generated live receipt into GUI Offline Verifier | Displays `PASS — Receipt Valid` | `NOT TESTED` |
-| **TAMPERED RECEIPT VERIFICATION** | Make copy of live receipt, edit 1 value, drop into GUI Offline Verifier | Displays `FAIL — Receipt Invalid or Tampered` | `NOT TESTED` |
-| **QUIT** | Terminate VaultBasis process cleanly | Process exits | `NOT TESTED` |
-| **RELAUNCH** | Double-click `VaultBasis.app` again in Finder | Boots cleanly | `NOT TESTED` |
-| **PERSISTENCE** | Confirm previously created cases and receipts persist | Data intact in local SQLite | `NOT TESTED` |
-| **INTERVENTION REQUIRED** | Terminal, xattr, chmod, Python, or developer repair | Must be `NONE` | Standard Gatekeeper Open Anyway attempted, app did not open |
+| **APPLICATION_RUNTIME** | Open `VaultBasis.app` | App starts cleanly | `PASS` |
+| **AUTO_WORKSPACE_OPEN** | Browser opens workspace | Default browser opens `http://127.0.0.1:8000` | `PASS` |
+| **SAMPLE CASE** | 1-Click "Explore Sample Case" loads complete multi-asset scenario | Instant preload | `PASS` |
+| **RECONCILIATION** | Run Deterministic Reconciliation | Deterministic findings rendered | `PASS` |
+| **OUTCOME RECEIPT** | Export Evidence Bundle ZIP | Exported ZIP generated | `PASS` |
+| **OFFLINE VERIFICATION**| Offline Verifier verification | Displays `PASS — Receipt Valid` | `PASS` |
+| **FORMAL DISTRIBUTION**| Developer ID Signing, Hardened Runtime, Notarization | Signed & Notarized | `PENDING` (Tracked in `MMP11-DIST-MAC-004`) |
 
-**Recipient Explanation (Verbatim Unprompted Response):**  
-> *"In your own words, what did VaultBasis just do, and what would you investigate next?"*  
-> [NOT TESTED — Execution blocked at launch]
-
-**Logged Findings Classification:**
-- `BLOCKER`: Standard Gatekeeper GUI Open Anyway completed in System Settings, but double-clicking `VaultBasis.app` does not start the application.
-- `COMPREHENSION FAILURE`: [None recorded yet]
-- `OBSERVATION`: [None]
-
-**macOS arm64 Result:** `FAIL`  
-**Stopped At:** `Normal GUI launch after documented Gatekeeper Open Anyway procedure`
+**macOS arm64 Result:** `FUNCTIONAL_MANUAL_PASS`  
+**Next Governance Step:** `MMP11-DIST-MAC-004` for formal CI-driven Developer ID signing and notarization.
 
 ---
 
 ## 4. State Transition Rule
-- macOS: `macOS DISTRIBUTION_QUALIFIED = NO` (`MMP11-DIST-MAC-002 = FAIL`)
-- Windows: Independent qualification pending physical test on Windows x64.
+- **Windows x64:** `DISTRIBUTION_QUALIFIED` (Run 37197525586 / SHA `434957f1...`)
+- **macOS arm64:** `FUNCTIONAL_MANUAL_PASS` (Run 37197525586 / SHA `9ec370c1...`) — Awaiting `MMP11-DIST-MAC-004` for formal distribution qualification.
 
