@@ -1,27 +1,38 @@
   <div id="access-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
     <div class="modal-card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
-        <h3 id="modal-title" style="font-size:1.4rem;color:#0f172a;font-weight:800;">Request VaultBasis Access</h3>
+        <h3 id="modal-title" style="font-size:1.4rem;color:#0f172a;font-weight:800;">Acquire VaultBasis License</h3>
         <button onclick="closeAccessModal()" style="background:none;border:none;color:#94a3b8;font-size:1.8rem;cursor:pointer;line-height:1;" aria-label="Close">&times;</button>
       </div>
-      <p style="color:#475569;font-size:1rem;margin-bottom:1.75rem;">VaultBasis Edge runs as a local offline executable. Enter your details to request design-partner access for the controlled preview.</p>
+      <p id="modal-desc" style="color:#475569;font-size:0.95rem;margin-bottom:1.5rem;">VaultBasis runs as a local offline desktop executable. Complete your information to receive your installation token and authorized download link via secure email.</p>
+      
       <div id="request-form-container">
         <div style="margin-bottom:1.25rem;">
-          <label for="req-name" style="display:block;color:#334155;font-size:0.88rem;margin-bottom:0.5rem;font-weight:600;">Full Name</label>
-          <input type="text" id="req-name" name="name" placeholder="Jane Doe" autocomplete="name" style="width:100%;padding:12px;border-radius:8px;background:#f8fafc;border:1px solid #cbd5e1;color:#0f172a;font-family:inherit;font-size:1rem;">
+          <label for="req-tier" style="display:block;color:#334155;font-size:0.88rem;margin-bottom:0.5rem;font-weight:600;">Selected Plan / Tier</label>
+          <select id="req-tier" name="tier" style="width:100%;padding:12px;border-radius:8px;background:#f8fafc;border:1px solid #cbd5e1;color:#0f172a;font-family:inherit;font-size:0.95rem;font-weight:600;">
+            <option value="TRIAL">Free Evaluation (Sample Data Mode — $0)</option>
+            <option value="ESSENTIAL">Solo Practitioner / Essential (10 Cases — $499/yr)</option>
+            <option value="PRACTICE" selected>Practice Firm (50 Cases — $1,499/yr)</option>
+            <option value="ENTERPRISE">Enterprise &amp; Multi-Seat (250+ Cases — $3,999+/yr)</option>
+          </select>
+        </div>
+        <div style="margin-bottom:1.25rem;">
+          <label for="req-name" style="display:block;color:#334155;font-size:0.88rem;margin-bottom:0.5rem;font-weight:600;">Full Name / Firm Name</label>
+          <input type="text" id="req-name" name="name" placeholder="Jane Doe, CPA" autocomplete="name" style="width:100%;padding:12px;border-radius:8px;background:#f8fafc;border:1px solid #cbd5e1;color:#0f172a;font-family:inherit;font-size:1rem;">
         </div>
         <div style="margin-bottom:1.75rem;">
-          <label for="req-email" style="display:block;color:#334155;font-size:0.88rem;margin-bottom:0.5rem;font-weight:600;">Contact Email</label>
+          <label for="req-email" style="display:block;color:#334155;font-size:0.88rem;margin-bottom:0.5rem;font-weight:600;">Work Email (for License &amp; Download Delivery)</label>
           <input type="email" id="req-email" name="email" placeholder="jane@cpa-firm.com" autocomplete="email" style="width:100%;padding:12px;border-radius:8px;background:#f8fafc;border:1px solid #cbd5e1;color:#0f172a;font-family:inherit;font-size:1rem;">
         </div>
-        <button onclick="submitAccessRequest()" id="btn-submit-req" class="btn btn-primary" style="width:100%;justify-content:center;padding:13px;font-size:1.05rem;">Submit Request</button>
+        <button onclick="submitAccessRequest()" id="btn-submit-req" class="btn btn-primary" style="width:100%;justify-content:center;padding:13px;font-size:1.05rem;">Proceed to Delivery</button>
       </div>
+
       <div id="request-success" style="display:none;padding:1.5rem;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:12px;text-align:center;">
-        <h4 style="color:#059669;margin-bottom:0.75rem;font-size:1.15rem;font-weight:700;">Request Received</h4>
-        <p style="color:#064e3b;font-size:0.95rem;margin-bottom:1.5rem;line-height:1.6;">Your design-partner access request has been submitted and is under review. Access is provisioned individually during the controlled preview.</p>
+        <h4 style="color:#059669;margin-bottom:0.75rem;font-size:1.15rem;font-weight:700;">Delivery Initiated</h4>
+        <p style="color:#064e3b;font-size:0.95rem;margin-bottom:1.5rem;line-height:1.6;">Your license token and expiring download link have been dispatched. Check your work inbox within 2 minutes.</p>
         <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;">
           <button onclick="closeAccessModal()" class="btn btn-secondary btn-sm">← Return to VaultBasis</button>
-          <a href="/#how-it-works" onclick="closeAccessModal()" class="btn btn-primary btn-sm">See How It Works →</a>
+          <a href="/trust-assurance" onclick="closeAccessModal()" class="btn btn-primary btn-sm">Review Trust &amp; Security →</a>
         </div>
       </div>
     </div>

@@ -27,7 +27,7 @@
     /* Access modal state management (VB-WEB-INV-003) */
     let _lastFocusedElement = null;
 
-    function openAccessModal(triggerEl) {
+    function openAccessModal(triggerEl, tier) {
       const modal = document.getElementById('access-modal');
       if (!modal) return;
       _lastFocusedElement = triggerEl || document.activeElement;
@@ -37,12 +37,24 @@
       const success = document.getElementById('request-success');
       const name = document.getElementById('req-name');
       const email = document.getElementById('req-email');
+      const tierSelect = document.getElementById('req-tier');
+      const modalTitle = document.getElementById('modal-title');
       const btn = document.getElementById('btn-submit-req');
+
       if (form) form.style.display = 'block';
       if (success) success.style.display = 'none';
       if (name) name.value = '';
       if (email) email.value = '';
-      if (btn) { btn.innerText = 'Submit Request'; btn.disabled = false; }
+      if (tierSelect && tier) {
+        tierSelect.value = tier;
+      }
+      if (modalTitle) {
+        modalTitle.innerText = (tier === 'TRIAL') ? 'Start Free Sample Evaluation' : 'Acquire VaultBasis License';
+      }
+      if (btn) {
+        btn.innerText = (tier === 'TRIAL') ? 'Get Evaluation Download' : 'Proceed to Delivery';
+        btn.disabled = false;
+      }
 
       modal.style.display = 'flex';
       setTimeout(function() {
@@ -66,7 +78,7 @@
       if (success) success.style.display = 'none';
       if (name) name.value = '';
       if (email) email.value = '';
-      if (btn) { btn.innerText = 'Submit Request'; btn.disabled = false; }
+      if (btn) { btn.innerText = 'Proceed to Delivery'; btn.disabled = false; }
 
       document.removeEventListener('keydown', _modalKeyHandler);
       if (_lastFocusedElement && typeof _lastFocusedElement.focus === 'function') {
@@ -88,15 +100,16 @@
     async function submitAccessRequest() {
       const name = document.getElementById('req-name').value.trim();
       const email = document.getElementById('req-email').value.trim();
+      const tier = document.getElementById('req-tier') ? document.getElementById('req-tier').value : 'PRACTICE';
       const btn = document.getElementById('btn-submit-req');
       if (!name || !email) { alert('Please provide a name and email address.'); return; }
-      btn.innerText = 'Submitting…';
+      btn.innerText = 'Dispatching…';
       btn.disabled = true;
       try {
         const res = await fetch('/api/request-access', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, email })
+          body: JSON.stringify({ name, email, tier })
         });
         const data = await res.json();
         if (res.ok) {
@@ -104,12 +117,12 @@
           document.getElementById('request-success').style.display = 'block';
         } else {
           alert(data.error || 'Request could not be submitted. Please try again.');
-          btn.innerText = 'Submit Request';
+          btn.innerText = 'Proceed to Delivery';
           btn.disabled = false;
         }
       } catch (_err) {
         alert('A network error occurred. Please check your connection and try again.');
-        btn.innerText = 'Submit Request';
+        btn.innerText = 'Proceed to Delivery';
         btn.disabled = false;
       }
     }
