@@ -1,0 +1,380 @@
+"""
+VaultBasis MMP-1.5 Entitlement Enforcement & Policy Test Suite
+Tests MMP15-ENT-002:
+1. Valid licence -> Billable operation succeeds
+2. No licence -> Billable operation denied deterministically (ENTITLEMENT_REQUIRED, 402)
+3. Expired licence -> New billable work denied (LICENSE_EXPIRED, 403)
+4. Grace licence -> Grace policy enforced (LICENSE_GRACE_RESTRICTED, 403 for new cases)
+5. Invalid signature -> Denied (LICENSE_INVALID, 403)
+6. Wrong installation -> Denied (INSTALLATION_MISMATCH, 403)
+7. Not yet valid licence -> Denied (LICENSE_NOT_YET_VALID, 403)
+8. Capacity available -> Case creation succeeds (201)
+9. Capacity exceeded -> New case denied (CASE_CAPACITY_REACHED, 402)
+10. Sample case -> Explicitly defined unmetered semantics (never counted against capacity)
+11. Existing cases -> Remain accessible after expiry (200)
+12. Evidence export -> Not commercial-metered; existing authorization still applies
+13. Receipt verification -> Free and unmetered with no licence (200)
+14. Error model -> Stable machine-readable denial codes without internal crypto leakage
+"""
+
+import base64
+import json
+import os
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
+import pytest
+
+from cryptography.hazmat.primitives.asymmetric import ed25519
+from fastapi.testclient import TestClient
+
+from edge.api.app import app
+from edge.commercial.models import LicenseState, LicenseTier
+from edge.commercial.policy import (
+    CommercialDenialCode,
+    CommercialOperation,
+    CommercialPolicyService,
+)
+from edge.storage.sqlite_store import SQLiteStore
+from tools.issue_license import issue_commercial_license
+
+
+# Deterministic test keys for commercial test harness
+_TEST_PRIV_KEY = ed25519.Ed25519PrivateKey.generate()
+_TEST_PRIV_HEX = _TEST_PRIV_KEY.private_bytes_raw().hex()
+_TEST_PUB_HEX = _TEST_PRIV_KEY.public_key().public_bytes_raw().hex()
+_TEST_KEY_ID = "KEY-COMMERCIAL-TEST-001"
+_TEST_KEYRING = {_TEST_KEY_ID: _TEST_PUB_HEX}
+
+
+def _make_test_token(
+    tier: LicenseTier = LicenseTier.PRACTICE,
+    max_cases: int = 5,
+    issued_at_dt: Optional[datetime] = None,
+    not_before_dt: Optional[datetime] = None,
+    expires_at_dt: Optional[datetime] = None,
+    grace_until_dt: Optional[datetime] = None,
+    installation_id: Optional[str] = None,
+    output_format: str = "base64",
+) -> str:
+    now = datetime.now(timezone.utc)
+    issued_at = (issued_at_dt or now).strftime("%Y-%m-%dT%H:%M:%SZ")
+    not_before = (not_before_dt or now).strftime("%Y-%m-%dT%H:%M:%SZ")
+    expires_at = (expires_at_dt or (now + timedelta(days=365))).strftime("%Y-%m-%dT%H:%M:%SZ")
+    grace_until = (grace_until_dt or (now + timedelta(days=395))).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    return issue_commercial_license(
+        signing_key_hex=_TEST_PRIV_HEX,
+        customer_id="CUST-TEST-FIRM",
+        tier=tier,
+        max_cases=max_cases,
+        license_id=f"LIC-TEST-{tier.value}",
+        issued_at=issued_at,
+        not_before=not_before,
+        expires_at=expires_at,
+        grace_until=grace_until,
+        entitlements=["reconciliation", "offline_export"],
+        installation_id=installation_id,
+        key_id=_TEST_KEY_ID,
+        output_format=output_format,
+    )
+
+
+@pytest.fixture
+def clean_commercial_env(monkeypatch, tmp_path):
+    """Sets up an isolated database, clean license store, and disables dev bypass."""
+    monkeypatch.setenv("VAULTBASIS_BYPASS_ENTITLEMENT", "0")
+    monkeypatch.delenv("VAULTBASIS_LICENSE_TOKEN", raising=False)
+
+    test_db_path = tmp_path / "test_commercial.db"
+    test_store = SQLiteStore(test_db_path)
+    test_policy = CommercialPolicyService(
+        store=test_store,
+        license_dir=tmp_path / "license",
+        keyring_override=_TEST_KEYRING,
+    )
+
+    # Patch global app instances for TestClient integration
+    monkeypatch.setattr("edge.api.app.db_store", test_store)
+    monkeypatch.setattr("edge.api.app.commercial_policy", test_policy)
+
+    return test_policy, test_store, tmp_path
+
+
+@pytest.fixture
+def client():
+    return TestClient(app)
+
+
+# ------------------------------------------------------------------------------
+# 1. Policy Service Direct Unit Tests
+# ------------------------------------------------------------------------------
+
+def test_policy_no_license_denied(clean_commercial_env):
+    policy, store, _ = clean_commercial_env
+    decision = policy.authorize(CommercialOperation.CREATE_CASE)
+    assert not decision.allowed
+    assert decision.reason_code == CommercialDenialCode.ENTITLEMENT_REQUIRED
+    assert decision.http_status == 402
+    assert "A valid commercial license is required" in decision.message
+    assert decision.correlation_id.startswith("VB-ENT-")
+
+    err_dict = decision.to_error_dict()
+    assert err_dict["error"]["code"] == "ENTITLEMENT_REQUIRED"
+    assert "upgrade_guidance" in err_dict["error"]
+
+
+def test_policy_valid_license_authorized(clean_commercial_env):
+    policy, store, _ = clean_commercial_env
+    token = _make_test_token(tier=LicenseTier.PRACTICE, max_cases=10)
+    policy.install_license_token(token)
+
+    decision = policy.authorize(CommercialOperation.CREATE_CASE)
+    assert decision.allowed
+    assert decision.http_status == 200
+    assert decision.license_state == LicenseState.ACTIVE
+    assert decision.tier == LicenseTier.PRACTICE
+    assert decision.max_cases == 10
+
+
+def test_policy_expired_license_denied(clean_commercial_env):
+    policy, store, _ = clean_commercial_env
+    now = datetime.now(timezone.utc)
+    # Chronologically valid, but expired in past
+    token = _make_test_token(
+        issued_at_dt=now - timedelta(days=60),
+        not_before_dt=now - timedelta(days=60),
+        expires_at_dt=now - timedelta(days=10),
+        grace_until_dt=now - timedelta(days=5),
+    )
+    policy.install_license_token(token)
+
+    decision = policy.authorize(CommercialOperation.CREATE_CASE)
+    assert not decision.allowed
+    assert decision.reason_code == CommercialDenialCode.LICENSE_EXPIRED
+    assert decision.http_status == 403
+    assert "expired" in decision.message.lower()
+
+
+def test_policy_grace_license_restricts_new_cases(clean_commercial_env):
+    policy, store, _ = clean_commercial_env
+    now = datetime.now(timezone.utc)
+    # Expired 5 days ago, but grace period lasts until +25 days -> currently in GRACE
+    token = _make_test_token(
+        issued_at_dt=now - timedelta(days=60),
+        not_before_dt=now - timedelta(days=60),
+        expires_at_dt=now - timedelta(days=5),
+        grace_until_dt=now + timedelta(days=25),
+    )
+    policy.install_license_token(token)
+
+    # Creating new cases is restricted in grace mode
+    decision_create = policy.authorize(CommercialOperation.CREATE_CASE)
+    assert not decision_create.allowed
+    assert decision_create.reason_code == CommercialDenialCode.LICENSE_GRACE_RESTRICTED
+    assert decision_create.http_status == 403
+
+    # Reconciling existing work remains permitted
+    decision_recon = policy.authorize(CommercialOperation.RECONCILE_CASE)
+    assert decision_recon.allowed
+
+
+def test_policy_not_yet_valid_license_denied(clean_commercial_env):
+    policy, store, _ = clean_commercial_env
+    now = datetime.now(timezone.utc)
+    # Starts 5 days in the future
+    token = _make_test_token(
+        issued_at_dt=now,
+        not_before_dt=now + timedelta(days=5),
+        expires_at_dt=now + timedelta(days=365),
+        grace_until_dt=now + timedelta(days=395),
+    )
+    policy.install_license_token(token)
+
+    decision = policy.authorize(CommercialOperation.CREATE_CASE)
+    assert not decision.allowed
+    assert decision.reason_code == CommercialDenialCode.LICENSE_NOT_YET_VALID
+    assert decision.http_status == 403
+
+
+def test_policy_installation_mismatch_denied(clean_commercial_env):
+    policy, store, _ = clean_commercial_env
+    policy.installation_id = "INST-ALPHA-999"
+
+    # Token bound to different installation
+    token = _make_test_token(installation_id="INST-BETA-000")
+    policy.install_license_token(token)
+
+    decision = policy.authorize(CommercialOperation.CREATE_CASE)
+    assert not decision.allowed
+    assert decision.reason_code == CommercialDenialCode.INSTALLATION_MISMATCH
+    assert decision.http_status == 403
+
+
+def test_policy_tampered_signature_denied(clean_commercial_env):
+    policy, store, _ = clean_commercial_env
+    token = _make_test_token(output_format="json")
+    env = json.loads(token)
+    env["payload"]["max_cases_per_installation"] = 999999
+    tampered_token = json.dumps(env)
+
+    policy.install_license_token(tampered_token)
+    decision = policy.authorize(CommercialOperation.CREATE_CASE)
+    assert not decision.allowed
+    assert decision.reason_code == CommercialDenialCode.LICENSE_INVALID
+    assert decision.http_status == 403
+
+
+def test_policy_capacity_limit_enforcement(clean_commercial_env):
+    policy, store, _ = clean_commercial_env
+    token = _make_test_token(tier=LicenseTier.TRIAL, max_cases=2)
+    policy.install_license_token(token)
+
+    # Initial state: 0 cases -> allowed
+    d1 = policy.authorize(CommercialOperation.CREATE_CASE)
+    assert d1.allowed
+
+    # Simulate saving 2 persistent billable cases
+    from schemas.canonical.case import CanonicalCase
+    now_utc = datetime.now(timezone.utc).isoformat()
+    store.save_case(CanonicalCase(case_id="CASE-PRACTITIONER-001", tax_year=2025, jurisdiction="US", case_status="CREATED", created_at=now_utc, updated_at=now_utc))
+    store.save_case(CanonicalCase(case_id="CASE-PRACTITIONER-002", tax_year=2025, jurisdiction="US", case_status="CREATED", created_at=now_utc, updated_at=now_utc))
+
+    # At capacity (2/2) -> new case creation denied
+    d2 = policy.authorize(CommercialOperation.CREATE_CASE)
+    assert not d2.allowed
+    assert d2.reason_code == CommercialDenialCode.CASE_CAPACITY_REACHED
+    assert d2.http_status == 402
+    assert "reached its licensed case capacity of 2" in d2.message
+
+    # Bundled sample case does NOT consume capacity
+    store.save_case(CanonicalCase(case_id="CASE-SAMPLE-2025", tax_year=2025, jurisdiction="US", case_status="CREATED", created_at=now_utc, updated_at=now_utc))
+    assert store.count_billable_cases() == 2
+
+
+# ------------------------------------------------------------------------------
+# 2. REST API Integration Tests via TestClient
+# ------------------------------------------------------------------------------
+
+def test_api_create_case_denied_without_license(clean_commercial_env, client):
+    res = client.post("/api/cases", json={"case_id": "CASE-UNLICENSED-001", "tax_year": 2025})
+    assert res.status_code == 402
+    data = res.json()
+    assert data["error"]["code"] == "ENTITLEMENT_REQUIRED"
+    assert "upgrade_guidance" in data["error"]
+    assert "correlation_id" in data["error"]
+
+
+def test_api_create_case_succeeds_with_license(clean_commercial_env, client):
+    policy, store, _ = clean_commercial_env
+    token = _make_test_token(tier=LicenseTier.ESSENTIAL, max_cases=5)
+    
+    # Install license via API endpoint
+    res_inst = client.post("/api/commercial/license", json={"token": token})
+    assert res_inst.status_code == 200
+    assert res_inst.json()["license_state"] == "ACTIVE"
+    assert res_inst.json()["tier"] == "ESSENTIAL"
+
+    # Create case
+    res_create = client.post("/api/cases", json={"case_id": "CASE-LICENSED-001", "tax_year": 2025})
+    assert res_create.status_code == 201
+    assert res_create.json()["case_id"] == "CASE-LICENSED-001"
+
+
+def test_api_sample_case_unmetered_and_accessible_without_license(clean_commercial_env, client):
+    """
+    Bundled sample case must always be accessible and loadable for onboarding
+    regardless of license state.
+    """
+    res = client.post("/api/sample-case/load")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["case_id"] == "CASE-SAMPLE-2025"
+    assert len(data["sources"]) == 2
+
+
+def test_api_receipt_verification_unencumbered_without_license(clean_commercial_env, client):
+    """
+    Independent receipt verification must be 100% free and unmetered.
+    """
+    sample_receipt_path = Path(__file__).resolve().parent.parent / "fixtures" / "golden_receipt_valid.json"
+    if not sample_receipt_path.is_file():
+        pytest.skip("Fixture golden_receipt_valid.json not found")
+
+    receipt_bytes = sample_receipt_path.read_bytes()
+    res = client.post("/api/receipts/verify", files={"file": ("receipt.json", receipt_bytes, "application/json")})
+    assert res.status_code == 200
+    data = res.json()
+    assert data["is_valid"] is True
+    assert data["overall_status"] == "PASS"
+
+
+def test_api_existing_case_and_export_accessible_after_license_expiry(clean_commercial_env, client):
+    """
+    Data preservation invariant: An expired license must NOT ransom existing customer records
+    or block evidence bundle export.
+    """
+    policy, store, _ = clean_commercial_env
+
+    # 1. Install active license and create a case with sample sources and reconciliation
+    token = _make_test_token(tier=LicenseTier.PRACTICE, max_cases=5)
+    policy.install_license_token(token)
+
+    res_sample = client.post("/api/sample-case/load")
+    assert res_sample.status_code == 200
+
+    res_recon = client.post("/api/cases/CASE-SAMPLE-2025/reconcile")
+    assert res_recon.status_code == 200
+
+    # 2. Now expire the license
+    now = datetime.now(timezone.utc)
+    expired_token = _make_test_token(
+        issued_at_dt=now - timedelta(days=60),
+        not_before_dt=now - timedelta(days=60),
+        expires_at_dt=now - timedelta(days=10),
+        grace_until_dt=now - timedelta(days=5),
+    )
+    policy.install_license_token(expired_token)
+
+    # 3. New case creation is blocked
+    res_blocked = client.post("/api/cases", json={"case_id": "CASE-NEW-BLOCKED", "tax_year": 2025})
+    assert res_blocked.status_code == 403
+    assert res_blocked.json()["error"]["code"] == "LICENSE_EXPIRED"
+
+    # 4. Reading existing case is permitted
+    res_get = client.get("/api/cases/CASE-SAMPLE-2025")
+    assert res_get.status_code == 200
+    assert res_get.json()["case_id"] == "CASE-SAMPLE-2025"
+
+    # 5. Reading existing receipt is permitted
+    res_rcpt = client.get("/api/cases/CASE-SAMPLE-2025/receipt")
+    assert res_rcpt.status_code == 200
+
+    # 6. Exporting evidence bundle is permitted
+    res_exp = client.get("/api/cases/CASE-SAMPLE-2025/export")
+    assert res_exp.status_code == 200
+    assert res_exp.headers["content-type"] == "application/zip"
+
+
+def test_api_commercial_status_endpoint(clean_commercial_env, client):
+    policy, store, _ = clean_commercial_env
+    
+    # 1. Unlicensed status
+    res1 = client.get("/api/commercial/status")
+    assert res1.status_code == 200
+    data1 = res1.json()
+    assert data1["licensed"] is False
+    assert data1["unmetered_verification_active"] is True
+
+    # 2. Licensed status
+    token = _make_test_token(tier=LicenseTier.ENTERPRISE, max_cases=100)
+    client.post("/api/commercial/license", json={"token": token})
+
+    res2 = client.get("/api/commercial/status")
+    assert res2.status_code == 200
+    data2 = res2.json()
+    assert data2["licensed"] is True
+    assert data2["tier"] == "ENTERPRISE"
+    assert data2["max_cases_per_installation"] == 100
+    assert data2["unmetered_verification_active"] is True

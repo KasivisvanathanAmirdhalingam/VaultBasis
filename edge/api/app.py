@@ -23,6 +23,12 @@ import sys
 
 from apps.verifier.verify_receipt import verify_outcome_receipt
 from edge.assurance.reconciliation_engine import DeterministicReconciliationEngine
+from edge.commercial.policy import (
+    CommercialOperation,
+    CommercialDenialCode,
+    CommercialPolicyDecision,
+    CommercialPolicyService,
+)
 from edge.connectors.validator import IntakeDispatcher
 from edge.receipts.keygen import InstallationKeyManager
 from edge.receipts.signer import ReceiptSigner
@@ -70,7 +76,7 @@ RESOURCE_BASE = _resource_base()
 DATA_DIR = _user_data_dir()
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
-# Initialize local key manager and SQLite store
+# Initialize local key manager, SQLite store, and commercial policy service
 KEY_DIR = DATA_DIR / "keys"
 DB_FILE = os.environ.get("VAULTBASIS_DB_FILE", "vaultbasis.db")
 DB_PATH = DATA_DIR / DB_FILE
@@ -79,6 +85,12 @@ key_manager = InstallationKeyManager(KEY_DIR)
 priv_key, pub_key = key_manager.ensure_keypair()
 receipt_signer = ReceiptSigner(priv_key)
 db_store = SQLiteStore(DB_PATH)
+commercial_policy = CommercialPolicyService(
+    store=db_store,
+    license_dir=DATA_DIR / "license",
+    installation_id=os.environ.get("VAULTBASIS_INSTALLATION_ID"),
+)
+
 
 app = FastAPI(
     title="VaultBasis Edge",
@@ -108,6 +120,10 @@ class CreateCaseRequest(BaseModel):
     client_reference: Optional[str] = Field("Sample Client", description="Client or engagement reference (e.g. Acme Holdings LLC)")
     tax_year: int = Field(2025, description="Target tax year")
     jurisdiction: str = Field("US", description="Regulatory jurisdiction")
+
+
+class InstallLicenseRequest(BaseModel):
+    token: str = Field(..., description="VaultBasis signed commercial license token string (Base64 or JSON envelope)")
 
 
 class CaseSummaryResponse(BaseModel):
@@ -160,11 +176,42 @@ def health_check():
     }
 
 
+@app.get("/api/commercial/status")
+def get_commercial_status():
+    """
+    Returns non-sensitive commercial entitlement status and case capacity metrics.
+    Safe for UI dashboard rendering and operational health diagnostics.
+    """
+    return commercial_policy.get_status()
+
+
+@app.post("/api/commercial/license")
+def install_commercial_license(req: InstallLicenseRequest):
+    """
+    Installs and evaluates a local offline commercial license token.
+    Persists token in local storage upon successful evaluation.
+    """
+    res = commercial_policy.install_license_token(req.token)
+    return {
+        "status": "INSTALLED" if res.is_active else "REJECTED",
+        "license_state": res.state.value,
+        "tier": res.tier.value if res.tier else None,
+        "license_id": res.license_id,
+        "customer_id": res.customer_id,
+        "max_cases_per_installation": res.max_cases_per_installation,
+        "entitlements": res.entitlements,
+        "days_remaining": res.days_remaining,
+        "grace_days_remaining": res.grace_days_remaining,
+        "diagnostic_reason": res.diagnostic_reason,
+    }
+
+
 @app.post("/api/sample-case/load")
 def load_sample_case():
     """
     Preload the canonical Sample Case for zero-knowledge onboarding.
     Populates Source A (Broker Form 1099-DA) and Source B (Tax-Ledger Koinly Report).
+    Explicitly unmetered — does not count against commercial case capacity.
     """
     case_id = "CASE-SAMPLE-2025"
     client_ref = "Sample Client (Acme Holdings LLC)"
@@ -231,7 +278,16 @@ def create_case(req: CreateCaseRequest):
             updated_at=existing.updated_at
         )
 
+    # Evaluate commercial entitlement before persisting new billable case
+    decision = commercial_policy.authorize(CommercialOperation.CREATE_CASE)
+    if not decision.allowed:
+        return JSONResponse(
+            status_code=decision.http_status,
+            content=decision.to_error_dict()
+        )
+
     now_utc = datetime.now(timezone.utc).isoformat()
+
     case = CanonicalCase(
         case_id=case_id,
         client_reference=client_ref,
@@ -336,11 +392,20 @@ def reconcile_case(case_id: str):
     if not case:
         raise HTTPException(status_code=404, detail=f"Case '{case_id}' not found")
 
+    # Evaluate commercial entitlement before performing reconciliation
+    decision = commercial_policy.authorize(CommercialOperation.RECONCILE_CASE, context={"case_id": case_id})
+    if not decision.allowed:
+        return JSONResponse(
+            status_code=decision.http_status,
+            content=decision.to_error_dict()
+        )
+
     if len(case.sources) < 2:
         raise HTTPException(
             status_code=400,
             detail="Reconciliation requires at least two source documents (e.g. Form 1099-DA and Koinly CSV)"
         )
+
 
     # Compute a manifest hash of the current source set (sorted for determinism).
     current_manifest = hashlib.sha256(

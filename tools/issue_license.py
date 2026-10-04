@@ -108,6 +108,52 @@ def encode_token_base64(envelope_dict: Dict[str, Any]) -> str:
     return base64.urlsafe_b64encode(json_bytes).decode("ascii").rstrip("=")
 
 
+def issue_commercial_license(
+    signing_key_hex: str,
+    customer_id: str,
+    tier: Any,
+    max_cases: int,
+    valid_days: int = 365,
+    grace_days: int = 30,
+    license_id: Optional[str] = None,
+    installation_id: Optional[str] = None,
+    entitlements: Optional[List[str]] = None,
+    key_id: str = "k1",
+    issued_at: Optional[str] = None,
+    not_before: Optional[str] = None,
+    expires_at: Optional[str] = None,
+    grace_until: Optional[str] = None,
+    output_format: str = "base64",
+) -> str:
+    """Programmatically issues a signed commercial license token string."""
+    tier_str = tier.value if hasattr(tier, "value") else str(tier)
+    payload = build_license_payload(
+        customer_id=customer_id,
+        tier=tier_str,
+        max_cases=max_cases,
+        valid_days=valid_days,
+        grace_days=grace_days,
+        license_id=license_id,
+        installation_id=installation_id,
+        entitlements=entitlements,
+        key_id=key_id,
+    )
+    if issued_at:
+        payload["issued_at"] = issued_at
+    if not_before:
+        payload["not_before"] = not_before
+    if expires_at:
+        payload["expires_at"] = expires_at
+    if grace_until:
+        payload["grace_until"] = grace_until
+
+    envelope = sign_license_payload(payload, signing_key_hex)
+    if output_format == "json":
+        return json.dumps(envelope)
+    return encode_token_base64(envelope)
+
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Issue cryptographically signed VaultBasis commercial license tokens.")
     parser.add_argument("--customer-id", help="Customer account identifier (e.g. CUST-ACME-CPA)")
