@@ -17,21 +17,51 @@ from schemas.canonical.transaction import CanonicalTransaction
 
 
 class SQLiteStore:
-    def __init__(self, db_path: Path):
+    """
+    Local SQLite persistence store conforming to MMP15-DATA-001 Durability & Recovery Contract.
+    Features WAL mode, foreign key enforcement, transactional versioned migrations, point-in-time
+    online backup/restore, and corruption health checks.
+    """
+
+    CURRENT_SCHEMA_VERSION = 3
+
+    def __init__(self, db_path: Path, synchronous: str = "NORMAL"):
         self.db_path = Path(db_path)
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
+        self.synchronous = synchronous
         self._init_db()
 
     def _get_connection(self) -> sqlite3.Connection:
-        conn = sqlite3.connect(str(self.db_path))
+        conn = sqlite3.connect(str(self.db_path), timeout=5.0)
         conn.row_factory = sqlite3.Row
-        # Enable WAL mode for high concurrency & robustness
+        # Enforce WAL mode, foreign keys, synchronous safety, and busy timeout
         conn.execute("PRAGMA journal_mode = WAL;")
+        conn.execute(f"PRAGMA synchronous = {self.synchronous};")
         conn.execute("PRAGMA foreign_keys = ON;")
+        conn.execute("PRAGMA busy_timeout = 5000;")
         return conn
 
     def _init_db(self):
         with self._get_connection() as conn:
+            # 1. Create migration ledger table
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS schema_migrations (
+                    version INTEGER PRIMARY KEY,
+                    name TEXT NOT NULL,
+                    applied_at TEXT NOT NULL
+                );
+            """)
+
+            # 2. Run versioned migrations in strict transactional sequence
+            self._run_migrations(conn)
+
+    def _run_migrations(self, conn: sqlite3.Connection):
+        cursor = conn.cursor()
+        applied_rows = cursor.execute("SELECT version FROM schema_migrations ORDER BY version ASC").fetchall()
+        applied_versions = {row[0] for row in applied_rows}
+
+        # Migration 1: Initial Core Reconciliation Tables
+        if 1 not in applied_versions:
             conn.executescript("""
                 CREATE TABLE IF NOT EXISTS cases (
                     case_id TEXT PRIMARY KEY,
@@ -75,19 +105,47 @@ class SQLiteStore:
                     created_at TEXT NOT NULL,
                     FOREIGN KEY (case_id) REFERENCES cases (case_id) ON DELETE CASCADE
                 );
+            """)
+            now_utc = datetime.now(timezone.utc).isoformat()
+            conn.execute("INSERT INTO schema_migrations (version, name, applied_at) VALUES (1, 'initial_core_schema', ?)", (now_utc,))
 
+        # Migration 2: Commercial License Table & Migration Columns
+        if 2 not in applied_versions:
+            conn.executescript("""
                 CREATE TABLE IF NOT EXISTS commercial_license (
                     id INTEGER PRIMARY KEY CHECK (id = 1),
                     token_text TEXT NOT NULL,
                     installed_at TEXT NOT NULL
                 );
             """)
-            # Migration check: ensure client_reference column exists
-            cursor = conn.cursor()
+            # Ensure client_reference column exists
             cursor.execute("PRAGMA table_info(cases)")
             columns = [row[1] for row in cursor.fetchall()]
             if "client_reference" not in columns:
                 cursor.execute("ALTER TABLE cases ADD COLUMN client_reference TEXT DEFAULT 'Sample Client'")
+            now_utc = datetime.now(timezone.utc).isoformat()
+            conn.execute("INSERT INTO schema_migrations (version, name, applied_at) VALUES (2, 'commercial_licensing_schema', ?)", (now_utc,))
+
+        # Migration 3: Firm & Workspace Identity Table (MMP15-ORG-001)
+        if 3 not in applied_versions:
+            conn.executescript("""
+                CREATE TABLE IF NOT EXISTS firm_identity (
+                    id INTEGER PRIMARY KEY CHECK (id = 1),
+                    organization_id TEXT NOT NULL,
+                    firm_name TEXT NOT NULL,
+                    office_id TEXT,
+                    workspace_id TEXT NOT NULL,
+                    preparer_id TEXT NOT NULL,
+                    display_name TEXT NOT NULL,
+                    ptin TEXT,
+                    efin TEXT,
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL
+                );
+            """)
+            now_utc = datetime.now(timezone.utc).isoformat()
+            conn.execute("INSERT INTO schema_migrations (version, name, applied_at) VALUES (3, 'firm_and_workspace_identity', ?)", (now_utc,))
+
 
     def save_case(self, case: CanonicalCase):
         now_utc = datetime.now(timezone.utc).isoformat()
@@ -290,4 +348,145 @@ class SQLiteStore:
         """Removes installed commercial license token."""
         with self._get_connection() as conn:
             conn.execute("DELETE FROM commercial_license WHERE id = 1")
+
+    # --------------------------------------------------------------------------
+    # Durability & Recovery Contract Methods (MMP15-DATA-001)
+    # --------------------------------------------------------------------------
+
+    def get_applied_migrations(self) -> List[Dict[str, Any]]:
+        """Returns ordered list of all schema migrations successfully applied."""
+        with self._get_connection() as conn:
+            rows = conn.execute("SELECT version, name, applied_at FROM schema_migrations ORDER BY version ASC").fetchall()
+            return [dict(r) for r in rows]
+
+    def check_integrity(self) -> Dict[str, Any]:
+        """
+        Executes structural integrity and relational foreign key verification.
+        Returns detailed health diagnosis conforming to PRD §22.1.
+        """
+        with self._get_connection() as conn:
+            # 1. Full Structural Integrity Check
+            integrity_rows = [row[0] for row in conn.execute("PRAGMA integrity_check;").fetchall()]
+            is_structurally_ok = integrity_rows == ["ok"]
+
+            # 2. Relational Foreign Key Check
+            fk_violations = [dict(r) for r in conn.execute("PRAGMA foreign_key_check;").fetchall()]
+            is_fk_ok = len(fk_violations) == 0
+
+            # 3. Journal Mode Check
+            journal_mode = conn.execute("PRAGMA journal_mode;").fetchone()[0]
+
+            is_healthy = is_structurally_ok and is_fk_ok
+
+            return {
+                "healthy": is_healthy,
+                "structural_integrity": "OK" if is_structurally_ok else "CORRUPTED",
+                "integrity_details": integrity_rows,
+                "foreign_keys_valid": is_fk_ok,
+                "foreign_key_violations": fk_violations,
+                "journal_mode": journal_mode,
+                "schema_version": self.CURRENT_SCHEMA_VERSION,
+                "timestamp": datetime.now(timezone.utc).isoformat()
+            }
+
+    def quick_check(self) -> bool:
+        """Fast non-blocking startup sanity check."""
+        try:
+            with self._get_connection() as conn:
+                res = conn.execute("PRAGMA quick_check;").fetchone()
+                return res is not None and res[0] == "ok"
+        except Exception:
+            return False
+
+    def backup(self, target_path: Path) -> Path:
+        """
+        Creates a consistent, non-blocking point-in-time snapshot backup using SQLite's Online Backup API.
+        Safe for execution while readers and writers are actively querying the primary database.
+        """
+        dest_path = Path(target_path)
+        dest_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        # Remove any existing destination file before snapshotting
+        if dest_path.is_file():
+            dest_path.unlink()
+
+        with self._get_connection() as src_conn:
+            dest_conn = sqlite3.connect(str(dest_path))
+            try:
+                src_conn.backup(dest_conn)
+            finally:
+                dest_conn.close()
+        return dest_path
+
+    def restore(self, backup_path: Path, verify_integrity: bool = True) -> bool:
+        """
+        Restores the active database from a point-in-time backup snapshot.
+        Optionally verifies the restored database integrity.
+        """
+        src_path = Path(backup_path)
+        if not src_path.is_file():
+            raise FileNotFoundError(f"Backup file not found: '{backup_path}'")
+
+        backup_conn = sqlite3.connect(str(src_path))
+        try:
+            with self._get_connection() as live_conn:
+                backup_conn.backup(live_conn)
+        finally:
+            backup_conn.close()
+
+        if verify_integrity:
+            diag = self.check_integrity()
+            return diag["healthy"]
+        return True
+
+    # --------------------------------------------------------------------------
+    # Firm & Workspace Identity Persistence (MMP15-ORG-001)
+    # --------------------------------------------------------------------------
+
+    def get_firm_identity(self) -> Optional[Dict[str, Any]]:
+        """Retrieves active firm and workspace identity profile."""
+        with self._get_connection() as conn:
+            row = conn.execute("SELECT * FROM firm_identity WHERE id = 1").fetchone()
+            if row:
+                return dict(row)
+            return None
+
+    def save_firm_identity(self, firm_dict: Dict[str, Any]):
+        """Stores or updates active firm and workspace identity profile."""
+        now_utc = datetime.now(timezone.utc).isoformat()
+        with self._get_connection() as conn:
+            conn.execute("""
+                INSERT INTO firm_identity (
+                    id, organization_id, firm_name, office_id, workspace_id,
+                    preparer_id, display_name, ptin, efin, created_at, updated_at
+                )
+                VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(id) DO UPDATE SET
+                    organization_id=excluded.organization_id,
+                    firm_name=excluded.firm_name,
+                    office_id=excluded.office_id,
+                    workspace_id=excluded.workspace_id,
+                    preparer_id=excluded.preparer_id,
+                    display_name=excluded.display_name,
+                    ptin=excluded.ptin,
+                    efin=excluded.efin,
+                    updated_at=excluded.updated_at;
+            """, (
+                firm_dict["organization_id"],
+                firm_dict["firm_name"],
+                firm_dict.get("office_id"),
+                firm_dict["workspace_id"],
+                firm_dict["preparer_id"],
+                firm_dict["display_name"],
+                firm_dict.get("ptin"),
+                firm_dict.get("efin"),
+                firm_dict.get("created_at", now_utc),
+                now_utc
+            ))
+
+    def delete_firm_identity(self):
+        """Clears stored firm and workspace identity profile."""
+        with self._get_connection() as conn:
+            conn.execute("DELETE FROM firm_identity WHERE id = 1")
+
 
