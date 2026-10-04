@@ -206,12 +206,23 @@ vercel.json & Packager ───> Localhost Airgap Bridge ───> WebCrypto V
 | **COM-04A**| Local License Validator | Update VaultBasis Edge (`app.py`) to cryptographically verify the user's purchased license key | Future | P0 | Dashboard requires a valid license key before allowing Case Creation | **NOT STARTED** | |
 | **COM-05A**| Authenticated Download | Implement secure, time-limited, signed download URLs for buyers to download the desktop bundle | Future | P0 | Only verified purchasers can download the actual Desktop Bundle | **NOT STARTED** | |
 
-### Workstream 10: Regulatory Assurance Invariants & Evidence Context (MMP-1.1 / MMP-1.5)
+### Workstream 11: MMP-1.5 Commercial Control Plane & Production Trust Qualification
 
-| Task ID | Component | Task Description | PRD Ref | Priority | DoD Exit Criterion | Status | Commit ID |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **MMP11-CASE-001** | Case Persistence | Enforce `VB-CASE-INV-001`: In-memory draft wizard persists only upon first valid evidence ingestion; clean non-wrapping header | §17, §18 | P0 | Zero empty case shells; single-line desktop header; 11/11 gates PASS | **COMPLETED** | Current |
-| **VB-REG-GAP-001** | Regulatory Analysis | Form 1099-DA / Basis Reconciliation Regulatory & Evidence Context Analysis (`docs/audit/VB_REG_GAP_001_regulatory_evidence_context.md`) | §14, §15 | P0 | 1.1 unknown-never-zero invariant verified; 1.5 Evidence Context scheduled; tax advice claims rejected | **COMPLETED** | Current |
+| Task ID | Component | Task Description | Priority | DoD Exit Criterion | Status | Commit ID |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **MMP15-ENT-001** | Licensing Model | Ed25519 offline license token engine, capacity limits, clock boundaries, grace periods | P0 | Valid signed token evaluates to ACTIVE; tamper rejected | **COMPLETED** | `f852a15` |
+| **MMP15-ADM-001** | License Tooling | Standalone `tools/issue_license.py` for commercial ops with isolated private key | P0 | Deterministic Base64/JSON tokens verifiable offline | **COMPLETED** | `f852a15` |
+| **MMP15-ENT-002** | Entitlement Policy | `CommercialPolicyService` enforcing capacity/tiers; unmetered `/verify` | P0 | Exceeded capacity returns `CASE_CAPACITY_REACHED`; 0 data leak | **COMPLETED** | `843e55c` |
+| **MMP15-DATA-001** | Durability Contract | SQLite WAL mode, `PRAGMA synchronous = FULL`, foreign keys, migrations | P0 | Crash recovery & backup restore deterministic | **COMPLETED** | `e7e7d35` |
+| **MMP15-ORG-001** | Firm Identity | Organization, practitioner, PTIN/EFIN local storage & redaction rules | P1 | Regulated IDs encrypted locally; redacted from diagnostics | **COMPLETED** | `951a89e` |
+| **MMP15-OPS-002** | Version Service | `GET /api/system/version` immutable build SHA, platform & channel metadata | P2 | Zero network inspection; exposed under About screen | **COMPLETED** | `1abe6f1` |
+| **MMP15-OPS-001** | Diagnostic Packager | Schema-first allowlisted `diagnostic.zip` packager (zero PII / PTIN) | P1 | Positive allowlisted export; negative-control regex passes | **COMPLETED** | `eb6d0ca` |
+| **MMP15-AUD-001** | Commercial Audit | Tamper-evident SHA-256 hash-chained `commercial_audit_log` table | P2 | Append-only administrative audit log with chain verification | **COMPLETED** | `eb6d0ca` |
+| **MMP15-INT-001** | E2E Integration | Full commercial lifecycle qualification in air-gapped environment | P0 | 100% test suite pass; 11/11 gates green | **COMPLETED** | `63ba552` |
+| **MMP15-PROD-SAMPLE-001** | Sample Provenance | Central `CaseWritePolicy` immutability & canonical digest verification | P0 | Persisted SQLite provenance check; 0 sample laundering | **COMPLETED** | `33b4c1c` |
+| **MMP15-CORPUS-2025-001** | Challenge Corpus | Decoupled 3-tier corpus & 4-state regulatory oracle framework | P1 | Zero raw input pollution; metamorphic tests green | **ACTIVE** | `2f6e556` |
+| **MMP15-PROD-ARTIFACT-001** | Artifact Provenance | Desktop candidate build from approved main with embedded build info | P0 | Runtime build SHA matches release manifest | **FUNCTIONAL PASS / SIGNING OPEN** | `1abe6f1` |
+| **MMP15-PROD-001** | Commercial Journey | First-time CPA discovery, evaluation, license, case, export, verifier | P0 | 18 production release gates (PROD-GATES) satisfied | **ACTIVE** | `a12323e` |
 
 ---
 

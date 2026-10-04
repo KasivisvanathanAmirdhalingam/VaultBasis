@@ -70,20 +70,20 @@ Automated pre-commit validation pipeline executes via `scripts/validate_before_c
 ```
 =============================================================================================================================================================================================================
                                                                             VAULTBASIS — INDUSTRIAL VALIDATION GATES AUDIT REPORT                                                                            
-                                                    Timestamp: 2026-09-26T16:06:36Z | Standard: Left-Shift Maximum (PRD §64, §71) | Enforce Level: Granite                                                   
+                                                    Timestamp: 2026-10-04T21:29:30Z | Standard: Left-Shift Maximum (PRD §64, §71) | Enforce Level: Granite                                                   
 +===========+============================+==========================+==========================================+==========================================+==========+============================================+
 | GATE ID   | CATEGORY                   | METRICS / NUMBERS        | EXPECTED RESULT                          | ACTUAL RESULT                            | STATUS   | POTENTIAL CAUSE / DIAGNOSTIC               |
 +===========+============================+==========================+==========================================+==========================================+==========+============================================+
-| GATE-01   | Static Code Quality        | 23 files compiled        | 0 syntax or AST errors                   | 0 errors in 23 files (100% clean)        | [PASS]  | N/A (AST parsed cleanly)                   |
-| GATE-02   | Normative Contract         | 25 required / 25 prop... | Draft-07 compliant schema with >= 23 ... | Draft-07 valid (25 required / 25 props)  | [PASS]  | N/A (Schema normative and compliant)       |
+| GATE-01   | Static Code Quality        | 65 files compiled        | 0 syntax or AST errors                   | 0 errors in 65 files (100% clean)        | [PASS]  | N/A (AST parsed cleanly)                   |
+| GATE-02   | Normative Contract         | 24 required / 25 prop... | Draft-07 compliant schema with >= 23 ... | Draft-07 valid (24 required / 25 props)  | [PASS]  | N/A (Schema normative and compliant)       |
 | GATE-03   | Domain Invariants (DDD)    | 11/11 tests passed       | All domain aggregate invariants hold     | 11/11 passed (100% green)                | [PASS]  | N/A (All suite invariants hold)            |
 | GATE-04   | Precision Math & Crypto... | 14/14 tests passed       | Zero float drift & valid Ed25519 sign... | 14/14 passed (100% green)                | [PASS]  | N/A (All suite invariants hold)            |
 | GATE-05   | Acceptance Criteria (BDD)  | 17/17 tests passed       | 100% pass on bounded outcomes, air-gap   | 17/17 passed (100% green)                | [PASS]  | N/A (All suite invariants hold)            |
-| GATE-06   | User Journeys (ATDD)       | 10/10 tests passed       | Multi-lot, provenance & audit journey... | 10/10 passed (100% green)                | [PASS]  | N/A (All suite invariants hold)            |
-| GATE-07   | Parser Invariants (Unit)   | 13/13 tests passed       | Lossless parsing across broker CSV fo... | 13/13 passed (100% green)                | [PASS]  | N/A (All suite invariants hold)            |
-| GATE-08   | Production Navigation      | 9/9 tests passed         | 100% working links, no anchor occlusion  | 9/9 passed (100% green)                  | [PASS]  | N/A (All suite invariants hold)            |
+| GATE-06   | User Journeys (ATDD)       | 17/17 tests passed       | Multi-lot, provenance & audit journey... | 17/17 passed (100% green)                | [PASS]  | N/A (All suite invariants hold)            |
+| GATE-07   | Parser Invariants (Unit)   | 173/173 tests passed     | Lossless parsing across broker CSV fo... | 173/173 passed (100% green)              | [PASS]  | N/A (All suite invariants hold)            |
+| GATE-08   | Production Navigation      | 71/71 tests passed       | 100% working links, no anchor occlusion  | 71/71 passed (100% green)                | [PASS]  | N/A (All suite invariants hold)            |
 | GATE-09   | Independent Verification   | 2/2 fixtures verified    | Valid=PASS (exit 0) | Tampered=FAIL (... | Valid=PASS (exit 0) | Tampered=FAIL (... | [PASS]  | N/A (Cryptographic & schema verificatio... |
-| GATE-10   | Production Build           | 6 distribution files     | Clean build, zero egress/secret leaks... | Bundle built cleanly (6 artifacts, 0 ... | [PASS]  | N/A (Public bundle isolated and audited)   |
+| GATE-10   | Production Build           | 15 distribution files    | Clean build, zero egress/secret leaks... | Bundle built cleanly (15 artifacts, 0... | [PASS]  | N/A (Public bundle isolated and audited)   |
 | GATE-11   | Security & Air-Gap         | 1 keyfiles audited (0... | All Ed25519 private keys strictly chm... | All private keys enforce 0o600 POSIX ... | [PASS]  | N/A (Security boundary intact)             |
 +-----------+----------------------------+--------------------------+------------------------------------------+------------------------------------------+----------+--------------------------------------------+
 
@@ -92,7 +92,8 @@ CATEGORICAL EXECUTION BREAKDOWN & METRICS:
   • Gates Passed (Green)     : 11
   • Gates Failed (Red)       : 0
   • Gates Warning (Yellow)   : 0
-  • Total Automated Tests    : 74 tests across ATDD, BDD, DDD, TDD, Prod, Unit
+  • Total Automated Tests    : 376 tests across ATDD, BDD, DDD, TDD, Prod, Unit
+  • Total Execution Time     : 7.13s
   • Pipeline Pass Rate       : 100.0%
 +===========+============================+==========================+==========================================+==========================================+==========+============================================+
 ✓ ALL PRE-COMMIT GATES SATISFIED — ZERO DRIFT — READY FOR PUSH TO REMOTE.
