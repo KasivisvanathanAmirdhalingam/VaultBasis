@@ -235,3 +235,39 @@ def test_api_firm_identity_invalid_ptin_rejected(client):
     }
     res = client.post("/api/firm/identity", json=payload)
     assert res.status_code == 422
+
+
+def test_regulated_identifier_non_propagation_in_repr_and_exceptions():
+    """
+    CRITICAL SECURITY INVARIANT:
+    repr(), str(), and exception strings containing FirmIdentity MUST NOT leak raw PTIN or EFIN.
+    """
+    ident = FirmIdentity(
+        organization_id="ORG-TEST",
+        firm_name="Test Firm",
+        preparer_id="PREP-01",
+        display_name="Preparer",
+        ptin="P99887766",
+        efin="887766",
+    )
+
+    repr_str = repr(ident)
+    str_val = str(ident)
+
+    # Raw PTIN and EFIN must never appear in repr or str
+    assert "P99887766" not in repr_str
+    assert "887766" not in repr_str
+    assert "P*****766" in repr_str
+    assert "***766" in repr_str
+
+    assert "P99887766" not in str_val
+    assert "887766" not in str_val
+
+    # Simulated exception formatting
+    try:
+        raise ValueError(f"Identity validation failure for entity: {ident}")
+    except ValueError as exc:
+        err_msg = str(exc)
+        assert "P99887766" not in err_msg
+        assert "887766" not in err_msg
+        assert "P*****766" in err_msg

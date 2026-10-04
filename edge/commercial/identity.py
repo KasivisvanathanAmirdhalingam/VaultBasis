@@ -103,6 +103,20 @@ class FirmIdentity(BaseModel):
             "updated_at": self.updated_at,
         }
 
+    def __repr__(self) -> str:
+        masked_ptin = f"P*****{self.ptin[-3:]}" if self.ptin else None
+        masked_efin = f"***{self.efin[-3:]}" if self.efin else None
+        return (
+            f"FirmIdentity(organization_id={self.organization_id!r}, "
+            f"firm_name={self.firm_name!r}, office_id={self.office_id!r}, "
+            f"workspace_id={self.workspace_id!r}, preparer_id={self.preparer_id!r}, "
+            f"display_name={self.display_name!r}, ptin={masked_ptin!r}, "
+            f"efin={masked_efin!r})"
+        )
+
+    def __str__(self) -> str:
+        return self.__repr__()
+
     def to_internal_dict(self) -> Dict[str, Any]:
         """Full internal local storage dictionary."""
         return self.model_dump()

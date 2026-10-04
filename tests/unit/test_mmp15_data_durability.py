@@ -30,10 +30,13 @@ def temp_store(tmp_path):
 
 
 def test_sqlite_pragmas_wal_and_foreign_keys(temp_store):
-    """Asserts that WAL mode, foreign keys, and busy timeout are strictly configured."""
+    """Asserts that WAL mode, foreign keys, synchronous=FULL, and busy timeout are strictly configured."""
     with temp_store._get_connection() as conn:
         journal_mode = conn.execute("PRAGMA journal_mode;").fetchone()[0]
         assert journal_mode.upper() == "WAL"
+
+        synchronous = conn.execute("PRAGMA synchronous;").fetchone()[0]
+        assert synchronous == 2  # 2 corresponds to FULL in SQLite PRAGMA
 
         foreign_keys = conn.execute("PRAGMA foreign_keys;").fetchone()[0]
         assert foreign_keys == 1
@@ -167,3 +170,25 @@ def test_online_backup_and_restore(temp_store, tmp_path):
     assert restored_case is not None
     assert restored_case.client_reference == "Backup Test Client"
     assert temp_store.get_commercial_license() == "TEST-BACKUP-TOKEN-VAL"
+
+
+def test_restore_incompatible_future_version_rejected(temp_store, tmp_path):
+    """Restore must fail safely if the backup comes from an incompatible future schema version."""
+    future_db_file = tmp_path / "future_schema.db"
+    conn = sqlite3.connect(str(future_db_file))
+    conn.execute("CREATE TABLE schema_migrations (version INTEGER PRIMARY KEY, name TEXT, applied_at TEXT);")
+    conn.execute("INSERT INTO schema_migrations VALUES (999, 'future_migration_v999', '2026-10-04T00:00:00Z');")
+    conn.commit()
+    conn.close()
+
+    with pytest.raises(ValueError, match="Incompatible backup schema version 999"):
+        temp_store.restore(future_db_file)
+
+
+def test_restore_corrupt_file_rejected(temp_store, tmp_path):
+    """Restore must fail safely if the backup file is corrupt / invalid SQLite database."""
+    corrupt_file = tmp_path / "corrupt.db"
+    corrupt_file.write_bytes(b"THIS IS NOT A VALID SQLITE DATABASE FILE HEADER")
+
+    with pytest.raises(Exception):
+        temp_store.restore(corrupt_file)

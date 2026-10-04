@@ -25,7 +25,7 @@ class SQLiteStore:
 
     CURRENT_SCHEMA_VERSION = 3
 
-    def __init__(self, db_path: Path, synchronous: str = "NORMAL"):
+    def __init__(self, db_path: Path, synchronous: str = "FULL"):
         self.db_path = Path(db_path)
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self.synchronous = synchronous
@@ -421,12 +421,41 @@ class SQLiteStore:
     def restore(self, backup_path: Path, verify_integrity: bool = True) -> bool:
         """
         Restores the active database from a point-in-time backup snapshot.
-        Optionally verifies the restored database integrity.
+        Strict Recovery Contract:
+        1. Pre-validates backup snapshot integrity before applying.
+        2. Validates backup schema compatibility (cannot restore incompatible newer schema versions).
+        3. Restores snapshot atomically into live storage.
+        4. Verifies post-restore integrity and foreign key constraints.
         """
         src_path = Path(backup_path)
         if not src_path.is_file():
             raise FileNotFoundError(f"Backup file not found: '{backup_path}'")
 
+        # 1. Pre-flight integrity validation on backup snapshot
+        pre_conn = sqlite3.connect(str(src_path))
+        try:
+            pre_check = pre_conn.execute("PRAGMA integrity_check;").fetchall()
+            if not pre_check or pre_check[0][0].lower() != "ok":
+                raise ValueError(f"Backup file corruption detected: {pre_check}")
+
+            # Check schema version compatibility
+            try:
+                cur = pre_conn.cursor()
+                cur.execute("SELECT MAX(version) FROM schema_migrations")
+                row = cur.fetchone()
+                backup_version = row[0] if row and row[0] is not None else 1
+                if backup_version > self.CURRENT_SCHEMA_VERSION:
+                    raise ValueError(
+                        f"Incompatible backup schema version {backup_version}. "
+                        f"Current runtime supports up to version {self.CURRENT_SCHEMA_VERSION}."
+                    )
+            except sqlite3.OperationalError:
+                # schema_migrations table might not exist in un-migrated legacy backup
+                pass
+        finally:
+            pre_conn.close()
+
+        # 2. Atomic restore into live store
         backup_conn = sqlite3.connect(str(src_path))
         try:
             with self._get_connection() as live_conn:
@@ -434,8 +463,11 @@ class SQLiteStore:
         finally:
             backup_conn.close()
 
+        # 3. Post-restore health verification
         if verify_integrity:
             diag = self.check_integrity()
+            if not diag["healthy"]:
+                raise RuntimeError(f"Post-restore integrity check failed: {diag}")
             return diag["healthy"]
         return True
 
