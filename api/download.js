@@ -72,11 +72,19 @@ module.exports = async (req, res) => {
   }
 
   // Release State Lifecycle Gate
+  // Canonical release authority derives from distribution_status (or release_state).
   // Valid lifecycle: BUILD_CREATED | FUNCTIONALLY_QUALIFIED | TRUST_QUALIFIED | RELEASE_MANIFEST_FROZEN | DISTRIBUTION_ACTIVE | SUPERSEDED | REVOKED
-  const releaseState = (manifest.distribution_status || manifest.release_state || (manifest.active === false ? 'INACTIVE' : 'DISTRIBUTION_ACTIVE')).toUpperCase();
-  if (manifest.active === false || manifest.is_active === false) {
-    return res.status(403).json({ error: 'This release is not currently authorized for distribution.' });
+  const releaseState = (manifest.distribution_status || manifest.release_state || 'UNSPECIFIED').toUpperCase();
+
+  // Canonical Authority Invariant: If legacy active boolean exists, enforce state == DISTRIBUTION_ACTIVE <=> active == true.
+  if (typeof manifest.active === 'boolean') {
+    const isStateActive = (releaseState === 'DISTRIBUTION_ACTIVE');
+    if (manifest.active !== isStateActive) {
+      console.error('Release authority conflict: state/active boolean divergence detected.');
+      return res.status(403).json({ error: 'This release manifest has a conflicting authorization state.' });
+    }
   }
+
   if (releaseState === 'REVOKED') {
     return res.status(410).json({ error: 'This release has been revoked for security or integrity reasons.' });
   }

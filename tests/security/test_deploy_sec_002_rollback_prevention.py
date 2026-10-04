@@ -180,9 +180,11 @@ def test_inactive_release_denies_distribution_across_all_non_active_states():
         }
         # Evaluation function replicating download.js gate
         def check_authorization(m):
-            rel_state = (m.get("distribution_status") or m.get("release_state") or ("INACTIVE" if m.get("active") is False else "DISTRIBUTION_ACTIVE")).upper()
-            if m.get("active") is False or m.get("is_active") is False:
-                return False, 403, "This release is not currently authorized for distribution."
+            rel_state = (m.get("distribution_status") or m.get("release_state") or "UNSPECIFIED").upper()
+            if isinstance(m.get("active"), bool):
+                is_state_active = (rel_state == "DISTRIBUTION_ACTIVE")
+                if m.get("active") != is_state_active:
+                    return False, 403, "This release manifest has a conflicting authorization state."
             if rel_state == "REVOKED":
                 return False, 410, "This release has been revoked for security or integrity reasons."
             if rel_state == "SUPERSEDED":
@@ -197,6 +199,73 @@ def test_inactive_release_denies_distribution_across_all_non_active_states():
             assert status_code == 410
         else:
             assert status_code == 403
+
+
+def test_canonical_authority_state_boolean_conflict_rejection():
+    """
+    Canonical Authority Invariant:
+    state == DISTRIBUTION_ACTIVE <=> active == true.
+    If state is DISTRIBUTION_ACTIVE but active=False, or state is SUPERSEDED but active=True,
+    the resolver detects authority conflict and DENIES distribution.
+    """
+    valid_sha = "dc8de90d20ed6c7b78f2b39bc501909e7706c8de7540c4d48a43cc9c26a92e67"
+    
+    # Conflict 1: Active state but active=False
+    conflict_manifest_1 = {
+        "manifest_version": "1",
+        "distribution_status": "DISTRIBUTION_ACTIVE",
+        "active": False,
+        "artifacts": {"macos-arm64": {"sha256": valid_sha}}
+    }
+    # Conflict 2: Superseded state but active=True
+    conflict_manifest_2 = {
+        "manifest_version": "1",
+        "distribution_status": "SUPERSEDED",
+        "active": True,
+        "artifacts": {"macos-arm64": {"sha256": valid_sha}}
+    }
+    # Consistent 1: Active state with active=True
+    consistent_active = {
+        "manifest_version": "1",
+        "distribution_status": "DISTRIBUTION_ACTIVE",
+        "active": True,
+        "artifacts": {"macos-arm64": {"sha256": valid_sha}}
+    }
+    # Consistent 2: Superseded state with active=False
+    consistent_superseded = {
+        "manifest_version": "1",
+        "distribution_status": "SUPERSEDED",
+        "active": False,
+        "artifacts": {"macos-arm64": {"sha256": valid_sha}}
+    }
+
+    def check_authorization(m):
+        rel_state = (m.get("distribution_status") or m.get("release_state") or "UNSPECIFIED").upper()
+        if isinstance(m.get("active"), bool):
+            is_state_active = (rel_state == "DISTRIBUTION_ACTIVE")
+            if m.get("active") != is_state_active:
+                return False, 403, "This release manifest has a conflicting authorization state."
+        if rel_state == "REVOKED":
+            return False, 410, "This release has been revoked for security or integrity reasons."
+        if rel_state == "SUPERSEDED":
+            return False, 403, "This release is superseded. Please request the currently active release."
+        if rel_state != "DISTRIBUTION_ACTIVE":
+            return False, 403, "This release is not currently authorized for distribution."
+        return True, 200, "Authorized"
+
+    # Conflicts fail closed
+    auth_1, code_1, err_1 = check_authorization(conflict_manifest_1)
+    assert not auth_1 and code_1 == 403 and "conflicting" in err_1
+
+    auth_2, code_2, err_2 = check_authorization(conflict_manifest_2)
+    assert not auth_2 and code_2 == 403 and "conflicting" in err_2
+
+    # Consistent cases evaluate strictly per lifecycle
+    auth_3, code_3, _ = check_authorization(consistent_active)
+    assert auth_3 and code_3 == 200
+
+    auth_4, code_4, _ = check_authorization(consistent_superseded)
+    assert not auth_4 and code_4 == 403
 
 
 def test_download_resolver_toctou_defense():
