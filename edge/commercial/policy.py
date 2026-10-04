@@ -10,6 +10,7 @@ Architectural Invariants:
 5. Historical Data Preservation: Expired or invalid license NEVER blocks reading existing cases or exporting evidence.
 """
 
+import hashlib
 import os
 import uuid
 from datetime import datetime, timezone
@@ -27,6 +28,30 @@ from edge.commercial.models import (
     LicenseTier,
 )
 from edge.storage.sqlite_store import SQLiteStore
+
+
+# Canonical baseline sample definitions for authentic provenance verification
+_SAMPLE_1099DA_CANONICAL = b"""Property,Date sold,Proceeds,Date acquired,Cost basis,Box 2
+BTC,2025-11-20,18400.00,2025-02-11,12100.00,YES
+ETH,2025-12-05,3200.00,2025-03-01,2800.00,YES
+SOL,2025-08-14,4500.00,2025-01-10,,NO
+AVAX,2025-09-10,9950.00,2025-01-01,8000.00,YES
+LINK,2025-10-01,1500.00,2025-04-01,1200.00,YES
+"""
+
+_SAMPLE_KOINLY_CANONICAL = b"""Date,Asset,Amount,Cost basis,Proceeds,Gain / loss,Date acquired
+2025-11-20,BTC,1.0,16300.00,18400.00,2100.00,2025-02-11
+2025-12-05,ETH,1.0,2800.00,3200.00,400.00,2025-03-01
+2025-08-14,SOL,30.0,4000.00,4500.00,500.00,2025-01-10
+2025-09-10,AVAX,500.0,8000.00,10000.00,2000.00,2025-01-01
+2025-10-01,LINK,100.0,1200.00,1500.00,300.00,2025-04-01
+"""
+
+CANONICAL_SAMPLE_A_DIGEST = hashlib.sha256(_SAMPLE_1099DA_CANONICAL + _SAMPLE_KOINLY_CANONICAL).hexdigest()
+
+KNOWN_AUTHENTIC_SAMPLE_DIGESTS: Dict[str, str] = {
+    "SAMPLE-A-2025-01": CANONICAL_SAMPLE_A_DIGEST,
+}
 
 
 class CaseWritePolicy:
@@ -287,18 +312,22 @@ class CommercialPolicyService:
 
         # 0.1 Bundled sample case unmetered evaluation (Onboarding & Evaluation Invariant)
         # Provenance invariant: Only authentic BUNDLED_SAMPLE cases are unmetered.
-        # Provenance is resolved authoritatively from persisted database state if case_id exists.
-        # Caller-supplied context cannot spoof provenance for a PRODUCTION case.
+        # Provenance and manifest digests are resolved authoritatively from persisted database state.
         case_id = (context or {}).get("case_id")
-        resolved_kind = "PRODUCTION"
+        is_authentic_sample = False
         if case_id and self.store:
             persisted_case = self.store.get_case(case_id)
-            if persisted_case:
-                resolved_kind = getattr(persisted_case, "case_kind", "PRODUCTION") or "PRODUCTION"
+            if persisted_case and getattr(persisted_case, "case_kind", "PRODUCTION") == "BUNDLED_SAMPLE":
+                def_id = getattr(persisted_case, "sample_definition_id", None)
+                digest = getattr(persisted_case, "sample_manifest_digest", None)
+                expected_digest = KNOWN_AUTHENTIC_SAMPLE_DIGESTS.get(def_id)
+                if expected_digest and digest == expected_digest:
+                    is_authentic_sample = True
         elif (context or {}).get("case_kind") == "BUNDLED_SAMPLE" and not case_id:
-            resolved_kind = "BUNDLED_SAMPLE"
+            # Internal test fixture
+            is_authentic_sample = True
 
-        if resolved_kind == "BUNDLED_SAMPLE":
+        if is_authentic_sample:
             return CommercialPolicyDecision(
                 allowed=True,
                 http_status=200,

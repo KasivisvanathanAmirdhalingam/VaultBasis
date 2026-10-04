@@ -552,3 +552,33 @@ def test_clone_sample_to_production_requires_license_and_consumes_capacity(clean
     assert res_next.json()["error"]["code"] == "CASE_CAPACITY_REACHED"
 
 
+def test_adversarial_tampered_sample_manifest_digest_denied_without_license(clean_commercial_env, client):
+    """
+    Sample Digest Verification Invariant:
+    A case claiming case_kind='BUNDLED_SAMPLE' but possessing an altered, forged,
+    or mismatched sample_manifest_digest fails closed (402 ENTITLEMENT_REQUIRED).
+    """
+    policy, store, _ = clean_commercial_env
+    now_utc = datetime.now(timezone.utc).isoformat()
+
+    # Save a forged sample case with invalid manifest digest
+    forged_sample = CanonicalCase(
+        case_id="CASE-FORGED-SAMPLE-001",
+        client_reference="Forged Sample Data",
+        tax_year=2025,
+        jurisdiction="US",
+        case_status="CREATED",
+        case_kind="BUNDLED_SAMPLE",
+        sample_definition_id="SAMPLE-A-2025-01",
+        sample_manifest_digest="0000000000000000000000000000000000000000000000000000000000000000",  # Forged digest
+        created_at=now_utc,
+        updated_at=now_utc
+    )
+    store.save_case(forged_sample)
+
+    res_recon = client.post("/api/cases/CASE-FORGED-SAMPLE-001/reconcile")
+    assert res_recon.status_code == 402
+    assert res_recon.json()["error"]["code"] == "ENTITLEMENT_REQUIRED"
+
+
+
