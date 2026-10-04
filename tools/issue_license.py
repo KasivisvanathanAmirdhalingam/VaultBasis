@@ -71,6 +71,7 @@ def build_license_payload(
     entitlements: Optional[List[str]] = None,
     key_id: str = "k1",
     not_before_dt: Optional[datetime] = None,
+    revision: int = 1,
 ) -> Dict[str, Any]:
     """
     Constructs a normalized license payload dictionary.
@@ -95,6 +96,7 @@ def build_license_payload(
         "grace_until": grace_until,
         "tier": tier,
         "max_cases_per_installation": max_cases,
+        "revision": revision,
         "entitlements": entitlements or default_entitlements,
         "installation_id": installation_id,
         "key_id": key_id,
@@ -123,6 +125,7 @@ def issue_commercial_license(
     not_before: Optional[str] = None,
     expires_at: Optional[str] = None,
     grace_until: Optional[str] = None,
+    revision: int = 1,
     output_format: str = "base64",
 ) -> str:
     """Programmatically issues a signed commercial license token string."""
@@ -137,6 +140,7 @@ def issue_commercial_license(
         installation_id=installation_id,
         entitlements=entitlements,
         key_id=key_id,
+        revision=revision,
     )
     if issued_at:
         payload["issued_at"] = issued_at

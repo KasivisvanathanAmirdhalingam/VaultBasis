@@ -75,6 +75,7 @@ class LicensePayload(BaseModel):
     grace_until: str = Field(..., description="ISO 8601 UTC timestamp when grace period terminates")
     tier: LicenseTier = Field(..., description="Commercial plan tier")
     max_cases_per_installation: int = Field(..., gt=0, description="Strict local installation case limit")
+    revision: int = Field(1, ge=1, description="Monotonic license revision number")
     entitlements: List[str] = Field(default_factory=list, description="Explicit feature flags granted")
     installation_id: Optional[str] = Field(None, description="Optional bound installation hash")
     key_id: str = Field(..., description="Key identifier for the signing key")
