@@ -78,10 +78,13 @@ During UAT and production operations, non-happy path conditions must map determi
 
 ---
 
-## 5. Post-Session Qualitative Assessment
+## 5. Qualitative Assessment & Essential Trust Signals
 
 * **Trust Level Before Download (1–5):** `[   ]`
 * **Trust Level After Running Sample (1–5):** `[   ]`
+* **Primary Trust Driver / Blocker:** `[ ] Publisher Identity / Signature  [ ] OS Security Warning  [ ] Website Assurance / Trust Center  [ ] Enterprise IT Docs  [ ] Email Legitimacy  [ ] Other: ____________`
+* **License Mode Comprehension:** *Did the participant understand what changes between unmetered evaluation mode and licensed production mode?* `[ ] Fully Understood  [ ] Partially  [ ] Confused`
+* **Independent Verification Comprehension:** *Did the participant understand that the verifier runs independently offline and what a PASS actually proves?* `[ ] Fully Understood  [ ] Partially  [ ] Confused`
 * **Value Comprehension:** `[ ] Fully Clear  [ ] Partially Clear  [ ] Confused`
 * **Willingness to Purchase:** `[ ] Definitely Yes  [ ] Probably Yes  [ ] Unsure  [ ] No`
 * **Price Sensitivity Feedback:** `_________________________________________________________`
@@ -89,10 +92,13 @@ During UAT and production operations, non-happy path conditions must map determi
 
 ---
 
-## 6. Qualification & Release Promotion Rule
+## 6. Qualification, Triage & Release Promotion Rule
 
 $$\texttt{MMP15-PROD-UAT-001 PASS} \implies \texttt{MMP-1.5 PRODUCTION-QUALIFIED}$$
 $$\implies \texttt{Stabilization / Defect Triage Window} \implies \texttt{Commercial Launch} \implies \texttt{MMP-2 Unlock}$$
 
-- **Zero-Intervention Threshold:** If any stage receives `FAIL_ZERO_INTERVENTION` or `BLOCKED_BY_PRODUCT`, it generates an immediate P0/P1 remediation ticket.
-- **Production Qualification:** Requires 100% stage pass rate across the full platform quota ($\ge 2$ Win, $\ge 2$ Mac, $\ge 1$ Enterprise).
+### Triage & Qualification Rules:
+1. **Zero-Intervention Rule:** If any stage receives `FAIL_ZERO_INTERVENTION` or `BLOCKED_BY_PRODUCT`, it generates an immediate P0/P1 remediation requirement.
+2. **Hesitation Clustering:** `PASS_WITH_HESITATION` is an active qualitative signal. If $\ge 2$ participants exhibit hesitation at the same stage, a remediation item is opened prior to commercial launch.
+3. **Environment Blocks as Enterprise Feedback:** `BLOCKED_BY_ENVIRONMENT` (e.g. corporate EDR/MDM block) is treated as an actionable enterprise-readiness defect requiring IT documentation/profile refinement.
+4. **Platform Quota Requirement:** Production Qualification requires 100% stage completion across the full quota ($\ge 2$ clean Windows x64, $\ge 2$ clean Apple Silicon macOS arm64, $\ge 1$ Enterprise/Managed endpoint).
