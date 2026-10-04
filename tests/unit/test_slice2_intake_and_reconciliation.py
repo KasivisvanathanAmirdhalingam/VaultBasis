@@ -181,3 +181,69 @@ def test_fastapi_e2e_endpoints(sample_1099da_csv, sample_koinly_csv):
     assert report["overall_status"] == "PASS"
     assert report["checks"]["signature_authenticity"] == "PASS"
     assert report["checks"]["schema_conformance"] == "PASS"
+
+
+@pytest.mark.regression
+def test_evidence_bundle_export_encoding_invariance(monkeypatch):
+    """
+    Focused regression test for MMP11-DIST-WIN-003:
+    Proves that export_evidence_bundle succeeds and outputs a valid ZIP archive
+    containing UTF-8 text assets even when the host default encoding is cp1252 (Windows ANSI).
+    """
+    import io
+    import zipfile
+
+    client = TestClient(app)
+
+    # 1. Ensure sample case is loaded and reconciled
+    load_res = client.post("/api/sample-case/load")
+    assert load_res.status_code == 200
+    recon_res = client.post("/api/cases/CASE-SAMPLE-2025/reconcile")
+    assert recon_res.status_code == 200
+
+    # 2. Simulate Windows host environment where default text reading (encoding=None) uses cp1252
+    orig_read_text = Path.read_text
+
+    def cp1252_default_read_text(self, encoding=None, errors=None):
+        eff_encoding = encoding or "cp1252"
+        return orig_read_text(self, encoding=eff_encoding, errors=errors)
+
+    monkeypatch.setattr(Path, "read_text", cp1252_default_read_text)
+
+    # 3. Export evidence bundle under simulated cp1252 host default locale
+    res_export = client.get("/api/cases/CASE-SAMPLE-2025/export")
+    assert res_export.status_code == 200
+    assert res_export.headers["content-type"] == "application/zip"
+
+    # 4. Open and inspect ZIP contents
+    zip_buffer = io.BytesIO(res_export.content)
+    with zipfile.ZipFile(zip_buffer, "r") as zf:
+        namelist = zf.namelist()
+        assert "receipt-v0.1.json" in namelist
+        assert "schemas/receipt-v0.1.json" in namelist
+        assert "verify_receipt.py" in namelist
+        assert "technical-verification/verify_receipt.py" in namelist
+        assert "VERIFY_INSTRUCTIONS.txt" in namelist
+
+        # 5. Assert verifier and schema decode cleanly as UTF-8 with non-ASCII symbols intact
+        verifier_content = zf.read("verify_receipt.py").decode("utf-8")
+        assert "VaultBasis" in verifier_content
+        assert "❌" in verifier_content
+        assert "—" in verifier_content
+
+        schema_content = zf.read("schemas/receipt-v0.1.json").decode("utf-8")
+        assert "$schema" in schema_content
+
+
+@pytest.mark.regression
+def test_evidence_bundle_export_negative_control():
+    """
+    Negative control for MMP11-DIST-WIN-003:
+    Demonstrates that reading verify_receipt.py with cp1252 (omitted explicit encoding on Windows)
+    fails with UnicodeDecodeError due to UTF-8 multi-byte characters.
+    """
+    verifier_path = Path(__file__).resolve().parent.parent.parent / "apps" / "verifier" / "verify_receipt.py"
+    assert verifier_path.is_file()
+    with pytest.raises(UnicodeDecodeError) as exc_info:
+        verifier_path.read_text(encoding="cp1252")
+    assert "charmap" in str(exc_info.value) or "codec" in str(exc_info.value)

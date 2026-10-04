@@ -13,6 +13,7 @@ successfully on the native CI runner, both pre-ZIP and post-ZIP-extraction,
 under both piped stdio and disconnected windowed (DEVNULL) modes.
 """
 import hashlib
+import io
 import json
 import os
 import shutil
@@ -32,6 +33,8 @@ PACKAGE_NAME = "VaultBasis-RC3-Windows-x64"
 ROOT_URL = "http://127.0.0.1:8000/"
 HEALTH_URL = "http://127.0.0.1:8000/api/health"
 SAMPLE_URL = "http://127.0.0.1:8000/api/sample-case/load"
+RECONCILE_URL = "http://127.0.0.1:8000/api/cases/CASE-SAMPLE-2025/reconcile"
+EXPORT_URL = "http://127.0.0.1:8000/api/cases/CASE-SAMPLE-2025/export"
 LAUNCH_TIMEOUT_S = 30
 POLL_INTERVAL_S = 1
 
@@ -39,7 +42,8 @@ POLL_INTERVAL_S = 1
 def launch_gate(exe_path: Path, label: str, disconnected_stdio: bool = False) -> None:
     """
     Launch VaultBasis.exe, wait for the health endpoint, verify root dashboard (GET /)
-    renders without 500 errors, test sample case load, then terminate cleanly.
+    renders without 500 errors, load sample case, execute reconciliation, export and validate
+    Evidence Bundle ZIP archive contents, then terminate cleanly.
     Tests standard launch and explorer-equivalent (disconnected stdio) launch.
     Raises SystemExit(1) on any failure.
     """
@@ -64,28 +68,57 @@ def launch_gate(exe_path: Path, label: str, disconnected_stdio: bool = False) ->
     healthy = False
     dashboard_ok = False
     sample_ok = False
+    reconcile_ok = False
+    export_ok = False
     last_err = None
     while time.monotonic() < deadline:
         try:
-            with urllib.request.urlopen(HEALTH_URL, timeout=2) as resp:
-                if resp.status == 200:
-                    health_body = resp.read().decode("utf-8")
-                    if '"HEALTHY"' in health_body:
-                        healthy = True
-            if healthy:
+            if not healthy:
+                with urllib.request.urlopen(HEALTH_URL, timeout=2) as resp:
+                    if resp.status == 200:
+                        health_body = resp.read().decode("utf-8")
+                        if '"HEALTHY"' in health_body:
+                            healthy = True
+            if healthy and not dashboard_ok:
                 with urllib.request.urlopen(ROOT_URL, timeout=2) as resp:
                     if resp.status == 200:
                         dash_body = resp.read().decode("utf-8")
                         if "VaultBasis Edge" in dash_body:
                             dashboard_ok = True
+            if healthy and dashboard_ok and not sample_ok:
                 req = urllib.request.Request(SAMPLE_URL, data=b"", method="POST")
                 with urllib.request.urlopen(req, timeout=2) as resp:
                     if resp.status == 200:
                         sample_body = resp.read().decode("utf-8")
                         if "CASE-SAMPLE-2025" in sample_body:
                             sample_ok = True
-                if healthy and dashboard_ok and sample_ok:
-                    break
+            if healthy and dashboard_ok and sample_ok and not reconcile_ok:
+                req = urllib.request.Request(RECONCILE_URL, data=b"", method="POST")
+                with urllib.request.urlopen(req, timeout=2) as resp:
+                    if resp.status == 200:
+                        recon_data = json.loads(resp.read().decode("utf-8"))
+                        if recon_data.get("status") in ("RECONCILED", "RECEIPT_ALREADY_ISSUED") and bool(recon_data.get("receipt_id")):
+                            reconcile_ok = True
+            if healthy and dashboard_ok and sample_ok and reconcile_ok and not export_ok:
+                with urllib.request.urlopen(EXPORT_URL, timeout=5) as resp:
+                    if resp.status == 200:
+                        content_type = resp.headers.get("Content-Type", "")
+                        if "application/zip" in content_type:
+                            zip_bytes = resp.read()
+                            if zip_bytes:
+                                with zipfile.ZipFile(io.BytesIO(zip_bytes)) as zf:
+                                    members = zf.namelist()
+                                    required_members = [
+                                        "receipt-v0.1.json",
+                                        "schemas/receipt-v0.1.json",
+                                        "verify_receipt.py",
+                                        "technical-verification/verify_receipt.py",
+                                        "VERIFY_INSTRUCTIONS.txt",
+                                    ]
+                                    if all(m in members for m in required_members):
+                                        export_ok = True
+            if healthy and dashboard_ok and sample_ok and reconcile_ok and export_ok:
+                break
         except Exception as e:
             last_err = e
         time.sleep(POLL_INTERVAL_S)
@@ -127,7 +160,17 @@ def launch_gate(exe_path: Path, label: str, disconnected_stdio: bool = False) ->
         print(f"  Last error: {last_err}")
         sys.exit(1)
 
-    print(f"  PASS: health, root dashboard (GET /), and sample case responded cleanly within deadline")
+    if not reconcile_ok:
+        print(f"  FAIL: sample case reconcile POST /api/cases/CASE-SAMPLE-2025/reconcile did not return valid status within {LAUNCH_TIMEOUT_S}s")
+        print(f"  Last error: {last_err}")
+        sys.exit(1)
+
+    if not export_ok:
+        print(f"  FAIL: evidence bundle export GET /api/cases/CASE-SAMPLE-2025/export did not return valid ZIP with required members within {LAUNCH_TIMEOUT_S}s")
+        print(f"  Last error: {last_err}")
+        sys.exit(1)
+
+    print(f"  PASS: health, root dashboard (GET /), sample case, reconcile, and evidence bundle export verified cleanly within deadline")
     print(f"  Process exit code: {proc.returncode}")
 
 

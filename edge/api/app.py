@@ -454,7 +454,7 @@ def export_evidence_bundle(case_id: str):
         # 2. Normative JSON Schema
         schema_path = RESOURCE_BASE / "schemas" / "receipt" / "receipt-v0.1.json"
         if schema_path.exists():
-            zip_file.writestr("schemas/receipt-v0.1.json", schema_path.read_text())
+            zip_file.writestr("schemas/receipt-v0.1.json", schema_path.read_text(encoding="utf-8"))
         # 3. Source Evidence Files
         for source_id, s_meta in case.sources.items():
             raw_bytes = db_store.get_source_file_bytes(source_id)
@@ -463,8 +463,8 @@ def export_evidence_bundle(case_id: str):
         # 4. Secondary Technical Verification Tooling (clearly placed)
         verifier_cli_path = RESOURCE_BASE / "apps" / "verifier" / "verify_receipt.py"
         if verifier_cli_path.exists():
-            zip_file.writestr("verify_receipt.py", verifier_cli_path.read_text())
-            zip_file.writestr("technical-verification/verify_receipt.py", verifier_cli_path.read_text())
+            zip_file.writestr("verify_receipt.py", verifier_cli_path.read_text(encoding="utf-8"))
+            zip_file.writestr("technical-verification/verify_receipt.py", verifier_cli_path.read_text(encoding="utf-8"))
         # 5. Verification Readme
         zip_file.writestr(
             "VERIFY_INSTRUCTIONS.txt",
