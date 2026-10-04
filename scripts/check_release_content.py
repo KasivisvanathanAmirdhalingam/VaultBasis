@@ -167,6 +167,57 @@ def check_zip_relative_links(names: list, zf) -> list:
     return failures
 
 
+# Windows distribution package hygiene contracts (PRD §64, §71, MMP11-DIST-WIN-004)
+# Exact relative paths expected within the top-level package directory
+WINDOWS_REQUIRED_MEMBERS = [
+    "RELEASE.txt",
+    "VaultBasis-Quick-Start.html",
+    "VaultBasis-Troubleshooting.html",
+    "VaultBasis/VaultBasis.exe",
+    "VaultBasis/_internal/apps/web-dashboard/index.html",
+    "VaultBasis/_internal/apps/edge-offline-verifier/index.html",
+    "VaultBasis/_internal/apps/verifier/verify_receipt.py",
+    "VaultBasis/_internal/schemas/receipt/receipt-v0.1.json",
+    "VaultBasis/_internal/docs/scope_and_limitations_v0.1.md",
+    "VaultBasis/_internal/sample/golden_receipt_valid.json",
+    "VaultBasis/_internal/sample/golden_receipt_tampered.json",
+]
+
+WINDOWS_FORBIDDEN_CATEGORY_PATTERNS = [
+    "_internal/docs/adr/",
+    "_internal/docs/audit/",
+    "_internal/docs/qualification/",
+    "_internal/docs/commercial/",
+    "_internal/docs/roadmap/",
+    "_internal/docs/product/",
+    "_internal/docs/assurance/",
+    "_internal/docs/master_tasks_ledger.md",
+    "_internal/docs/mmp11_task_ledger.md",
+    "_internal/tasks_ledger.md",
+    "_internal/apps/web-marketing/api/",
+    "_internal/apps/web-verifier/",
+    "_internal/schemas/canonical/",
+    "_internal/schemas/receipt/canonicalization-v0.1.md",
+    "_internal/schemas/receipt/signing-v0.1.md",
+    "_internal/schemas/receipt/verification-v0.1.md",
+    "_internal/schemas/receipt/equivalence-projection-v0.1.json",
+    "_internal/schemas/release/",
+]
+
+
+# Mach-O and Universal/FAT binary magic signatures (32-bit, 64-bit, little & big endian)
+MACHO_MAGICS = (
+    b"\xcf\xfa\xed\xfe",  # Mach-O 64-bit LE
+    b"\xfe\xed\xfa\xcf",  # Mach-O 64-bit BE
+    b"\xce\xfa\xed\xfe",  # Mach-O 32-bit LE
+    b"\xfe\xed\xfa\xce",  # Mach-O 32-bit BE
+    b"\xca\xfe\xba\xbe",  # FAT Mach-O BE
+    b"\xbe\xba\xfe\xca",  # FAT Mach-O LE
+    b"\xca\xfe\xba\xbf",  # FAT 64-bit BE
+    b"\xbf\xba\xfe\xca",  # FAT 64-bit LE
+)
+
+
 def check_zip(zip_path: Path) -> list:
     """Inspect an RC3 candidate ZIP. Returns failure strings; empty = PASS."""
     failures = []
@@ -174,7 +225,7 @@ def check_zip(zip_path: Path) -> list:
         return [f"ZIP not found: {zip_path}"]
     try:
         with zipfile.ZipFile(zip_path) as zf:
-            names = zf.namelist()
+            names = set(zf.namelist())
             # Banned filenames
             for name in names:
                 for banned in ZIP_BANNED_NAMES:
@@ -199,7 +250,44 @@ def check_zip(zip_path: Path) -> list:
                                 f"ZIP-SHELL-BANNED {banned!r} in Quick Start member {name}"
                             )
             # Relative link integrity: every local href/src must resolve within the ZIP
-            failures.extend(check_zip_relative_links(names, zf))
+            failures.extend(check_zip_relative_links(list(names), zf))
+
+            # Platform-specific package hygiene checks
+            is_windows = any(n.endswith("VaultBasis.exe") for n in names) or "Windows" in zip_path.name
+            if is_windows:
+                # Resolve package root directory prefix containing VaultBasis/VaultBasis.exe deterministically
+                pkg_root = ""
+                for n in sorted(names):
+                    if n.endswith("VaultBasis/VaultBasis.exe"):
+                        pkg_root = n[:-len("VaultBasis/VaultBasis.exe")].rstrip("/")
+                        break
+                    elif n == "VaultBasis.exe" or n.endswith("/VaultBasis.exe"):
+                        pkg_root = n[:-len("VaultBasis.exe")].rstrip("/")
+                        break
+
+                # 1. Positive required resource contract (exact path resolution)
+                for req in WINDOWS_REQUIRED_MEMBERS:
+                    expected_member = f"{pkg_root}/{req}" if pkg_root else req
+                    if expected_member not in names:
+                        failures.append(f"ZIP-MISSING-REQUIRED Windows member at expected path: {expected_member}")
+
+                # 2. Narrowly named forbidden repository categories
+                for name in names:
+                    for forbidden in WINDOWS_FORBIDDEN_CATEGORY_PATTERNS:
+                        if forbidden in name:
+                            failures.append(f"ZIP-FORBIDDEN-CATEGORY '{forbidden}' leaked in member {name}")
+
+                # 3. Foreign-platform executable/bundle checks in Windows package
+                for name in names:
+                    if name.endswith(".app") or ".app/" in name or name.endswith("/Contents/MacOS/VaultBasis"):
+                        failures.append(f"ZIP-CROSS-PLATFORM-LEAKAGE macOS .app bundle path in Windows ZIP: {name}")
+                    elif not name.endswith("/"):
+                        try:
+                            head = zf.read(name)[:4]
+                            if head in MACHO_MAGICS:
+                                failures.append(f"ZIP-CROSS-PLATFORM-LEAKAGE Mach-O binary in Windows ZIP: {name}")
+                        except Exception:
+                            pass
     except zipfile.BadZipFile as e:
         failures.append(f"ZIP unreadable: {e}")
     return failures

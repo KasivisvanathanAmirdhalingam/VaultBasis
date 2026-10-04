@@ -261,6 +261,15 @@ def list_cases():
     return db_store.list_cases()
 
 
+@app.delete("/api/cases/{case_id}")
+def delete_case(case_id: str):
+    case = db_store.get_case(case_id)
+    if not case:
+        raise HTTPException(status_code=404, detail=f"Case '{case_id}' not found")
+    db_store.delete_case(case_id)
+    return {"status": "DELETED", "case_id": case_id}
+
+
 @app.get("/api/cases/{case_id}")
 def get_case(case_id: str):
     case = db_store.get_case(case_id)
@@ -445,18 +454,13 @@ def export_evidence_bundle(case_id: str):
         # 2. Normative JSON Schema
         schema_path = RESOURCE_BASE / "schemas" / "receipt" / "receipt-v0.1.json"
         if schema_path.exists():
-            zip_file.writestr("schemas/receipt-v0.1.json", schema_path.read_text())
+            zip_file.writestr("schemas/receipt-v0.1.json", schema_path.read_text(encoding="utf-8"))
         # 3. Source Evidence Files
         for source_id, s_meta in case.sources.items():
             raw_bytes = db_store.get_source_file_bytes(source_id)
             if raw_bytes:
                 zip_file.writestr(f"evidence/{source_id}_{s_meta.filename}", raw_bytes)
-        # 4. Secondary Technical Verification Tooling (clearly placed)
-        verifier_cli_path = RESOURCE_BASE / "apps" / "verifier" / "verify_receipt.py"
-        if verifier_cli_path.exists():
-            zip_file.writestr("verify_receipt.py", verifier_cli_path.read_text())
-            zip_file.writestr("technical-verification/verify_receipt.py", verifier_cli_path.read_text())
-        # 5. Verification Readme
+        # 4. Verification Readme (strictly practitioner guidance and schema instructions; zero implementation code)
         zip_file.writestr(
             "VERIFY_INSTRUCTIONS.txt",
             f"""VAULTBASIS OUTCOME RECEIPT VERIFICATION INSTRUCTIONS
@@ -472,8 +476,9 @@ PRIMARY PRACTITIONER PATH (GUI / Offline Verifier):
 3. Review the automated verification checklist (Schema Conformance, Contract Version, Key Consistency, Signature Verification).
 
 SECONDARY TECHNICAL AUDIT PATH (Air-gapped Python CLI):
-For independent technical auditors wishing to verify via command line:
-1. python3 verify_receipt.py receipt-v0.1.json --evidence-dir evidence/
+For independent technical auditors wishing to verify via command line using the standalone verifier utility provided in the VaultBasis distribution or repository:
+1. Run verify_receipt.py against the exported receipt and evidence folder:
+   python3 verify_receipt.py receipt-v0.1.json --evidence-dir evidence/
 
 IMPORTANT REGULATORY & ASSURANCE BOUNDARY:
 VaultBasis performs bounded, deterministic reconciliation of supported sources under declared semantics. It does not assess tax correctness, establish legal compliance, or determine whether source information is complete or accurate. Successful verification confirms that the receipt signature is valid for the declared installation public key and that the signed receipt content has not changed relative to that signature. Verification does not constitute a professional opinion, legal finding, government approval, or endorsement by the IRS or any other government authority. The practitioner remains responsible for professional interpretation and application of applicable law.
@@ -515,7 +520,7 @@ if WEB_DASHBOARD_DIR.exists():
 def serve_dashboard():
     index_file = WEB_DASHBOARD_DIR / "index.html"
     if index_file.exists():
-        return HTMLResponse(content=index_file.read_text(), status_code=200)
+        return HTMLResponse(content=index_file.read_text(encoding="utf-8"), status_code=200)
     return HTMLResponse("<h2>VaultBasis Dashboard building...</h2>")
 
 @app.get("/verifier")
@@ -526,7 +531,7 @@ def verifier_redirect():
 def serve_offline_verifier():
     index_file = WEB_OFFLINE_VERIFIER_DIR / "index.html"
     if index_file.exists():
-        return HTMLResponse(content=index_file.read_text(), status_code=200)
+        return HTMLResponse(content=index_file.read_text(encoding="utf-8"), status_code=200)
     return HTMLResponse("<h2>Offline Verifier building...</h2>")
 
 @app.get("/about", response_class=HTMLResponse)
@@ -534,7 +539,7 @@ def serve_offline_verifier():
 def serve_marketing():
     marketing_file = WEB_MARKETING_DIR / "index.html"
     if marketing_file.exists():
-        return HTMLResponse(content=marketing_file.read_text(), status_code=200)
+        return HTMLResponse(content=marketing_file.read_text(encoding="utf-8"), status_code=200)
     return HTMLResponse("<h2>VaultBasis Marketing building...</h2>")
 
 
@@ -549,7 +554,7 @@ def serve_schema(filename: str):
     if not str(schema_path).startswith(str(schema_dir)):
         raise HTTPException(status_code=404, detail="Schema file not found")
     if schema_path.is_file():
-        return Response(content=schema_path.read_text(), media_type="application/json")
+        return Response(content=schema_path.read_text(encoding="utf-8"), media_type="application/json")
     raise HTTPException(status_code=404, detail="Schema file not found")
 
 
@@ -583,7 +588,7 @@ def _sample_path(name: str) -> Path:
 def get_sample_receipt():
     sample_path = _sample_path("golden_receipt_valid.json")
     if sample_path.is_file():
-        return JSONResponse(content=json.loads(sample_path.read_text()))
+        return JSONResponse(content=json.loads(sample_path.read_text(encoding="utf-8")))
     raise HTTPException(status_code=404, detail="Sample receipt not found")
 
 
@@ -591,5 +596,5 @@ def get_sample_receipt():
 def get_sample_receipt_tampered():
     sample_path = _sample_path("golden_receipt_tampered.json")
     if sample_path.is_file():
-        return JSONResponse(content=json.loads(sample_path.read_text()))
+        return JSONResponse(content=json.loads(sample_path.read_text(encoding="utf-8")))
     raise HTTPException(status_code=404, detail="Tampered sample receipt not found")

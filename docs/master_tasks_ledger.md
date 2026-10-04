@@ -206,6 +206,13 @@ vercel.json & Packager ───> Localhost Airgap Bridge ───> WebCrypto V
 | **COM-04A**| Local License Validator | Update VaultBasis Edge (`app.py`) to cryptographically verify the user's purchased license key | Future | P0 | Dashboard requires a valid license key before allowing Case Creation | **NOT STARTED** | |
 | **COM-05A**| Authenticated Download | Implement secure, time-limited, signed download URLs for buyers to download the desktop bundle | Future | P0 | Only verified purchasers can download the actual Desktop Bundle | **NOT STARTED** | |
 
+### Workstream 10: Regulatory Assurance Invariants & Evidence Context (MMP-1.1 / MMP-1.5)
+
+| Task ID | Component | Task Description | PRD Ref | Priority | DoD Exit Criterion | Status | Commit ID |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **MMP11-CASE-001** | Case Persistence | Enforce `VB-CASE-INV-001`: In-memory draft wizard persists only upon first valid evidence ingestion; clean non-wrapping header | §17, §18 | P0 | Zero empty case shells; single-line desktop header; 11/11 gates PASS | **COMPLETED** | Current |
+| **VB-REG-GAP-001** | Regulatory Analysis | Form 1099-DA / Basis Reconciliation Regulatory & Evidence Context Analysis (`docs/audit/VB_REG_GAP_001_regulatory_evidence_context.md`) | §14, §15 | P0 | 1.1 unknown-never-zero invariant verified; 1.5 Evidence Context scheduled; tax advice claims rejected | **COMPLETED** | Current |
+
 ---
 
 ## 6. Execution Protocol: Slice 1 Immediate Kickoff

@@ -181,3 +181,94 @@ def test_fastapi_e2e_endpoints(sample_1099da_csv, sample_koinly_csv):
     assert report["overall_status"] == "PASS"
     assert report["checks"]["signature_authenticity"] == "PASS"
     assert report["checks"]["schema_conformance"] == "PASS"
+
+
+@pytest.mark.regression
+def test_evidence_bundle_export_encoding_invariance(monkeypatch):
+    """
+    Focused regression test for MMP11-DIST-WIN-003:
+    Proves that export_evidence_bundle succeeds and outputs a valid ZIP archive
+    containing UTF-8 text assets even when the host default encoding is cp1252 (Windows ANSI).
+    """
+    import io
+    import zipfile
+
+    client = TestClient(app)
+
+    # 1. Ensure sample case is loaded and reconciled
+    load_res = client.post("/api/sample-case/load")
+    assert load_res.status_code == 200
+    recon_res = client.post("/api/cases/CASE-SAMPLE-2025/reconcile")
+    assert recon_res.status_code == 200
+
+    # 2. Simulate Windows host environment where default text reading (encoding=None) uses cp1252
+    orig_read_text = Path.read_text
+
+    def cp1252_default_read_text(self, encoding=None, errors=None):
+        eff_encoding = encoding or "cp1252"
+        return orig_read_text(self, encoding=eff_encoding, errors=errors)
+
+    monkeypatch.setattr(Path, "read_text", cp1252_default_read_text)
+
+    # 3. Export evidence bundle under simulated cp1252 host default locale
+    res_export = client.get("/api/cases/CASE-SAMPLE-2025/export")
+    assert res_export.status_code == 200
+    assert res_export.headers["content-type"] == "application/zip"
+
+    # 4. Open and inspect ZIP contents
+    zip_buffer = io.BytesIO(res_export.content)
+    with zipfile.ZipFile(zip_buffer, "r") as zf:
+        namelist = zf.namelist()
+        assert "receipt-v0.1.json" in namelist
+        assert "schemas/receipt-v0.1.json" in namelist
+        assert "VERIFY_INSTRUCTIONS.txt" in namelist
+
+        # 5. Assert schema and instructions decode cleanly as UTF-8
+        instructions_content = zf.read("VERIFY_INSTRUCTIONS.txt").decode("utf-8")
+        assert "VAULTBASIS OUTCOME RECEIPT VERIFICATION INSTRUCTIONS" in instructions_content
+
+        schema_content = zf.read("schemas/receipt-v0.1.json").decode("utf-8")
+        assert "$schema" in schema_content
+
+
+@pytest.mark.regression
+def test_evidence_bundle_export_allowlist_and_negative_controls():
+    """
+    Evidence Export Contract (MMP11-DIST-WIN-004):
+    Positive allowlist: Only receipt, schema, raw evidence files, and instructions are permitted.
+    Negative controls: Zero Python source (.py), bytecode (.pyc), caches, or internal tooling allowed.
+    """
+    import io
+    import zipfile
+
+    client = TestClient(app)
+    load_res = client.post("/api/sample-case/load")
+    assert load_res.status_code == 200
+    recon_res = client.post("/api/cases/CASE-SAMPLE-2025/reconcile")
+    assert recon_res.status_code == 200
+
+    res_export = client.get("/api/cases/CASE-SAMPLE-2025/export")
+    assert res_export.status_code == 200
+
+    with zipfile.ZipFile(io.BytesIO(res_export.content), "r") as zf:
+        namelist = zf.namelist()
+
+        # 1. Positive Allowlist Validation: Every single member must match the declared contract
+        allowed_exact = {
+            "receipt-v0.1.json",
+            "schemas/receipt-v0.1.json",
+            "VERIFY_INSTRUCTIONS.txt",
+        }
+        for name in namelist:
+            is_exact = name in allowed_exact
+            is_evidence = name.startswith("evidence/")
+            assert is_exact or is_evidence, f"Unexpected member violating Evidence Export allowlist: {name}"
+
+        # 2. Negative Controls: Absolute ban on Python files and internal directories
+        assert "verify_receipt.py" not in namelist, "verify_receipt.py leaked at root of evidence bundle"
+        assert "technical-verification/verify_receipt.py" not in namelist, "verify_receipt.py leaked in technical-verification/"
+        assert not any(name.endswith((".py", ".pyc", ".pyd")) for name in namelist), "Python source/binary leaked in evidence bundle"
+        assert not any(name.startswith(("technical-verification/", "__pycache__/", "build/", "dist/", ".git/")) for name in namelist), (
+            "Internal development/tooling folder leaked in evidence bundle"
+        )
+

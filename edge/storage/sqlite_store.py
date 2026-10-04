@@ -153,6 +153,10 @@ class SQLiteStore:
             rows = conn.execute("SELECT * FROM cases ORDER BY updated_at DESC").fetchall()
             return [dict(r) for r in rows]
 
+    def delete_case(self, case_id: str):
+        with self._get_connection() as conn:
+            conn.execute("DELETE FROM cases WHERE case_id = ?", (case_id,))
+
     def add_source_and_transactions(
         self,
         case_id: str,

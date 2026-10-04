@@ -7,6 +7,7 @@ from decimal import Decimal
 import json
 import zipfile
 import io
+from pathlib import Path
 import pytest
 from starlette.testclient import TestClient
 
@@ -88,8 +89,10 @@ BTC,2025-11-20,18400.00,2025-02-11,12100.00,YES
     with zipfile.ZipFile(io.BytesIO(export_res.content)) as zf:
         namelist = zf.namelist()
         assert "receipt-v0.1.json" in namelist
-        assert "verify_receipt.py" in namelist
+        assert "schemas/receipt-v0.1.json" in namelist
         assert "VERIFY_INSTRUCTIONS.txt" in namelist
+        assert "verify_receipt.py" not in namelist
+        assert not any(n.endswith(".py") for n in namelist)
 
     # Step 8: Offline Independent Verification
     ver_res = verify_outcome_receipt(receipt)
@@ -282,18 +285,26 @@ def test_atdd_zip_bundle_complete_standalone_reverification(client, tmp_path):
         zf.extractall(bundle_dir)
 
     receipt_file = bundle_dir / "receipt-v0.1.json"
-    verifier_script = bundle_dir / "verify_receipt.py"
     instructions_file = bundle_dir / "VERIFY_INSTRUCTIONS.txt"
+    evidence_dir = bundle_dir / "evidence"
 
     assert receipt_file.exists()
-    assert verifier_script.exists()
     assert instructions_file.exists()
+    assert evidence_dir.exists()
+    assert not (bundle_dir / "verify_receipt.py").exists()
 
-    # Execute standalone CLI verifier in auditor folder
+    # Standalone CLI verifier is supplied via the distribution tools (apps/verifier/verify_receipt.py)
+    repo_root = Path(__file__).resolve().parent.parent.parent.parent
+    verifier_script = repo_root / "apps" / "verifier" / "verify_receipt.py"
+    assert verifier_script.exists()
+
+    # Execute standalone CLI verifier in auditor folder against extracted receipt and evidence
     cmd = [
         sys.executable,
         str(verifier_script),
         str(receipt_file),
+        "--evidence-dir",
+        str(evidence_dir),
         "--no-color",
         "--json"
     ]

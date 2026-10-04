@@ -23,6 +23,9 @@
 |---|---|---|---|---|
 | MMP11-DIST-MAC-001 | Mac RC3 packaging: PyInstaller onedir, symlink preservation via `zip -ry`, recipient-style extraction via `unzip -X`, PRE/POST-ZIP launch gates | IMPLEMENTED | `3845219`, `4ec1a74` | Superseded by EXEC-009A |
 | MMP11-DIST-WIN-001 | Windows RC3: switch `--onefile` → `--onedir`, hard timeout on communicate(), Defender exclusion in CI | IMPLEMENTED | `5dc4962` | Superseded by EXEC-009A |
+| MMP11-DIST-WIN-003 | Windows Evidence Bundle Export UTF-8 encoding fix under `cp1252` host environment | CLOSED / QUALIFIED | `55eb501` | Closed; verified in CI Run 37190867994 and physical Windows smoke |
+| MMP11-DIST-WIN-004 | Windows package bounded resource inclusion, hygiene gate, and evidence-export allowlist contract | CLOSED / QUALIFIED | `bd9b1e7` | CI Run 37197525586; candidate SHA `434957f1...`, export SHA `403de48c...`; 0 leaks, physical smoke PASS |
+| MMP11-DIST-MAC-004 | macOS candidate repeatable build & Developer ID signing/notarization distribution qualification | PENDING | — | Functional manual pass verified (`9ec370c1...`); Developer ID signing/notarization pending |
 | MMP11-SEC-002 | Blob-backed expiring entitlement: token → `sha256(token).json`, 72h TTL, timing-safe comparison, artifact-hash binding, fail-closed | IMPLEMENTED | (prior session) | Production smoke test pending |
 | MMP11-SEC-003 | `PUBLIC_BASE_URL` env var for provisioning emails; adversarial host-header test | IMPLEMENTED | (prior session) | Production confirmation pending |
 | MMP11-SEC-004 | CORS origin restriction to canonical production hostname | IMPLEMENTED | (prior session) | Verified in code |
@@ -50,13 +53,15 @@
 
 | Task ID | Description | State | Commit | Notes |
 |---|---|---|---|---|
-| MMP11-DIST-WIN-002 | Windows Explorer runtime startup: stdio None fallback, `log_config=None`, hiddenimports, disconnected stdio CI launch gate | READY_FOR_PHYSICAL_RECIPIENT_QUALIFICATION | Current | 11/11 gates PASS; physical test pending |
+| MMP11-DIST-WIN-002 | Windows Explorer runtime startup: stdio None fallback, `log_config=None`, hiddenimports, disconnected stdio CI launch gate | DISTRIBUTION_QUALIFIED | `55eb501` | 11/11 gates PASS; physical test PASS |
 | MMP11-DIST-MAC-002 | Mac launcher browser auto-open: OS-authoritative `open <url>` launch on health confirmation | READY_FOR_PHYSICAL_RECIPIENT_QUALIFICATION | Current | 11/11 gates PASS; physical test pending |
 | MMP11-UX-STORY-001 | Practitioner mental model: Client/Year Context, Source A (Broker) vs Source B (Tax Ledger), readiness layer, 4-stage workflow, sensitized results | READY_FOR_PHYSICAL_RECIPIENT_QUALIFICATION | Current | 11/11 gates PASS; physical test pending |
-| MMP11-SAMPLE-001 | 1-Click zero-knowledge sample case onboarding (`POST /api/sample-case/load`) | READY_FOR_PHYSICAL_RECIPIENT_QUALIFICATION | Current | 11/11 gates PASS; physical test pending |
-| MMP11-VERIFY-UX-001 | GUI Offline Verifier practitioner journey; bundle restructuring for secondary technical tools | READY_FOR_PHYSICAL_RECIPIENT_QUALIFICATION | Current | 11/11 gates PASS; physical test pending |
+| MMP11-SAMPLE-001 | 1-Click zero-knowledge sample case onboarding (`POST /api/sample-case/load`) | DISTRIBUTION_QUALIFIED | Current | 11/11 gates PASS; physical test PASS on Windows & Mac |
+| MMP11-VERIFY-UX-001 | GUI Offline Verifier practitioner journey; bundle restructuring for secondary technical tools | DISTRIBUTION_QUALIFIED | Current | 11/11 gates PASS; physical test PASS on Windows & Mac |
+| MMP11-CASE-001 | Empty case persistence containment (`VB-CASE-INV-001`) + non-wrapping header streamline | AUTOMATED_VALIDATION_PASS | Current | In-memory draft wizard; persists only upon first valid evidence ingestion; 11/11 gates PASS |
+| VB-REG-GAP-001 | Form 1099-DA / Basis Reconciliation Regulatory & Evidence Context Analysis | RESEARCH_DISPOSITION_RECORDED | Current | Triaged: 1.1 unknown-never-zero invariant verified; 1.5 Evidence Context scheduled; tax characterization claims rejected |
 | VB-DOC-INV-001 | Canonical docs architecture: `case_model`, `domain_model`, `practitioner_journey`, `evidence_readiness`, `visual_semantics`, `MMP15-COMM-001`, `MMP15-PRACTICE-001` | VERIFIED | Current | Included in repo |
-| MMP11-QUAL-PHYS-001 | Physical recipient qualification execution on Mac arm64 & Windows x64 | PENDING | — | Governed by `docs/qualification/MMP11_EXEC_009A_physical_qualification_record.md` |
+| MMP11-QUAL-PHYS-001 | Physical recipient qualification execution on Mac arm64 & Windows x64 | IN_PROGRESS | `bd9b1e7` | Windows x64 QUALIFIED; macOS arm64 functional manual pass confirmed |
 
 ---
 
