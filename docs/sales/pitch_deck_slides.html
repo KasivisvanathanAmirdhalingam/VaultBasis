@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VaultBasis — Executive Presentation & Master Pitch Deck</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #0a0f1d;
+      --bg-surface: #111827;
+      --bg-card: rgba(26, 34, 52, 0.85);
+      --border-color: rgba(255, 255, 255, 0.12);
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --accent-cyan: #06b6d4;
+      --accent-emerald: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-indigo: #6366f1;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Deck Header & Footer Controls */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      background: rgba(10, 15, 29, 0.9);
+      border-bottom: 1px solid var(--border-color);
+      z-index: 100;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 700;
+      font-size: 1.125rem;
+      letter-spacing: 0.05em;
+    }
+
+    .brand-badge {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.6rem;
+      background: rgba(6, 182, 212, 0.15);
+      color: var(--accent-cyan);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      border-radius: 4px;
+      font-family: var(--font-mono);
+    }
+
+    .nav-controls {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .slide-counter {
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+
+    .btn-nav {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .btn-nav:hover {
+      background: var(--accent-cyan);
+      color: #000;
+      border-color: var(--accent-cyan);
+    }
+
+    /* Slide Container */
+    #slide-viewport {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .slide {
+      position: absolute;
+      width: 100%;
+      max-width: 1200px;
+      height: 90%;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 3rem 4rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      opacity: 0;
+      transform: translateY(20px) scale(0.98);
+      transition: opacity 0.35s ease, transform 0.35s ease;
+      pointer-events: none;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+
+    .slide.active {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+    }
+
+    /* Slide Typography */
+    .slide-header {
+      margin-bottom: 1.5rem;
+    }
+
+    .slide-tag {
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+      color: var(--accent-cyan);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.5rem;
+    }
+
+    .slide-title {
+      font-size: 2.25rem;
+      font-weight: 800;
+      line-height: 1.2;
+      background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .slide-subtitle {
+      font-size: 1.125rem;
+      color: var(--text-secondary);
+      margin-top: 0.5rem;
+    }
+
+    .slide-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 1.5rem;
+    }
+
+    /* Grid & Card Utilities */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+    }
+
+    .card {
+      background: rgba(17, 24, 39, 0.75);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 1.5rem;
+    }
+
+    .card.highlight {
+      border-color: rgba(6, 182, 212, 0.5);
+      background: rgba(6, 182, 212, 0.05);
+    }
+
+    .card h3 {
+      font-size: 1.125rem;
+      margin-bottom: 0.5rem;
+      color: var(--accent-cyan);
+    }
+
+    .card p, .card li {
+      font-size: 0.9375rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    ul {
+      list-style-position: inside;
+      margin-top: 0.5rem;
+    }
+
+    li {
+      margin-bottom: 0.4rem;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+
+    th, td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    th {
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-primary);
+      font-weight: 600;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+    }
+
+    td {
+      color: var(--text-secondary);
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+      color: var(--text-primary);
+    }
+
+    /* Code Blocks / Diagram */
+    .terminal-box {
+      background: #000;
+      border: 1px solid #1e293b;
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      font-family: var(--font-mono);
+      font-size: 0.8125rem;
+      color: #38bdf8;
+      line-height: 1.6;
+      overflow-x: auto;
+    }
+
+    /* Slide Footer */
+    .slide-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding-top: 1rem;
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+    }
+
+    .stat-hero {
+      font-size: 3rem;
+      font-weight: 800;
+      color: var(--accent-cyan);
+      font-family: var(--font-mono);
+      line-height: 1;
+      margin-bottom: 0.25rem;
+    }
+
+    .badge-pass {
+      color: var(--accent-emerald);
+      background: rgba(16, 185, 129, 0.12);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <span>VAULTBASIS</span>
+      <span class="brand-badge">EXECUTIVE PITCH DECK</span>
+    </div>
+    <div class="nav-controls">
+      <button class="btn-nav" id="btn-prev" onclick="prevSlide()">← Prev</button>
+      <span class="slide-counter" id="slide-num">01 / 12</span>
+      <button class="btn-nav" id="btn-next" onclick="nextSlide()">Next →</button>
+      <button class="btn-nav" onclick="toggleFullScreen()">⛶ Fullscreen</button>
+    </div>
+  </header>
+
+  <main id="slide-viewport">
+
+    <!-- SLIDE 1: COVER -->
+    <div class="slide active">
+      <div class="slide-header">
+        <div class="slide-tag">Executive Presentation & Co-Founder / Investor Invitation</div>
+        <h1 class="slide-title">VaultBasis</h1>
+        <p class="slide-subtitle">The Independent Outcome-Assurance Edge for Digital-Asset Tax & Multi-Year Basis Reconciliation</p>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card highlight">
+            <h3>The Core Mission</h3>
+            <p>Transforming seasonal, high-risk digital-asset tax preparation into a <strong>defensible, multi-year professional system of record</strong> with cryptographic proof and air-gapped privacy.</p>
+          </div>
+          <div class="card">
+            <h3>Key Executive Takeaways</h3>
+            <ul>
+              <li><strong>Form 1099-DA Catalyst:</strong> IRS mandates proceeds reporting while omitting cost basis.</li>
+              <li><strong>Multi-Year Flywheel:</strong> Basis continuity across 5+ years creates massive recurring retention.</li>
+              <li><strong>Granite Standard:</strong> 100% deterministic math, Ed25519 receipts, and zero cloud token bleed.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <span>Confidential — Prepared for Strategic Partners & Investors</span>
+        <span>TecTixBase / VaultBasis</span>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: THE PROBLEM -->
+    <div class="slide">
+      <div class="slide-header">
+        <div class="slide-tag">Market Catalyst & Macro Problem</div>
+        <h1 class="slide-title">The Form 1099-DA Basis Blindspot</h1>
+        <p class="slide-subtitle">Why the IRS rollout accelerates CPA review backlogs rather than fixing them</p>
+      </div>
+      <div class="slide-body">
+        <div class="grid-3">
+          <div class="card">
+            <h3>1. Gross Proceeds Only</h3>
+            <p>Brokers and crypto exchanges report sales proceeds on Form 1099-DA, but <strong>omit acquisition dates and cost basis</strong> for non-covered wallets and off-exchange transfers.</p>
+          </div>
+          <div class="card">
+            <h3>2. Strict Legal Burden</h3>
+            <p>Treasury regulations mandate that taxpayers and CPAs must substantiate cost basis. Filing without reconciliation risks massive client tax overpayments or audit penalties.</p>
+          </div>
+          <div class="card">
+            <h3>3. Calculation Chaos</h3>
+            <p>Broker reports and taxpayer software ledgers produce divergent gains, rounding errors, and unverified numbers with zero standardized workpaper evidence.</p>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <span>Source: IRS Notice 2024-56 & Rev. Proc. 2024-28 (TD 10000)</span>
+        <span>Slide 02 / 12</span>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: STRATEGIC THESIS -->
+    <div class="slide">
+      <div class="slide-header">
+        <div class="slide-tag">Strategic Thesis</div>
+        <h1 class="slide-title">Beyond the "October 15" Seasonal Trap</h1>
+        <p class="slide-subtitle">October 15 is an acquisition spike. Multi-year record continuity is our durable revenue moat.</p>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card">
+            <h3 style="color: var(--accent-amber);">The Fragile View: Seasonal Tool</h3>
+            <p><em>"Convert messy crypto CSVs into a tax file before October 15."</em></p>
+            <ul>
+              <li>High churn after filing season.</li>
+              <li>Vulnerable to commoditization.</li>
+              <li>Rebuilding client books from scratch every January.</li>
+            </ul>
+          </div>
+          <div class="card highlight">
+            <h3 style="color: var(--accent-emerald);">The VaultBasis View: System of Record</h3>
+            <p><em>"The professional platform for reconstructing, maintaining, and verifying basis across 5+ years."</em></p>
+            <ul>
+              <li><strong>Asset Lifetime:</strong> Assets bought in 2025 and sold in 2029 require unbroken 5-year lineage.</li>
+              <li><strong>Carry-Forward Value:</strong> Prior-year closing state becomes next year's foundation.</li>
+              <li><strong>Audit Defense:</strong> Instant evidence generation for IRS notices and amendments.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <span>Strategic Moat: Cumulative switching costs increase with every tax year preserved</span>
+        <span>Slide 03 / 12</span>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: 5-YEAR HORIZON -->
+    <div class="slide">
+      <div class="slide-header">
+        <div class="slide-tag">Five-Year Horizon</div>
+        <h1 class="slide-title">2026 – 2030 Workload & Value Map</h1>
+        <p class="slide-subtitle">How VaultBasis evolves alongside the digital-asset regulatory lifecycle</p>
+      </div>
+      <div class="slide-body">
+        <table>
+          <thead>
+            <tr>
+              <th>Year</th>
+              <th>Primary Tax Workload</th>
+              <th>CPA / Firm Need</th>
+              <th>Dominant Product Layer</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>2026</strong></td>
+              <td>TY2025 1099-DA Reconciliation</td>
+              <td>Rescue messy clients before extension deadlines</td>
+              <td><span class="badge-pass">MMP-1.1 + MMP-1.5</span> Deterministic Core & Licensing</td>
+            </tr>
+            <tr>
+              <td><strong>2027</strong></td>
+              <td>TY2026 + Prior Amendments</td>
+              <td>Roll prior-year closing basis forward seamlessly</td>
+              <td><span class="badge-pass">MMP-2.5</span> Carry-Forward Contracts</td>
+            </tr>
+            <tr>
+              <td><strong>2028</strong></td>
+              <td>TY2027 + IRS Notices/Audits</td>
+              <td>Search 3+ years of transaction lineage & provenance</td>
+              <td><span class="badge-pass">MMP-2.0</span> Evidence-Grounded AI</td>
+            </tr>
+            <tr>
+              <td><strong>2029</strong></td>
+              <td>TY2028 + Standardized Ops</td>
+              <td>Standardize preparer/reviewer queues across firm</td>
+              <td><span class="badge-pass">MMP-3.0</span> RBAC & Firm Governance</td>
+            </tr>
+            <tr>
+              <td><strong>2030</strong></td>
+              <td>TY2029 + 5-Year Basis History</td>
+              <td>Maintain irreplaceable 5-year cumulative basis ledger</td>
+              <td><span class="badge-pass">MMP-4.0 + MMP-5.0</span> System of Record Platform</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="slide-footer">
+        <span>Roadmap: Multi-Year Continuous Growth</span>
+        <span>Slide 04 / 12</span>
+      </div>
+    </div>
+
+    <!-- SLIDE 5: ARCHITECTURAL PILLARS -->
+    <div class="slide">
+      <div class="slide-header">
+        <div class="slide-tag">Product Architecture</div>
+        <h1 class="slide-title">The Four Granite-Grade Pillars</h1>
+        <p class="slide-subtitle">Engineered for absolute mathematical precision, privacy, and third-party verifiability</p>
+      </div>
+      <div class="slide-body">
+        <div class="grid-4">
+          <div class="card">
+            <h3>1. Exact Math</h3>
+            <p>100% exact integer / decimal arithmetic. 13 normative outcome states. Unknown basis remains explicitly <code>UNRESOLVED</code> and never defaults to zero.</p>
+          </div>
+          <div class="card">
+            <h3>2. Air-Gap Privacy</h3>
+            <p>Runs 100% locally on practitioner machines (macOS / Windows). Zero cloud egress, zero token bleed, and zero client PII leakage.</p>
+          </div>
+          <div class="card">
+            <h3>3. Signed Receipts</h3>
+            <p>Emits portable, Ed25519-signed Outcome Receipts conforming to Evidence Contract v0.1 and RFC 8785 canonical serialization.</p>
+          </div>
+          <div class="card">
+            <h3>4. Free Verifier</h3>
+            <p>Free, unmetered GUI/CLI offline verifier for clean-machine audits, building viral institutional trust across CPAs and IRS agents.</p>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <span>Security Standard: Tested with OS-level packet capture network audits</span>
+        <span>Slide 05 / 12</span>
+      </div>
+    </div>
+
+    <!-- SLIDE 6: PERSONA MATRIX -->
+    <div class="slide">
+      <div class="slide-header">
+        <div class="slide-tag">Customer Segmentation</div>
+        <h1 class="slide-title">Multi-Persona Value Matrix</h1>
+        <p class="slide-subtitle">Solving discrete professional pain points across the entire tax & audit hierarchy</p>
+      </div>
+      <div class="slide-body">
+        <div class="grid-3">
+          <div class="card">
+            <h3>CPA & Tax Preparer</h3>
+            <p><strong>Initial:</strong> Slashes 10+ hours of crypto spreadsheet pain into a 15-minute reconciliation.<br><strong>Recurring:</strong> 1-Click annual basis roll-forward.</p>
+          </div>
+          <div class="card">
+            <h3>Enrolled Agent (EA)</h3>
+            <p><strong>Initial:</strong> Reconstructs missing basis for complex multi-wallet filers.<br><strong>Recurring:</strong> IRS notice representation & amended return defense.</p>
+          </div>
+          <div class="card">
+            <h3>Tax Reviewer / Partner</h3>
+            <p><strong>Initial:</strong> Standardized workpaper packages with clear exception flags.<br><strong>Recurring:</strong> Non-repudiable review queues & firm risk control.</p>
+          </div>
+          <div class="card">
+            <h3>Forensic Accountant</h3>
+            <p><strong>Initial:</strong> Reconstructs historical transactions across dead exchanges.<br><strong>Recurring:</strong> End-to-end evidence lineage & lot tracing.</p>
+          </div>
+          <div class="card">
+            <h3>Firm IT & Operations</h3>
+            <p><strong>Initial:</strong> Deploy software without data leakage or compliance risk.<br><strong>Recurring:</strong> Offline licensing, channel governance, scrubbed diagnostics.</p>
+          </div>
+          <div class="card highlight">
+            <h3>Auditor / IRS Examiner</h3>
+            <p><strong>Role:</strong> Objective third-party verifier.<br><strong>Model:</strong> 100% Free unmetered verification expands trust and creates viral inbound demand.</p>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <span>Target Market: 40,000+ U.S. CPA Firms and 60,000+ Enrolled Agents</span>
+        <span>Slide 06 / 12</span>
+      </div>
+    </div>
+
+    <!-- SLIDE 7: PRODUCT ROADMAP -->
+    <div class="slide">
+      <div class="slide-header">
+        <div class="slide-tag">Master Roadmap</div>
+        <h1 class="slide-title">MMP Scope × Technical Evolution</h1>
+        <p class="slide-subtitle">A disciplined sequence from technical credibility to ecosystem platform</p>
+      </div>
+      <div class="slide-body">
+        <table>
+          <thead>
+            <tr>
+              <th>Phase</th>
+              <th>Capability Focus</th>
+              <th>Key Technical Milestones</th>
+              <th>Release State</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>MMP-1.1</strong></td>
+              <td>Deterministic Core</td>
+              <td>13-State Matcher, Ed25519 Receipts, Windows/Mac Native Packages</td>
+              <td><span class="badge-pass">QUALIFIED</span></td>
+            </tr>
+            <tr>
+              <td><strong>MMP-1.5</strong></td>
+              <td>Commercial Control Plane</td>
+              <td>Offline Signed Tokens, Firm Identity, PII-Scrubbed Diagnostics</td>
+              <td><span class="badge-pass">PROTOCOL FROZEN</span></td>
+            </tr>
+            <tr>
+              <td><strong>MMP-2.0</strong></td>
+              <td>Intelligence Layer</td>
+              <td>Evidence-Grounded AI, Exception Explanation, Client-Question Drafter</td>
+              <td>Planned (v2.0)</td>
+            </tr>
+            <tr>
+              <td><strong>MMP-2.5</strong></td>
+              <td>Multi-Year Continuity</td>
+              <td>Prior-Year Carry-Forward, Lineage Chains, Reviewer Queues</td>
+              <td>Planned (v2.5)</td>
+            </tr>
+            <tr>
+              <td><strong>MMP-3.0</strong></td>
+              <td>Firm-Scale Ops</td>
+              <td>RBAC, Multi-Office Partitioning, Standardized Policy Bundles</td>
+              <td>Planned (v3.0)</td>
+            </tr>
+            <tr>
+              <td><strong>MMP-4/5</strong></td>
+              <td>Ecosystem Platform</td>
+              <td>Continuous Ingestion, Verification SDK, Public APIs, Custody Hooks</td>
+              <td>Planned (v4.0+)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="slide-footer">
+        <span>Discipline Rule: AI layer interprets evidence; never mutates deterministic calculation truth</span>
+        <span>Slide 07 / 12</span>
+      </div>
+    </div>
+
+    <!-- SLIDE 8: TECH ARCHITECTURE -->
+    <div class="slide">
+      <div class="slide-header">
+        <div class="slide-tag">Engineering Excellence</div>
+        <h1 class="slide-title">Clean Stack & 11-Gate CI Pipeline</h1>
+        <p class="slide-subtitle">High-assurance software engineering with 100% automated invariant enforcement</p>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="terminal-box">
+# 11-Gate Industrial Validation Pipeline
+GATE-01: Static AST Code Quality       [PASS] (50/50 clean)
+GATE-02: Normative Schema Draft-07     [PASS] (24 req props)
+GATE-03: Domain Invariants (DDD)       [PASS] (11/11 green)
+GATE-04: Precision Math & Crypto       [PASS] (14/14 green)
+GATE-05: Acceptance Criteria (BDD)     [PASS] (17/17 green)
+GATE-06: User Journeys (ATDD)          [PASS] (17/17 green)
+GATE-07: Lossless CSV Parsers          [PASS] (115/115 green)
+GATE-08: Production Navigation Links   [PASS] (71/71 green)
+GATE-09: Cryptographic Verifier        [PASS] (2/2 valid/tamper)
+GATE-10: Clean Bundle Hygiene (0 Leak) [PASS] (15 artifacts)
+GATE-11: Air-Gap & Key Permissions     [PASS] (0o600 enforced)
+=============================================================
+Total Automated Tests: 317 Passed (100% Pass Rate)
+          </div>
+          <div class="card">
+            <h3>Core Technical Foundations</h3>
+            <ul>
+              <li><strong>FastAPI & SQLite:</strong> Local high-performance REST daemon with ACID transactional safety.</li>
+              <li><strong>Pure Python Engine:</strong> Zero C-extension memory vulnerabilities in core diff logic.</li>
+              <li><strong>Cryptography:</strong> Standard pure Ed25519 & SHA-256 for cryptographic non-repudiation.</li>
+              <li><strong>Native Packaging:</strong> Self-contained, single-folder executables with PyInstaller.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <span>CI Benchmark: 2.6s full regression execution time</span>
+        <span>Slide 08 / 12</span>
+      </div>
+    </div>
+
+    <!-- SLIDE 9: BUSINESS MODEL -->
+    <div class="slide">
+      <div class="slide-header">
+        <div class="slide-tag">Monetization & Economics</div>
+        <h1 class="slide-title">Three-Layer Recurring Revenue Model</h1>
+        <p class="slide-subtitle">Aligning price directly with professional assurance capacity and firm value</p>
+      </div>
+      <div class="slide-body">
+        <div class="grid-3">
+          <div class="card">
+            <div class="stat-hero">$2.5k</div>
+            <h3>Essential Practice</h3>
+            <p><strong>Solo CPAs & Boutique Practices</strong></p>
+            <ul>
+              <li>Up to 50 Completed Reconciliation Cases</li>
+              <li>Signed Outcome Receipts & Bundles</li>
+              <li>Single-Installation License</li>
+              <li>Standard Email & Knowledge Support</li>
+            </ul>
+          </div>
+          <div class="card highlight">
+            <div class="stat-hero">$7.5k</div>
+            <h3>Practice Tier</h3>
+            <p><strong>Mid-Sized Accounting Firms</strong></p>
+            <ul>
+              <li>Up to 250 Completed Cases</li>
+              <li>Reviewer & Preparer Workflows</li>
+              <li>Firm & Workspace Identity Metadata</li>
+              <li>Priority Diagnostic Support</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="stat-hero">$25k+</div>
+            <h3>Enterprise Firm</h3>
+            <p><strong>Regional & National Firms</strong></p>
+            <ul>
+              <li>1,000+ Included Cases + Capacity Blocks</li>
+              <li>Multi-Office Segmentation & RBAC</li>
+              <li>Dedicated Support & Channel Governance</li>
+              <li>Custom Regulatory Workpaper Exports</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <span>Capacity Add-On Blocks: $1,000 per incremental 50 cases during peak tax season</span>
+        <span>Slide 09 / 12</span>
+      </div>
+    </div>
+
+    <!-- SLIDE 10: COMPETITIVE MOAT -->
+    <div class="slide">
+      <div class="slide-header">
+        <div class="slide-tag">Defensibility & Moat</div>
+        <h1 class="slide-title">Why VaultBasis Wins & Retains</h1>
+        <p class="slide-subtitle">A defensible position that consumer SaaS tax tools cannot replicate</p>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="card">
+            <h3 style="color: #ef4444;">Consumer SaaS Tax Software</h3>
+            <ul>
+              <li>Black-box calculations with no explainability.</li>
+              <li>Stores sensitive client financial records on public cloud.</li>
+              <li>Output is an unverified PDF summary.</li>
+              <li>Single-year focus; zero multi-year cryptographic continuity.</li>
+              <li>Forces CPAs to act as tech support for messy client data.</li>
+            </ul>
+          </div>
+          <div class="card highlight">
+            <h3 style="color: var(--accent-emerald);">VaultBasis Outcome-Assurance Edge</h3>
+            <ul>
+              <li><strong>100% Explainable:</strong> 13-state diff engine explains every penny.</li>
+              <li><strong>Zero-Egress Air-Gap:</strong> Financial data never leaves CPA laptop.</li>
+              <li><strong>Portable Proof:</strong> Cryptographic Ed25519 Outcome Receipts.</li>
+              <li><strong>Multi-Year Moat:</strong> Seamless basis roll-forward across 5+ tax years.</li>
+              <li><strong>Viral Trust:</strong> Free offline verifier turns auditors into champions.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <span>Positioning: The objective referee and system of record for digital-asset tax</span>
+        <span>Slide 10 / 12</span>
+      </div>
+    </div>
+
+    <!-- SLIDE 11: CURRENT TRACTION -->
+    <div class="slide">
+      <div class="slide-header">
+        <div class="slide-tag">Current Status & Validation</div>
+        <h1 class="slide-title">Engineering Milestones Achieved</h1>
+        <p class="slide-subtitle">From architectural specification to qualified, reproducible infrastructure binaries</p>
+      </div>
+      <div class="slide-body">
+        <div class="grid-3">
+          <div class="card">
+            <h3>Windows x64 Package</h3>
+            <p><span class="badge-pass">DISTRIBUTION_QUALIFIED</span></p>
+            <p style="margin-top: 0.5rem;">Native CI Run 37197525586. 0 leaks, 11 required package members, physical smoke verified.</p>
+          </div>
+          <div class="card">
+            <h3>macOS arm64 Package</h3>
+            <p><span class="badge-pass">FUNCTIONAL_MANUAL_PASS</span></p>
+            <p style="margin-top: 0.5rem;">Candidate 9ec370c1... verified working on Apple Silicon. Developer ID signing & notarization in queue.</p>
+          </div>
+          <div class="card">
+            <h3>Commercial Protocol</h3>
+            <p><span class="badge-pass">BASELINE FROZEN</span></p>
+            <p style="margin-top: 0.5rem;"><code>baseline/mmp15-license-protocol-v1</code> locked. Air-gapped Ed25519 token evaluation & keyring rotation.</p>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <span>Git Milestones: milestone/mmp11-infra-dist-ready-001 & baseline/mmp15-license-protocol-v1</span>
+        <span>Slide 11 / 12</span>
+      </div>
+    </div>
+
+    <!-- SLIDE 12: INVITATION TO JOIN -->
+    <div class="slide">
+      <div class="slide-header">
+        <div class="slide-tag">Call to Action</div>
+        <h1 class="slide-title">Build the Future of Financial Assurance</h1>
+        <p class="slide-subtitle">Join us as a commercial co-founder, executive leader, or strategic partner</p>
+      </div>
+      <div class="slide-body">
+        <div class="grid-3">
+          <div class="card highlight">
+            <h3>Commercial Co-Founder / GTM</h3>
+            <p>Lead CPA firm distribution, professional channel partnerships, and national accounting practice acquisition.</p>
+          </div>
+          <div class="card highlight">
+            <h3>Principal Systems Architect</h3>
+            <p>Drive multi-year basis carry-forward engines, air-gapped policy models, and cryptographic data layers.</p>
+          </div>
+          <div class="card highlight">
+            <h3>Strategic Investors & Advisors</h3>
+            <p>Back the market leader in Form 1099-DA basis reconciliation and professional outcome assurance.</p>
+          </div>
+        </div>
+      </div>
+      <div class="slide-footer">
+        <span>Contact: leadership@vaultbasis.com / partnerships@vaultbasis.com</span>
+        <span>Slide 12 / 12</span>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    const slideNumDisplay = document.getElementById('slide-num');
+
+    function updateSlide() {
+      slides.forEach((slide, index) => {
+        slide.classList.toggle('active', index === currentSlide);
+      });
+      const numStr = (currentSlide + 1).toString().padStart(2, '0');
+      const totalStr = totalSlides.toString().padStart(2, '0');
+      slideNumDisplay.textContent = `${numStr} / ${totalStr}`;
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides - 1) {
+        currentSlide++;
+        updateSlide();
+      }
+    }
+
+    function prevSlide() {
+      if (currentSlide > 0) {
+        currentSlide--;
+        updateSlide();
+      }
+    }
+
+    function toggleFullScreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen();
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+    }
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        prevSlide();
+      } else if (e.key === 'f' || e.key === 'F') {
+        toggleFullScreen();
+      }
+    });
+
+    // Initialize
+    updateSlide();
+  </script>
+</body>
+</html>
