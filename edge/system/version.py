@@ -38,6 +38,18 @@ def _resolve_build_sha() -> str:
     if env_sha:
         return env_sha.strip()
 
+    # Check embedded build_info.json (generated at package build time)
+    info_path = os.path.join(os.path.dirname(__file__), "build_info.json")
+    if os.path.exists(info_path):
+        try:
+            import json
+            with open(info_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if data.get("build_sha"):
+                    return data["build_sha"].strip()
+        except Exception:
+            pass
+
     try:
         res = subprocess.run(
             ["git", "rev-parse", "HEAD"],
@@ -52,12 +64,24 @@ def _resolve_build_sha() -> str:
     except Exception:
         pass
 
-    return "3152df830089f2d1e2b4676573c387b99adfe092"
+    return "a12323e049bb55e5814940287223810f11b93b3a"
 
 
 def _resolve_release_channel() -> ReleaseChannel:
-    """Resolves release channel from environment or defaults to DEVELOPMENT."""
-    env_chan = os.environ.get("VAULTBASIS_RELEASE_CHANNEL", "DEVELOPMENT").upper().strip()
+    """Resolves release channel from environment, embedded metadata, or defaults to DEVELOPMENT."""
+    env_chan = os.environ.get("VAULTBASIS_RELEASE_CHANNEL")
+    if not env_chan:
+        info_path = os.path.join(os.path.dirname(__file__), "build_info.json")
+        if os.path.exists(info_path):
+            try:
+                import json
+                with open(info_path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    env_chan = data.get("release_channel")
+            except Exception:
+                pass
+
+    env_chan = (env_chan or "DEVELOPMENT").upper().strip()
     try:
         return ReleaseChannel(env_chan)
     except ValueError:
