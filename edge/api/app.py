@@ -23,6 +23,10 @@ import sys
 
 from apps.verifier.verify_receipt import verify_outcome_receipt
 from edge.assurance.reconciliation_engine import DeterministicReconciliationEngine
+from edge.commercial.identity import (
+    FirmIdentity,
+    FirmIdentityService,
+)
 from edge.commercial.policy import (
     CommercialOperation,
     CommercialDenialCode,
@@ -76,7 +80,7 @@ RESOURCE_BASE = _resource_base()
 DATA_DIR = _user_data_dir()
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
-# Initialize local key manager, SQLite store, and commercial policy service
+# Initialize local key manager, SQLite store, commercial policy service, and firm identity service
 KEY_DIR = DATA_DIR / "keys"
 DB_FILE = os.environ.get("VAULTBASIS_DB_FILE", "vaultbasis.db")
 DB_PATH = DATA_DIR / DB_FILE
@@ -90,6 +94,8 @@ commercial_policy = CommercialPolicyService(
     license_dir=DATA_DIR / "license",
     installation_id=os.environ.get("VAULTBASIS_INSTALLATION_ID"),
 )
+firm_identity_service = FirmIdentityService(db_store)
+
 
 
 app = FastAPI(
@@ -206,7 +212,51 @@ def install_commercial_license(req: InstallLicenseRequest):
     }
 
 
+@app.get("/api/firm/identity")
+def get_firm_identity():
+    """
+    Returns public metadata of active firm and workspace identity profile.
+    STRICT PRIVACY GUARANTEE: Regulated identifiers (PTIN/EFIN) are strictly isolated and omitted.
+    """
+    ident = firm_identity_service.get_public_identity()
+    if not ident:
+        return {
+            "configured": False,
+            "organization_id": None,
+            "firm_name": None,
+            "office_id": None,
+            "workspace_id": "WS-DEFAULT",
+            "preparer_id": None,
+            "display_name": None,
+            "has_ptin_configured": False,
+            "has_efin_configured": False,
+        }
+    return {"configured": True, **ident}
+
+
+@app.post("/api/firm/identity")
+def update_firm_identity(identity: FirmIdentity):
+    """
+    Saves or updates local firm, workspace, practitioner, and regulated identifiers.
+    Regulated identifiers are stored locally and never emitted in public receipts.
+    """
+    saved = firm_identity_service.save_identity(identity)
+    return {
+        "status": "SAVED",
+        "configured": True,
+        **saved.to_public_metadata()
+    }
+
+
+@app.delete("/api/firm/identity")
+def clear_firm_identity():
+    """Clears stored firm and workspace identity profile."""
+    firm_identity_service.clear_identity()
+    return {"status": "CLEARED", "configured": False}
+
+
 @app.post("/api/sample-case/load")
+
 def load_sample_case():
     """
     Preload the canonical Sample Case for zero-knowledge onboarding.
