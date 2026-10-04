@@ -88,9 +88,10 @@ Every production release of VaultBasis is cryptographically signed and independe
 VaultBasis adheres strictly to the principle of least privilege:
 - **Files Read:** The application reads files **only** when explicitly selected by the practitioner via OS file picker dialogs (e.g., Form 1099-DA CSVs, broker tax-lot exports, license `.lic` tokens).
 - **Files Written:**
-  - Local database: `vaultbasis.db` and temporary WAL files inside the designated user application data directory.
-  - User-directed exports: Reconciled Form 8949 CSVs, audit workpapers, and cryptographic evidence packages saved to practitioner-selected folders.
-  - Sanitized support diagnostics: User-initiated `diagnostic.zip` exports.
+  - Local database: `vaultbasis.db` and temporary WAL files inside the designated user application data directory using **`SQLite WAL mode (PRAGMA synchronous = FULL)`** for enterprise-grade write durability.
+  - User-directed exports: Reconciled Form 8949 CSVs, audit workpapers, and cryptographic evidence packages saved strictly to practitioner-selected folders.
+  - Sanitized support diagnostics: User-initiated `diagnostic.zip` exports (zero transaction rows, zero client PII, zero unmasked PTIN/EFIN).
+- **Independent Offline Verification:** Evidence bundles can be verified on an air-gapped machine using the frozen standalone verifier script (`apps/verifier/verify.py`), completely independent of the VaultBasis runtime.
 
 ---
 
