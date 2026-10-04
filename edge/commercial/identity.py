@@ -127,8 +127,9 @@ class FirmIdentityService:
     Manages local firm and workspace identity profiles via SQLite persistence.
     """
 
-    def __init__(self, store: SQLiteStore):
+    def __init__(self, store: SQLiteStore, audit_service: Optional[Any] = None):
         self.store = store
+        self.audit_service = audit_service
 
     def get_identity(self) -> Optional[FirmIdentity]:
         """Retrieves and parses current firm identity from local persistence."""
@@ -139,9 +140,22 @@ class FirmIdentityService:
 
     def save_identity(self, identity: FirmIdentity) -> FirmIdentity:
         """Saves firm identity to local persistence."""
+        existing = self.get_identity()
         now_utc = datetime.now(timezone.utc).isoformat()
         identity.updated_at = now_utc
         self.store.save_firm_identity(identity.to_internal_dict())
+
+        if self.audit_service:
+            from edge.commercial.audit import AuditEventType
+            ev_type = AuditEventType.FIRM_IDENTITY_CREATED if existing is None else AuditEventType.FIRM_IDENTITY_UPDATED
+            self.audit_service.record_event(
+                ev_type,
+                actor_type="USER",
+                actor_id=identity.preparer_id,
+                workspace_id=identity.workspace_id,
+                details=identity.to_redacted_diagnostic(),
+            )
+
         return identity
 
     def get_public_identity(self) -> Optional[Dict[str, Any]]:
@@ -160,4 +174,14 @@ class FirmIdentityService:
 
     def clear_identity(self):
         """Clears stored firm identity profile."""
+        existing = self.get_identity()
         self.store.delete_firm_identity()
+        if self.audit_service and existing:
+            from edge.commercial.audit import AuditEventType
+            self.audit_service.record_event(
+                AuditEventType.FIRM_IDENTITY_REMOVED,
+                actor_type="USER",
+                actor_id=existing.preparer_id,
+                workspace_id=existing.workspace_id,
+                details={"organization_id": existing.organization_id},
+            )
