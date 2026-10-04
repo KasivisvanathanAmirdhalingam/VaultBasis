@@ -23,6 +23,8 @@ import sys
 
 from apps.verifier.verify_receipt import verify_outcome_receipt
 from edge.assurance.reconciliation_engine import DeterministicReconciliationEngine
+from edge.commercial.audit import AuditEventType, CommercialAuditService
+from edge.commercial.diagnostics import DiagnosticPackager
 from edge.commercial.identity import (
     FirmIdentity,
     FirmIdentityService,
@@ -37,6 +39,7 @@ from edge.connectors.validator import IntakeDispatcher
 from edge.receipts.keygen import InstallationKeyManager
 from edge.receipts.signer import ReceiptSigner
 from edge.storage.sqlite_store import SQLiteStore, EvidenceCollisionError
+from edge.system.version import get_system_version
 from schemas.canonical.case import CanonicalCase
 
 
@@ -89,12 +92,18 @@ key_manager = InstallationKeyManager(KEY_DIR)
 priv_key, pub_key = key_manager.ensure_keypair()
 receipt_signer = ReceiptSigner(priv_key)
 db_store = SQLiteStore(DB_PATH)
+commercial_audit_service = CommercialAuditService(
+    store=db_store,
+    installation_id=os.environ.get("VAULTBASIS_INSTALLATION_ID")
+)
 commercial_policy = CommercialPolicyService(
     store=db_store,
     license_dir=DATA_DIR / "license",
     installation_id=os.environ.get("VAULTBASIS_INSTALLATION_ID"),
+    audit_service=commercial_audit_service,
 )
-firm_identity_service = FirmIdentityService(db_store)
+firm_identity_service = FirmIdentityService(db_store, audit_service=commercial_audit_service)
+diagnostic_packager = DiagnosticPackager(db_store, commercial_policy, firm_identity_service)
 
 
 
@@ -179,6 +188,68 @@ def health_check():
         "installation_key_id": receipt_signer.key_id,
         "egress_policy": "STRICT_LOCAL_ONLY",
         "timestamp": datetime.now(timezone.utc).isoformat()
+    }
+
+
+@app.get("/api/system/version")
+def get_version_info():
+    """
+    Returns immutable build, release channel, schema version, and compatibility metadata.
+    Read-only, strictly local, zero network egress.
+    """
+    return get_system_version().model_dump()
+
+
+@app.get("/api/system/diagnostic")
+def get_system_diagnostic():
+    """
+    Returns positive-allowlisted sanitized diagnostic report for support and operational triage.
+    STRICT PRIVACY GUARANTEE: Zero financial data, transaction rows, evidence files, private keys, or raw PTIN/EFIN.
+    """
+    report = diagnostic_packager.generate_report()
+    commercial_audit_service.record_event(
+        AuditEventType.DIAGNOSTIC_EXPORTED,
+        actor_type="USER",
+        details={"bundle_id": report.bundle_id, "format": "JSON"}
+    )
+    return report.model_dump()
+
+
+@app.get("/api/system/diagnostic/bundle")
+def download_diagnostic_bundle():
+    """
+    Downloads structured ZIP bundle containing diagnostic.json, integrity.txt, migrations.json, and README.txt.
+    """
+    report = diagnostic_packager.generate_report()
+    commercial_audit_service.record_event(
+        AuditEventType.DIAGNOSTIC_EXPORTED,
+        actor_type="USER",
+        details={"bundle_id": report.bundle_id, "format": "ZIP"}
+    )
+    bundle_zip_bytes = diagnostic_packager.export_bundle_zip()
+    filename = f"VaultBasis_Support_Diagnostic_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}.zip"
+    return Response(
+        content=bundle_zip_bytes,
+        media_type="application/zip",
+        headers={"Content-Disposition": f"attachment; filename={filename}"},
+    )
+
+
+@app.get("/api/commercial/audit")
+def get_commercial_audit_events(limit: int = 100, offset: int = 0):
+    """
+    Returns paginated tamper-evident administrative audit events and hash chain verification status.
+    Strictly administrative scope: license changes, firm profile mutations, diagnostic exports.
+    """
+    events = [e.model_dump() for e in commercial_audit_service.get_events(limit=limit, offset=offset)]
+    total_count = commercial_audit_service.count_events()
+    chain_status = commercial_audit_service.verify_chain_integrity()
+    return {
+        "events": events,
+        "total_count": total_count,
+        "chain_integrity": chain_status,
+        "limit": limit,
+        "offset": offset,
     }
 
 

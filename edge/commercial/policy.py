@@ -88,11 +88,13 @@ class CommercialPolicyService:
         license_dir: Optional[Path] = None,
         keyring_override: Optional[Dict[str, str]] = None,
         installation_id: Optional[str] = None,
+        audit_service: Optional[Any] = None,
     ):
         self.store = store
         self.license_dir = Path(license_dir) if license_dir else None
         self.keyring_override = keyring_override
         self.installation_id = installation_id
+        self.audit_service = audit_service
         self._runtime_token: Optional[str] = None
 
     def set_runtime_token(self, token: Optional[str]):
@@ -115,6 +117,31 @@ class CommercialPolicyService:
             self.license_dir.mkdir(parents=True, exist_ok=True)
             (self.license_dir / "license.lic").write_text(token_text, encoding="utf-8")
         self._runtime_token = token_text
+
+        if self.audit_service:
+            from edge.commercial.audit import AuditEventType
+            if res.is_active:
+                self.audit_service.record_event(
+                    AuditEventType.LICENSE_INSTALLED,
+                    actor_type="USER",
+                    actor_id=self.installation_id or "UNKNOWN",
+                    details={
+                        "tier": res.tier.value if res.tier else None,
+                        "license_id": res.license_id,
+                        "state": res.state.value,
+                    },
+                )
+            else:
+                self.audit_service.record_event(
+                    AuditEventType.LICENSE_REJECTED,
+                    actor_type="USER",
+                    actor_id=self.installation_id or "UNKNOWN",
+                    details={
+                        "state": res.state.value,
+                        "reason": res.diagnostic_reason,
+                    },
+                )
+
         return res
 
     def remove_license_token(self):
@@ -126,6 +153,15 @@ class CommercialPolicyService:
             lic_file = self.license_dir / "license.lic"
             if lic_file.is_file():
                 lic_file.unlink()
+
+        if self.audit_service:
+            from edge.commercial.audit import AuditEventType
+            self.audit_service.record_event(
+                AuditEventType.LICENSE_REPLACED,
+                actor_type="USER",
+                actor_id=self.installation_id or "UNKNOWN",
+                details={"action": "REMOVED"},
+            )
 
     def get_active_token(self) -> Optional[str]:
         """

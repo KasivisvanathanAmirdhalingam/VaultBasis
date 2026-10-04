@@ -23,7 +23,7 @@ class SQLiteStore:
     online backup/restore, and corruption health checks.
     """
 
-    CURRENT_SCHEMA_VERSION = 3
+    CURRENT_SCHEMA_VERSION = 4
 
     def __init__(self, db_path: Path, synchronous: str = "FULL"):
         self.db_path = Path(db_path)
@@ -145,6 +145,28 @@ class SQLiteStore:
             """)
             now_utc = datetime.now(timezone.utc).isoformat()
             conn.execute("INSERT INTO schema_migrations (version, name, applied_at) VALUES (3, 'firm_and_workspace_identity', ?)", (now_utc,))
+
+        # Migration 4: Commercial & Administrative Audit Log Table (MMP15-AUD-001)
+        if 4 not in applied_versions:
+            conn.executescript("""
+                CREATE TABLE IF NOT EXISTS commercial_audit_log (
+                    event_id TEXT PRIMARY KEY,
+                    event_type TEXT NOT NULL,
+                    occurred_at TEXT NOT NULL,
+                    actor_type TEXT NOT NULL,
+                    actor_id TEXT NOT NULL,
+                    workspace_id TEXT,
+                    installation_id TEXT,
+                    build_sha TEXT NOT NULL,
+                    details_json TEXT NOT NULL,
+                    event_hash TEXT NOT NULL,
+                    previous_event_hash TEXT
+                );
+                CREATE INDEX IF NOT EXISTS idx_audit_occurred_at ON commercial_audit_log (occurred_at);
+                CREATE INDEX IF NOT EXISTS idx_audit_event_type ON commercial_audit_log (event_type);
+            """)
+            now_utc = datetime.now(timezone.utc).isoformat()
+            conn.execute("INSERT INTO schema_migrations (version, name, applied_at) VALUES (4, 'commercial_audit_log', ?)", (now_utc,))
 
 
     def save_case(self, case: CanonicalCase):
@@ -520,5 +542,58 @@ class SQLiteStore:
         """Clears stored firm and workspace identity profile."""
         with self._get_connection() as conn:
             conn.execute("DELETE FROM firm_identity WHERE id = 1")
+
+    # --------------------------------------------------------------------------
+    # Commercial & Administrative Audit Log Persistence (MMP15-AUD-001)
+    # --------------------------------------------------------------------------
+
+    def insert_audit_event(self, event_dict: Dict[str, Any]):
+        """Inserts an immutable administrative audit event record."""
+        with self._get_connection() as conn:
+            conn.execute("""
+                INSERT INTO commercial_audit_log (
+                    event_id, event_type, occurred_at, actor_type, actor_id,
+                    workspace_id, installation_id, build_sha, details_json,
+                    event_hash, previous_event_hash
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+            """, (
+                event_dict["event_id"],
+                event_dict["event_type"],
+                event_dict["occurred_at"],
+                event_dict.get("actor_type", "SYSTEM"),
+                event_dict.get("actor_id", "UNKNOWN"),
+                event_dict.get("workspace_id"),
+                event_dict.get("installation_id"),
+                event_dict.get("build_sha", "UNKNOWN"),
+                event_dict.get("details_json", "{}"),
+                event_dict["event_hash"],
+                event_dict.get("previous_event_hash"),
+            ))
+
+    def get_last_audit_event(self) -> Optional[Dict[str, Any]]:
+        """Retrieves the most recent audit event record for hash chaining."""
+        with self._get_connection() as conn:
+            row = conn.execute(
+                "SELECT * FROM commercial_audit_log ORDER BY occurred_at DESC, rowid DESC LIMIT 1"
+            ).fetchone()
+            if row:
+                return dict(row)
+            return None
+
+    def get_audit_events(self, limit: int = 100, offset: int = 0) -> List[Dict[str, Any]]:
+        """Retrieves paginated audit events ordered chronologically descending."""
+        with self._get_connection() as conn:
+            rows = conn.execute(
+                "SELECT * FROM commercial_audit_log ORDER BY occurred_at DESC, rowid DESC LIMIT ? OFFSET ?",
+                (limit, offset)
+            ).fetchall()
+            return [dict(r) for r in rows]
+
+    def count_audit_events(self) -> int:
+        """Returns total number of recorded audit events."""
+        with self._get_connection() as conn:
+            row = conn.execute("SELECT COUNT(*) FROM commercial_audit_log").fetchone()
+            return row[0] if row else 0
 
 
