@@ -37,11 +37,11 @@ def test_marketing_site_header_footer_and_anchor_links():
     # 1. Header Navigation elements (MMP11-WEB-PRES-001: nav renamed from
     # anchor-section names to practitioner-facing IA labels)
     assert "How It Works" in html
-    assert "Trust &amp; Assurance" in html or "Trust & Assurance" in html
+    assert "Security &amp; Trust" in html or "Security & Trust" in html
     assert "About" in html
     assert "Resources" in html
-    assert "Verify an Outcome Receipt" in html
-    assert "Request Design-Partner Access" in html
+    assert "Verify an Evidence Receipt" in html or "Verify a VaultBasis Receipt" in html
+    assert "Try VaultBasis Free" in html
 
     # 2. Extract all href="/#..." and href="#..." anchors and assert matching id="..." exists
     anchors = set(re.findall(r'href="(?:/)?#([a-zA-Z0-9_\-]+)"', html))

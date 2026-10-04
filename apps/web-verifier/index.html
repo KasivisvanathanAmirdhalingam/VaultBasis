@@ -259,7 +259,7 @@
       </div>
       <div>
         <div class="brand-name">VaultBasis</div>
-        <span class="brand-descriptor">Outcome Receipt Verifier</span>
+        <span class="brand-descriptor">Evidence Receipt Verifier</span>
       </div>
     </a>
     <nav class="nav-links">
@@ -272,9 +272,9 @@
 
   <main class="container" role="main">
     <div class="card" style="text-align: center;">
-      <h2 style="font-size: 1.6rem; margin-bottom: 8px; color: #0f172a;">Independent Outcome Verification</h2>
+      <h2 style="font-size: 1.6rem; margin-bottom: 8px; color: #0f172a;">Verify a VaultBasis Receipt</h2>
       <p style="color: var(--text-muted); font-size: 0.95rem; max-width: 680px; margin: 0 auto 1.5rem auto;">
-        Select or drop a VaultBasis Outcome Receipt to verify its integrity and cryptographic signature. Verification runs entirely in your browser — receipt contents are not sent to VaultBasis.
+        A VaultBasis receipt lets you independently verify that exported evidence has not been altered. Select or drop a VaultBasis Evidence Receipt to verify its integrity and cryptographic signature. Verification runs entirely in your browser — receipt contents are not sent to VaultBasis.
       </p>
     </div>
 
@@ -282,7 +282,7 @@
     <div class="card">
       <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Upload receipt JSON" onclick="document.getElementById('receipt-upload').click()" onkeydown="if(event.key==='Enter'||event.key===' ') { event.preventDefault(); document.getElementById('receipt-upload').click(); }">
         <input type="file" id="receipt-upload" accept=".json" style="display: none;" onchange="handleReceiptFile(event)">
-        <p style="font-size: 1.15rem; font-weight: 600; margin-bottom: 6px; color: #0f172a;">Drop an Outcome Receipt here or click to open</p>
+        <p style="font-size: 1.15rem; font-weight: 600; margin-bottom: 6px; color: #0f172a;">Drop an Evidence Receipt here or click to open</p>
         <p style="font-size: 0.85rem; color: var(--text-muted);">
           Cryptographic verification is performed client-side in your browser.
         </p>

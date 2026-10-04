@@ -605,7 +605,7 @@
         </div>
         <div style="display: flex; gap: 8px;">
           <button class="btn btn-primary" id="btn-run-recon" onclick="triggerReconciliation()">⚡ Run Deterministic Reconciliation</button>
-          <button class="btn btn-success" id="btn-view-receipt" onclick="viewReceiptScreen()" style="display: none;">📜 View Outcome Receipt</button>
+          <button class="btn btn-success" id="btn-view-receipt" onclick="viewReceiptScreen()" style="display: none;">📜 View Evidence Receipt</button>
         </div>
       </div>
 
@@ -649,7 +649,7 @@
         <div class="step-divider"></div>
         <div class="step-item" id="step-4">
           <div class="step-num">4</div>
-          <span>Outcome Receipt</span>
+          <span>Evidence Receipt</span>
         </div>
       </div>
 
@@ -788,14 +788,14 @@
       </div>
     </div>
 
-    <!-- SCREEN 3: OUTCOME RECEIPT & INDEPENDENT VERIFIER -->
+    <!-- SCREEN 3: EVIDENCE RECEIPT & INDEPENDENT VERIFIER -->
     <div id="screen-receipt" class="screen">
       <div class="header-bar">
         <div>
           <button class="btn" onclick="showScreen('screen-review')" style="margin-bottom: 8px;">← Back to Case Review</button>
-          <h2>Signed Outcome Receipt</h2>
+          <h2>Signed Evidence Receipt</h2>
           <p style="color: var(--text-muted); font-size: 0.88rem; margin-top: 4px;">
-            A portable, Ed25519-signed artifact preserving the declared reconciliation outcome.
+            A portable, cryptographically signed artifact preserving the declared reconciliation outcome.
           </p>
         </div>
         <div style="display: flex; gap: 8px;">
@@ -813,7 +813,7 @@
             <tr><td style="color: var(--text-muted);">Signing Key ID:</td><td id="rcpt-key-id" style="font-family: 'JetBrains Mono'; font-size: 0.75rem;">-</td></tr>
           </table>
           <div class="boundary-callout" style="margin-top: 1rem;">
-            <strong>What this receipt establishes:</strong> Payload integrity and authentic Ed25519 signature under declared schema.<br>
+            <strong>What this receipt establishes:</strong> Payload integrity and authentic signature under declared schema.<br>
             <strong>What it does NOT establish:</strong> Tax correctness, legal compliance, or factual truth of sources.
           </div>
         </div>
@@ -878,7 +878,7 @@
             <li><a href="https://vaultbasis.com" target="_blank" rel="noopener" style="color: var(--primary);">Why VaultBasis? ↗</a></li>
             <li><a href="https://vaultbasis.com/verifier" target="_blank" rel="noopener" style="color: var(--primary);">Independent Web Verifier ↗</a></li>
             <li><a href="/offline-verifier" target="_blank" style="color: var(--primary);">Local Offline Verifier</a></li>
-            <li><a href="/schemas/receipt-v0.1.json" target="_blank" style="color: var(--primary);">Outcome Receipt JSON Schema</a></li>
+            <li><a href="/schemas/receipt-v0.1.json" target="_blank" style="color: var(--primary);">Evidence Receipt JSON Schema</a></li>
             <li><a href="/docs/scope_and_limitations_v0.1.html" target="_blank" style="color: var(--primary);">Scope &amp; Limitations ↗</a></li>
             <li><a href="https://vaultbasis.com/faq" target="_blank" rel="noopener" style="color: var(--primary);">Full FAQ ↗</a></li>
             <li><a href="https://vaultbasis.com/contact" target="_blank" rel="noopener" style="color: var(--primary);">Contact Support ↗</a></li>
@@ -934,10 +934,10 @@
       </div>
     </div>
     <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 0.85rem 1rem; font-size: 0.78rem; color: #475569; line-height: 1.5;">
-      VaultBasis performs bounded, deterministic reconciliation of supported sources under declared semantics. It does not assess tax correctness, establish legal compliance, or determine whether source information is complete or accurate. An Outcome Receipt records the declared reconciliation outcome and can be cryptographically verified for payload integrity and signature validity. Verification does not constitute a professional opinion, legal finding, government approval, or endorsement by the IRS or any other government authority. The practitioner remains responsible for professional interpretation and application of applicable law.
+      VaultBasis performs bounded, deterministic reconciliation of supported sources under declared semantics. It does not assess tax correctness, establish legal compliance, or determine whether source information is complete or accurate. A VaultBasis Evidence Receipt records the declared reconciliation outcome and can be cryptographically verified for payload integrity and signature validity. Verification does not constitute a professional opinion, legal finding, government approval, or endorsement by the IRS or any other government authority. The practitioner remains responsible for professional interpretation and application of applicable law.
     </div>
     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-      <div>© 2026 VaultBasis. All rights reserved. • Design-Partner Preview</div>
+      <div>© 2026 VaultBasis. All rights reserved.</div>
       <div style="font-size: 0.76rem; color: #64748b;">Local Evidence Processing</div>
     </div>
   </footer>

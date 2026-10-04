@@ -247,7 +247,7 @@ def test_policy_capacity_limit_enforcement(clean_commercial_env):
     assert not d2.allowed
     assert d2.reason_code == CommercialDenialCode.CASE_CAPACITY_REACHED
     assert d2.http_status == 402
-    assert "reached its licensed case capacity of 2" in d2.message
+    assert "reached the case limit for your current license" in d2.message
 
     # Bundled sample case does NOT consume capacity
     store.save_case(CanonicalCase(case_id="CASE-SAMPLE-2025", tax_year=2025, jurisdiction="US", case_status="CREATED", created_at=now_utc, updated_at=now_utc))

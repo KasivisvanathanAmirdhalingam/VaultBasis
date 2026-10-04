@@ -38,7 +38,7 @@
     <div class="page-hero">
       <span class="section-tag">Frequently Asked Questions</span>
       <h1>FAQ</h1>
-      <p>Answers to common questions about VaultBasis, how reconciliation works, the Outcome Receipt, and the Design-Partner Preview.</p>
+      <p>Answers to common questions about VaultBasis, how reconciliation works, the Evidence Receipt, and licensing.</p>
     </div>
 
     <div class="faq-container">
@@ -48,7 +48,7 @@
       <details>
         <summary>What is VaultBasis?</summary>
         <div class="faq-answer">
-          <p>VaultBasis is an independent evidence-assurance system that deterministically reconciles supported digital-asset broker and tax-ledger information. It identifies agreements, differences, and unresolved information, and produces a signed Outcome Receipt that can be independently verified.</p>
+          <p>VaultBasis is an independent evidence-assurance system that deterministically reconciles supported digital-asset broker and tax-ledger information. It identifies agreements, differences, and unresolved information, and produces a signed Evidence Receipt that can be independently verified.</p>
         </div>
       </details>
 
@@ -90,7 +90,7 @@
       <details>
         <summary>What information sources are currently supported?</summary>
         <div class="faq-answer">
-          <p>The current Design-Partner Preview supports Form 1099-DA (U.S. digital asset broker reporting) and Koinly Capital Gains CSV. See <a href="/docs/scope_and_limitations_v0.1.html" target="_blank" rel="noopener">Scope &amp; Limitations</a> for the exact supported format specifications.</p>
+          <p>The current release supports Form 1099-DA (U.S. digital asset broker reporting) and supported tax-ledger CSV formats. See <a href="/docs/scope_and_limitations_v0.1.html" target="_blank" rel="noopener">Scope &amp; Limitations</a> for the exact supported format specifications.</p>
         </div>
       </details>
 
@@ -127,14 +127,14 @@
       <details>
         <summary>Why doesn't VaultBasis automatically resolve missing information?</summary>
         <div class="faq-answer">
-          <p>Because assuming a value would introduce an error that is not visible in the Outcome Receipt. Preserving Unresolved keeps the evidence honest and flags the item for practitioner review.</p>
+          <p>Because assuming a value would introduce an error that is not visible in the Evidence Receipt. Preserving Unresolved keeps the evidence honest and flags the item for practitioner review.</p>
         </div>
       </details>
 
       <details>
         <summary>What information does provenance provide?</summary>
         <div class="faq-answer">
-          <p>Each item in an Outcome Receipt references the source rows and file hashes it came from, so the receipt can be traced back to its source evidence.</p>
+          <p>Each item in an Evidence Receipt references the source rows and file hashes it came from, so the receipt can be traced back to its source evidence.</p>
         </div>
       </details>
 
@@ -145,17 +145,17 @@
         </div>
       </details>
 
-      <h2 class="faq-section-title" id="receipt">Outcome Receipt</h2>
+      <h2 class="faq-section-title" id="receipt">Evidence Receipt</h2>
 
       <details>
-        <summary>What is an Outcome Receipt?</summary>
+        <summary>What is a VaultBasis Evidence Receipt?</summary>
         <div class="faq-answer">
           <p>A digitally signed JSON document recording the outcome of a VaultBasis reconciliation. It contains the case summary, differences, provenance references, and a cryptographic signature.</p>
         </div>
       </details>
 
       <details>
-        <summary>Why is an Outcome Receipt signed?</summary>
+        <summary>Why is an Evidence Receipt signed?</summary>
         <div class="faq-answer">
           <p>The signature allows any reviewer to verify that the receipt has not been changed since it was created and that the signature matches the key declared in the receipt.</p>
         </div>
@@ -164,7 +164,7 @@
       <details>
         <summary>Can another person verify it?</summary>
         <div class="faq-answer">
-          <p>Yes. The independent Web Verifier at <a href="/verifier">/verifier</a> verifies any supported Outcome Receipt in a browser without a VaultBasis account. The specification and test vectors are public.</p>
+          <p>Yes. The independent Web Verifier at <a href="/verifier">/verifier</a> verifies any supported Evidence Receipt in a browser without a VaultBasis account. The specification and test vectors are public.</p>
         </div>
       </details>
 
@@ -215,7 +215,7 @@
       <details>
         <summary>Where is the signing key stored?</summary>
         <div class="faq-answer">
-          <p>The Ed25519 signing key is generated locally within the VaultBasis Edge application. See <a href="/docs/scope_and_limitations_v0.1.html" target="_blank" rel="noopener">Scope &amp; Limitations</a> for the declared local application boundary and known limitations.</p>
+          <p>The signing key is generated locally within the VaultBasis Edge application. See <a href="/docs/scope_and_limitations_v0.1.html" target="_blank" rel="noopener">Scope &amp; Limitations</a> for the declared local application boundary and known limitations.</p>
         </div>
       </details>
 
@@ -233,21 +233,31 @@
         </div>
       </details>
 
-      <h2 class="faq-section-title" id="preview">Design-Partner Preview</h2>
+      <h2 class="faq-section-title" id="licensing">Free Evaluation &amp; Licensing</h2>
 
       <details>
-        <summary>What does Design-Partner Preview mean?</summary>
+        <summary>How does the Free Evaluation work?</summary>
         <div class="faq-answer">
-          <p>VaultBasis is currently available to invited participants for evaluation using supported sample or test data. This is a controlled evaluation release, not a production service. Provisioning is not automatic.</p>
+          <p>You can download VaultBasis for free with no time limit to evaluate reconciliation and receipt verification using preloaded sample cases. A paid license is required to import and reconcile your own client files.</p>
         </div>
       </details>
 
       <details>
-        <summary>How do I get access?</summary>
+        <summary>How do I get a license or download VaultBasis?</summary>
         <div class="faq-answer">
-          <p>Use the Request Design-Partner Access button on the <a href="/">home page</a>. Access is reviewed and provisioned individually.</p>
+          <p>Use the "Try VaultBasis Free" button or select a plan on the <a href="/#pricing">Pricing section</a>. Your authorized download link and license token will be delivered to your work email.</p>
         </div>
       </details>
+
+      <details>
+        <summary>What happens when my license expires?</summary>
+        <div class="faq-answer">
+          <p>Existing client cases, workpapers, and generated Evidence Receipts remain permanently accessible and exportable on your computer. You only need an active license to create new client cases or run new reconciliations.</p>
+        </div>
+      </details>
+
+    </div>
+  </main>
 
     </div>
   </main>

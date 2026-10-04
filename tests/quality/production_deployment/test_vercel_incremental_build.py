@@ -98,8 +98,8 @@ def test_incremental_build_execution_and_artifacts():
     assert marketing_index.is_file(), "dist/public-web/index.html must exist"
     marketing_html = marketing_index.read_text(encoding="utf-8")
     assert "VaultBasis" in marketing_html
-    assert "Outcome Receipt" in marketing_html
-    assert "Request Design-Partner Access" in marketing_html
+    assert "Evidence Receipt" in marketing_html
+    assert "Try VaultBasis Free" in marketing_html
 
     # 2. Web Verifier must NOT be a static file in outputDirectory.
     # Vercel serves static files before rewrites — placing verifier/index.html

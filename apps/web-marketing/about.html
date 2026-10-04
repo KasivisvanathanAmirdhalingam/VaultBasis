@@ -44,7 +44,7 @@
     <div class="content-container">
       <div class="content-section">
         <h2>What VaultBasis Is</h2>
-        <p>VaultBasis is an independent evidence-assurance system for reconciling supported digital-asset broker and tax-ledger outcomes. VaultBasis deterministically compares declared information sources, identifies agreements, differences, and unresolved information, and produces a signed Outcome Receipt that any reviewer can independently verify.</p>
+        <p>VaultBasis is an independent evidence-assurance system for reconciling supported digital-asset broker and tax-ledger outcomes. VaultBasis deterministically compares declared information sources, identifies agreements, differences, and unresolved information, and produces a signed Evidence Receipt that any reviewer can independently verify.</p>
       </div>
 
       <hr class="divider">
@@ -52,7 +52,7 @@
       <div class="content-section">
         <h2>Why It Exists</h2>
         <p>Tax software and broker reporting systems each produce information used in the tax workflow. The system producing a tax-ledger outcome is not independent of that outcome. VaultBasis provides a separate deterministic comparison against supported broker information under declared rules, without deciding which source is legally or factually correct.</p>
-        <p>When source data contains gaps or missing dates, VaultBasis preserves them as unresolved facts rather than inventing assumptions. The result is a signed receipt that records exactly what the comparison found.</p>
+        <p>When source data contains gaps or missing dates, VaultBasis preserves them as unresolved facts rather than inventing assumptions. The result is a signed Evidence Receipt that records exactly what the comparison found.</p>
       </div>
 
       <hr class="divider">
@@ -72,23 +72,23 @@
       <hr class="divider">
 
       <div class="content-section">
-        <h2>The Outcome Receipt</h2>
-        <p>Each reconciliation produces a signed Outcome Receipt — a portable artifact recording the declared outcome, the sources compared, and a cryptographic signature. The receipt can be independently verified by any reviewer using the Web Verifier without requiring the VaultBasis runtime. Verification confirms payload integrity and signature authenticity only; it does not establish that the underlying source data is correct.</p>
+        <h2>The Evidence Receipt</h2>
+        <p>Each reconciliation produces a signed Evidence Receipt — a portable artifact recording the declared outcome, the sources compared, and a cryptographic signature. The receipt can be independently verified by any reviewer using the Web Verifier without requiring the VaultBasis runtime. Verification confirms payload integrity and signature authenticity only; it does not establish that the underlying source data is correct.</p>
       </div>
 
       <hr class="divider">
 
       <div class="content-section">
-        <h2>Preview Status</h2>
-        <p>VaultBasis is in a controlled design-partner preview. Access is individually reviewed and provisioned. The current release supports a defined scope of broker and tax-ledger formats. The Scope &amp; Limitations document describes the tested boundary, known limitations, and what is not yet supported.</p>
+        <h2>Release Scope &amp; Availability</h2>
+        <p>VaultBasis is available for evaluation with preloaded sample data and commercial licensing for practitioner client workflows. The current release supports a defined scope of broker Form 1099-DA and tax-ledger formats. The Scope &amp; Limitations document describes the tested boundary, known limitations, and supported formats.</p>
       </div>
 
       <div class="about-cta">
         <h3>Evaluate VaultBasis</h3>
-        <p>Request design-partner access to evaluate VaultBasis using sample data and share feedback on the reconciliation and verification experience.</p>
+        <p>Try VaultBasis with preloaded sample cases or request a practitioner license tier for your client files.</p>
         <div class="about-cta-buttons">
-          <a href="/verifier" class="btn btn-secondary btn-sm">Verify an Outcome Receipt ↗</a>
-          <button onclick="openAccessModal()" class="btn btn-primary btn-sm">Request Design-Partner Access</button>
+          <a href="/verifier" class="btn btn-secondary btn-sm">Verify an Evidence Receipt ↗</a>
+          <button onclick="openAccessModal(this, 'TRIAL')" class="btn btn-primary btn-sm">Try VaultBasis Free</button>
         </div>
       </div>
     </div>

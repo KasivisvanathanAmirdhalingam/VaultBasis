@@ -127,13 +127,13 @@
       <!-- BUILD_METADATA -->
       <div class="hero-badge">LOCAL-FIRST TAX ASSURANCE</div>
       <h1>Digital-asset tax reconciliation for professionals. Local, deterministic, evidence-backed, independently verifiable.</h1>
-      <p>VaultBasis compares Form 1099-DA broker reports against client tax-ledger records entirely on your local machine—identifying basis discrepancies, missing lots, and unresolved items with zero cloud telemetry and zero client data egress.</p>
+      <p>VaultBasis compares Form 1099-DA broker reports against client tax-ledger records entirely on your local computer—identifying basis discrepancies, missing lots, and unresolved items with zero cloud telemetry and zero client data egress.</p>
       <div class="cta-group">
-        <button onclick="openAccessModal()" class="btn btn-primary" style="padding:15px 30px;font-size:1.05rem;">Try VaultBasis with Sample Data</button>
+        <button onclick="openAccessModal(this, 'TRIAL')" class="btn btn-primary" style="padding:15px 30px;font-size:1.05rem;">Try VaultBasis Free</button>
         <a href="/trust-assurance#enterprise-it" class="btn btn-secondary" style="padding:15px 30px;font-size:1.05rem;">Using a managed work computer? Send this to IT</a>
       </div>
 
-      <!-- Value Cards (replaces faint trust strip) -->
+      <!-- Value Cards -->
       <div class="value-cards" role="list">
         <div class="value-card" role="listitem">
           <div class="value-card-label">Reconciliation</div>
@@ -147,8 +147,8 @@
         </div>
         <div class="value-card" role="listitem">
           <div class="value-card-label">Portability</div>
-          <h3>Independently Verifiable Receipt</h3>
-          <p>A signed Outcome Receipt lets another party verify payload integrity and signature authenticity independently.</p>
+          <h3>Independently Verifiable Evidence Receipt</h3>
+          <p>A signed VaultBasis Evidence Receipt lets your reviewer verify file integrity and calculation provenance independently.</p>
         </div>
       </div>
     </section>
@@ -158,28 +158,28 @@
       <div class="section-header">
         <span class="section-tag">Process</span>
         <h2>How It Works</h2>
-        <p>Four steps from supported evidence to a signed, independently verifiable Outcome Receipt.</p>
+        <p>Four steps from supported client evidence to a signed, independently verifiable Evidence Receipt.</p>
       </div>
       <div class="steps-grid">
         <div class="step-card">
           <div class="step-number">1</div>
           <h3>Provide Supported Evidence</h3>
-          <p>Select supported broker information and supported tax-ledger output within the declared scope.</p>
+          <p>Select supported broker Form 1099-DA and tax-ledger records within the declared scope.</p>
         </div>
         <div class="step-card">
           <div class="step-number">2</div>
-          <h3>Reconcile Independently</h3>
-          <p>VaultBasis applies declared deterministic reconciliation semantics to compare the two sources locally.</p>
+          <h3>Reconcile Locally</h3>
+          <p>VaultBasis applies declared deterministic reconciliation rules to compare the two sources on your computer.</p>
         </div>
         <div class="step-card">
           <div class="step-number">3</div>
           <h3>Review the Outcome</h3>
-          <p>Review agreements, differences, and unresolved information with explanation and provenance. Unresolved facts are never silently resolved.</p>
+          <p>Review agreements, differences, and unresolved items with clear explanation and record provenance. Unresolved facts are never silently resolved.</p>
         </div>
         <div class="step-card">
           <div class="step-number">4</div>
-          <h3>Produce an Outcome Receipt</h3>
-          <p>Generate a signed portable receipt whose payload integrity and signature authenticity can be independently verified without the VaultBasis runtime.</p>
+          <h3>Produce an Evidence Receipt</h3>
+          <p>Generate a signed portable Evidence Receipt whose integrity can be independently verified without the VaultBasis runtime.</p>
         </div>
       </div>
     </section>
@@ -229,7 +229,7 @@
         <div class="boundary-row">
           <div class="boundary-cell">
             <h4>Payload Integrity &amp; Signature</h4>
-            <p>Verifies that an Outcome Receipt has not been changed since it was signed, and confirms the signature is valid for the key that produced it.</p>
+            <p>Verifies that an Evidence Receipt has not been changed since it was signed, and confirms the signature is valid for the key that produced it.</p>
           </div>
           <div class="boundary-cell">
             <h4>Professional Judgment</h4>
@@ -244,7 +244,7 @@
       <div class="section-header">
         <span class="section-tag">Deployment Boundary</span>
         <h2>Local-First Evidence Processing</h2>
-        <p>VaultBasis Edge is designed for local evidence processing. Source evidence used in reconciliation is processed within the declared local application boundary. Website, access-request, and distribution interactions are separate from the local Edge processing boundary. See Scope &amp; Limitations for tested network behavior, storage boundaries, and known limitations.</p>
+        <p>VaultBasis is designed for local evidence processing. Client files used in reconciliation are processed within the declared local application boundary on your computer. Website, license request, and distribution interactions are separate from local processing.</p>
       </div>
       <div class="grid-3">
         <div class="feature-card">
@@ -252,21 +252,21 @@
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
           </div>
           <h3>Local Processing</h3>
-          <p>Supported evidence intake and reconciliation execute entirely within the local VaultBasis Edge process.</p>
+          <p>Client file intake and reconciliation execute entirely within the local VaultBasis process on your computer.</p>
         </div>
         <div class="feature-card">
           <div class="card-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
           </div>
-          <h3>Local Signing</h3>
-          <p>Outcome Receipts are signed using a locally generated persistent Ed25519 installation key.</p>
+          <h3>Local Evidence Signing</h3>
+          <p>Evidence Receipts are signed using a locally generated persistent installation key.</p>
         </div>
         <div class="feature-card">
           <div class="card-icon">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
           </div>
           <h3>Independent Receipt Verification</h3>
-          <p>Supported Outcome Receipts can be checked using the independent Web Verifier without requiring the VaultBasis Edge runtime. Verification runs entirely in your browser.</p>
+          <p>VaultBasis Evidence Receipts can be checked using the independent Web Verifier without requiring the VaultBasis desktop application. Verification runs entirely in your browser.</p>
         </div>
       </div>
     </section>
@@ -276,12 +276,12 @@
       <div class="section-header">
         <span class="section-tag">Assurance Evidence</span>
         <h2>Evidence &amp; Verification Resources</h2>
-        <p>VaultBasis publishes inspectable evidence for key assurance claims, including the Evidence Contract, verifier, test vectors, and local-processing scope documentation. Design-partner access is required to retrieve some resources during the preview phase.</p>
+        <p>VaultBasis publishes inspectable evidence for key assurance claims, including the Evidence Contract, verifier, test receipts, and local-processing scope documentation.</p>
       </div>
       <div class="grid-2">
         <div class="feature-card">
           <h3>Public Evidence Contract v0.1</h3>
-          <p style="margin-bottom:1.25rem;">The published schema defining the structure of a VaultBasis Outcome Receipt, including outcome states and signature format.</p>
+          <p style="margin-bottom:1.25rem;">The published schema defining the structure of a VaultBasis Evidence Receipt, including outcome states and signature format.</p>
           <a href="/schemas/receipt-v0.1.json" target="_blank" rel="noopener" class="btn btn-secondary btn-sm">View Evidence Schema ↗</a>
         </div>
         <div class="feature-card">
@@ -299,7 +299,7 @@
         </div>
         <div class="feature-card">
           <h3>Scope &amp; Limitations</h3>
-          <p style="margin-bottom:1.25rem;">Documents the declared local application boundary, tested network behavior, supported source formats, outcome states, and explicit limitations of the preview release.</p>
+          <p style="margin-bottom:1.25rem;">Documents the declared local application boundary, tested network behavior, supported source formats, outcome states, and explicit limitations of the release.</p>
           <a href="/docs/scope_and_limitations_v0.1.html" target="_blank" rel="noopener" class="btn btn-secondary btn-sm">Scope &amp; Limitations ↗</a>
         </div>
       </div>
@@ -318,59 +318,62 @@
         <div class="feature-card" style="display: flex; flex-direction: column; justify-content: space-between; border-color: var(--border);">
           <div>
             <div style="font-size: 0.8rem; font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--accent); text-transform: uppercase; margin-bottom: 0.5rem;">Free Evaluation</div>
-            <h3 style="font-size: 1.3rem; margin-bottom: 0.5rem;">Sample Data Mode</h3>
+            <h3 style="font-size: 1.3rem; margin-bottom: 0.5rem;">Free Evaluation</h3>
             <div style="margin-bottom: 1.25rem;">
               <span style="font-size: 2.2rem; font-weight: 800; color: var(--text);">$0</span>
-              <span style="color: var(--text-muted); font-size: 0.9rem;">/ no time limit</span>
+              <span style="color: var(--text-muted); font-size: 0.9rem;">— no time limit</span>
             </div>
-            <p style="font-size: 0.9rem; margin-bottom: 1.5rem; color: var(--text-muted);">No credit card. Explore deterministic reconciliation math &amp; test evidence verification with pre-loaded samples.</p>
+            <p style="font-size: 0.9rem; margin-bottom: 1.5rem; color: var(--text-muted);">Try VaultBasis with preloaded sample cases before using client data.</p>
             <ul style="list-style: none; padding: 0; margin: 0 0 1.5rem 0; font-size: 0.88rem; color: var(--text); line-height: 1.8;">
-              <li>✓ Bundled sample case intake</li>
-              <li>✓ Unlimited reconciliation of samples</li>
-              <li>✓ Signed receipt generation</li>
-              <li>✓ Independent offline verification</li>
-              <li style="color: #94a3b8;">✗ Production client data</li>
+              <li>✓ Preloaded sample cases</li>
+              <li>✓ Complete sample reconciliation</li>
+              <li>✓ Generate signed evidence receipts</li>
+              <li>✓ Verify results independently, offline</li>
+              <li>✓ No license required</li>
+              <li style="color: #94a3b8; margin-top: 0.5rem; font-size: 0.82rem;">Sample data only — client files require a paid plan</li>
             </ul>
           </div>
-          <button onclick="openAccessModal(this, 'TRIAL')" class="btn btn-secondary" style="width: 100%; justify-content: center;">Start Free Evaluation</button>
+          <button onclick="openAccessModal(this, 'TRIAL')" class="btn btn-secondary" style="width: 100%; justify-content: center;">Try VaultBasis Free</button>
         </div>
 
         <!-- Tier 2: Essential (Solo) -->
         <div class="feature-card" style="display: flex; flex-direction: column; justify-content: space-between; border-color: var(--border);">
           <div>
             <div style="font-size: 0.8rem; font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--primary); text-transform: uppercase; margin-bottom: 0.5rem;">Solo Practitioner</div>
-            <h3 style="font-size: 1.3rem; margin-bottom: 0.5rem;">Solo License</h3>
+            <h3 style="font-size: 1.3rem; margin-bottom: 0.5rem;">Essential</h3>
             <div style="margin-bottom: 1.25rem;">
               <span style="font-size: 2.2rem; font-weight: 800; color: var(--text);">$499</span>
-              <span style="color: var(--text-muted); font-size: 0.9rem;">/ license term</span>
+              <span style="color: var(--text-muted); font-size: 0.9rem;">/ year</span>
             </div>
-            <p style="font-size: 0.9rem; margin-bottom: 1.5rem; color: var(--text-muted);">Ideal for solo CPAs and EAs handling digital-asset returns with Form 1099-DA.</p>
+            <p style="font-size: 0.9rem; margin-bottom: 1.5rem; color: var(--text-muted);">For individual CPAs and EAs handling digital-asset clients and Form 1099-DA reconciliation.</p>
             <ul style="list-style: none; padding: 0; margin: 0 0 1.5rem 0; font-size: 0.88rem; color: var(--text); line-height: 1.8;">
-              <li>✓ <strong>10 production cases</strong> / term</li>
-              <li>✓ Form 1099-DA &amp; tax ledger intake</li>
-              <li>✓ Ed25519 signed outcome receipts</li>
-              <li>✓ Full offline local persistence</li>
-              <li>✓ Offline verifier CLI tool</li>
+              <li>✓ <strong>Up to 10 client cases</strong> per annual term</li>
+              <li>✓ Import Form 1099-DA &amp; tax-ledger exports</li>
+              <li>✓ Signed, independently verifiable evidence</li>
+              <li>✓ Cases stored locally on your computer</li>
+              <li>✓ Offline evidence verification</li>
+              <li>✓ Existing cases accessible after expiry</li>
             </ul>
           </div>
           <button onclick="openAccessModal(this, 'ESSENTIAL')" class="btn btn-secondary" style="width: 100%; justify-content: center;">Request Solo License</button>
         </div>
 
-        <!-- Tier 3: Practice (Most Popular) -->
+        <!-- Tier 3: Practice (Recommended for Firms) -->
         <div class="feature-card" style="display: flex; flex-direction: column; justify-content: space-between; border: 2px solid var(--primary); box-shadow: 0 8px 24px rgba(37,99,235,0.08); position: relative;">
-          <div style="position: absolute; top: -12px; right: 16px; background: var(--primary); color: white; padding: 2px 10px; border-radius: 999px; font-size: 0.72rem; font-family: 'JetBrains Mono', monospace; font-weight: 700; text-transform: uppercase;">Most Popular</div>
+          <div style="position: absolute; top: -12px; right: 16px; background: var(--primary); color: white; padding: 2px 10px; border-radius: 999px; font-size: 0.72rem; font-family: 'JetBrains Mono', monospace; font-weight: 700; text-transform: uppercase;">Recommended for Firms</div>
           <div>
-            <div style="font-size: 0.8rem; font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--primary); text-transform: uppercase; margin-bottom: 0.5rem;">Tax &amp; Accounting Firm</div>
-            <h3 style="font-size: 1.3rem; margin-bottom: 0.5rem;">Practice License</h3>
+            <div style="font-size: 0.8rem; font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--primary); text-transform: uppercase; margin-bottom: 0.5rem;">For CPA &amp; Tax Firms</div>
+            <h3 style="font-size: 1.3rem; margin-bottom: 0.5rem;">Practice</h3>
             <div style="margin-bottom: 1.25rem;">
               <span style="font-size: 2.2rem; font-weight: 800; color: var(--text);">$1,499</span>
-              <span style="color: var(--text-muted); font-size: 0.9rem;">/ license term</span>
+              <span style="color: var(--text-muted); font-size: 0.9rem;">/ year</span>
             </div>
-            <p style="font-size: 0.9rem; margin-bottom: 1.5rem; color: var(--text-muted);">Sized for multi-preparer CPA firms reconciling medium client volumes.</p>
+            <p style="font-size: 0.9rem; margin-bottom: 1.5rem; color: var(--text-muted);">For firms handling multiple practitioners and a larger volume of digital-asset cases.</p>
             <ul style="list-style: none; padding: 0; margin: 0 0 1.5rem 0; font-size: 0.88rem; color: var(--text); line-height: 1.8;">
-              <li>✓ <strong>50 production cases</strong> / term</li>
-              <li>✓ Firm &amp; preparer identity on receipts</li>
-              <li>✓ Sanitized diagnostic support packager</li>
+              <li>✓ <strong>Up to 50 client cases</strong> per annual term</li>
+              <li>✓ Everything in Essential</li>
+              <li>✓ Firm &amp; preparer details on evidence</li>
+              <li>✓ Privacy-safe support diagnostics</li>
               <li>✓ Local backup &amp; recovery</li>
               <li>✓ Practitioner email support</li>
             </ul>
@@ -381,21 +384,22 @@
         <!-- Tier 4: Enterprise -->
         <div class="feature-card" style="display: flex; flex-direction: column; justify-content: space-between; border-color: var(--border);">
           <div>
-            <div style="font-size: 0.8rem; font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--accent); text-transform: uppercase; margin-bottom: 0.5rem;">High Volume / Firm</div>
+            <div style="font-size: 0.8rem; font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--accent); text-transform: uppercase; margin-bottom: 0.5rem;">For Larger Firms</div>
             <h3 style="font-size: 1.3rem; margin-bottom: 0.5rem;">Enterprise</h3>
             <div style="margin-bottom: 1.25rem;">
-              <span style="font-size: 1.8rem; font-weight: 800; color: var(--text);">Contact us</span>
+              <span style="font-size: 1.8rem; font-weight: 800; color: var(--text);">From $3,999</span>
+              <span style="color: var(--text-muted); font-size: 0.9rem;">/ year</span>
             </div>
-            <p style="font-size: 0.9rem; margin-bottom: 1.5rem; color: var(--text-muted);">Higher installation/case capacity, enterprise security documentation, and dedicated support.</p>
+            <p style="font-size: 0.9rem; margin-bottom: 1.5rem; color: var(--text-muted);">For higher-volume firms and managed IT environments.</p>
             <ul style="list-style: none; padding: 0; margin: 0 0 1.5rem 0; font-size: 0.88rem; color: var(--text); line-height: 1.8;">
-              <li>✓ <strong>250+ production cases</strong> (custom)</li>
-              <li>✓ Enterprise IT deployment profile &amp; SBOM</li>
-              <li>✓ MDM &amp; endpoint allowlisting guidance</li>
-              <li>✓ Custom capacity expansion blocks</li>
-              <li>✓ Dedicated technical support</li>
+              <li>✓ <strong>Higher / custom case capacity</strong></li>
+              <li>✓ Everything in Practice</li>
+              <li>✓ IT security review pack &amp; SBOM</li>
+              <li>✓ Managed-deployment guidance</li>
+              <li>✓ Dedicated support options</li>
             </ul>
           </div>
-          <button onclick="openAccessModal(this, 'ENTERPRISE')" class="btn btn-secondary" style="width: 100%; justify-content: center;">Contact Enterprise</button>
+          <button onclick="openAccessModal(this, 'ENTERPRISE')" class="btn btn-secondary" style="width: 100%; justify-content: center;">Contact Us</button>
         </div>
       </div>
 
@@ -403,7 +407,7 @@
       <div style="background: rgba(37,99,235,0.04); border: 1px solid rgba(37,99,235,0.15); border-radius: var(--radius); padding: 1.25rem 1.75rem; margin-bottom: 2.5rem; text-align: center;">
         <p style="margin: 0; font-size: 0.95rem; color: var(--text); line-height: 1.6;">
           <strong>Your license is validated locally.</strong> VaultBasis does not require an internet connection to reconcile client records or verify evidence. Expiration does not remove access to existing case records. Independent receipt verification remains free.
-          <a href="/trust-assurance" style="color: var(--primary); font-weight: 600; margin-left: 6px;">Learn more in Trust &amp; Assurance →</a>
+          <a href="/trust-assurance" style="color: var(--primary); font-weight: 600; margin-left: 6px;">Learn more in Security &amp; Trust →</a>
         </p>
       </div>
 
@@ -411,24 +415,24 @@
       <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.75rem 2rem; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
         <div>
           <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem; color: var(--text);">How offline licensing works</h4>
-          <p style="font-size: 0.9rem; color: var(--text-muted); margin: 0; line-height: 1.6;">Licensing is validated locally using cryptographically signed Ed25519 tokens. The application never phones home to verify seats or check activation status.</p>
+          <p style="font-size: 0.9rem; color: var(--text-muted); margin: 0; line-height: 1.6;">Licensing is validated locally using cryptographically signed tokens. The application never phones home to verify seats or check activation status.</p>
         </div>
         <div>
           <h4 style="font-size: 1rem; font-weight: 700; margin-bottom: 0.4rem; color: var(--text);">Historical case access guarantee</h4>
-          <p style="font-size: 0.9rem; color: var(--text-muted); margin: 0; line-height: 1.6;">If a license expires, existing cases, workpapers, and historical outcome receipts remain 100% readable and exportable on your machine forever.</p>
+          <p style="font-size: 0.9rem; color: var(--text-muted); margin: 0; line-height: 1.6;">If a license expires, existing cases, workpapers, and historical Evidence Receipts remain 100% readable and exportable on your machine forever.</p>
         </div>
       </div>
     </section>
 
-    <!-- Design-Partner CTA -->
+    <!-- Bottom CTA -->
     <div class="section-container">
       <div class="banner">
         <div>
           <h3>Ready to Reconcile Digital-Asset Returns?</h3>
-          <p>Evaluate VaultBasis with sample data or select the license tier that matches your tax practice volume.</p>
+          <p>Evaluate VaultBasis with preloaded sample data or select the license tier that matches your practice volume.</p>
         </div>
         <button onclick="openAccessModal(this, 'TRIAL')" class="btn btn-primary" style="padding:14px 28px;background:white;color:#0f172a;border:none;font-size:1.05rem;flex-shrink:0;">
-          Start Evaluation
+          Try VaultBasis Free
         </button>
       </div>
     </div>

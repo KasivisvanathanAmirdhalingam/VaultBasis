@@ -60,7 +60,7 @@
     <div class="access-card">
       <h1>Verifier Access</h1>
       <p class="subtitle">
-        The VaultBasis Web Verifier is available to design partners during the preview period.
+        The VaultBasis Web Verifier independently checks signed VaultBasis Evidence Receipts.
         Enter your access credentials to continue.
       </p>
 
@@ -74,7 +74,7 @@
         <label for="access-token">Access Token</label>
         <input type="password" id="access-token" name="token"
                placeholder="64-character hex token" autocomplete="off" spellcheck="false" required>
-        <p class="field-hint">Provided in your design-partner onboarding communication.</p>
+        <p class="field-hint">Provided in your download authorization communication.</p>
 
         <button type="submit" class="btn-submit" id="submit-btn">Continue to Verifier</button>
       </form>
@@ -82,7 +82,7 @@
       <div class="divider"></div>
 
       <div class="info-block">
-        <p>Don't have access credentials? <a href="/verifier-access" onclick="event.preventDefault();closeAccessModal&&closeAccessModal();openAccessModal&&openAccessModal()">Request design-partner access</a> to join the preview program.</p>
+        <p>Don't have access credentials? <a href="/#pricing" onclick="event.preventDefault();closeAccessModal&&closeAccessModal();openAccessModal&&openAccessModal(this, 'TRIAL')">Get started with a free evaluation or license</a>.</p>
         <p>Questions or issues? See <a href="/faq">FAQ</a> or <a href="/security-disclosure">Security Disclosure</a>.</p>
       </div>
     </div>

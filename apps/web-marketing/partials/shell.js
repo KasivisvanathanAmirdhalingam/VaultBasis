@@ -49,10 +49,10 @@
         tierSelect.value = tier;
       }
       if (modalTitle) {
-        modalTitle.innerText = (tier === 'TRIAL') ? 'Start Free Sample Evaluation' : 'Acquire VaultBasis License';
+        modalTitle.innerText = (tier === 'TRIAL') ? 'Start Free Evaluation' : 'Request a VaultBasis License';
       }
       if (btn) {
-        btn.innerText = (tier === 'TRIAL') ? 'Get Evaluation Download' : 'Proceed to Delivery';
+        btn.innerText = (tier === 'TRIAL') ? 'Get Evaluation Download' : 'Request Download & License';
         btn.disabled = false;
       }
 
@@ -78,7 +78,7 @@
       if (success) success.style.display = 'none';
       if (name) name.value = '';
       if (email) email.value = '';
-      if (btn) { btn.innerText = 'Proceed to Delivery'; btn.disabled = false; }
+      if (btn) { btn.innerText = 'Request Download & License'; btn.disabled = false; }
 
       document.removeEventListener('keydown', _modalKeyHandler);
       if (_lastFocusedElement && typeof _lastFocusedElement.focus === 'function') {

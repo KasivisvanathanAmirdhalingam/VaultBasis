@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Trust &amp; Assurance — VaultBasis</title>
-  <meta name="description" content="VaultBasis Trust &amp; Assurance — product assurance, security boundaries, privacy handling, and governance information.">
+  <title>Security &amp; Trust — VaultBasis</title>
+  <meta name="description" content="VaultBasis Security &amp; Trust — how client data is protected, how downloads are verified, local execution architecture, and IT deployment information.">
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
 <!-- SHELL_CSS -->
-    /* ── Trust & Assurance-specific ───────────────────────────────────── */
+    /* ── Security & Trust-specific ────────────────────────────────────── */
     main { flex: 1; }
     .page-hero { max-width: 1100px; margin: 4rem auto 2rem; padding: 0 1.5rem; }
     .page-hero .section-tag { font-size: 0.85rem; font-family: 'JetBrains Mono', monospace; color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem; display: block; font-weight: 700; }
@@ -54,108 +54,109 @@
   <main role="main">
 
     <div class="page-hero">
-      <span class="section-tag">Trust &amp; Assurance</span>
-      <h1>Trust &amp; Assurance</h1>
-      <p>Product assurance, security boundaries, privacy handling, and governance information for the VaultBasis Design-Partner Preview.</p>
+      <span class="section-tag">Security &amp; Trust</span>
+      <h1>Security &amp; Trust</h1>
+      <p>How VaultBasis protects client data, how downloads are verified, what runs on your computer, and security specifications for IT reviewers.</p>
     </div>
 
     <div class="toc-strip">
       <nav aria-label="Page sections">
-        <a href="#product-assurance">Product Assurance</a>
-        <a href="#security">Security</a>
-        <a href="#privacy">Privacy &amp; Data Handling</a>
-        <a href="#governance">Governance</a>
-        <a href="#legal">Legal</a>
+        <a href="#how-vaultbasis-protects-data">Data Protection</a>
+        <a href="#how-downloads-verified">Download Integrity</a>
+        <a href="#what-runs-locally">Local Processing</a>
+        <a href="#independent-verification">Independent Verification</a>
+        <a href="#enterprise-it">Information for IT Teams</a>
+        <a href="#governance">Governance &amp; Legal</a>
       </nav>
     </div>
 
-    <section id="product-assurance" class="assurance-section">
-      <h2>Product Assurance</h2>
-      <p class="section-intro">Verifiable properties of the VaultBasis reconciliation and receipt system.</p>
+    <section id="how-vaultbasis-protects-data" class="assurance-section">
+      <h2>How VaultBasis Protects Your Data</h2>
+      <p class="section-intro">Client case data does not need to be uploaded to VaultBasis to reconcile or verify a case.</p>
       <div class="assurance-grid">
         <div class="assurance-card">
-          <h3>Deterministic Reconciliation</h3>
-          <p>Reconciliation outcomes for the same source inputs are computed under fixed, published rules. Installation-specific elements — signing keys, timestamps, and receipt identifiers — are unique per installation.</p>
-          <p><a href="/schemas/receipt-v0.1.json" target="_blank" rel="noopener">View Evidence Contract ↗</a></p>
-        </div>
-        <div class="assurance-card">
-          <h3>Independent Receipt Verification</h3>
-          <p>Outcome Receipts can be independently verified offline or via the hosted web verifier during preview. Verification operates entirely client-side without transmitting receipt contents to a server.</p>
-          <p><a href="/verifier">Open Web Verifier ↗</a></p>
-        </div>
-        <div class="assurance-card">
-          <h3>Local Evidence Boundary</h3>
-          <p>Source evidence used in reconciliation is processed within the local VaultBasis Edge application. The website, access-request, and distribution interactions are a separate plane.</p>
+          <h3>Local Evidence Processing</h3>
+          <p>Client CSV files, Form 1099-DA imports, and reconciliation calculations execute entirely within the local VaultBasis process on your computer. Case records stay on your computer.</p>
           <p><a href="/docs/scope_and_limitations_v0.1.html" target="_blank" rel="noopener">Scope &amp; Limitations ↗</a></p>
         </div>
         <div class="assurance-card">
-          <h3>Cryptographic Signing</h3>
-          <p>Outcome Receipts are signed using a locally generated Ed25519 installation key. Successful signature verification establishes that the receipt has not been changed since signing and that the signature matches the key declared in the receipt. It does not independently authenticate the originating installation.</p>
+          <h3>Strict Loopback Boundary</h3>
+          <p>The local runtime binds strictly to loopback (<code>127.0.0.1</code>) and does not require outbound network access to perform reconciliation or export evidence.</p>
+        </div>
+        <div class="assurance-card">
+          <h3>Privacy-Safe Support</h3>
+          <p>Support diagnostics strip and sanitize all taxpayer information, file contents, and sensitive records before packaging, ensuring client confidential data is never shared.</p>
+        </div>
+        <div class="assurance-card">
+          <h3>Local Cryptographic Signing</h3>
+          <p>Evidence Receipts are signed using a locally generated installation key stored securely on your device. Private keys never leave your machine.</p>
         </div>
       </div>
     </section>
 
-    <section id="security" class="assurance-section">
-      <h2>Security</h2>
-      <p class="section-intro">VaultBasis operates across three distinct planes. Each has a separate security boundary.</p>
+    <section id="how-downloads-verified" class="assurance-section">
+      <h2>How Downloads Are Verified</h2>
+      <p class="section-intro">Every official VaultBasis release is cryptographically signed, notarized, and hashed at build time.</p>
+      <div class="assurance-grid">
+        <div class="assurance-card">
+          <h3>macOS Notarization &amp; Developer ID</h3>
+          <p>macOS binaries are signed with an Apple Developer ID Application certificate and notarized by Apple's automated notary service with hardened runtime enabled.</p>
+        </div>
+        <div class="assurance-card">
+          <h3>Windows Authenticode Signature</h3>
+          <p>Windows binaries are signed with an Authenticode digital certificate and timestamped via RFC 3161 timestamping authority.</p>
+        </div>
+        <div class="assurance-card">
+          <h3>Immutable Release Digests</h3>
+          <p>Every official distribution artifact carries a published SHA-256 digest recorded in the canonical release manifest.</p>
+        </div>
+        <div class="assurance-card">
+          <h3>Security Vulnerability Reporting</h3>
+          <p>Security concerns or vulnerability disclosures are handled with highest priority.</p>
+          <p><a href="/security-disclosure">Security Disclosure ↗</a></p>
+        </div>
+      </div>
+    </section>
+
+    <section id="what-runs-locally" class="assurance-section">
+      <h2>What Runs on Your Computer &amp; Network Architecture</h2>
+      <p class="section-intro">VaultBasis operates across three separate planes to maintain strict security boundaries.</p>
       <table class="planes-table" role="table">
         <thead>
           <tr><th>Plane</th><th>Description</th></tr>
         </thead>
         <tbody>
           <tr>
-            <td><strong>Local Edge</strong></td>
-            <td>The local VaultBasis Edge application processes source evidence, performs reconciliation, and generates the signed Outcome Receipt. Source evidence is processed within the declared local application boundary. See <a href="/docs/scope_and_limitations_v0.1.html" target="_blank" rel="noopener">Scope &amp; Limitations</a> for tested network behaviour and known limitations.</td>
+            <td><strong>Local Edge (Your Computer)</strong></td>
+            <td>Processes client files, performs deterministic reconciliation, persists case history, and produces signed Evidence Receipts. Binds strictly to <code>127.0.0.1</code>.</td>
           </tr>
           <tr>
-            <td><strong>Web / Marketing</strong></td>
-            <td>The public marketing website handles access-request submissions for provisioning purposes. It is a separate plane from the local Edge application. No reconciliation or evidence processing occurs here.</td>
+            <td><strong>Marketing &amp; License Provisioning</strong></td>
+            <td>Public website hosted on Vercel handling plan requests and delivering authorized software download links. Separate from local processing.</td>
           </tr>
           <tr>
-            <td><strong>Distribution</strong></td>
-            <td>Qualified artifacts are recorded at build time with SHA-256 identities and stored in controlled storage before distribution. The distribution plane is separate from both the Edge application and the marketing website.</td>
+            <td><strong>Independent Verifier</strong></td>
+            <td>Browser-based verification engine running 100% client-side via WebCrypto. Does not transmit receipt files or data to any server.</td>
           </tr>
         </tbody>
       </table>
-      <div style="margin-top:1.75rem;" class="assurance-grid">
-        <div class="assurance-card">
-          <h3>Vulnerability Reporting</h3>
-          <p>Security concerns should be reported via the security disclosure route.</p>
-          <p><a href="/security-disclosure">Security Disclosure ↗</a></p>
-        </div>
-        <div class="assurance-card">
-          <h3>Release Integrity</h3>
-          <p>Candidate artifacts carry SHA-256 identities recorded at build time. Qualified artifacts are immutably stored before distribution.</p>
-        </div>
-        <div class="assurance-card">
-          <h3>Known Limitations</h3>
-          <p>The Scope &amp; Limitations document describes the declared application boundary, tested network behavior, supported source formats, and explicit limitations of the preview release.</p>
-          <p><a href="/docs/scope_and_limitations_v0.1.html" target="_blank" rel="noopener">View Scope &amp; Limitations ↗</a></p>
-        </div>
-      </div>
     </section>
 
-    <section id="privacy" class="assurance-section">
-      <h2>Privacy &amp; Data Handling</h2>
-      <p class="section-intro">How information is handled across each operational plane. See the <a href="/privacy-policy" style="color:var(--primary);font-weight:600;">Privacy Policy</a> for full details.</p>
-      <ul class="privacy-list">
-        <li>
-          <strong>Edge evidence processing</strong>
-          Source evidence used in reconciliation is processed within the declared local application boundary. See <a href="/docs/scope_and_limitations_v0.1.html" style="color:var(--primary);">Scope &amp; Limitations</a> for tested network behaviour and known limitations.
-        </li>
-        <li>
-          <strong>Website interactions</strong>
-          The marketing website collects access-request information (name and email) for provisioning purposes. This information is used to review and provision design-partner access.
-        </li>
-        <li>
-          <strong>Receipt verification</strong>
-          The Web Verifier performs verification in the browser using WebCrypto. Receipt contents are not sent to VaultBasis servers.
-        </li>
-        <li>
-          <strong>Contact and support</strong>
-          Information submitted via contact or support routes is used to respond to the inquiry.
-        </li>
-      </ul>
+    <section id="independent-verification" class="assurance-section">
+      <h2>Independent Verification</h2>
+      <p class="section-intro">A VaultBasis Evidence Receipt lets you independently verify that exported evidence has not been altered.</p>
+      <div class="assurance-grid">
+        <div class="assurance-card">
+          <h3>Independent Receipt Verification</h3>
+          <p>Evidence Receipts can be independently verified offline or via the hosted web verifier. Verification operates entirely client-side without transmitting receipt contents to a server.</p>
+          <p><a href="/verifier">Open Web Verifier ↗</a></p>
+        </div>
+        <div class="assurance-card">
+          <h3>Public Evidence Contract v0.1</h3>
+          <p>The published schema defining the exact structure, outcome states, and cryptographic signature of an Evidence Receipt.</p>
+          <p><a href="/schemas/receipt-v0.1.json" target="_blank" rel="noopener">View Evidence Schema ↗</a></p>
+        </div>
+      </div>
     </section>
 
     <section id="enterprise-it" class="assurance-section">

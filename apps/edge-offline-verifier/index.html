@@ -183,17 +183,17 @@
   </header>
 
   <main role="main">
-    <h2>Offline Receipt Verifier</h2>
+    <h2>Offline Evidence Receipt Verifier</h2>
     <p class="subtitle">
-      Verify a signed Outcome Receipt locally, without contacting VaultBasis or any external server.
-      Verification runs entirely within this Edge installation.
+      Verify a signed Evidence Receipt locally, without contacting VaultBasis or any external server.
+      Verification runs entirely within this local installation.
     </p>
 
     <div class="upload-zone" id="drop-zone" onclick="document.getElementById('receipt-file').click()"
          ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
       <input type="file" id="receipt-file" accept=".json" style="display:none" onchange="handleFileSelect(event)">
-      <p class="upload-label" id="upload-label">Drop Outcome Receipt JSON here, or click to select</p>
-      <p class="upload-hint" id="upload-hint">Accepts VaultBasis Outcome Receipt v0.1 JSON files</p>
+      <p class="upload-label" id="upload-label">Drop Evidence Receipt JSON here, or click to select</p>
+      <p class="upload-hint" id="upload-hint">Accepts VaultBasis Evidence Receipt v0.1 JSON files</p>
     </div>
 
     <div style="display: flex; gap: 0.75rem; align-items: center;">
@@ -213,7 +213,7 @@
   </main>
 
   <footer role="contentinfo">
-    <span>© 2026 VaultBasis. All rights reserved. • Design-Partner Preview</span>
+    <span>© 2026 VaultBasis. All rights reserved.</span>
     <span>Local Evidence Processing</span>
   </footer>
 
@@ -248,8 +248,8 @@
     }
     function clearAll() {
       selectedFile = null;
-      document.getElementById('upload-label').textContent = 'Drop Outcome Receipt JSON here, or click to select';
-      document.getElementById('upload-hint').textContent = 'Accepts VaultBasis Outcome Receipt v0.1 JSON files';
+      document.getElementById('upload-label').textContent = 'Drop Evidence Receipt JSON here, or click to select';
+      document.getElementById('upload-hint').textContent = 'Accepts VaultBasis Evidence Receipt v0.1 JSON files';
       document.getElementById('verify-btn').disabled = true;
       document.getElementById('clear-btn').style.display = 'none';
       document.getElementById('result-panel').style.display = 'none';
