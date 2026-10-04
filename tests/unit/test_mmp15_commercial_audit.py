@@ -20,6 +20,7 @@ from edge.commercial.audit import (
     AuditEventType,
     CommercialAuditService,
 )
+from edge.commercial.diagnostics import DiagnosticPackager
 from edge.commercial.identity import FirmIdentity, FirmIdentityService
 from edge.commercial.policy import CommercialPolicyService
 from edge.storage.sqlite_store import SQLiteStore
@@ -45,11 +46,13 @@ def client(monkeypatch, tmp_path):
         audit_service=audit_service,
     )
     identity_service = FirmIdentityService(store, audit_service=audit_service)
+    packager = DiagnosticPackager(store, policy_service, identity_service)
 
     monkeypatch.setattr("edge.api.app.db_store", store)
     monkeypatch.setattr("edge.api.app.commercial_audit_service", audit_service)
     monkeypatch.setattr("edge.api.app.commercial_policy", policy_service)
     monkeypatch.setattr("edge.api.app.firm_identity_service", identity_service)
+    monkeypatch.setattr("edge.api.app.diagnostic_packager", packager)
     return TestClient(app)
 
 

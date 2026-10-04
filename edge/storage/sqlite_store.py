@@ -73,7 +73,8 @@ class SQLiteStore:
                     assurance_level TEXT,
                     receipt_id TEXT,
                     created_at TEXT NOT NULL,
-                    updated_at TEXT NOT NULL
+                    updated_at TEXT NOT NULL,
+                    case_kind TEXT DEFAULT 'PRODUCTION'
                 );
 
                 CREATE TABLE IF NOT EXISTS sources (
@@ -118,11 +119,13 @@ class SQLiteStore:
                     installed_at TEXT NOT NULL
                 );
             """)
-            # Ensure client_reference column exists
+            # Ensure client_reference and case_kind columns exist
             cursor.execute("PRAGMA table_info(cases)")
             columns = [row[1] for row in cursor.fetchall()]
             if "client_reference" not in columns:
                 cursor.execute("ALTER TABLE cases ADD COLUMN client_reference TEXT DEFAULT 'Sample Client'")
+            if "case_kind" not in columns:
+                cursor.execute("ALTER TABLE cases ADD COLUMN case_kind TEXT DEFAULT 'PRODUCTION'")
             now_utc = datetime.now(timezone.utc).isoformat()
             conn.execute("INSERT INTO schema_migrations (version, name, applied_at) VALUES (2, 'commercial_licensing_schema', ?)", (now_utc,))
 
@@ -168,21 +171,33 @@ class SQLiteStore:
             now_utc = datetime.now(timezone.utc).isoformat()
             conn.execute("INSERT INTO schema_migrations (version, name, applied_at) VALUES (4, 'commercial_audit_log', ?)", (now_utc,))
 
+        # Idempotent verification for existing databases
+        cursor.execute("PRAGMA table_info(cases)")
+        existing_cols = [row[1] for row in cursor.fetchall()]
+        if existing_cols:
+            if "client_reference" not in existing_cols:
+                cursor.execute("ALTER TABLE cases ADD COLUMN client_reference TEXT DEFAULT 'Sample Client'")
+            if "case_kind" not in existing_cols:
+                cursor.execute("ALTER TABLE cases ADD COLUMN case_kind TEXT DEFAULT 'PRODUCTION'")
+
+
 
     def save_case(self, case: CanonicalCase):
         now_utc = datetime.now(timezone.utc).isoformat()
         client_ref = getattr(case, "client_reference", "Sample Client") or "Sample Client"
+        case_kind = getattr(case, "case_kind", "PRODUCTION") or "PRODUCTION"
         with self._get_connection() as conn:
             conn.execute("""
-                INSERT INTO cases (case_id, client_reference, tax_year, jurisdiction, case_status, outcome_state, assurance_level, receipt_id, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO cases (case_id, client_reference, tax_year, jurisdiction, case_status, outcome_state, assurance_level, receipt_id, created_at, updated_at, case_kind)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(case_id) DO UPDATE SET
                     client_reference=excluded.client_reference,
                     case_status=excluded.case_status,
                     outcome_state=excluded.outcome_state,
                     assurance_level=excluded.assurance_level,
                     receipt_id=excluded.receipt_id,
-                    updated_at=excluded.updated_at;
+                    updated_at=excluded.updated_at,
+                    case_kind=excluded.case_kind;
             """, (
                 case.case_id,
                 client_ref,
@@ -193,7 +208,8 @@ class SQLiteStore:
                 case.assurance_level,
                 case.receipt_id,
                 case.created_at,
-                now_utc
+                now_utc,
+                case_kind
             ))
 
     def get_case(self, case_id: str) -> Optional[CanonicalCase]:
@@ -219,12 +235,14 @@ class SQLiteStore:
                 transactions.append(CanonicalTransaction.model_validate_json(t_row["data_json"]))
 
             client_ref = row["client_reference"] if "client_reference" in row.keys() and row["client_reference"] else "Sample Client"
+            case_kind = row["case_kind"] if "case_kind" in row.keys() and row["case_kind"] else "PRODUCTION"
             return CanonicalCase(
                 case_id=row["case_id"],
                 client_reference=client_ref,
                 tax_year=row["tax_year"],
                 jurisdiction=row["jurisdiction"],
                 case_status=row["case_status"],
+                case_kind=case_kind,
                 outcome_state=row["outcome_state"],
                 assurance_level=row["assurance_level"],
                 receipt_id=row["receipt_id"],
@@ -336,12 +354,12 @@ class SQLiteStore:
     def count_billable_cases(self, sample_case_ids: Optional[Set[str]] = None) -> int:
         """
         Returns count of persistent practitioner-created production cases.
-        Explicitly excludes bundled sample cases from capacity metering.
+        Explicitly excludes bundled sample cases and test fixtures from capacity metering.
         """
         excluded = sample_case_ids or {"CASE-SAMPLE-2025"}
         placeholders = ",".join("?" for _ in excluded)
         with self._get_connection() as conn:
-            query = f"SELECT COUNT(*) FROM cases WHERE case_id NOT IN ({placeholders})"
+            query = f"SELECT COUNT(*) FROM cases WHERE case_kind = 'PRODUCTION' AND case_id NOT IN ({placeholders})"
             cursor = conn.execute(query, list(excluded))
             row = cursor.fetchone()
             return row[0] if row else 0

@@ -37,6 +37,7 @@ from edge.commercial.policy import (
     CommercialPolicyService,
 )
 from edge.storage.sqlite_store import SQLiteStore
+from schemas.canonical.case import CanonicalCase
 from tools.issue_license import issue_commercial_license
 
 
@@ -378,3 +379,92 @@ def test_api_commercial_status_endpoint(clean_commercial_env, client):
     assert data2["tier"] == "ENTERPRISE"
     assert data2["max_cases_per_installation"] == 100
     assert data2["unmetered_verification_active"] is True
+
+
+# ------------------------------------------------------------------------------
+# 3. Adversarial Provenance & Anti-Laundering Tests
+# ------------------------------------------------------------------------------
+
+def test_adversarial_production_case_named_case_sample_2025_denied_without_license(clean_commercial_env, client):
+    """
+    Adversarial Boundary Test:
+    A user cannot bypass commercial entitlement simply by naming their production case 'CASE-SAMPLE-2025'.
+    Unmetered evaluation is granted only to authentic BUNDLED_SAMPLE provenance, not arbitrary strings.
+    """
+    policy, store, _ = clean_commercial_env
+
+    # 1. Attempting to create a production case named 'CASE-SAMPLE-2025' without a license must return 402
+    res_create = client.post("/api/cases", json={"case_id": "CASE-SAMPLE-2025", "tax_year": 2025})
+    assert res_create.status_code == 402
+    assert res_create.json()["error"]["code"] == "ENTITLEMENT_REQUIRED"
+
+    # 2. Even if a PRODUCTION case with case_id="CASE-SAMPLE-2025" were saved directly into SQLite,
+    # reconciling it without an authentic BUNDLED_SAMPLE provenance must fail closed (402).
+    now_utc = datetime.now(timezone.utc).isoformat()
+    spoofed_case = CanonicalCase(
+        case_id="CASE-SAMPLE-2025",
+        client_reference="Adversarial Client Data",
+        tax_year=2025,
+        jurisdiction="US",
+        case_status="CREATED",
+        case_kind="PRODUCTION",
+        created_at=now_utc,
+        updated_at=now_utc
+    )
+    store.save_case(spoofed_case)
+
+    res_recon = client.post("/api/cases/CASE-SAMPLE-2025/reconcile")
+    assert res_recon.status_code == 402
+    assert res_recon.json()["error"]["code"] == "ENTITLEMENT_REQUIRED"
+
+
+def test_adversarial_bundled_sample_rejects_client_csv_mutation(clean_commercial_env, client):
+    """
+    Anti-Sample-Laundering Invariant:
+    A bundled sample case is immutable demonstration data. Attempting to upload
+    custom client CSVs into a BUNDLED_SAMPLE container must be strictly rejected (403 Forbidden).
+    """
+    # 1. Load authentic bundled sample
+    res_load = client.post("/api/sample-case/load")
+    assert res_load.status_code == 200
+
+    # 2. Attempt to upload arbitrary client CSV to the bundled sample
+    fake_csv = b"Transaction_ID,Asset,Amount\nTX-999,BTC,100.0\n"
+    res_upload = client.post(
+        "/api/cases/CASE-SAMPLE-2025/sources",
+        files={"file": ("client_private_data.csv", fake_csv, "text/csv")},
+        data={"source_type": "AUTO"}
+    )
+    assert res_upload.status_code == 403
+    assert "immutable demonstration baselines" in res_upload.json()["detail"]
+
+
+def test_adversarial_authentic_bundled_sample_allowed_with_expired_license(clean_commercial_env, client):
+    """
+    Evaluation Invariant:
+    Authentic bundled sample reconciliation and export remain 100% functional
+    even when an installed commercial license is expired.
+    """
+    policy, store, _ = clean_commercial_env
+    now = datetime.now(timezone.utc)
+    expired_token = _make_test_token(
+        issued_at_dt=now - timedelta(days=60),
+        not_before_dt=now - timedelta(days=60),
+        expires_at_dt=now - timedelta(days=10),
+        grace_until_dt=now - timedelta(days=5),
+    )
+    policy.install_license_token(expired_token)
+
+    # 1. Load authentic sample
+    res_load = client.post("/api/sample-case/load")
+    assert res_load.status_code == 200
+
+    # 2. Reconcile sample case
+    res_recon = client.post("/api/cases/CASE-SAMPLE-2025/reconcile")
+    assert res_recon.status_code == 200
+
+    # 3. Export sample evidence
+    res_exp = client.get("/api/cases/CASE-SAMPLE-2025/export")
+    assert res_exp.status_code == 200
+    assert res_exp.headers["content-type"] == "application/zip"
+

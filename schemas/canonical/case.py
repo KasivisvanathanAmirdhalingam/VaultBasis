@@ -32,6 +32,10 @@ class CanonicalCase(BaseModel):
         "CREATED",
         description="Case lifecycle status: CREATED, SOURCES_INGESTED, RECONCILED, RECEIPT_ISSUED"
     )
+    case_kind: str = Field(
+        "PRODUCTION",
+        description="Case provenance kind: PRODUCTION, BUNDLED_SAMPLE, TEST_FIXTURE"
+    )
     
     sources: Dict[str, SourceDocumentMetadata] = Field(
         default_factory=dict,

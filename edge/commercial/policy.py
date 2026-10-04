@@ -269,8 +269,10 @@ class CommercialPolicyService:
             )
 
         # 0.1 Bundled sample case unmetered evaluation (Onboarding & Evaluation Invariant)
-        case_id = (context or {}).get("case_id")
-        if case_id == "CASE-SAMPLE-2025" or (context or {}).get("is_sample"):
+        # Provenance invariant: Only authentic BUNDLED_SAMPLE cases are unmetered.
+        # Merely naming a production case "CASE-SAMPLE-2025" is not authorized.
+        case_kind = (context or {}).get("case_kind")
+        if case_kind == "BUNDLED_SAMPLE":
             return CommercialPolicyDecision(
                 allowed=True,
                 http_status=200,

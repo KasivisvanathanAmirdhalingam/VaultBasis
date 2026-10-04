@@ -346,6 +346,7 @@ def load_sample_case():
             tax_year=2025,
             jurisdiction="US",
             case_status="CREATED",
+            case_kind="BUNDLED_SAMPLE",
             created_at=now_utc,
             updated_at=now_utc
         )
@@ -480,6 +481,12 @@ async def upload_source(
     if not case:
         raise HTTPException(status_code=404, detail=f"Case '{case_id}' not found")
 
+    if getattr(case, "case_kind", "PRODUCTION") == "BUNDLED_SAMPLE":
+        raise HTTPException(
+            status_code=403,
+            detail="Bundled sample cases are immutable demonstration baselines and cannot accept custom client data. Please create a new production case."
+        )
+
     content = await file.read()
     if not content:
         raise HTTPException(status_code=400, detail="Uploaded file is empty")
@@ -514,7 +521,13 @@ def reconcile_case(case_id: str):
         raise HTTPException(status_code=404, detail=f"Case '{case_id}' not found")
 
     # Evaluate commercial entitlement before performing reconciliation
-    decision = commercial_policy.authorize(CommercialOperation.RECONCILE_CASE, context={"case_id": case_id})
+    decision = commercial_policy.authorize(
+        CommercialOperation.RECONCILE_CASE,
+        context={
+            "case_id": case_id,
+            "case_kind": getattr(case, "case_kind", "PRODUCTION") or "PRODUCTION"
+        }
+    )
     if not decision.allowed:
         return JSONResponse(
             status_code=decision.http_status,
