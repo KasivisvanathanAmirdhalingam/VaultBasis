@@ -71,6 +71,22 @@ module.exports = async (req, res) => {
     return res.status(503).json({ error: 'Release manifest could not be read.' });
   }
 
+  // Release State Lifecycle Gate
+  // Valid lifecycle: BUILD_CREATED | FUNCTIONALLY_QUALIFIED | TRUST_QUALIFIED | RELEASE_MANIFEST_FROZEN | DISTRIBUTION_ACTIVE | SUPERSEDED | REVOKED
+  const releaseState = (manifest.distribution_status || manifest.release_state || (manifest.active === false ? 'INACTIVE' : 'DISTRIBUTION_ACTIVE')).toUpperCase();
+  if (manifest.active === false || manifest.is_active === false) {
+    return res.status(403).json({ error: 'This release is not currently authorized for distribution.' });
+  }
+  if (releaseState === 'REVOKED') {
+    return res.status(410).json({ error: 'This release has been revoked for security or integrity reasons.' });
+  }
+  if (releaseState === 'SUPERSEDED') {
+    return res.status(403).json({ error: 'This release is superseded. Please request the currently active release.' });
+  }
+  if (releaseState !== 'DISTRIBUTION_ACTIVE') {
+    return res.status(403).json({ error: 'This release is not currently authorized for distribution.' });
+  }
+
   // Resolve platform and artifact entry.
   const ua = req.headers['user-agent'] || '';
   const platformKey = platformParam || detectPlatformFromUA(ua);
