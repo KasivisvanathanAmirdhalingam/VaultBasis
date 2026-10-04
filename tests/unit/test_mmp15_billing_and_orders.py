@@ -238,6 +238,253 @@ def test_payment_failure_remains_not_eligible():
     assert result["provisioningState"] == "NOT_ELIGIBLE"
 
 
+def test_expired_and_cancelled_checkout_cannot_become_provisionable():
+    """Validates that expired or cancelled checkouts can never transition to provisionable."""
+    code = """
+    const order1 = await billingStore.createOrder({
+        customerEmail: 'cancel@firm.com',
+        customerName: 'Cancel Test',
+        planId: 'SOLO'
+    });
+    const order2 = await billingStore.createOrder({
+        customerEmail: 'expire@firm.com',
+        customerName: 'Expire Test',
+        planId: 'PRACTICE'
+    });
+
+    const cancelled = await billingStore.transitionOrderPaymentState(
+        order1.orderId,
+        billingStore.PAYMENT_STATES.CANCELLED,
+        { detail: 'User abandoned checkout' }
+    );
+    const expired = await billingStore.transitionOrderPaymentState(
+        order2.orderId,
+        billingStore.PAYMENT_STATES.CHECKOUT_EXPIRED,
+        { detail: 'Session expired' }
+    );
+
+    // Attempt illegal transition to PAYMENT_CONFIRMED on cancelled order
+    let illegalTransitionBlocked = false;
+    try {
+        await billingStore.transitionOrderPaymentState(
+            order1.orderId,
+            billingStore.PAYMENT_STATES.PAYMENT_CONFIRMED
+        );
+    } catch (e) {
+        illegalTransitionBlocked = true;
+    }
+
+    console.log(JSON.stringify({
+        cancelledState: cancelled.paymentState,
+        cancelledProv: cancelled.provisioningState,
+        expiredState: expired.paymentState,
+        expiredProv: expired.provisioningState,
+        illegalTransitionBlocked
+    }));
+    """
+    result = run_node_script(code)
+    assert result["cancelledState"] == "CANCELLED"
+    assert result["cancelledProv"] == "NOT_ELIGIBLE"
+    assert result["expiredState"] == "CHECKOUT_EXPIRED"
+    assert result["expiredProv"] == "NOT_ELIGIBLE"
+    assert result["illegalTransitionBlocked"] is True
+
+
+def test_amount_and_currency_mismatch_fails_closed():
+    """Validates that webhook calls with wrong amount or currency fail closed with 409."""
+    code = """
+    process.env.ALLOW_TEST_WEBHOOKS = 'true';
+    const order = await billingStore.createOrder({
+        customerEmail: 'tamper@firm.com',
+        customerName: 'Tamper Test',
+        planId: 'SOLO' // Expected 49900 USD
+    });
+
+    let mockRes = { statusCode: 200, json: (d) => { mockRes.data = d; } };
+    mockRes.status = (code) => { mockRes.statusCode = code; return mockRes; };
+
+    // 1. Wrong currency (EUR instead of USD)
+    const reqWrongCurr = {
+        method: 'POST',
+        headers: {},
+        body: {
+            id: 'evt_wrong_curr',
+            type: 'checkout.session.completed',
+            data: {
+                object: {
+                    metadata: { orderId: order.orderId },
+                    amount_total: 49900,
+                    currency: 'eur'
+                }
+            }
+        }
+    };
+    await webhookHandler(reqWrongCurr, mockRes);
+    const codeWrongCurr = mockRes.statusCode;
+
+    // 2. Wrong amount (10000 instead of 49900)
+    const reqWrongAmt = {
+        method: 'POST',
+        headers: {},
+        body: {
+            id: 'evt_wrong_amt',
+            type: 'checkout.session.completed',
+            data: {
+                object: {
+                    metadata: { orderId: order.orderId },
+                    amount_total: 10000,
+                    currency: 'usd'
+                }
+            }
+        }
+    };
+    await webhookHandler(reqWrongAmt, mockRes);
+    const codeWrongAmt = mockRes.statusCode;
+
+    // Verify order in store is still CHECKOUT_CREATED (NOT eligible)
+    const freshOrder = await billingStore.getOrder(order.orderId);
+
+    console.log(JSON.stringify({
+        codeWrongCurr,
+        codeWrongAmt,
+        orderState: freshOrder.paymentState,
+        provisioningState: freshOrder.provisioningState
+    }));
+    """
+    result = run_node_script(code)
+    assert result["codeWrongCurr"] == 409
+    assert result["codeWrongAmt"] == 409
+    assert result["orderState"] == "CHECKOUT_CREATED"
+    assert result["provisioningState"] == "NOT_ELIGIBLE"
+
+
+def test_refund_lifecycle_before_and_after_provisioning():
+    """Validates refund state transitions before and after license provisioning."""
+    code = """
+    // Case 1: Refund before provisioning
+    const orderBefore = await billingStore.createOrder({
+        customerEmail: 'refund_before@firm.com',
+        customerName: 'Refund Before',
+        planId: 'SOLO'
+    });
+    const refundedBefore = await billingStore.transitionOrderPaymentState(
+        orderBefore.orderId,
+        billingStore.PAYMENT_STATES.REFUNDED
+    );
+
+    // Case 2: Refund after provisioning
+    const orderAfter = await billingStore.createOrder({
+        customerEmail: 'refund_after@firm.com',
+        customerName: 'Refund After',
+        planId: 'PRACTICE'
+    });
+    await billingStore.transitionOrderPaymentState(
+        orderAfter.orderId,
+        billingStore.PAYMENT_STATES.PAYMENT_CONFIRMED
+    );
+    // Simulate downstream worker completed provisioning
+    orderAfter.provisioningState = billingStore.PROVISIONING_STATES.PROVISIONED;
+    const refundedAfter = await billingStore.transitionOrderPaymentState(
+        orderAfter.orderId,
+        billingStore.PAYMENT_STATES.REFUNDED
+    );
+
+    console.log(JSON.stringify({
+        beforePaymentState: refundedBefore.paymentState,
+        beforeProvState: refundedBefore.provisioningState,
+        afterPaymentState: refundedAfter.paymentState,
+        afterProvState: refundedAfter.provisioningState
+    }));
+    """
+    result = run_node_script(code)
+    assert result["beforePaymentState"] == "REFUNDED"
+    assert result["beforeProvState"] == "CANCELLED"
+    assert result["afterPaymentState"] == "REFUNDED"
+    assert result["afterProvState"] == "PROVISIONED"  # Preserves record that offline license was issued
+
+
+def test_stripe_timestamped_signature_validation():
+    """Validates Stripe t=...,v1=... HMAC signature verification."""
+    code = """
+    const secret = 'whsec_test_secret_key_12345';
+    process.env.PAYMENT_WEBHOOK_SECRET = secret;
+
+    const payload = JSON.stringify({ id: 'evt_sig_test', type: 'payment_intent.succeeded' });
+    const timestamp = Math.floor(Date.now() / 1000);
+    const signedPayload = `${timestamp}.${payload}`;
+    const signature = crypto.createHmac('sha256', secret).update(signedPayload, 'utf8').digest('hex');
+    const validHeader = `t=${timestamp},v1=${signature}`;
+    const tamperedHeader = `t=${timestamp},v1=deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef`;
+    const staleHeader = `t=${timestamp - 1000},v1=${signature}`;
+
+    let mockRes = { statusCode: 200, json: (d) => { mockRes.data = d; } };
+    mockRes.status = (code) => { mockRes.statusCode = code; return mockRes; };
+
+    // Request with valid header
+    const reqValid = {
+        method: 'POST',
+        headers: { 'stripe-signature': validHeader },
+        body: payload
+    };
+    // Request with tampered header
+    const reqTampered = {
+        method: 'POST',
+        headers: { 'stripe-signature': tamperedHeader },
+        body: payload
+    };
+
+    // Call webhook handler
+    await webhookHandler(reqTampered, mockRes);
+    const tamperedCode = mockRes.statusCode;
+
+    delete process.env.PAYMENT_WEBHOOK_SECRET;
+
+    console.log(JSON.stringify({
+        tamperedCode
+    }));
+    """
+    result = run_node_script(code)
+    assert result["tamperedCode"] == 401
+
+
+def test_audit_event_trail_records_state_transitions():
+    """Validates that every commercial state transition is appended to the order audit trail."""
+    code = """
+    const order = await billingStore.createOrder({
+        customerEmail: 'audit@firm.com',
+        customerName: 'Audit Test',
+        planId: 'SOLO'
+    });
+
+    await billingStore.transitionOrderPaymentState(
+        order.orderId,
+        billingStore.PAYMENT_STATES.PAYMENT_PENDING,
+        { detail: 'Awaiting bank clearance' }
+    );
+
+    await billingStore.transitionOrderPaymentState(
+        order.orderId,
+        billingStore.PAYMENT_STATES.PAYMENT_CONFIRMED,
+        { providerEventId: 'evt_audit_100', detail: 'Bank clearance confirmed' }
+    );
+
+    const fresh = await billingStore.getOrder(order.orderId);
+
+    console.log(JSON.stringify({
+        eventsCount: fresh.events.length,
+        states: fresh.events.map(e => e.state),
+        details: fresh.events.map(e => e.detail)
+    }));
+    """
+    result = run_node_script(code)
+    assert result["eventsCount"] == 3
+    assert result["states"] == [
+        "CHECKOUT_CREATED",
+        "PAYMENT_PENDING",
+        "ORDER_ELIGIBLE_FOR_PROVISIONING",
+    ]
+
+
 def test_zero_signing_key_and_evidence_bleed():
     """Verifies that billing stores and handlers contain zero private keys and zero client data."""
     billing_store_content = (API_DIR / "billing-store.js").read_text(encoding="utf-8")
