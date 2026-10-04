@@ -146,13 +146,88 @@ class CommercialPolicyService:
     def install_license_token(self, token_text: str) -> LicenseEvaluationResult:
         """
         Installs a new license token into local persistence (SQLite / license file).
-        Evaluates the token first; saves to store if present.
+        Evaluates the token first, validates monotonic revision replacement if an active
+        license already exists, and saves to store only upon successful validation.
         """
         res = evaluate_license_token(
             token_text,
             keyring_override=self.keyring_override,
             current_installation_id=self.installation_id,
         )
+
+        # Monotonic revision and lineage check if replacing an active license
+        current_res = self.evaluate_current_license()
+        if current_res.is_active:
+            if res.state in (LicenseState.MALFORMED, LicenseState.INVALID_SIGNATURE):
+                # Do not overwrite active license with an invalid/untrusted token
+                if self.audit_service:
+                    from edge.commercial.audit import AuditEventType
+                    self.audit_service.record_event(
+                        AuditEventType.LICENSE_REJECTED,
+                        actor_type="USER",
+                        actor_id=self.installation_id or "UNKNOWN",
+                        details={
+                            "state": res.state.value,
+                            "reason": res.diagnostic_reason,
+                        },
+                    )
+                return res
+
+            if current_res.customer_id != res.customer_id:
+                rejected_res = LicenseEvaluationResult(
+                    state=LicenseState.MALFORMED,
+                    is_active=False,
+                    tier=res.tier,
+                    license_id=res.license_id,
+                    customer_id=res.customer_id,
+                    max_cases_per_installation=res.max_cases_per_installation,
+                    revision=res.revision,
+                    diagnostic_reason=(
+                        f"License lineage mismatch: active license belongs to '{current_res.customer_id}', "
+                        f"cannot be replaced by '{res.customer_id}' without explicit license removal."
+                    ),
+                )
+                if self.audit_service:
+                    from edge.commercial.audit import AuditEventType
+                    self.audit_service.record_event(
+                        AuditEventType.LICENSE_REJECTED,
+                        actor_type="USER",
+                        actor_id=self.installation_id or "UNKNOWN",
+                        details={
+                            "state": rejected_res.state.value,
+                            "reason": rejected_res.diagnostic_reason,
+                        },
+                    )
+                return rejected_res
+
+            if current_res.revision is not None and res.revision is not None and res.revision <= current_res.revision:
+                rejected_res = LicenseEvaluationResult(
+                    state=LicenseState.MALFORMED,
+                    is_active=False,
+                    tier=res.tier,
+                    license_id=res.license_id,
+                    customer_id=res.customer_id,
+                    max_cases_per_installation=res.max_cases_per_installation,
+                    revision=res.revision,
+                    diagnostic_reason=(
+                        f"Monotonic replacement violation: incoming revision ({res.revision}) "
+                        f"must be strictly greater than active revision ({current_res.revision})."
+                    ),
+                )
+                if self.audit_service:
+                    from edge.commercial.audit import AuditEventType
+                    self.audit_service.record_event(
+                        AuditEventType.LICENSE_REJECTED,
+                        actor_type="USER",
+                        actor_id=self.installation_id or "UNKNOWN",
+                        details={
+                            "state": rejected_res.state.value,
+                            "reason": rejected_res.diagnostic_reason,
+                        },
+                    )
+                return rejected_res
+
+        # Save to persistence if no active license, or if valid replacement
         if self.store:
             self.store.save_commercial_license(token_text)
         elif self.license_dir:
@@ -171,6 +246,7 @@ class CommercialPolicyService:
                         "tier": res.tier.value if res.tier else None,
                         "license_id": res.license_id,
                         "state": res.state.value,
+                        "revision": res.revision,
                     },
                 )
             else:

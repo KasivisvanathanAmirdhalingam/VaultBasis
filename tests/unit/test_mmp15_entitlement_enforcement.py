@@ -58,6 +58,7 @@ def _make_test_token(
     grace_until_dt: Optional[datetime] = None,
     installation_id: Optional[str] = None,
     output_format: str = "base64",
+    revision: int = 1,
 ) -> str:
     now = datetime.now(timezone.utc)
     issued_at = (issued_at_dt or now).strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -79,6 +80,7 @@ def _make_test_token(
         installation_id=installation_id,
         key_id=_TEST_KEY_ID,
         output_format=output_format,
+        revision=revision,
     )
 
 
@@ -328,13 +330,14 @@ def test_api_existing_case_and_export_accessible_after_license_expiry(clean_comm
     res_recon = client.post("/api/cases/CASE-SAMPLE-2025/reconcile")
     assert res_recon.status_code == 200
 
-    # 2. Now expire the license
+    # 2. Now expire the license with monotonic revision 2 renewal
     now = datetime.now(timezone.utc)
     expired_token = _make_test_token(
         issued_at_dt=now - timedelta(days=60),
         not_before_dt=now - timedelta(days=60),
         expires_at_dt=now - timedelta(days=10),
         grace_until_dt=now - timedelta(days=5),
+        revision=2,
     )
     policy.install_license_token(expired_token)
 

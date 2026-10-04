@@ -138,6 +138,7 @@ class LicenseEvaluationResult(BaseModel):
     license_id: Optional[str] = Field(None, description="License ID if parsable")
     customer_id: Optional[str] = Field(None, description="Customer ID if parsable")
     max_cases_per_installation: Optional[int] = Field(None, description="Enforceable case limit")
+    revision: Optional[int] = Field(None, description="Monotonic license revision number")
     entitlements: List[str] = Field(default_factory=list, description="Granted feature list")
     days_remaining: Optional[int] = Field(None, description="Days until expiry (presentation helper only)")
     grace_days_remaining: Optional[int] = Field(None, description="Days until grace period ends (presentation helper only)")
