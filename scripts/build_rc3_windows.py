@@ -108,14 +108,15 @@ def launch_gate(exe_path: Path, label: str, disconnected_stdio: bool = False) ->
                             if zip_bytes:
                                 with zipfile.ZipFile(io.BytesIO(zip_bytes)) as zf:
                                     members = zf.namelist()
-                                    required_members = [
+                                    allowed_exact = {
                                         "receipt-v0.1.json",
                                         "schemas/receipt-v0.1.json",
-                                        "verify_receipt.py",
-                                        "technical-verification/verify_receipt.py",
                                         "VERIFY_INSTRUCTIONS.txt",
-                                    ]
-                                    if all(m in members for m in required_members):
+                                    }
+                                    has_required = all(m in members for m in allowed_exact)
+                                    all_allowlisted = all(m in allowed_exact or m.startswith("evidence/") for m in members)
+                                    has_no_source = not any(m.endswith((".py", ".pyc", ".pyd")) for m in members)
+                                    if has_required and all_allowlisted and has_no_source:
                                         export_ok = True
             if healthy and dashboard_ok and sample_ok and reconcile_ok and export_ok:
                 break

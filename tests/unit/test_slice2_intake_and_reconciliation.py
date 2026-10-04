@@ -221,29 +221,54 @@ def test_evidence_bundle_export_encoding_invariance(monkeypatch):
         namelist = zf.namelist()
         assert "receipt-v0.1.json" in namelist
         assert "schemas/receipt-v0.1.json" in namelist
-        assert "verify_receipt.py" in namelist
-        assert "technical-verification/verify_receipt.py" in namelist
         assert "VERIFY_INSTRUCTIONS.txt" in namelist
 
-        # 5. Assert verifier and schema decode cleanly as UTF-8 with non-ASCII symbols intact
-        verifier_content = zf.read("verify_receipt.py").decode("utf-8")
-        assert "VaultBasis" in verifier_content
-        assert "❌" in verifier_content
-        assert "—" in verifier_content
+        # 5. Assert schema and instructions decode cleanly as UTF-8
+        instructions_content = zf.read("VERIFY_INSTRUCTIONS.txt").decode("utf-8")
+        assert "VAULTBASIS OUTCOME RECEIPT VERIFICATION INSTRUCTIONS" in instructions_content
 
         schema_content = zf.read("schemas/receipt-v0.1.json").decode("utf-8")
         assert "$schema" in schema_content
 
 
 @pytest.mark.regression
-def test_evidence_bundle_export_negative_control():
+def test_evidence_bundle_export_allowlist_and_negative_controls():
     """
-    Negative control for MMP11-DIST-WIN-003:
-    Demonstrates that reading verify_receipt.py with cp1252 (omitted explicit encoding on Windows)
-    fails with UnicodeDecodeError due to UTF-8 multi-byte characters.
+    Evidence Export Contract (MMP11-DIST-WIN-004):
+    Positive allowlist: Only receipt, schema, raw evidence files, and instructions are permitted.
+    Negative controls: Zero Python source (.py), bytecode (.pyc), caches, or internal tooling allowed.
     """
-    verifier_path = Path(__file__).resolve().parent.parent.parent / "apps" / "verifier" / "verify_receipt.py"
-    assert verifier_path.is_file()
-    with pytest.raises(UnicodeDecodeError) as exc_info:
-        verifier_path.read_text(encoding="cp1252")
-    assert "charmap" in str(exc_info.value) or "codec" in str(exc_info.value)
+    import io
+    import zipfile
+
+    client = TestClient(app)
+    load_res = client.post("/api/sample-case/load")
+    assert load_res.status_code == 200
+    recon_res = client.post("/api/cases/CASE-SAMPLE-2025/reconcile")
+    assert recon_res.status_code == 200
+
+    res_export = client.get("/api/cases/CASE-SAMPLE-2025/export")
+    assert res_export.status_code == 200
+
+    with zipfile.ZipFile(io.BytesIO(res_export.content), "r") as zf:
+        namelist = zf.namelist()
+
+        # 1. Positive Allowlist Validation: Every single member must match the declared contract
+        allowed_exact = {
+            "receipt-v0.1.json",
+            "schemas/receipt-v0.1.json",
+            "VERIFY_INSTRUCTIONS.txt",
+        }
+        for name in namelist:
+            is_exact = name in allowed_exact
+            is_evidence = name.startswith("evidence/")
+            assert is_exact or is_evidence, f"Unexpected member violating Evidence Export allowlist: {name}"
+
+        # 2. Negative Controls: Absolute ban on Python files and internal directories
+        assert "verify_receipt.py" not in namelist, "verify_receipt.py leaked at root of evidence bundle"
+        assert "technical-verification/verify_receipt.py" not in namelist, "verify_receipt.py leaked in technical-verification/"
+        assert not any(name.endswith((".py", ".pyc", ".pyd")) for name in namelist), "Python source/binary leaked in evidence bundle"
+        assert not any(name.startswith(("technical-verification/", "__pycache__/", "build/", "dist/", ".git/")) for name in namelist), (
+            "Internal development/tooling folder leaked in evidence bundle"
+        )
+

@@ -460,12 +460,7 @@ def export_evidence_bundle(case_id: str):
             raw_bytes = db_store.get_source_file_bytes(source_id)
             if raw_bytes:
                 zip_file.writestr(f"evidence/{source_id}_{s_meta.filename}", raw_bytes)
-        # 4. Secondary Technical Verification Tooling (clearly placed)
-        verifier_cli_path = RESOURCE_BASE / "apps" / "verifier" / "verify_receipt.py"
-        if verifier_cli_path.exists():
-            zip_file.writestr("verify_receipt.py", verifier_cli_path.read_text(encoding="utf-8"))
-            zip_file.writestr("technical-verification/verify_receipt.py", verifier_cli_path.read_text(encoding="utf-8"))
-        # 5. Verification Readme
+        # 4. Verification Readme (strictly practitioner guidance and schema instructions; zero implementation code)
         zip_file.writestr(
             "VERIFY_INSTRUCTIONS.txt",
             f"""VAULTBASIS OUTCOME RECEIPT VERIFICATION INSTRUCTIONS
@@ -481,8 +476,9 @@ PRIMARY PRACTITIONER PATH (GUI / Offline Verifier):
 3. Review the automated verification checklist (Schema Conformance, Contract Version, Key Consistency, Signature Verification).
 
 SECONDARY TECHNICAL AUDIT PATH (Air-gapped Python CLI):
-For independent technical auditors wishing to verify via command line:
-1. python3 verify_receipt.py receipt-v0.1.json --evidence-dir evidence/
+For independent technical auditors wishing to verify via command line using the standalone verifier utility provided in the VaultBasis distribution or repository:
+1. Run verify_receipt.py against the exported receipt and evidence folder:
+   python3 verify_receipt.py receipt-v0.1.json --evidence-dir evidence/
 
 IMPORTANT REGULATORY & ASSURANCE BOUNDARY:
 VaultBasis performs bounded, deterministic reconciliation of supported sources under declared semantics. It does not assess tax correctness, establish legal compliance, or determine whether source information is complete or accurate. Successful verification confirms that the receipt signature is valid for the declared installation public key and that the signed receipt content has not changed relative to that signature. Verification does not constitute a professional opinion, legal finding, government approval, or endorsement by the IRS or any other government authority. The practitioner remains responsible for professional interpretation and application of applicable law.
