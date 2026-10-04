@@ -40,10 +40,27 @@ class AuditEventType(str, Enum):
     DATABASE_RESTORE_FAILED = "DATABASE_RESTORE_FAILED"
 
 
+def _sanitize_details(event_type: AuditEventType, details: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """
+    STRICT PRIVACY GUARANTEE:
+    Sanitizes audit details to ensure no raw PTIN/EFIN, private keys, or customer transaction rows leak into the audit ledger.
+    """
+    if not details:
+        return {}
+    clean: Dict[str, Any] = {}
+    for k, v in details.items():
+        if k in ("ptin", "efin", "private_key", "secret", "raw_row", "transactions", "token_bytes"):
+            continue  # Explicitly drop raw sensitive credentials
+        if isinstance(v, (str, int, float, bool, list, dict)) or v is None:
+            clean[k] = v
+    return clean
+
+
 class AuditEvent(BaseModel):
     """
-    Immutable administrative audit log entry with cryptographic hash chaining.
+    Tamper-evident administrative audit log entry with cryptographic hash chaining.
     """
+    audit_format_version: str = "v1"
     event_id: str
     event_type: AuditEventType
     occurred_at: str
@@ -58,6 +75,7 @@ class AuditEvent(BaseModel):
 
 
 def compute_event_hash(
+    audit_format_version: str,
     event_id: str,
     event_type: str,
     occurred_at: str,
@@ -72,7 +90,7 @@ def compute_event_hash(
     """
     Computes SHA-256 digest over canonicalized event attributes for tamper evidence.
     """
-    payload = f"{event_id}|{event_type}|{occurred_at}|{actor_type}|{actor_id}|{workspace_id or ''}|{installation_id or ''}|{build_sha}|{details_json}|{previous_event_hash or 'GENESIS'}"
+    payload = f"{audit_format_version}|{event_id}|{event_type}|{occurred_at}|{actor_type}|{actor_id}|{workspace_id or ''}|{installation_id or ''}|{build_sha}|{details_json}|{previous_event_hash or 'GENESIS'}"
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
@@ -99,7 +117,7 @@ class CommercialAuditService:
         now_utc = datetime.now(timezone.utc).isoformat()
         sys_ver = get_system_version()
         event_id = str(uuid.uuid4())
-        details_map = details or {}
+        details_map = _sanitize_details(event_type, details)
         details_json = json.dumps(details_map, sort_keys=True)
 
         # Get previous event hash
@@ -109,6 +127,7 @@ class CommercialAuditService:
         inst_id = self.installation_id or "LOCAL_DEFAULT"
 
         event_hash = compute_event_hash(
+            audit_format_version="v1",
             event_id=event_id,
             event_type=event_type.value,
             occurred_at=now_utc,
@@ -138,6 +157,7 @@ class CommercialAuditService:
         self.store.insert_audit_event(event_record)
 
         return AuditEvent(
+            audit_format_version="v1",
             event_id=event_id,
             event_type=event_type,
             occurred_at=now_utc,
@@ -205,6 +225,7 @@ class CommercialAuditService:
 
             # Recalculate event hash
             expected_hash = compute_event_hash(
+                audit_format_version="v1",
                 event_id=r["event_id"],
                 event_type=r["event_type"],
                 occurred_at=r["occurred_at"],

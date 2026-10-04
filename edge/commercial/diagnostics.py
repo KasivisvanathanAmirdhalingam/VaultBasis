@@ -185,40 +185,64 @@ class DiagnosticPackager:
     def export_bundle_zip(self) -> bytes:
         """
         Creates a structured zip bundle containing:
+        - manifest.json: bundle format, metadata, and SHA-256 member digests
         - diagnostic.json: complete sanitized allowlisted diagnostic metadata
         - integrity.txt: database PRAGMA integrity verification summary
         - migrations.json: schema migration ledger
         - README.txt: purpose and security boundary documentation
         """
+        import hashlib
         report = self.generate_report()
         report_json = report.model_dump_json(indent=2)
 
+        integrity_text = (
+            f"VaultBasis Database Integrity Report\n"
+            f"Generated: {report.generated_at_utc}\n"
+            f"Structural Integrity: {report.database.integrity_status}\n"
+            f"Foreign Keys Valid: {report.database.foreign_keys_valid}\n"
+            f"Journal Mode: {report.database.journal_mode}\n"
+            f"Schema Version: {report.database.schema_version}\n"
+        )
+
+        migrations_json = json.dumps(report.database.applied_migrations, indent=2)
+
+        readme_text = (
+            f"VaultBasis Support Diagnostic Bundle ({report.bundle_id})\n"
+            f"----------------------------------------------------------------------\n"
+            f"This diagnostic package was generated locally for support troubleshooting.\n"
+            f"SECURITY NOTICE:\n"
+            f"- No taxpayer financial data, transaction rows, or wallet addresses are included.\n"
+            f"- Regulated identifiers (PTIN/EFIN) are strictly redacted.\n"
+            f"- Zero client evidence source files or receipt cryptographic keys are included.\n"
+        )
+
+        # Compute SHA-256 digests for manifest
+        diag_bytes = report_json.encode("utf-8")
+        integ_bytes = integrity_text.encode("utf-8")
+        mig_bytes = migrations_json.encode("utf-8")
+        readme_bytes = readme_text.encode("utf-8")
+
+        manifest = {
+            "format": "vaultbasis-support-diagnostic-v1",
+            "bundle_id": report.bundle_id,
+            "created_at_utc": report.generated_at_utc,
+            "build_sha": report.system.build_sha,
+            "product_version": report.system.product_version,
+            "files": {
+                "diagnostic.json": f"sha256:{hashlib.sha256(diag_bytes).hexdigest()}",
+                "integrity.txt": f"sha256:{hashlib.sha256(integ_bytes).hexdigest()}",
+                "migrations.json": f"sha256:{hashlib.sha256(mig_bytes).hexdigest()}",
+                "README.txt": f"sha256:{hashlib.sha256(readme_bytes).hexdigest()}",
+            }
+        }
+        manifest_json = json.dumps(manifest, indent=2)
+
         buffer = io.BytesIO()
         with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as zf:
+            zf.writestr("manifest.json", manifest_json)
             zf.writestr("diagnostic.json", report_json)
-
-            integrity_text = (
-                f"VaultBasis Database Integrity Report\n"
-                f"Generated: {report.generated_at_utc}\n"
-                f"Structural Integrity: {report.database.integrity_status}\n"
-                f"Foreign Keys Valid: {report.database.foreign_keys_valid}\n"
-                f"Journal Mode: {report.database.journal_mode}\n"
-                f"Schema Version: {report.database.schema_version}\n"
-            )
             zf.writestr("integrity.txt", integrity_text)
-
-            migrations_json = json.dumps(report.database.applied_migrations, indent=2)
             zf.writestr("migrations.json", migrations_json)
-
-            readme_text = (
-                f"VaultBasis Support Diagnostic Bundle ({report.bundle_id})\n"
-                f"----------------------------------------------------------------------\n"
-                f"This diagnostic package was generated locally for support troubleshooting.\n"
-                f"SECURITY NOTICE:\n"
-                f"- No taxpayer financial data, transaction rows, or wallet addresses are included.\n"
-                f"- Regulated identifiers (PTIN/EFIN) are strictly redacted.\n"
-                f"- Zero client evidence source files or receipt cryptographic keys are included.\n"
-            )
             zf.writestr("README.txt", readme_text)
 
         buffer.seek(0)

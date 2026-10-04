@@ -39,10 +39,11 @@
 | **MMP15-OPS-002** | Version & Release Channel Compatibility Service | Blocker 5: Practitioners running mismatched schema/runtime versions across team | Firm Managing Partner, IT Admin | Version metadata endpoint (`GET /api/system/version`), channel awareness (`DEVELOPMENT`, `CANDIDATE`, `STABLE`, `LTS`), schema compatibility matrix | Background auto-updater, silent binary downloads, network telemetry | System reports build SHA, channel, schema compatibility matrix, Python/platform details; zero network | Read-only local inspection | None | `tests/unit/test_mmp15_version_channel.py` | `feat/mmp15-ops-control-001` | `feat/mmp15-ops-control-001` | `BASELINED / CLOSED` |
 | **MMP15-OPS-001** | Air-Gapped Diagnostic & Support Bundle Packager | Blocker 4: Support unable to diagnose runtime errors without violating PII boundaries | Firm IT, Support Engineer | Schema-first sanitized diagnostic exporter (`GET /api/system/diagnostic`, `GET /api/system/diagnostic/bundle`): OS, Python, SQLite schema version, migration ledger, license state, masked firm profile, database integrity report (zero customer records, zero transaction rows, zero PII, zero PTIN/EFIN) | Automated remote log streaming, telemetry agents | Positive allowlisted export of `diagnostic.json` and structured ZIP bundle with integrity.txt, migrations.json, README.txt; secondary negative-control regex test passes | Guaranteed zero transaction, client, or raw regulated identifier inclusion | MMP15-OPS-002 | `tests/unit/test_mmp15_support_packager.py` | `feat/mmp15-ops-control-001` | `feat/mmp15-ops-control-001` | `BASELINED / CLOSED` |
 | **MMP15-AUD-001** | Commercial & Administrative Audit Event Log | Blocker 7: Lack of non-repudiable log for license activation, tier change, and support actions | Compliance Officer, Managing Partner | Append-only SQLite `commercial_audit_log` table tracking: license key applied/rejected, tier changed, firm identity created/updated/removed, diagnostic exported; cryptographic SHA-256 hash chaining | Centralized remote SIEM export, logging case transaction data | Tamper-evident hash-chained audit log for administrative events; automated verification of chain integrity (`GET /api/commercial/audit`) | Audit log stored locally with restricted table access; zero customer transaction data | MMP15-ENT-001, MMP15-ORG-001, MMP15-OPS-001 | `tests/unit/test_mmp15_commercial_audit.py` | `feat/mmp15-ops-control-001` | `feat/mmp15-ops-control-001` | `BASELINED / CLOSED` |
+| **MMP15-INT-001** | Commercial Control Plane End-to-End Qualification | Blocker 9: Unproven interaction between licensing, identity, capacity, diagnostics, audit, and durability | Firm Managing Partner, Compliance Officer | End-to-end integration lifecycle test suite proving: fresh install -> firm setup -> license install -> entitlement evaluation -> case creation -> capacity limit -> reconciliation -> evidence export -> diagnostic export + manifest -> audit log -> backup -> restore -> restart simulation | Production cloud infrastructure, multi-tenant clustering | All commercial operations operate cohesively in air-gapped environment; zero PII leakage; full regression green | Complete integration boundary qualified across all commercial subsystems | All MMP-1.5 tasks | `tests/quality/integration/test_mmp15_commercial_e2e.py` | `feat/mmp15-ops-control-001` | `feat/mmp15-ops-control-001` | `BASELINED / CLOSED` |
 
 ---
 
-## 3. Critical Path Ranking (First 8 Items)
+## 3. Critical Path Ranking (First 9 Items)
 
 Ranked by **Commercial Necessity**, **Implementation Risk**, **Coupling to MMP-1.1**, **Security/Privacy Boundary**, and **Offline Safety**:
 
@@ -61,6 +62,9 @@ Ranked by **Commercial Necessity**, **Implementation Risk**, **Coupling to MMP-1
 7. **MMP15-OPS-001 (P1): Air-Gapped Diagnostic & Support Bundle Packager** `[CLOSED / BASELINED]`  
    - *Why seventh:* Critical for enterprise and CPA support triage while strictly preventing PII egress via schema-first positive allowlist.
 8. **MMP15-AUD-001 (P2): Commercial & Administrative Audit Event Log** `[CLOSED / BASELINED]`  
-   - *Why eighth:* Completes enterprise auditability and non-repudiation for administrative actions via cryptographic SHA-256 hash chaining.
+   - *Why eighth:* Completes enterprise auditability and tamper evidence for administrative actions via cryptographic SHA-256 hash chaining.
+9. **MMP15-INT-001 (P0): Commercial Control Plane End-to-End Qualification** `[CLOSED / BASELINED]`  
+   - *Why ninth:* Fully qualifies the cohesive integration of all commercial control plane modules in an end-to-end lifecycle.
+
 
 

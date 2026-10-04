@@ -125,7 +125,6 @@ class CommercialPolicyService:
                     AuditEventType.LICENSE_INSTALLED,
                     actor_type="USER",
                     actor_id=self.installation_id or "UNKNOWN",
-                    installation_id=self.installation_id,
                     details={
                         "tier": res.tier.value if res.tier else None,
                         "license_id": res.license_id,
@@ -137,7 +136,6 @@ class CommercialPolicyService:
                     AuditEventType.LICENSE_REJECTED,
                     actor_type="USER",
                     actor_id=self.installation_id or "UNKNOWN",
-                    installation_id=self.installation_id,
                     details={
                         "state": res.state.value,
                         "reason": res.diagnostic_reason,
@@ -162,7 +160,6 @@ class CommercialPolicyService:
                 AuditEventType.LICENSE_REPLACED,
                 actor_type="USER",
                 actor_id=self.installation_id or "UNKNOWN",
-                installation_id=self.installation_id,
                 details={"action": "REMOVED"},
             )
 

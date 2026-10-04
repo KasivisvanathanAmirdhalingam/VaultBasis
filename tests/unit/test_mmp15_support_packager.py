@@ -168,7 +168,7 @@ def test_diagnostic_zero_financial_and_evidence_leakage(test_environment):
     # 2. Assertions on ZIP contents
     with zipfile.ZipFile(io.BytesIO(bundle_zip_bytes), "r") as zf:
         members = zf.namelist()
-        assert set(members) == {"diagnostic.json", "integrity.txt", "migrations.json", "README.txt"}
+        assert set(members) == {"manifest.json", "diagnostic.json", "integrity.txt", "migrations.json", "README.txt"}
         for member in members:
             content = zf.read(member).decode("utf-8")
             assert "Secret Family Trust" not in content
@@ -178,16 +178,30 @@ def test_diagnostic_zero_financial_and_evidence_leakage(test_environment):
 
 
 def test_structured_zip_bundle_integrity(test_environment):
+    import hashlib
     store, policy_service, identity_service, packager = test_environment
     zip_bytes = packager.export_bundle_zip()
     assert len(zip_bytes) > 0
 
     with zipfile.ZipFile(io.BytesIO(zip_bytes), "r") as zf:
         members = zf.namelist()
+        assert "manifest.json" in members
         assert "diagnostic.json" in members
         assert "integrity.txt" in members
         assert "migrations.json" in members
         assert "README.txt" in members
+
+        # Validate manifest.json format and SHA-256 digests
+        manifest = json.loads(zf.read("manifest.json").decode("utf-8"))
+        assert manifest["format"] == "vaultbasis-support-diagnostic-v1"
+        assert "bundle_id" in manifest
+        assert "build_sha" in manifest
+
+        for filename, expected_digest in manifest["files"].items():
+            assert filename in members
+            file_data = zf.read(filename)
+            actual_digest = f"sha256:{hashlib.sha256(file_data).hexdigest()}"
+            assert actual_digest == expected_digest
 
         diag_data = json.loads(zf.read("diagnostic.json").decode("utf-8"))
         assert diag_data["system"]["product"] == "VaultBasis"
@@ -222,4 +236,4 @@ def test_api_diagnostic_endpoints(client):
     # Verify returned zip
     with zipfile.ZipFile(io.BytesIO(res_zip.content), "r") as zf:
         members = zf.namelist()
-        assert set(members) == {"diagnostic.json", "integrity.txt", "migrations.json", "README.txt"}
+        assert set(members) == {"manifest.json", "diagnostic.json", "integrity.txt", "migrations.json", "README.txt"}

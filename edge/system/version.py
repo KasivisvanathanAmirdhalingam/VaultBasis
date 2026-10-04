@@ -78,6 +78,21 @@ def _resolve_platform_identifier() -> str:
     return f"{os_name}-{norm_arch}"
 
 
+class DatabaseVersionInfo(BaseModel):
+    current_schema: int = SQLiteStore.CURRENT_SCHEMA_VERSION
+    supported_schemas: List[int] = Field(default_factory=lambda: [1, 2, 3, 4])
+
+
+class LicenseProtocolVersionInfo(BaseModel):
+    current_version: str = "v1.0"
+    supported_versions: List[str] = Field(default_factory=lambda: ["v1.0"])
+
+
+class ReceiptSchemaVersionInfo(BaseModel):
+    current_version: str = "v0.1"
+    supported_versions: List[str] = Field(default_factory=lambda: ["v0.1"])
+
+
 class CompatibilityMatrix(BaseModel):
     """
     Declares the schema and protocol formats supported by this runtime.
@@ -116,6 +131,13 @@ class SystemVersionInfo(BaseModel):
     os_name: str = Field(default_factory=_resolve_os_name)
     architecture: str = Field(default_factory=_resolve_architecture)
     python_version: str = Field(default_factory=lambda: sys.version.split()[0])
+    database: DatabaseVersionInfo = Field(default_factory=DatabaseVersionInfo)
+    license_protocol: LicenseProtocolVersionInfo = Field(default_factory=LicenseProtocolVersionInfo)
+    receipt_schema: ReceiptSchemaVersionInfo = Field(default_factory=ReceiptSchemaVersionInfo)
+    supported_intake_profiles: List[str] = Field(
+        default_factory=lambda: ["1099DA", "COINBASE_CSV", "KRAKEN_LEDGER", "GENERIC_TAX_LOTS"]
+    )
+    # Flat backward-compatibility aliases
     schema_version: int = Field(default=SQLiteStore.CURRENT_SCHEMA_VERSION)
     license_protocol_version: str = "v1.0"
     receipt_schema_version: str = "v0.1"
