@@ -24,6 +24,11 @@ from edge.commercial.policy import (
     CommercialPolicyService,
 )
 
+from edge.commercial.identity import (
+    FirmIdentity,
+    FirmIdentityService,
+)
+
 __all__ = [
     "LicenseTier",
     "LicenseState",
@@ -37,5 +42,8 @@ __all__ = [
     "CommercialDenialCode",
     "CommercialPolicyDecision",
     "CommercialPolicyService",
+    "FirmIdentity",
+    "FirmIdentityService",
 ]
+
 
