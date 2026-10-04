@@ -154,7 +154,7 @@ To prevent serial bottlenecks, commercial launch qualification is organized into
 
 ### Lane B: Acquisition & Secure Delivery
 - `MMP15-PROD-COM-001`: Commercial purchase and trial request orchestration engine.
-- `MMP15-PROD-MAIL-001`: Transactional email delivery with SPF/DKIM/DMARC authentication (licence issued, purchase confirmation, download link, expiry/resend, support acknowledgement; **strictly zero client evidence receipt egress**).
+- `MMP15-PROD-MAIL-001`: Transactional email delivery with SPF/DKIM/DMARC authentication (license issued, purchase confirmation, download link, expiry/resend, support acknowledgement; **strictly zero client evidence receipt egress**).
 - `MMP15-PROD-DL-001`: Authenticated artifact delivery service with expiring HMAC-signed download URLs.
 
 ### Lane C: Trust Evidence & Enterprise Readiness
@@ -256,6 +256,6 @@ The application UI visibly exposes under **About / System Information**:
 - Commercial license state & remaining case capacity
 
 ### Formal MMP15-PROD-001 Closure Acceptance Standard
-> **MMP15-PROD-001 closes only when an unfamiliar practitioner, using a clean supported machine and only public/customer-facing materials, can independently establish product relevance and security trust; obtain an authentic qualified VaultBasis artifact; run bundled evaluation cases; purchase/request and activate a licence; ingest realistic production evidence; reconcile a case; export and independently verify signed evidence; restart without losing work; obtain support diagnostics; and understand renewal/support paths without developer intervention.**
+> **MMP15-PROD-001 closes only when an unfamiliar practitioner, using a clean supported machine and only public/customer-facing materials, can independently establish product relevance and security trust; obtain an authentic qualified VaultBasis artifact; run bundled evaluation cases; purchase/request and activate a license; ingest realistic production evidence; reconcile a case; export and independently verify signed evidence; restart without losing work; obtain support diagnostics; and understand renewal/support paths without developer intervention.**
 > 
 > **For managed machines: An enterprise IT reviewer can independently determine application publisher identity, privileges, network behavior, data locations, dependencies, security posture and deployment requirements from the provided IT package.**

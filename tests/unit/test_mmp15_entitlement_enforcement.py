@@ -1,19 +1,19 @@
 """
 VaultBasis MMP-1.5 Entitlement Enforcement & Policy Test Suite
 Tests MMP15-ENT-002:
-1. Valid licence -> Billable operation succeeds
-2. No licence -> Billable operation denied deterministically (ENTITLEMENT_REQUIRED, 402)
-3. Expired licence -> New billable work denied (LICENSE_EXPIRED, 403)
-4. Grace licence -> Grace policy enforced (LICENSE_GRACE_RESTRICTED, 403 for new cases)
+1. Valid license -> Billable operation succeeds
+2. No license -> Billable operation denied deterministically (ENTITLEMENT_REQUIRED, 402)
+3. Expired license -> New billable work denied (LICENSE_EXPIRED, 403)
+4. Grace license -> Grace policy enforced (LICENSE_GRACE_RESTRICTED, 403 for new cases)
 5. Invalid signature -> Denied (LICENSE_INVALID, 403)
 6. Wrong installation -> Denied (INSTALLATION_MISMATCH, 403)
-7. Not yet valid licence -> Denied (LICENSE_NOT_YET_VALID, 403)
+7. Not yet valid license -> Denied (LICENSE_NOT_YET_VALID, 403)
 8. Capacity available -> Case creation succeeds (201)
 9. Capacity exceeded -> New case denied (CASE_CAPACITY_REACHED, 402)
 10. Sample case -> Explicitly defined unmetered semantics (never counted against capacity)
 11. Existing cases -> Remain accessible after expiry (200)
 12. Evidence export -> Not commercial-metered; existing authorization still applies
-13. Receipt verification -> Free and unmetered with no licence (200)
+13. Receipt verification -> Free and unmetered with no license (200)
 14. Error model -> Stable machine-readable denial codes without internal crypto leakage
 """
 
