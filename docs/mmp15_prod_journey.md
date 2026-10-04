@@ -1,9 +1,7 @@
 # VaultBasis MMP-1.5 Production Practitioner Journey & Enterprise Trust Architecture (MMP15-PROD-001)
 
-> **Milestone:** MMP15-PROD-001 — First-Time Practitioner Commercial Journey & Enterprise Trust Qualification  
-> **Status:** ACTIVE GOVERNANCE MILESTONE  
-> **Pre-requisites:** `milestone/mmp15-commercial-control-plane-ready-001` (Merged at SHA `63ba5528...`, 364 tests PASS, 11/11 Gates PASS)  
-> **Strategic Gate:** MMP-2 Local Intelligence implementation is strictly **ON HOLD** awaiting qualification of this production commercial journey.
+> **MMP-2 IMPLEMENTATION INVARIANT:**  
+> **MMP-2 implementation remains blocked until VaultBasis proves the complete MMP-1.5 production journey—from first web visit through trusted installation, licensed case completion, evidence export, independent verification, persistence, and support—on production-equivalent infrastructure with first-time practitioners.**
 
 ---
 
@@ -26,104 +24,190 @@ If VaultBasis cannot answer this fear visibly, frictionlessly, and with cryptogr
 │  BINARY TRUST   │ │  RUNTIME TRUST  │                         │ENTERPRISE TRUST │ │COMMERCIAL TRUST │
 ├─────────────────┤ ├─────────────────┤                         ├─────────────────┤ ├─────────────────┤
 │• Authenticode   │ │• 127.0.0.1 loop │                         │• IT Deploy Pack │ │• Trust Center   │
-│  (RFC 3161)     │ │• Zero egress    │                         │• CycloneDX SBOM │ │• Clear pricing  │
+│  (RFC 3161)     │ │• No case egress │                         │• CycloneDX SBOM │ │• Clear pricing  │
 │• Apple Developer│ │• No admin rights│                         │• Allowlist spec │ │• Auth'd emails  │
-│  ID Notarization│ │• Zero telemetry │                         │• Intune/MDM doc │ │• Signed dl URLs │
-│• SHA-256 Digest │ │• Never asks for │                         │• Silent install │ │• EULA & Privacy │
-│• CI Malware Scan│ │  crypto keys/pwd│                         │  specification  │ │  commitments    │
+│  ID Notarization│ │• Zero case      │                         │• Intune/MDM doc │ │• Signed dl URLs │
+│• SHA-256 Digest │ │  telemetry      │                         │• Silent install │ │• EULA & Privacy │
+│• CI Malware Scan│ │• Never asks for │                         │  specification  │ │  commitments    │
+│                 │ │  crypto keys/pwd│                         │                 │ │                 │
 └─────────────────┘ └─────────────────┘                         └─────────────────┘ └─────────────────┘
 ```
 
 ---
 
-## 2. Dual Customer Persona Journeys
+## 2. Trust Claims Lifecycle & Evidence States
 
-To accommodate both independent practitioners and accountants working inside governed firms, VaultBasis supports two distinct production paths:
+To maintain strict engineering and brand integrity, **VaultBasis never publishes a marketing or security claim on its website or documentation merely because the architecture intends it.** Every public statement must progress through five verifiable evidence states:
+
+```
+[ PLANNED ] ──► [ IMPLEMENTED ] ──► [ VERIFIED ] ──► [ PRODUCTION_QUALIFIED ] ──► [ PUBLICLY_CLAIMABLE ]
+```
+
+| State | Definition | Gate Requirement |
+|---|---|---|
+| **`PLANNED`** | Architectural goal or documented specification. | Internal RFC / Ledger task defined. |
+| **`IMPLEMENTED`** | Code written and merged into `main`. | Unit and automated domain tests passing. |
+| **`VERIFIED`** | Proven in clean local automated environments. | 11/11 Industrial Validation Gates passing. |
+| **`PRODUCTION_QUALIFIED`** | Proven on physical target OS without development tooling or bypasses. | Clean-machine Gatekeeper / SmartScreen acceptance; physical air-gap receipt verification. |
+| **`PUBLICLY_CLAIMABLE`** | Formally authorized for display on `vaultbasis.com` and public Trust Center. | Signed release artifact digest published in immutable release manifest. |
+
+### Evidence State Matrix for Core Commercial Claims
+| Public Claim | Required Evidence Level | Current State | Evidence Reference |
+|---|---|---|---|
+| *"Digitally signed Windows executable"* | `PRODUCTION_QUALIFIED` | `IMPLEMENTED` | `MMP15-PROD-WIN-SIGN-001` (RFC 3161 Authenticode CI pipeline) |
+| *"Apple Developer ID Notarized & Stapled"* | `PRODUCTION_QUALIFIED` | `IMPLEMENTED` | `MMP11-DIST-MAC-004` (Notarization ticket stapling) |
+| *"No case-data egress during processing"* | `VERIFIED` | `VERIFIED` | `AC07_OS_Level_Egress_Evidence.md` (Zero non-loopback sockets) |
+| *"No administrator privileges required"* | `PRODUCTION_QUALIFIED` | `VERIFIED` | Standard user context execution test on Windows & macOS |
+| *"Malware & vulnerability scanned"* | `PRODUCTION_QUALIFIED` | `PLANNED` | Multi-engine AV scan & CycloneDX SBOM generation in CI |
+| *"No runtime telemetry from case processing"*| `VERIFIED` | `VERIFIED` | Codebase audit: zero telemetry hooks in `edge/` runtime |
+| *"Never requests private keys or passwords"* | `VERIFIED` | `VERIFIED` | Zero seed phrase/credential inputs in domain schemas |
+| *"Authenticated temporary download links"* | `PRODUCTION_QUALIFIED` | `PLANNED` | `MMP15-PROD-DL-001` (HMAC-signed expiring URLs) |
+
+---
+
+## 3. Empirical UAT Finding: Pre-Installation Trust Barrier
+
+```
+FINDING ID:      UAT-FINDING-001
+DATE:            2026-10-04
+STAGE:           Pre-Installation & Download
+TEST SUBJECT:    External Professional Associate (First-Time User Simulation)
+
+OBSERVATION:
+The test subject hesitated and declined to launch the downloaded VaultBasis executable on their
+primary work laptop, citing concerns about whether the unverified binary could harm their machine,
+trigger corporate endpoint security alarms, or violate firm software policies.
+
+ROOT CAUSE ANALYSIS:
+1. Binary Provenance Gap: Unsigned direct ZIP distribution triggers OS reputation warnings.
+2. Context Vacuum: Lack of a pre-download "Why this download is safe" panel explaining local execution.
+3. Enterprise IT Friction: Absence of an IT-ready deployment pack (SBOM, allowlisting guide) for firm-governed PCs.
+4. Transparency Gap: Missing public Trust Center explaining network, filesystem, and privilege boundaries.
+
+MAPPED REMEDIATIONS:
+• MMP15-PROD-TRUST-001:  Windows Authenticode & macOS Developer ID signing/notarization.
+• MMP15-PROD-TRUSTWEB-001: Pre-download Trust Panel & Trust Center at vaultbasis.com/trust.
+• MMP15-PROD-ENT-001:     Enterprise IT Deployment & Security Profile artifact.
+• MMP15-PROD-SEC-002:     Published SHA-256 digests, SBOM, and recorded CI malware scans.
+```
+
+---
+
+## 4. Dual Customer Persona Journeys
 
 ### Path A: Self-Managed Practitioner (Solo CPA / Independent EA)
 ```
-[ www.vaultbasis.com ] ──► [ Value & Pricing ] ──► [ Request / Buy License ] ──► [ Transactional Email ]
+[ www.vaultbasis.com ] ──► [ Value & Pricing ] ──► [ "Why It's Safe" Panel ] ──► [ Request / Buy License ]
                                                                                          │
-[ Open Application ] ◄── [ Extract & Launch ] ◄── [ OS Validates Signature ] ◄── [ Signed Download ]
-        │
-[ Onboarding & Sample A ] ──► [ Real Case Intake ] ──► [ Reconcile ] ──► [ Export & Verify Receipt ]
+[ Open Application ] ◄── [ Extract & Launch ] ◄── [ OS Validates Signature ] ◄── [ Transactional Email ]
+        │                                                                                │
+        ▼                                                                                ▼
+[ Privacy Screen ] ──► [ Onboarding / Sample A ] ──► [ Real Case Intake ] ──► [ Reconcile & Verify Receipt ]
 ```
 
 ### Path B: Firm-Managed Practitioner (Enterprise / Multi-Seat CPA Firm)
 ```
-[ www.vaultbasis.com ] ──► [ "Managed Work Laptop?" ] ──► [ Enterprise IT Deployment Pack ]
-                                                                   │
-[ Practitioner Receives Installed App ] ◄── [ IT Allowlisting & Intune/MDM Push ] ◄──────┘
+[ www.vaultbasis.com ] ──► [ "Managed Work Computer?" ] ──► [ Send to IT: Enterprise Security Pack ]
+                                                                            │
+┌───────────────────────────────────────────────────────────────────────────┴───────────────────────┐
+│                                ENTERPRISE IT ASSESSMENT & APPROVAL                                │
+│  • Review Publisher Identity & RFC 3161 Certificate                                               │
+│  • Inspect CycloneDX SBOM & Vulnerability Profile                                                 │
+│  • Verify Localhost-Only Network Boundary (127.0.0.1) & Zero Admin Elevation                      │
+│  • Configure Endpoint Allowlisting (Intune / Defender / SentinelOne / Jamf)                       │
+└───────────────────────────────────────────────────────────────────────────┬───────────────────────┘
+                                                                            ▼
+[ Firm License Activation ] ◄── [ Practitioner Receives Installed App ] ◄── [ IT Managed Deployment ]
         │
-[ Firm License Activation ] ──► [ Workspace Identity Setup ] ──► [ Multi-Lot Reconciliation ]
+        ▼
+[ Workspace Identity Setup ] ──► [ Multi-Lot Reconciliation ] ──► [ Workpaper Export & Independent Verification ]
 ```
 
 ---
 
-## 3. The 27-Stage Practitioner Commercial Golden Path
+## 5. Five Parallel Execution Lanes for MMP15-PROD-001
 
-| Stage | Practitioner Question / Action | Production Requirement & Expected Behavior |
+To prevent serial bottlenecks, commercial launch qualification is organized into five parallel execution tracks:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                   MMP15-PROD-001 EXECUTION LANES                                        │
+└─────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+        │                     │                     │                     │                     │
+        ▼                     ▼                     ▼                     ▼                     ▼
+  ┌───────────┐         ┌───────────┐         ┌───────────┐         ┌───────────┐         ┌───────────┐
+  │  LANE A   │         │  LANE B   │         │  LANE C   │         │  LANE D   │         │  LANE E   │
+  │Production │         │Acquisition│         │   Trust   │         │  Product  │         │   Human   │
+  │ Artifacts │         │ & Delivery│         │ Evidence  │         │Onboarding │         │    UAT    │
+  ├───────────┤         ├───────────┤         ├───────────┤         ├───────────┤         ├───────────┤
+  │• Win Sign │         │• Checkout │         │• TrustWeb │         │• 4 Sample │         │• 5-8 CPAs │
+  │• Mac Notar│         │• Tx Email │         │• IT Pack  │         │  Journeys │         │• Unguided │
+  │• SBOM/Scan│         │• Signed DL│         │• Manifest │         │• Privacy  │         │• Trust    │
+  │• Gatekeepr│         │  URLs     │         │• Vuln Disc│         │  Screen   │         │  Friction │
+  └───────────┘         └───────────┘         └───────────┘         └───────────┘         └───────────┘
+```
+
+### Lane A: Production Binary Trust
+- `MMP15-PROD-WIN-SIGN-001`: Windows Authenticode code signing with RFC 3161 timestamping; SmartScreen reputation readiness.
+- `MMP11-DIST-MAC-004`: macOS Developer ID signing, Apple notarization ticket, and stapling.
+- `MMP15-PROD-SEC-002`: Multi-engine malware scanning and CycloneDX SBOM release generation.
+
+### Lane B: Acquisition & Secure Delivery
+- `MMP15-PROD-COM-001`: Commercial purchase and trial request orchestration engine.
+- `MMP15-PROD-MAIL-001`: Transactional email delivery with SPF/DKIM/DMARC authentication.
+- `MMP15-PROD-DL-001`: Authenticated artifact delivery service with expiring HMAC-signed download URLs.
+
+### Lane C: Trust Evidence & Enterprise Readiness
+- `MMP15-PROD-TRUSTWEB-001`: Production Trust Center (`vaultbasis.com/trust`) and pre-download trust panel.
+- `MMP15-PROD-ENT-001`: Enterprise IT Deployment & Security Profile (`VaultBasis_IT_Deployment_and_Security_Profile.md`).
+- `MMP15-PROD-VULN-001`: Responsible Vulnerability Disclosure policy and security contact route (`security@vaultbasis.com`).
+
+### Lane D: Product Onboarding & Native Trust Experience
+- `MMP15-PROD-ONB-001`: First-run screen with explicit privacy summary and 4 controlled samples (Clean 1099-DA, Multi-Exchange, Basis Gap, Tampered Receipt).
+- `MMP15-PROD-UPG-001`: In-place application upgrade qualification preserving existing databases, receipts, and licenses.
+- `MMP15-PROD-REC-001`: 1-click database backup and transactional restore verification.
+
+### Lane E: Human Observed Qualification
+- `MMP15-PROD-UAT-001`: Structured, unguided UAT sessions with 5–8 CPAs measuring trust friction, time-to-value, and willingness to buy.
+
+---
+
+## 6. The 18 Industrial Production Release Gates (PROD-GATES)
+
+Before VaultBasis is declared **`PRODUCTION_RELEASE = YES`**, the release authority must verify all 18 gates:
+
+| Gate ID | Release Requirement | Verification Standard |
 |---|---|---|
-| **1. Discovery** | *"What is VaultBasis?"* | Homepage articulates local, deterministic digital-asset tax basis reconstruction in < 15 seconds. |
-| **2. Relevance** | *"Is this for someone like me?"* | CPA / EA / Tax Preparer / Reviewer use cases prominently framed above the fold. |
-| **3. Trust** | *"Why should I trust this on my PC?"* | Explicit "Why this is safe" badges: Local-only, Zero Egress, Signed & Notarized, Open Verifier. |
-| **4. Scope** | *"What does it actually handle?"* | Supported inputs (Form 1099-DA, exchange CSVs, wallet exports) and boundaries clearly listed. |
-| **5. Pricing** | *"What does it cost?"* | Transparent tier/case capacity matrix without opaque sales walls. |
-| **6. Acquisition** | *"How do I obtain a license?"* | Simple, structured checkout / trial request flow requiring minimal practitioner data. |
-| **7. Confirmation** | *"Did my request succeed?"* | Immediate on-screen confirmation with expected delivery timeframe (< 2 mins). |
-| **8. Email Delivery** | *"Where is my license and link?"* | Authenticated transactional email delivered reliably (SPF, DKIM, DMARC compliant). |
-| **9. Email Content** | *"What do I do with this email?"* | Clear email containing license token, platform-specific download button, SHA-256 hash, and instructions. |
-| **10. Secure Download** | *"Is this download authentic?"* | Authenticated, temporary signed download link serving correct platform bundle (`.zip` / `.dmg`). |
-| **11. Pre-Install Verification**| *"Can I verify before running?"* | Published release manifest (`manifest.json`) and SHA-256 checksums available for manual verification. |
-| **12. OS Gatekeeper / SmartScreen**| *"Does the OS trust the binary?"* | Windows Authenticode verified publisher; macOS Gatekeeper accepts notarized ticket without `xattr` bypass. |
-| **13. Zero-Engineering Install** | *"Do I need developer tools?"* | Extract and launch executable directly. Zero Python, zero pip, zero terminal commands, zero Docker. |
-| **14. Privacy & Security Screen** | *"What will this app access?"* | First-run dialogue explicitly summarizing: "Local data only, No admin rights, No seed phrases requested". |
-| **15. License Activation** | *"Where does the license go?"* | Drag-and-drop license file or paste token. Immediate validation with clear capacity display. |
-| **16. Firm Identity Setup** | *"How is my firm identified?"* | Configure Firm Name, Preparer Name, and optional PTIN/EFIN (strictly encrypted & isolated locally). |
-| **17. First Success (Sample A)** | *"Can I see it work immediately?"* | 1-click execution of Clean 1099-DA sample producing reconciled Form 8949 worksheet in < 60 seconds. |
-| **18. Complex Ingest (Sample B)**| *"Can it handle multiple sources?"*| Multi-source exchange + wallet CSV ingest with automated deduplication and lot matching. |
-| **19. Exception Handling (Sample C)**| *"What if data is missing?"* | Demonstrates missing basis detection, transfer matching gap findings, and actionable practitioner guidance. |
-| **20. Real Client Ingest** | *"Can I use real client files?"* | Seamless intake of real client broker files with schema preflight validation. |
-| **21. Deterministic Reconcile** | *"Is the calculation defensible?"* | Real-time reconciliation generating audit-trail findings and capital gain/loss summaries. |
-| **22. Evidence Package Export** | *"How do I deliver this to a reviewer?"*| 1-click export of complete evidence bundle including signed outcome receipt (`receipt.json`). |
-| **23. Independent Verification** | *"Can a reviewer verify without trust?"*| Open-source offline verifier verifies Ed25519 signature and SHA-256 evidence digests independently. |
-| **24. Session Persistence** | *"Is my work saved on restart?"* | Re-opening application instantly recovers all cases, firm profile, license state, and audit log. |
-| **25. Durability & Backup** | *"How do I protect my database?"* | 1-click database backup (`.db` snapshot) with transactional restore capability. |
-| **26. Support & Diagnostics** | *"What if I encounter an issue?"* | 1-click export of sanitized support bundle (`diagnostic.zip` with manifest and zero client PII). |
-| **27. License Renewal / Expiry**| *"What happens when my license ends?"*| Graceful degradation: existing cases and verifier remain 100% accessible; clear renewal path displayed. |
+| **`PROD-GATE-01`** | **Value Comprehension** | Unfamiliar CPA understands product purpose and scope in < 15 seconds. |
+| **`PROD-GATE-02`** | **Pricing Transparency** | Tier, case capacity, and renewal rules fully clear without sales contact. |
+| **`PROD-GATE-03`** | **Transactional Email** | Purchase/license emails arrive in inbox within 2 minutes across major mail providers. |
+| **`PROD-GATE-04`** | **Secure Delivery** | Downloads served via authenticated, expiring signed links; no directory listings. |
+| **`PROD-GATE-05`** | **Windows Binary Trust** | Executable signed with valid Authenticode certificate & RFC 3161 timestamp; verified offline. |
+| **`PROD-GATE-06`** | **macOS Binary Trust** | Apple Developer ID signed, notarized, stapled; clean Gatekeeper pass without `xattr` bypass. |
+| **`PROD-GATE-07`** | **Artifact Security & SBOM** | CycloneDX SBOM generated; zero critical/high unmitigated CVEs; malware scan clean. |
+| **`PROD-GATE-08`** | **Localhost Runtime Boundary**| Sockets bind exclusively to `127.0.0.1`; local session auth token enforced; zero case egress. |
+| **`PROD-GATE-09`** | **First-Run Onboarding** | Welcome screen displays privacy facts; Sample A runs to completion in < 60 seconds. |
+| **`PROD-GATE-10`** | **Real Case Lifecycle** | Ingest $\rightarrow$ reconcile $\rightarrow$ exception inspect $\rightarrow$ Form 8949 worksheet output complete. |
+| **`PROD-GATE-11`** | **Independent Verification** | Evidence bundle transferred to separate machine and verified successfully via offline verifier. |
+| **`PROD-GATE-12`** | **Restart & Persistence** | Closing and reopening app recovers 100% of cases, firm identity, license, and audit log. |
+| **`PROD-GATE-13`** | **Durability & Recovery** | Online backup creates valid snapshot; restore recovers exact state with zero corruption. |
+| **`PROD-GATE-14`** | **In-Place Upgrade Safety**| Upgrading to newer version discovers existing DB, applies migrations, and leaves past receipts verifiable. |
+| **`PROD-GATE-15`** | **Enterprise IT Package** | IT Deployment & Security Profile document reviewed and accepted for Intune/Defender allowlisting. |
+| **`PROD-GATE-16`** | **Sanitized Diagnostics** | Exported `diagnostic.zip` verified to contain manifest and zero client PII or unmasked PTIN/EFIN. |
+| **`PROD-GATE-17`** | **Legal & Privacy Boundaries**| EULA, Privacy Statement, and Tax/Legal Disclaimers finalized and published. |
+| **`PROD-GATE-18`** | **First-Time UAT Sign-Off** | 5–8 unguided CPA test sessions confirm trust confidence, successful case completion, and commercial intent. |
 
 ---
 
-## 4. Master Task Ledger: MMP15-PROD Program Catalog
+## 7. Enterprise IT Deployment & Security Profile Specification
 
-| Task ID | Task Title | Core Objective & Deliverable | Primary Persona | Status |
-|---|---|---|---|---|
-| **`MMP15-PROD-WEB-001`** | Production Website & Value Proposition | Clear, responsive website (`vaultbasis.com`) explaining local deterministic reconciliation in < 15s. | Prospective CPA / EA | `READY FOR SPEC` |
-| **`MMP15-PROD-PRICE-001`**| Pricing, Tiers & Capacity Transparency | Transparent pricing matrix detailing case limits, practitioner workflow features, and renewals. | Managing Partner | `READY FOR SPEC` |
-| **`MMP15-PROD-TRUST-001`**| Public Binary Trust & Code Signing | Windows RFC 3161 Authenticode signing & macOS Developer ID notarization and stapling. | Security Admin / CPA | `IN PROGRESS (Track A)` |
-| **`MMP15-PROD-SEC-002`** | Artifact Security & Malware Scanning | CI pipeline integration for multi-engine malware scanning, dependency CVE checks, and CycloneDX SBOM. | Enterprise Security | `READY FOR SPEC` |
-| **`MMP15-PROD-LOCAL-001`**| Local Runtime Boundary & Least Privilege | Strict 127.0.0.1 binding, ephemeral session auth tokens, zero admin rights, zero background daemons. | IT Administrator | `READY FOR SPEC` |
-| **`MMP15-PROD-ENT-001`** | Enterprise IT Deployment Pack | Complete IT pack with Intune/MDM allowlisting guides, silent install flags, and network manifests. | Enterprise IT Lead | `READY FOR SPEC` |
-| **`MMP15-PROD-TRUSTWEB-001`**| Trust Center (`vaultbasis.com/trust`) | Dedicated web portal covering security architecture, data locality, vulnerability disclosure, and FAQs. | Risk & Compliance | `READY FOR SPEC` |
-| **`MMP15-PROD-COM-001`** | License Request & Acquisition Flow | Self-serve license request engine with automated key generation and CRM integration. | Customer Ops | `READY FOR SPEC` |
-| **`MMP15-PROD-MAIL-001`**| Transactional Email & Deliverability | Production email template with SPF/DKIM/DMARC qualification, download links, and license tokens. | End-User CPA | `READY FOR SPEC` |
-| **`MMP15-PROD-DL-001`**  | Secure Signed Artifact Delivery | Time-limited, authenticated download endpoints serving platform-specific distribution bundles. | Security Engineer | `READY FOR SPEC` |
-| **`MMP15-PROD-WIN-001`** | First-Time Windows Direct Journey | Zero-terminal Windows packaging qualification with SmartScreen reputation management documentation. | Windows Practitioner | `READY FOR SPEC` |
-| **`MMP15-PROD-MAC-001`** | First-Time macOS Direct Journey | Clean-download Gatekeeper acceptance on fresh Apple Silicon / Intel macOS without security bypasses. | macOS Practitioner | `IN PROGRESS (Track A)` |
-| **`MMP15-PROD-ONB-001`** | First-Run Onboarding & Sample Suite | Interactive first-run guide with Samples A (1099-DA), B (Exchange), C (Basis Gap), and D (Tamper Proof). | First-Time User | `READY FOR SPEC` |
-| **`MMP15-PROD-E2E-001`** | Real Practitioner Workflow Lifecycle | End-to-end multi-lot intake, reconciliation, exception review, and Form 8949 worksheet generation. | Senior Tax Preparer | `READY FOR SPEC` |
-| **`MMP15-PROD-VERIFY-001`**| Independent Verifier Physical Journey| Physical machine receipt transfer and air-gapped cryptographic validation demonstration. | Audit Reviewer | `READY FOR SPEC` |
-| **`MMP15-PROD-UPG-001`** | In-Place Upgrade & Migration Safety | Seamless version upgrades preserving existing databases, receipts, licenses, and firm identity. | IT Support / CPA | `READY FOR SPEC` |
-| **`MMP15-PROD-REC-001`** | Backup, Restore & Recovery Journey | 1-click snapshot creation, atomic transactional restore, and corruption detection verification. | Practitioner | `READY FOR SPEC` |
-| **`MMP15-PROD-SUP-001`** | Support & Sanitized Diagnostic Journey| 1-click sanitized diagnostic ZIP export with manifest, allowing fast triage without PII leakage. | Support Engineer | `READY FOR SPEC` |
-| **`MMP15-PROD-UAT-001`** | Observed First-Time Practitioner UAT| Structured, unguided user testing with 5–8 CPAs measuring trust friction, time-to-value, and NPS. | Product Lead | `READY FOR SPEC` |
+The companion artifact [`docs/enterprise/VaultBasis_IT_Deployment_and_Security_Profile.md`](file:///Users/kasivisvanathanamirdhalingam/Downloads/VaultBasis/docs/enterprise/VaultBasis_IT_Deployment_and_Security_Profile.md) defines the exact technical posture for enterprise security reviewers:
 
----
-
-## 5. Security & Privacy Invariants for Production
-
-1. **Zero Crypto Credential Requests:** VaultBasis will **NEVER** prompt for or store seed phrases, private keys, exchange passwords, or withdrawal-enabled API keys.
-2. **Strict Data Locality:** All case calculations, source document parsing, and database records remain exclusively on the user's local machine (`127.0.0.1`).
-3. **No Hidden Background Services:** VaultBasis does not register background daemons, kernel drivers, browser extensions, or automatic startup entries without explicit user action.
-4. **Non-Elevated Execution:** Normal practitioner operations run entirely within standard user permissions (non-Administrator / non-root).
-5. **Sanitized Diagnostics:** Support bundles exported by practitioners use strict positive-allowlisting and regex scrubbing, guaranteeing zero client transaction rows or unmasked PTIN/EFIN values.
+1. **Publisher Identity & Code Signing:** Legal publisher details, certificate issuer, and verification commands.
+2. **Execution Privileges:** Standard user space only (`%LOCALAPPDATA%` on Windows, `/Applications` or `~/Applications` on macOS); zero Administrator elevation required.
+3. **Network Behavior:** Strict loopback binding (`127.0.0.1:8000` default, dynamic fallback); **zero outbound network connections during case processing**.
+4. **Filesystem Boundaries:** Reads only explicitly selected practitioner files; writes only to isolated application data directory; zero modifications to system registries or kernel extensions.
+5. **Data Storage & Encryption:** Local SQLite database with WAL durability; AES-GCM local protection for regulated identifiers (PTIN/EFIN).
+6. **Telemetry Policy:** Zero runtime telemetry, usage tracking, or token logging from case processing.
+7. **Allowlisting Signatures:** Executable paths, hash algorithms, and MDM / Intune deployment configurations.
+8. **Vulnerability Disclosure:** Responsible disclosure contact at `security@vaultbasis.com`.
