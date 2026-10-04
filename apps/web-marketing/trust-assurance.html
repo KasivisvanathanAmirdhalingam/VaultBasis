@@ -158,6 +158,49 @@
       </ul>
     </section>
 
+    <section id="enterprise-it" class="assurance-section">
+      <h2>Enterprise IT Deployment &amp; Security Profile</h2>
+      <p class="section-intro">Information for Enterprise IT Administrators, CISO teams, and security reviewers evaluating VaultBasis on firm-managed endpoints.</p>
+      <div class="assurance-grid">
+        <div class="assurance-card">
+          <h3>Local Endpoint Architecture</h3>
+          <p>VaultBasis binds strictly to <code>127.0.0.1</code> using standard user space privileges. Zero administrator/root elevation is required, and zero persistent background daemons are installed.</p>
+        </div>
+        <div class="assurance-card">
+          <h3>Zero Runtime Case Egress</h3>
+          <p>Client transaction rows, Form 1099-DA imports, and tax-basis computations remain entirely on the local device. No taxpayer data or wallet information is ever transmitted to external servers.</p>
+        </div>
+        <div class="assurance-card">
+          <h3>Enterprise Durability</h3>
+          <p>Local state is stored in SQLite using Write-Ahead Logging (WAL) with <code>PRAGMA synchronous = FULL</code> for enterprise-grade transactional resilience and crash recovery.</p>
+        </div>
+        <div class="assurance-card">
+          <h3>IT Allowlisting &amp; Deployment Guide</h3>
+          <p>Comprehensive specifications covering Microsoft Intune, Defender for Endpoint, Jamf Pro MDM, and CycloneDX SBOM are documented in the full IT package.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="active-release" class="assurance-section">
+      <h2>Active Release &amp; Provenance Metadata</h2>
+      <p class="section-intro">Exact build identifiers and cryptographic artifact digests for the current release candidate.</p>
+      <table class="planes-table" role="table">
+        <thead>
+          <tr><th>Release Property</th><th>Current Value</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Product Version</strong></td><td><code>0.1.0-preview</code></td></tr>
+          <tr><td><strong>Source Commit SHA</strong></td><td><code>a12323e049bb55e5814940287223810f11b93b3a</code></td></tr>
+          <tr><td><strong>macOS Artifact (arm64)</strong></td><td><code>VaultBasis-macOS-arm64.zip</code></td></tr>
+          <tr><td><strong>macOS SHA-256 Digest</strong></td><td><code>dc8de90d20ed6c7b78f2b39bc501909e7706c8de7540c4d48a43cc9c26a92e67</code></td></tr>
+          <tr><td><strong>Runtime Network Policy</strong></td><td>Strict Loopback Only (<code>127.0.0.1</code>) — Zero Outbound Telemetry</td></tr>
+          <tr><td><strong>Local Storage Mode</strong></td><td>SQLite WAL Mode (<code>PRAGMA synchronous = FULL</code>)</td></tr>
+          <tr><td><strong>Execution Privileges</strong></td><td>Standard User Space Only (Zero Admin / Root Required)</td></tr>
+          <tr><td><strong>Security &amp; Support Contact</strong></td><td><code>security@vaultbasis.com</code></td></tr>
+        </tbody>
+      </table>
+    </section>
+
     <section id="governance" class="assurance-section">
       <h2>Governance</h2>
       <p class="section-intro">Specification, versioning, and change control for the VaultBasis evidence system.</p>
