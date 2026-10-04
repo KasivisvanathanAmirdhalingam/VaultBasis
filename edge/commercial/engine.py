@@ -1,48 +1,52 @@
 """
 VaultBasis MMP-1.5 Commercial Entitlement Evaluation Engine
 Evaluates offline Ed25519-signed license tokens with deterministic state transitions.
+Conforms to VaultBasis Commercial License Token Specification v1.0 (docs/commercial/license_token_v1.md).
 """
 
 import base64
 import json
 from datetime import datetime, timezone
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives.asymmetric import ed25519
 
-from edge.commercial.keys import COMMERCIAL_LICENSE_VERIFICATION_PUBLIC_KEY_HEX
+from edge.commercial.keys import resolve_verification_key
 from edge.commercial.models import (
     LicenseEnvelope,
     LicenseEvaluationResult,
     LicensePayload,
     LicenseState,
     LicenseTier,
+    parse_strict_utc_iso8601,
 )
 from edge.receipts.canonicalizer import canonical_json_bytes, compute_sha256_digest
 
 
-def _parse_iso8601(dt_str: str) -> Optional[datetime]:
-    """Parses ISO 8601 UTC timestamp string safely."""
-    try:
-        dt = datetime.fromisoformat(dt_str.replace("Z", "+00:00"))
-        if dt.tzinfo is None:
-            dt = dt.replace(tzinfo=timezone.utc)
-        return dt
-    except Exception:
-        return None
+def _reject_duplicate_keys_hook(pairs: List[Tuple[str, Any]]) -> Dict[str, Any]:
+    """
+    JSON object pairs hook that raises ValueError on duplicate dictionary keys.
+    Prevents JSON parsing ambiguity attacks before canonicalization.
+    """
+    result: Dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError(f"Duplicate JSON key detected in license: '{key}'")
+        result[key] = value
+    return result
 
 
 def evaluate_license_envelope(
     envelope_dict: Dict[str, Any],
     public_key_hex: Optional[str] = None,
+    keyring_override: Optional[Dict[str, str]] = None,
     current_time: Optional[datetime] = None,
     current_installation_id: Optional[str] = None,
 ) -> LicenseEvaluationResult:
     """
-    Evaluates a parsed LicenseEnvelope dictionary against the trusted verification public key.
+    Evaluates a parsed LicenseEnvelope dictionary against the trusted verification keyring.
     """
-    pub_key_hex = public_key_hex or COMMERCIAL_LICENSE_VERIFICATION_PUBLIC_KEY_HEX
     eval_time = current_time or datetime.now(timezone.utc)
     if eval_time.tzinfo is None:
         eval_time = eval_time.replace(tzinfo=timezone.utc)
@@ -68,7 +72,7 @@ def evaluate_license_envelope(
             diagnostic_reason=f"Unsupported license version '{version}', expected 'v1.0'",
         )
 
-    # 3. Payload Schema Validation
+    # 3. Payload Schema & Chronology Validation
     try:
         payload = LicensePayload.model_validate(payload_dict)
     except Exception as e:
@@ -78,9 +82,23 @@ def evaluate_license_envelope(
             diagnostic_reason=f"License payload structure malformed: {e}",
         )
 
-    # 4. Cryptographic Signature Verification
+    # 4. Resolve Verification Public Key (via key_id or explicit override)
+    resolved_pub_hex = public_key_hex
+    if not resolved_pub_hex:
+        resolved_pub_hex = resolve_verification_key(envelope.key_id, keyring_override=keyring_override)
+
+    if not resolved_pub_hex:
+        return LicenseEvaluationResult(
+            state=LicenseState.INVALID_SIGNATURE,
+            is_active=False,
+            license_id=payload.license_id,
+            customer_id=payload.customer_id,
+            diagnostic_reason=f"Unknown signing key ID '{envelope.key_id}' — not present in trusted keyring",
+        )
+
+    # 5. Cryptographic Signature Verification
     try:
-        pub_key_bytes = bytes.fromhex(pub_key_hex)
+        pub_key_bytes = bytes.fromhex(resolved_pub_hex)
         if len(pub_key_bytes) != 32:
             raise ValueError("Public key must be 32 bytes")
         public_key = ed25519.Ed25519PublicKey.from_public_bytes(pub_key_bytes)
@@ -106,7 +124,7 @@ def evaluate_license_envelope(
             diagnostic_reason=f"Malformed signature hex: {e}",
         )
 
-    # Compute canonical payload SHA-256 digest
+    # Compute canonical payload SHA-256 digest using RFC 8785
     canonical_bytes = canonical_json_bytes(payload_dict)
     digest = compute_sha256_digest(canonical_bytes)
 
@@ -121,7 +139,7 @@ def evaluate_license_envelope(
             diagnostic_reason="Cryptographic signature verification failed — payload or signature modified",
         )
 
-    # 5. Installation ID Binding Verification (Optional Bound Field)
+    # 6. Installation ID Binding Verification (Optional Bound Field)
     installation_bound = payload.installation_id is not None
     if installation_bound:
         if not current_installation_id or current_installation_id != payload.installation_id:
@@ -140,36 +158,18 @@ def evaluate_license_envelope(
                 ),
             )
 
-    # 6. Temporal Validity & Grace Window Evaluation
-    dt_not_before = _parse_iso8601(payload.not_before)
-    dt_expires_at = _parse_iso8601(payload.expires_at)
-    dt_grace_until = _parse_iso8601(payload.grace_until)
+    # 7. Temporal Validity & Exact Boundary Evaluation
+    dt_not_before = parse_strict_utc_iso8601(payload.not_before)
+    dt_expires_at = parse_strict_utc_iso8601(payload.expires_at)
+    dt_grace_until = parse_strict_utc_iso8601(payload.grace_until)
 
-    if not dt_not_before or not dt_expires_at or not dt_grace_until:
-        return LicenseEvaluationResult(
-            state=LicenseState.MALFORMED,
-            is_active=False,
-            license_id=payload.license_id,
-            customer_id=payload.customer_id,
-            diagnostic_reason="Invalid ISO 8601 timestamps in license payload",
-        )
-
-    if dt_expires_at < dt_not_before or dt_grace_until < dt_expires_at:
-        return LicenseEvaluationResult(
-            state=LicenseState.MALFORMED,
-            is_active=False,
-            license_id=payload.license_id,
-            customer_id=payload.customer_id,
-            diagnostic_reason="Invalid date chronology: not_before <= expires_at <= grace_until violated",
-        )
-
-    # Calculate remaining time
+    # Presentation helper calculations (strictly non-governing for security)
     seconds_to_expiry = (dt_expires_at - eval_time).total_seconds()
     seconds_to_grace = (dt_grace_until - eval_time).total_seconds()
     days_remaining = int(seconds_to_expiry // 86400)
     grace_days_remaining = int(seconds_to_grace // 86400)
 
-    # Check temporal state
+    # State decision evaluated on exact datetime boundaries
     if eval_time < dt_not_before:
         return LicenseEvaluationResult(
             state=LicenseState.NOT_YET_VALID,
@@ -237,12 +237,14 @@ def evaluate_license_envelope(
 def evaluate_license_token(
     token_str: str,
     public_key_hex: Optional[str] = None,
+    keyring_override: Optional[Dict[str, str]] = None,
     current_time: Optional[datetime] = None,
     current_installation_id: Optional[str] = None,
 ) -> LicenseEvaluationResult:
     """
     Decodes and evaluates a raw license token string.
     Accepts Base64-encoded envelope, URL-safe Base64 envelope, or raw JSON envelope string.
+    Enforces strict duplicate JSON key rejection before canonicalization.
     """
     if not token_str or not token_str.strip():
         return LicenseEvaluationResult(
@@ -262,7 +264,6 @@ def evaluate_license_token(
         try:
             # Add padding if needed
             padded = cleaned + "=" * ((4 - len(cleaned) % 4) % 4)
-            # Try urlsafe first then standard
             try:
                 decoded = base64.urlsafe_b64decode(padded.encode("ascii")).decode("utf-8")
             except Exception:
@@ -279,13 +280,14 @@ def evaluate_license_token(
             diagnostic_reason="License token is neither valid JSON nor valid Base64 JSON payload",
         )
 
+    # Parse with strict duplicate key rejection
     try:
-        envelope_dict = json.loads(raw_json)
+        envelope_dict = json.loads(raw_json, object_pairs_hook=_reject_duplicate_keys_hook)
     except Exception as e:
         return LicenseEvaluationResult(
             state=LicenseState.MALFORMED,
             is_active=False,
-            diagnostic_reason=f"Failed to parse license JSON: {e}",
+            diagnostic_reason=f"Failed to parse license JSON (or duplicate keys present): {e}",
         )
 
     if not isinstance(envelope_dict, dict):
@@ -298,6 +300,8 @@ def evaluate_license_token(
     return evaluate_license_envelope(
         envelope_dict=envelope_dict,
         public_key_hex=public_key_hex,
+        keyring_override=keyring_override,
         current_time=current_time,
         current_installation_id=current_installation_id,
     )
+

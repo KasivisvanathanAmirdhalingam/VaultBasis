@@ -1,11 +1,12 @@
 """
 VaultBasis MMP-1.5 Commercial Entitlement Domain Models
-Strict separation between LicenseTier and LicenseState.
+Strict separation between LicenseTier and LicenseState, normative UTC chronology validation.
 """
 
+from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
-from pydantic import BaseModel, Field, field_validator
+from typing import Any, Dict, List, Optional, Set
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 
 class LicenseTier(str, Enum):
@@ -29,6 +30,36 @@ class LicenseState(str, Enum):
     MALFORMED = "MALFORMED"
     UNSUPPORTED_VERSION = "UNSUPPORTED_VERSION"
     INSTALLATION_MISMATCH = "INSTALLATION_MISMATCH"
+
+
+class CommercialEntitlement(str, Enum):
+    """Known capability identifiers granted by commercial licenses."""
+    RECONCILIATION = "reconciliation"
+    OFFLINE_EXPORT = "offline_export"
+    REVIEWER_WORKFLOW = "reviewer_workflow"
+    MULTI_OFFICE = "multi_office"
+
+
+def parse_strict_utc_iso8601(dt_str: str) -> datetime:
+    """
+    Parses ISO 8601 timestamp string and ensures it has an explicit UTC timezone.
+    Rejects naive timestamps without timezone information.
+    """
+    if not isinstance(dt_str, str):
+        raise ValueError(f"Timestamp must be a string, got {type(dt_str).__name__}")
+    
+    clean_str = dt_str.strip()
+    if not (clean_str.endswith("Z") or clean_str.endswith("+00:00") or clean_str.endswith("-00:00")):
+        raise ValueError(f"Timestamp must explicitly indicate UTC ('Z' or '+00:00'), got: {dt_str}")
+    
+    try:
+        dt = datetime.fromisoformat(clean_str.replace("Z", "+00:00"))
+    except Exception as e:
+        raise ValueError(f"Invalid ISO 8601 timestamp format '{dt_str}': {e}")
+    
+    if dt.tzinfo is None:
+        raise ValueError(f"Naive timestamps are prohibited: {dt_str}")
+    return dt
 
 
 class LicensePayload(BaseModel):
@@ -55,6 +86,27 @@ class LicensePayload(BaseModel):
             raise ValueError(f"Unsupported license version: {v}")
         return v
 
+    @field_validator("issued_at", "not_before", "expires_at", "grace_until")
+    @classmethod
+    def validate_timestamp_format(cls, v: str) -> str:
+        parse_strict_utc_iso8601(v)
+        return v
+
+    @model_validator(mode="after")
+    def validate_chronology(self) -> "LicensePayload":
+        dt_issued = parse_strict_utc_iso8601(self.issued_at)
+        dt_not_before = parse_strict_utc_iso8601(self.not_before)
+        dt_expires = parse_strict_utc_iso8601(self.expires_at)
+        dt_grace = parse_strict_utc_iso8601(self.grace_until)
+
+        if dt_issued > dt_expires:
+            raise ValueError(f"Chronology violation: issued_at ({self.issued_at}) > expires_at ({self.expires_at})")
+        if dt_not_before > dt_expires:
+            raise ValueError(f"Chronology violation: not_before ({self.not_before}) > expires_at ({self.expires_at})")
+        if dt_expires > dt_grace:
+            raise ValueError(f"Chronology violation: expires_at ({self.expires_at}) > grace_until ({self.grace_until})")
+        return self
+
 
 class LicenseEnvelope(BaseModel):
     """
@@ -63,6 +115,16 @@ class LicenseEnvelope(BaseModel):
     payload: Dict[str, Any] = Field(..., description="Raw dictionary of LicensePayload")
     signature: str = Field(..., description="Hex-encoded Ed25519 signature")
     key_id: str = Field(..., description="Key identifier matching payload.key_id")
+
+    @model_validator(mode="after")
+    def validate_key_id_synchronization(self) -> "LicenseEnvelope":
+        payload_key_id = self.payload.get("key_id")
+        if payload_key_id is not None and payload_key_id != self.key_id:
+            raise ValueError(
+                f"Key ID mismatch: envelope has key_id '{self.key_id}', "
+                f"but payload has key_id '{payload_key_id}'"
+            )
+        return self
 
 
 class LicenseEvaluationResult(BaseModel):
@@ -76,7 +138,17 @@ class LicenseEvaluationResult(BaseModel):
     customer_id: Optional[str] = Field(None, description="Customer ID if parsable")
     max_cases_per_installation: Optional[int] = Field(None, description="Enforceable case limit")
     entitlements: List[str] = Field(default_factory=list, description="Granted feature list")
-    days_remaining: Optional[int] = Field(None, description="Days until expiry (negative if expired)")
-    grace_days_remaining: Optional[int] = Field(None, description="Days until grace period ends")
+    days_remaining: Optional[int] = Field(None, description="Days until expiry (presentation helper only)")
+    grace_days_remaining: Optional[int] = Field(None, description="Days until grace period ends (presentation helper only)")
     installation_bound: bool = Field(False, description="True if bound to specific installation_id")
     diagnostic_reason: str = Field(..., description="Human/audit readable explanation")
+
+    def has_entitlement(self, capability: str) -> bool:
+        """
+        Determines whether a specific capability is granted.
+        INVARIANT: Unknown capabilities or inactive license NEVER grant access.
+        """
+        if not self.is_active:
+            return False
+        return capability in self.entitlements
+
