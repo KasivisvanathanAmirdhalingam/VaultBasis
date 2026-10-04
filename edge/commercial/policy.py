@@ -268,6 +268,16 @@ class CommercialPolicyService:
                 message="Dev bypass active.",
             )
 
+        # 0.1 Bundled sample case unmetered evaluation (Onboarding & Evaluation Invariant)
+        case_id = (context or {}).get("case_id")
+        if case_id == "CASE-SAMPLE-2025" or (context or {}).get("is_sample"):
+            return CommercialPolicyDecision(
+                allowed=True,
+                http_status=200,
+                correlation_id=correlation_id,
+                message="Bundled sample case unmetered evaluation authorized.",
+            )
+
         # 1. Check for token presence
         token = self.get_active_token()
         if not token:
