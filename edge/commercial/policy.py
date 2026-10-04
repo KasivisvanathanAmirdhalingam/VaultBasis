@@ -1,0 +1,365 @@
+"""
+VaultBasis MMP-1.5 Commercial Policy & Local Entitlement Enforcement Service
+Conforms to PRD commercial architecture and docs/mmp15_task_ledger.md (MMP15-ENT-002).
+
+Architectural Invariants:
+1. Thin Service Boundary: Consumes frozen entitlement engine (evaluate_license_token).
+2. Zero Cryptography Leakage: User-facing responses use stable machine-readable reason codes.
+3. Fail Closed (Crypto) / Fail Graceful (UX): Rejection never crashes runtime or exposes internal keys.
+4. Independent Verification Unencumbered: Receipt verification is always free, public, and unmetered.
+5. Historical Data Preservation: Expired or invalid license NEVER blocks reading existing cases or exporting evidence.
+"""
+
+import os
+import uuid
+from datetime import datetime, timezone
+from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Set
+
+from pydantic import BaseModel, Field
+
+from edge.commercial.engine import evaluate_license_token
+from edge.commercial.models import (
+    LicenseEvaluationResult,
+    LicenseState,
+    LicenseTier,
+)
+from edge.storage.sqlite_store import SQLiteStore
+
+
+class CommercialOperation(str, Enum):
+    """Operations subject to local commercial entitlement checks."""
+    CREATE_CASE = "CREATE_CASE"
+    RECONCILE_CASE = "RECONCILE_CASE"
+
+
+class CommercialDenialCode(str, Enum):
+    """
+    Deterministic machine-readable reason codes for commercial operation denials.
+    Separates HTTP status from domain semantics.
+    """
+    ENTITLEMENT_REQUIRED = "ENTITLEMENT_REQUIRED"
+    LICENSE_NOT_YET_VALID = "LICENSE_NOT_YET_VALID"
+    LICENSE_EXPIRED = "LICENSE_EXPIRED"
+    LICENSE_GRACE_RESTRICTED = "LICENSE_GRACE_RESTRICTED"
+    INSTALLATION_MISMATCH = "INSTALLATION_MISMATCH"
+    CASE_CAPACITY_REACHED = "CASE_CAPACITY_REACHED"
+    CAPABILITY_NOT_LICENSED = "CAPABILITY_NOT_LICENSED"
+    LICENSE_INVALID = "LICENSE_INVALID"
+
+
+class CommercialPolicyDecision(BaseModel):
+    """
+    Structured outcome of a commercial policy authorization check.
+    """
+    allowed: bool = Field(..., description="True if operation is permitted")
+    reason_code: Optional[CommercialDenialCode] = Field(None, description="Denial code if blocked")
+    message: Optional[str] = Field(None, description="User-facing explanation")
+    http_status: int = Field(200, description="HTTP status code for API layer")
+    upgrade_guidance: Optional[str] = Field(None, description="Actionable guidance or contact info")
+    correlation_id: Optional[str] = Field(None, description="Correlation identifier for support triage")
+    license_state: Optional[LicenseState] = Field(None, description="Evaluated license state")
+    tier: Optional[LicenseTier] = Field(None, description="Active commercial tier")
+    current_case_count: Optional[int] = Field(None, description="Current persistent billable cases")
+    max_cases: Optional[int] = Field(None, description="Licensed maximum capacity")
+
+    def to_error_dict(self) -> Dict[str, Any]:
+        """Formats a clean, non-leaking JSON error payload for REST API consumers."""
+        return {
+            "error": {
+                "code": self.reason_code.value if self.reason_code else "COMMERCIAL_DENIAL",
+                "message": self.message or "Commercial authorization failed.",
+                "upgrade_guidance": self.upgrade_guidance or "Contact sales@vaultbasis.com for assistance.",
+                "correlation_id": self.correlation_id,
+            }
+        }
+
+
+class CommercialPolicyService:
+    """
+    Evaluates commercial policies and authorizes billable operations.
+    Acts as the clean boundary between the REST API and the cryptographic entitlement engine.
+    """
+
+    def __init__(
+        self,
+        store: Optional[SQLiteStore] = None,
+        license_dir: Optional[Path] = None,
+        keyring_override: Optional[Dict[str, str]] = None,
+        installation_id: Optional[str] = None,
+    ):
+        self.store = store
+        self.license_dir = Path(license_dir) if license_dir else None
+        self.keyring_override = keyring_override
+        self.installation_id = installation_id
+        self._runtime_token: Optional[str] = None
+
+    def set_runtime_token(self, token: Optional[str]):
+        """Sets an in-memory runtime token override (useful for testing and dynamic configuration)."""
+        self._runtime_token = token
+
+    def install_license_token(self, token_text: str) -> LicenseEvaluationResult:
+        """
+        Installs a new license token into local persistence (SQLite / license file).
+        Evaluates the token first; saves to store if present.
+        """
+        res = evaluate_license_token(
+            token_text,
+            keyring_override=self.keyring_override,
+            current_installation_id=self.installation_id,
+        )
+        if self.store:
+            self.store.save_commercial_license(token_text)
+        elif self.license_dir:
+            self.license_dir.mkdir(parents=True, exist_ok=True)
+            (self.license_dir / "license.lic").write_text(token_text, encoding="utf-8")
+        self._runtime_token = token_text
+        return res
+
+    def remove_license_token(self):
+        """Clears installed license token."""
+        self._runtime_token = None
+        if self.store:
+            self.store.remove_commercial_license()
+        if self.license_dir:
+            lic_file = self.license_dir / "license.lic"
+            if lic_file.is_file():
+                lic_file.unlink()
+
+    def get_active_token(self) -> Optional[str]:
+        """
+        Resolves active license token with deterministic precedence:
+        1. Runtime in-memory override
+        2. Environment variable VAULTBASIS_LICENSE_TOKEN
+        3. SQLite persistence store
+        4. License file (license.lic)
+        """
+        if self._runtime_token:
+            return self._runtime_token
+        
+        env_token = os.environ.get("VAULTBASIS_LICENSE_TOKEN")
+        if env_token:
+            return env_token.strip()
+
+        if self.store:
+            stored = self.store.get_commercial_license()
+            if stored:
+                return stored.strip()
+
+        if self.license_dir:
+            lic_file = self.license_dir / "license.lic"
+            if lic_file.is_file():
+                return lic_file.read_text(encoding="utf-8").strip()
+
+        return None
+
+    def evaluate_current_license(self, current_time: Optional[datetime] = None) -> LicenseEvaluationResult:
+        """Evaluates currently installed commercial license token."""
+        token = self.get_active_token()
+        if not token:
+            return LicenseEvaluationResult(
+                state=LicenseState.MALFORMED,
+                is_active=False,
+                diagnostic_reason="No commercial license token installed on this system.",
+            )
+        return evaluate_license_token(
+            token,
+            keyring_override=self.keyring_override,
+            current_time=current_time,
+            current_installation_id=self.installation_id,
+        )
+
+    def get_status(self, current_time: Optional[datetime] = None) -> Dict[str, Any]:
+        """
+        Returns safe, non-sensitive commercial status metadata for UI dashboards and health diagnostics.
+        """
+        token = self.get_active_token()
+        has_token = bool(token)
+        billable_cases = self.store.count_billable_cases() if self.store else 0
+
+        if not has_token:
+            return {
+                "licensed": False,
+                "license_state": "UNLICENSED",
+                "tier": None,
+                "license_id": None,
+                "customer_id": None,
+                "billable_cases_count": billable_cases,
+                "max_cases_per_installation": 0,
+                "days_remaining": 0,
+                "grace_days_remaining": 0,
+                "unmetered_verification_active": True,
+                "message": "VaultBasis is operating in unmetered verification mode. A commercial license is required to create or reconcile cases.",
+            }
+
+        eval_res = self.evaluate_current_license(current_time=current_time)
+        return {
+            "licensed": eval_res.is_active,
+            "license_state": eval_res.state.value,
+            "tier": eval_res.tier.value if eval_res.tier else None,
+            "license_id": eval_res.license_id,
+            "customer_id": eval_res.customer_id,
+            "billable_cases_count": billable_cases,
+            "max_cases_per_installation": eval_res.max_cases_per_installation or 0,
+            "days_remaining": eval_res.days_remaining or 0,
+            "grace_days_remaining": eval_res.grace_days_remaining or 0,
+            "unmetered_verification_active": True,
+            "diagnostic_reason": eval_res.diagnostic_reason,
+        }
+
+    def authorize(
+        self,
+        operation: CommercialOperation,
+        context: Optional[Dict[str, Any]] = None,
+        current_time: Optional[datetime] = None,
+    ) -> CommercialPolicyDecision:
+        """
+        Evaluates whether a commercial operation is permitted.
+        
+        Capacity Semantics:
+        - Counted: Persistent practitioner-created cases.
+        - Excluded: Bundled sample case (CASE-SAMPLE-2025), unpersisted drafts, independent verification.
+        """
+        correlation_id = f"VB-ENT-{uuid.uuid4().hex[:8].upper()}"
+
+        # 0. Dev / Test explicit bypass check (opt-in for development suites)
+        if os.environ.get("VAULTBASIS_BYPASS_ENTITLEMENT") == "1":
+            return CommercialPolicyDecision(
+                allowed=True,
+                http_status=200,
+                correlation_id=correlation_id,
+                message="Dev bypass active.",
+            )
+
+        # 1. Check for token presence
+        token = self.get_active_token()
+        if not token:
+            return CommercialPolicyDecision(
+                allowed=False,
+                reason_code=CommercialDenialCode.ENTITLEMENT_REQUIRED,
+                http_status=402,
+                message="A valid commercial license is required to create or reconcile cases. Existing cases and receipt verification remain fully accessible.",
+                upgrade_guidance="Install a valid license token via Settings or contact sales@vaultbasis.com to purchase a practitioner subscription.",
+                correlation_id=correlation_id,
+            )
+
+        # 2. Cryptographic & Temporal Evaluation via frozen engine
+        eval_res = evaluate_license_token(
+            token,
+            keyring_override=self.keyring_override,
+            current_time=current_time,
+            current_installation_id=self.installation_id,
+        )
+
+        # 3. Handle specific non-active states
+        if eval_res.state == LicenseState.NOT_YET_VALID:
+            return CommercialPolicyDecision(
+                allowed=False,
+                reason_code=CommercialDenialCode.LICENSE_NOT_YET_VALID,
+                http_status=403,
+                message="Installed commercial license is not yet active (effective date is in the future).",
+                upgrade_guidance="Please verify your system clock or check your license effective start date.",
+                correlation_id=correlation_id,
+                license_state=eval_res.state,
+            )
+
+        if eval_res.state == LicenseState.EXPIRED:
+            return CommercialPolicyDecision(
+                allowed=False,
+                reason_code=CommercialDenialCode.LICENSE_EXPIRED,
+                http_status=403,
+                message="Commercial license has expired. All existing cases, evidence records, and independent verification remain intact and accessible.",
+                upgrade_guidance="Please renew your VaultBasis license subscription to continue creating and reconciling new cases.",
+                correlation_id=correlation_id,
+                license_state=eval_res.state,
+                tier=eval_res.tier,
+            )
+
+        if eval_res.state == LicenseState.GRACE:
+            # Policy for GRACE period:
+            # Existing cases and reconciliation of existing cases remain available; creating new cases is restricted.
+            if operation == CommercialOperation.CREATE_CASE:
+                return CommercialPolicyDecision(
+                    allowed=False,
+                    reason_code=CommercialDenialCode.LICENSE_GRACE_RESTRICTED,
+                    http_status=403,
+                    message="License is currently in grace period. Creation of new cases is restricted. Existing client cases remain fully accessible.",
+                    upgrade_guidance="Renew your subscription now to restore full new-case capacity.",
+                    correlation_id=correlation_id,
+                    license_state=eval_res.state,
+                    tier=eval_res.tier,
+                )
+            # For RECONCILE_CASE on existing cases in grace mode, allow it.
+
+        if eval_res.state == LicenseState.INSTALLATION_MISMATCH:
+            return CommercialPolicyDecision(
+                allowed=False,
+                reason_code=CommercialDenialCode.INSTALLATION_MISMATCH,
+                http_status=403,
+                message="Installed commercial license is bound to a different machine installation identifier.",
+                upgrade_guidance="Contact sales@vaultbasis.com or your administrator to re-bind this installation.",
+                correlation_id=correlation_id,
+                license_state=eval_res.state,
+            )
+
+        if eval_res.state in (LicenseState.INVALID_SIGNATURE, LicenseState.MALFORMED, LicenseState.UNSUPPORTED_VERSION):
+            return CommercialPolicyDecision(
+                allowed=False,
+                reason_code=CommercialDenialCode.LICENSE_INVALID,
+                http_status=403,
+                message="The installed VaultBasis commercial license could not be validated. Existing case records and independent verification remain available.",
+                upgrade_guidance="Please reinstall a genuine, untampered VaultBasis license token.",
+                correlation_id=correlation_id,
+                license_state=eval_res.state,
+            )
+
+        # 4. Active license validations
+        billable_count = self.store.count_billable_cases() if self.store else 0
+        max_cases = eval_res.max_cases_per_installation or 0
+
+        # Capacity Check for case creation
+        if operation == CommercialOperation.CREATE_CASE:
+            if max_cases > 0 and billable_count >= max_cases:
+                return CommercialPolicyDecision(
+                    allowed=False,
+                    reason_code=CommercialDenialCode.CASE_CAPACITY_REACHED,
+                    http_status=402,
+                    message=f"This installation has reached its licensed case capacity of {max_cases} cases ({billable_count}/{max_cases} used).",
+                    upgrade_guidance="Upgrade your subscription tier at sales@vaultbasis.com to increase your case volume.",
+                    correlation_id=correlation_id,
+                    license_state=eval_res.state,
+                    tier=eval_res.tier,
+                    current_case_count=billable_count,
+                    max_cases=max_cases,
+                )
+
+        # Capability Check for reconciliation
+        if operation == CommercialOperation.RECONCILE_CASE:
+            # Check if reconciliation entitlement or recognized tier is present
+            has_recon = eval_res.has_entitlement("reconciliation") or (
+                eval_res.tier in (LicenseTier.TRIAL, LicenseTier.ESSENTIAL, LicenseTier.PRACTICE, LicenseTier.ENTERPRISE)
+            )
+            if not has_recon:
+                return CommercialPolicyDecision(
+                    allowed=False,
+                    reason_code=CommercialDenialCode.CAPABILITY_NOT_LICENSED,
+                    http_status=403,
+                    message="Reconciliation capability is not licensed under your current plan.",
+                    upgrade_guidance="Contact sales@vaultbasis.com to add deterministic reconciliation entitlement.",
+                    correlation_id=correlation_id,
+                    license_state=eval_res.state,
+                    tier=eval_res.tier,
+                )
+
+        # 5. Permitted
+        return CommercialPolicyDecision(
+            allowed=True,
+            http_status=200,
+            correlation_id=correlation_id,
+            license_state=eval_res.state,
+            tier=eval_res.tier,
+            current_case_count=billable_count,
+            max_cases=max_cases,
+            message="Operation authorized.",
+        )

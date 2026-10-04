@@ -7,7 +7,7 @@ import json
 import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Set
 
 
 class EvidenceCollisionError(Exception):
@@ -74,6 +74,12 @@ class SQLiteStore:
                     receipt_json TEXT NOT NULL,
                     created_at TEXT NOT NULL,
                     FOREIGN KEY (case_id) REFERENCES cases (case_id) ON DELETE CASCADE
+                );
+
+                CREATE TABLE IF NOT EXISTS commercial_license (
+                    id INTEGER PRIMARY KEY CHECK (id = 1),
+                    token_text TEXT NOT NULL,
+                    installed_at TEXT NOT NULL
                 );
             """)
             # Migration check: ensure client_reference column exists
@@ -246,3 +252,42 @@ class SQLiteStore:
             if row:
                 return row["raw_content"]
             return None
+
+    def count_billable_cases(self, sample_case_ids: Optional[Set[str]] = None) -> int:
+        """
+        Returns count of persistent practitioner-created production cases.
+        Explicitly excludes bundled sample cases from capacity metering.
+        """
+        excluded = sample_case_ids or {"CASE-SAMPLE-2025"}
+        placeholders = ",".join("?" for _ in excluded)
+        with self._get_connection() as conn:
+            query = f"SELECT COUNT(*) FROM cases WHERE case_id NOT IN ({placeholders})"
+            cursor = conn.execute(query, list(excluded))
+            row = cursor.fetchone()
+            return row[0] if row else 0
+
+    def get_commercial_license(self) -> Optional[str]:
+        """Retrieves stored commercial license token text if present."""
+        with self._get_connection() as conn:
+            row = conn.execute("SELECT token_text FROM commercial_license WHERE id = 1").fetchone()
+            if row:
+                return row["token_text"]
+            return None
+
+    def save_commercial_license(self, token_text: str):
+        """Stores or replaces the local commercial license token."""
+        now_utc = datetime.now(timezone.utc).isoformat()
+        with self._get_connection() as conn:
+            conn.execute("""
+                INSERT INTO commercial_license (id, token_text, installed_at)
+                VALUES (1, ?, ?)
+                ON CONFLICT(id) DO UPDATE SET
+                    token_text=excluded.token_text,
+                    installed_at=excluded.installed_at;
+            """, (token_text, now_utc))
+
+    def remove_commercial_license(self):
+        """Removes installed commercial license token."""
+        with self._get_connection() as conn:
+            conn.execute("DELETE FROM commercial_license WHERE id = 1")
+
