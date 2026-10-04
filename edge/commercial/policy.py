@@ -17,6 +17,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
 
+from fastapi import HTTPException
 from pydantic import BaseModel, Field
 
 from edge.commercial.engine import evaluate_license_token
@@ -26,6 +27,22 @@ from edge.commercial.models import (
     LicenseTier,
 )
 from edge.storage.sqlite_store import SQLiteStore
+
+
+class CaseWritePolicy:
+    """
+    Centralized domain policy governing write operations on cases.
+    Enforces sample immutability and protects bundled evaluation fixtures from mutation.
+    """
+    @staticmethod
+    def assert_can_mutate(case: Optional[Any], operation_name: str = "mutation"):
+        if not case:
+            return
+        if getattr(case, "case_kind", "PRODUCTION") == "BUNDLED_SAMPLE":
+            raise HTTPException(
+                status_code=403,
+                detail=f"Bundled sample cases are immutable demonstration baselines and cannot accept {operation_name}. Please create or clone a production case."
+            )
 
 
 class CommercialOperation(str, Enum):
@@ -270,9 +287,18 @@ class CommercialPolicyService:
 
         # 0.1 Bundled sample case unmetered evaluation (Onboarding & Evaluation Invariant)
         # Provenance invariant: Only authentic BUNDLED_SAMPLE cases are unmetered.
-        # Merely naming a production case "CASE-SAMPLE-2025" is not authorized.
-        case_kind = (context or {}).get("case_kind")
-        if case_kind == "BUNDLED_SAMPLE":
+        # Provenance is resolved authoritatively from persisted database state if case_id exists.
+        # Caller-supplied context cannot spoof provenance for a PRODUCTION case.
+        case_id = (context or {}).get("case_id")
+        resolved_kind = "PRODUCTION"
+        if case_id and self.store:
+            persisted_case = self.store.get_case(case_id)
+            if persisted_case:
+                resolved_kind = getattr(persisted_case, "case_kind", "PRODUCTION") or "PRODUCTION"
+        elif (context or {}).get("case_kind") == "BUNDLED_SAMPLE" and not case_id:
+            resolved_kind = "BUNDLED_SAMPLE"
+
+        if resolved_kind == "BUNDLED_SAMPLE":
             return CommercialPolicyDecision(
                 allowed=True,
                 http_status=200,

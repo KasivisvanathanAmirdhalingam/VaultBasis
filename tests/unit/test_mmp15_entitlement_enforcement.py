@@ -468,3 +468,87 @@ def test_adversarial_authentic_bundled_sample_allowed_with_expired_license(clean
     assert res_exp.status_code == 200
     assert res_exp.headers["content-type"] == "application/zip"
 
+
+def test_adversarial_caller_supplied_case_kind_cannot_bypass_stored_production_state(clean_commercial_env, client):
+    """
+    Provenance Defense Invariant:
+    CommercialPolicyService NEVER trusts caller-supplied case_kind context.
+    It resolves case_kind authoritatively from persisted SQLite state.
+    """
+    policy, store, _ = clean_commercial_env
+    now_utc = datetime.now(timezone.utc).isoformat()
+
+    # Save a production case in SQLite
+    prod_case = CanonicalCase(
+        case_id="CASE-REAL-PRODUCTION-001",
+        client_reference="Paying Client",
+        tax_year=2025,
+        jurisdiction="US",
+        case_status="CREATED",
+        case_kind="PRODUCTION",
+        created_at=now_utc,
+        updated_at=now_utc
+    )
+    store.save_case(prod_case)
+
+    # Caller attempts to spoof context={"case_kind": "BUNDLED_SAMPLE"} for this production case
+    spoofed_context = {
+        "case_id": "CASE-REAL-PRODUCTION-001",
+        "case_kind": "BUNDLED_SAMPLE"  # Adversarial spoof attempt
+    }
+    decision = policy.authorize(CommercialOperation.RECONCILE_CASE, context=spoofed_context)
+    assert not decision.allowed
+    assert decision.http_status == 402
+    assert decision.reason_code == CommercialDenialCode.ENTITLEMENT_REQUIRED
+
+
+def test_adversarial_bundled_sample_deletion_rejected(clean_commercial_env, client):
+    """
+    Sample Immutability Invariant:
+    A bundled sample case is an immutable system baseline and cannot be deleted via DELETE /api/cases/{id}.
+    """
+    res_load = client.post("/api/sample-case/load")
+    assert res_load.status_code == 200
+
+    res_del = client.delete("/api/cases/CASE-SAMPLE-2025")
+    assert res_del.status_code == 403
+    assert "immutable demonstration baselines" in res_del.json()["detail"]
+
+
+def test_clone_sample_to_production_requires_license_and_consumes_capacity(clean_commercial_env, client):
+    """
+    Cloning Semantics Invariant:
+    Cloning an authentic sample case produces a PRODUCTION case that loses sample provenance,
+    requires active commercial entitlement to create, and consumes licensed capacity.
+    """
+    policy, store, _ = clean_commercial_env
+    client.post("/api/sample-case/load")
+
+    # 1. Unlicensed clone attempt is blocked (402)
+    res_clone_unauth = client.post("/api/cases/CASE-SAMPLE-2025/clone", json={"new_case_id": "CASE-PROD-CLONE-001"})
+    assert res_clone_unauth.status_code == 402
+    assert res_clone_unauth.json()["error"]["code"] == "ENTITLEMENT_REQUIRED"
+
+    # 2. Install license with capacity limit of 1
+    token = _make_test_token(tier=LicenseTier.ESSENTIAL, max_cases=1)
+    policy.install_license_token(token)
+
+    # 3. Licensed clone succeeds and sets case_kind=PRODUCTION
+    res_clone = client.post("/api/cases/CASE-SAMPLE-2025/clone", json={"new_case_id": "CASE-PROD-CLONE-001"})
+    assert res_clone.status_code == 201
+    data = res_clone.json()
+    assert data["case_id"] == "CASE-PROD-CLONE-001"
+
+    # Verify persisted state
+    persisted = store.get_case("CASE-PROD-CLONE-001")
+    assert persisted is not None
+    assert persisted.case_kind == "PRODUCTION"
+    assert persisted.sample_definition_id is None
+    assert store.count_billable_cases() == 1
+
+    # 4. Next case creation is blocked because capacity (1/1) is now reached
+    res_next = client.post("/api/cases", json={"case_id": "CASE-EXCEEDED-002", "tax_year": 2025})
+    assert res_next.status_code == 402
+    assert res_next.json()["error"]["code"] == "CASE_CAPACITY_REACHED"
+
+

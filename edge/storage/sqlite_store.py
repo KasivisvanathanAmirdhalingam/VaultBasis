@@ -179,17 +179,26 @@ class SQLiteStore:
                 cursor.execute("ALTER TABLE cases ADD COLUMN client_reference TEXT DEFAULT 'Sample Client'")
             if "case_kind" not in existing_cols:
                 cursor.execute("ALTER TABLE cases ADD COLUMN case_kind TEXT DEFAULT 'PRODUCTION'")
-
+            if "sample_definition_id" not in existing_cols:
+                cursor.execute("ALTER TABLE cases ADD COLUMN sample_definition_id TEXT")
+            if "sample_manifest_digest" not in existing_cols:
+                cursor.execute("ALTER TABLE cases ADD COLUMN sample_manifest_digest TEXT")
 
 
     def save_case(self, case: CanonicalCase):
         now_utc = datetime.now(timezone.utc).isoformat()
         client_ref = getattr(case, "client_reference", "Sample Client") or "Sample Client"
         case_kind = getattr(case, "case_kind", "PRODUCTION") or "PRODUCTION"
+        sample_def_id = getattr(case, "sample_definition_id", None)
+        sample_digest = getattr(case, "sample_manifest_digest", None)
         with self._get_connection() as conn:
             conn.execute("""
-                INSERT INTO cases (case_id, client_reference, tax_year, jurisdiction, case_status, outcome_state, assurance_level, receipt_id, created_at, updated_at, case_kind)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO cases (
+                    case_id, client_reference, tax_year, jurisdiction, case_status,
+                    outcome_state, assurance_level, receipt_id, created_at, updated_at,
+                    case_kind, sample_definition_id, sample_manifest_digest
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(case_id) DO UPDATE SET
                     client_reference=excluded.client_reference,
                     case_status=excluded.case_status,
@@ -197,7 +206,9 @@ class SQLiteStore:
                     assurance_level=excluded.assurance_level,
                     receipt_id=excluded.receipt_id,
                     updated_at=excluded.updated_at,
-                    case_kind=excluded.case_kind;
+                    case_kind=excluded.case_kind,
+                    sample_definition_id=excluded.sample_definition_id,
+                    sample_manifest_digest=excluded.sample_manifest_digest;
             """, (
                 case.case_id,
                 client_ref,
@@ -209,7 +220,9 @@ class SQLiteStore:
                 case.receipt_id,
                 case.created_at,
                 now_utc,
-                case_kind
+                case_kind,
+                sample_def_id,
+                sample_digest
             ))
 
     def get_case(self, case_id: str) -> Optional[CanonicalCase]:
@@ -236,6 +249,8 @@ class SQLiteStore:
 
             client_ref = row["client_reference"] if "client_reference" in row.keys() and row["client_reference"] else "Sample Client"
             case_kind = row["case_kind"] if "case_kind" in row.keys() and row["case_kind"] else "PRODUCTION"
+            sample_def_id = row["sample_definition_id"] if "sample_definition_id" in row.keys() else None
+            sample_digest = row["sample_manifest_digest"] if "sample_manifest_digest" in row.keys() else None
             return CanonicalCase(
                 case_id=row["case_id"],
                 client_reference=client_ref,
@@ -243,6 +258,8 @@ class SQLiteStore:
                 jurisdiction=row["jurisdiction"],
                 case_status=row["case_status"],
                 case_kind=case_kind,
+                sample_definition_id=sample_def_id,
+                sample_manifest_digest=sample_digest,
                 outcome_state=row["outcome_state"],
                 assurance_level=row["assurance_level"],
                 receipt_id=row["receipt_id"],

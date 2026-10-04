@@ -36,6 +36,14 @@ class CanonicalCase(BaseModel):
         "PRODUCTION",
         description="Case provenance kind: PRODUCTION, BUNDLED_SAMPLE, TEST_FIXTURE"
     )
+    sample_definition_id: Optional[str] = Field(
+        None,
+        description="Identifier of authentic bundled sample definition (e.g. SAMPLE-A-2025-01)"
+    )
+    sample_manifest_digest: Optional[str] = Field(
+        None,
+        description="SHA-256 digest of bundled sample source files and canonical manifest"
+    )
     
     sources: Dict[str, SourceDocumentMetadata] = Field(
         default_factory=dict,

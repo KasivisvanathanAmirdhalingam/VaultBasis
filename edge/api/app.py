@@ -30,6 +30,7 @@ from edge.commercial.identity import (
     FirmIdentityService,
 )
 from edge.commercial.policy import (
+    CaseWritePolicy,
     CommercialOperation,
     CommercialDenialCode,
     CommercialPolicyDecision,
@@ -135,6 +136,11 @@ class CreateCaseRequest(BaseModel):
     client_reference: Optional[str] = Field("Sample Client", description="Client or engagement reference (e.g. Acme Holdings LLC)")
     tax_year: int = Field(2025, description="Target tax year")
     jurisdiction: str = Field("US", description="Regulatory jurisdiction")
+
+
+class CloneCaseRequest(BaseModel):
+    new_case_id: Optional[str] = Field(None, description="Optional new case ID for cloned production case")
+    client_reference: Optional[str] = Field(None, description="Optional updated client reference")
 
 
 class InstallLicenseRequest(BaseModel):
@@ -327,7 +333,6 @@ def clear_firm_identity():
 
 
 @app.post("/api/sample-case/load")
-
 def load_sample_case():
     """
     Preload the canonical Sample Case for zero-knowledge onboarding.
@@ -337,6 +342,7 @@ def load_sample_case():
     case_id = "CASE-SAMPLE-2025"
     client_ref = "Sample Client (Acme Holdings LLC)"
     now_utc = datetime.now(timezone.utc).isoformat()
+    manifest_digest = hashlib.sha256(SAMPLE_1099DA_CSV + SAMPLE_KOINLY_CSV).hexdigest()
 
     existing = db_store.get_case(case_id)
     if not existing:
@@ -347,6 +353,8 @@ def load_sample_case():
             jurisdiction="US",
             case_status="CREATED",
             case_kind="BUNDLED_SAMPLE",
+            sample_definition_id="SAMPLE-A-2025-01",
+            sample_manifest_digest=manifest_digest,
             created_at=now_utc,
             updated_at=now_utc
         )
@@ -416,6 +424,7 @@ def create_case(req: CreateCaseRequest):
         tax_year=req.tax_year,
         jurisdiction=req.jurisdiction,
         case_status="CREATED",
+        case_kind="PRODUCTION",
         created_at=now_utc,
         updated_at=now_utc
     )
@@ -434,6 +443,58 @@ def create_case(req: CreateCaseRequest):
     )
 
 
+@app.post("/api/cases/{case_id}/clone", response_model=CaseSummaryResponse, status_code=status.HTTP_201_CREATED)
+def clone_case(case_id: str, req: Optional[CloneCaseRequest] = None):
+    """
+    Clones an existing case (sample or template) into a new production case.
+    Cloned cases immediately lose bundled sample provenance, are assigned case_kind='PRODUCTION',
+    and require active commercial entitlement to create and reconcile.
+    """
+    source_case = db_store.get_case(case_id)
+    if not source_case:
+        raise HTTPException(status_code=404, detail=f"Case '{case_id}' not found")
+
+    # Evaluate commercial entitlement for creating a new production case
+    decision = commercial_policy.authorize(CommercialOperation.CREATE_CASE)
+    if not decision.allowed:
+        return JSONResponse(
+            status_code=decision.http_status,
+            content=decision.to_error_dict()
+        )
+
+    now_utc = datetime.now(timezone.utc).isoformat()
+    new_id = (req.new_case_id if req and req.new_case_id else None) or f"CASE-{uuid.uuid4().hex[:8].upper()}"
+    new_client_ref = (req.client_reference if req and req.client_reference else None) or f"Copy of {getattr(source_case, 'client_reference', 'Case')}"
+
+    cloned_case = CanonicalCase(
+        case_id=new_id,
+        client_reference=new_client_ref,
+        tax_year=source_case.tax_year,
+        jurisdiction=source_case.jurisdiction,
+        case_status="CREATED",
+        case_kind="PRODUCTION",
+        sample_definition_id=None,
+        sample_manifest_digest=None,
+        sources=source_case.sources.copy(),
+        transactions=source_case.transactions.copy(),
+        created_at=now_utc,
+        updated_at=now_utc
+    )
+    db_store.save_case(cloned_case)
+    return CaseSummaryResponse(
+        case_id=cloned_case.case_id,
+        client_reference=cloned_case.client_reference,
+        tax_year=cloned_case.tax_year,
+        jurisdiction=cloned_case.jurisdiction,
+        case_status=cloned_case.case_status,
+        outcome_state=cloned_case.outcome_state,
+        assurance_level=cloned_case.assurance_level,
+        receipt_id=cloned_case.receipt_id,
+        created_at=cloned_case.created_at,
+        updated_at=cloned_case.updated_at
+    )
+
+
 @app.get("/api/cases", response_model=List[Dict[str, Any]])
 def list_cases():
     return db_store.list_cases()
@@ -444,6 +505,7 @@ def delete_case(case_id: str):
     case = db_store.get_case(case_id)
     if not case:
         raise HTTPException(status_code=404, detail=f"Case '{case_id}' not found")
+    CaseWritePolicy.assert_can_mutate(case, "deletion")
     db_store.delete_case(case_id)
     return {"status": "DELETED", "case_id": case_id}
 
@@ -481,11 +543,7 @@ async def upload_source(
     if not case:
         raise HTTPException(status_code=404, detail=f"Case '{case_id}' not found")
 
-    if getattr(case, "case_kind", "PRODUCTION") == "BUNDLED_SAMPLE":
-        raise HTTPException(
-            status_code=403,
-            detail="Bundled sample cases are immutable demonstration baselines and cannot accept custom client data. Please create a new production case."
-        )
+    CaseWritePolicy.assert_can_mutate(case, "evidence uploads or modifications")
 
     content = await file.read()
     if not content:
