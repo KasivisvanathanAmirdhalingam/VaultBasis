@@ -3,6 +3,7 @@
 > **Release Phase:** MMP-1.5 — Commercial Operations & Control Plane  
 > **Directive:** Bounded commercial operations, firm identity, licensing/entitlement state, and administrative control plane.  
 > **Governance Isolation Rule:** MMP-1.5 workstreams MUST NOT modify or destabilize core deterministic reconciliation math (`edge/reconcile/`, `schemas/canonical/`), cryptographic evidence hashing (`edge/receipts/`), or qualified distribution packages (`VaultBasis-RC3-*`).  
+> **Operational Freeze Rule:** No new MMP-1.5 feature is allowed unless it is strictly required to close one of the remaining production release gates (`PROD-GATE-01` to `PROD-GATE-18`) or resolve an unassisted UAT finding.  
 > **Explicit MMP-2 Exclusions:** All intelligence, natural language generation, RAG, automated client-question drafting, evidence-gap investigation, and LLM-assisted features belong strictly in MMP-2 and are excluded from this ledger.
 
 ---
