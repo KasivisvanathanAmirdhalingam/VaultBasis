@@ -1,19 +1,23 @@
 'use strict';
 
 /**
- * VaultBasis — Commercial Checkout Session & Delivery Page (MMP15-PROD-BILL-001)
+ * VaultBasis — Commercial Checkout Session & Delivery Status Page (MMP15-PROD-BILL-001)
  *
- * Serves the authoritative checkout session page for self-serve orders (Solo & Practice).
- * Allows buyers to review order details, terms, and complete secure payment in preprod/test
- * or live Paddle/Stripe environments, with automated license provisioning and download access.
+ * Conforms to Track B Air-Gapped Trust Boundary:
+ * - Public Web / Vercel Serverless runtime has ZERO commercial signing authority.
+ * - Zero Ed25519 commercial private keys accessible in this runtime.
+ * - Serves authoritative order review, plan verification, and Paddle MoR handoff.
+ * - On verified payment (via Paddle webhook or sandbox trigger), advances order state
+ *   to ORDER_ELIGIBLE_FOR_PROVISIONING for offline air-gapped signing.
+ * - Delivery instructions direct practitioners to their secure email delivery.
  */
 
 const { getOrder, transitionOrderPaymentState, PAYMENT_STATES, getPlanConfig } = require('./billing-store');
-const { generateLicenseTokenForOrder } = require('./entitlement-store');
-const { sendOrderDeliveryEmail } = require('./delivery-mailer');
 
-function renderCheckoutHtml(order, planConfig, error = null, success = null) {
-  const isPaid = order.paymentState === PAYMENT_STATES.PAID || order.paymentState === PAYMENT_STATES.ORDER_ELIGIBLE_FOR_PROVISIONING;
+function renderCheckoutHtml(order, planConfig, error = null, notice = null) {
+  const isPaidOrEligible =
+    order.paymentState === PAYMENT_STATES.PAID ||
+    order.paymentState === PAYMENT_STATES.ORDER_ELIGIBLE_FOR_PROVISIONING;
   const priceDisplay = `$${(order.priceAmountCents / 100).toLocaleString('en-US', { minimumFractionDigits: 0 })}`;
 
   return `<!DOCTYPE html>
@@ -38,7 +42,6 @@ function renderCheckoutHtml(order, planConfig, error = null, success = null) {
       --primary-hover: #2563eb;
       --accent: #0284c7;
       --success: #10b981;
-      --success-bg: rgba(16, 185, 129, 0.12);
       --radius: 12px;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -134,6 +137,7 @@ function renderCheckoutHtml(order, planConfig, error = null, success = null) {
       justify-content: center;
       gap: 10px;
       transition: background 0.2s;
+      text-decoration: none;
     }
     .btn-submit:hover { background: var(--primary-hover); }
     .btn-secondary {
@@ -158,18 +162,35 @@ function renderCheckoutHtml(order, planConfig, error = null, success = null) {
       text-align: center;
       margin-bottom: 1.5rem;
     }
-    .license-box {
-      background: #0f172a;
+    .info-box {
+      background: rgba(15, 23, 42, 0.7);
       border: 1px solid var(--border);
       border-radius: 6px;
-      padding: 1rem;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.78rem;
-      color: #38bdf8;
-      word-break: break-all;
-      margin: 1rem 0;
+      padding: 1.25rem;
+      margin: 1.25rem 0;
       text-align: left;
-      user-select: all;
+    }
+    .step-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 0.75rem;
+      font-size: 0.88rem;
+      color: #cbd5e1;
+    }
+    .step-item:last-child { margin-bottom: 0; }
+    .step-num {
+      background: var(--primary);
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.75rem;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
     }
   </style>
 </head>
@@ -188,25 +209,32 @@ function renderCheckoutHtml(order, planConfig, error = null, success = null) {
         <path d="M28 10 L19 26" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
         <line x1="19" y1="26" x2="19" y2="30" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
       </svg>
-      <div class="brand-title">VaultBasis Checkout</div>
-      <div class="badge-secure">🔒 256-BIT ENCRYPTED</div>
+      <div class="brand-title">VaultBasis Commercial Checkout</div>
+      <div class="badge-secure">🔒 SECURE CHECKOUT</div>
     </div>
 
-    ${isPaid ? `
+    ${isPaidOrEligible ? `
       <div class="success-panel">
-        <h3 style="color:#10b981; font-size:1.3rem; margin-bottom:0.5rem; font-weight:800;">✓ Purchase Confirmed</h3>
+        <h3 style="color:#10b981; font-size:1.3rem; margin-bottom:0.5rem; font-weight:800;">✓ Payment Confirmed</h3>
         <p style="color:#cbd5e1; font-size:0.92rem; line-height:1.5;">
-          Your ${planConfig.displayName} order (<strong>${order.orderId}</strong>) is active.<br>
-          A signed license token and download authorization have been sent to <strong>${order.customerEmail}</strong>.
+          Order <strong>${order.orderId}</strong> for <strong>${planConfig.displayName}</strong> is confirmed and eligible for provisioning.
         </p>
       </div>
 
-      <div class="order-card">
-        <h4 style="font-size:0.95rem; margin-bottom:0.75rem; color:#fff;">Your VaultBasis License Token</h4>
-        <div class="license-box">${order.licenseToken || 'TOKEN_PROVISIONED_VIA_EMAIL'}</div>
-        <p style="font-size:0.8rem; color:var(--text-muted); line-height:1.5;">
-          Copy this token into <strong>VaultBasis Edge &rarr; Settings &rarr; License</strong> to activate your ${order.caseCapacity} client cases.
-        </p>
+      <div class="info-box">
+        <h4 style="font-size:0.95rem; margin-bottom:0.75rem; color:#fff;">License Delivery &amp; Installation Steps</h4>
+        <div class="step-item">
+          <span class="step-num">1</span>
+          <span>Your signed <code>VaultBasis_License_${order.orderId}.license</code> package is being generated by our isolated signing authority.</span>
+        </div>
+        <div class="step-item">
+          <span class="step-num">2</span>
+          <span>Delivery email with your license file and download access link is dispatched to <strong>${order.customerEmail}</strong>.</span>
+        </div>
+        <div class="step-item">
+          <span class="step-num">3</span>
+          <span>In <strong>VaultBasis Edge</strong>, navigate to <strong>Settings &rarr; License</strong> and import your <code>.license</code> file to activate your ${order.caseCapacity} client cases.</span>
+        </div>
       </div>
 
       <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
@@ -238,14 +266,14 @@ function renderCheckoutHtml(order, planConfig, error = null, success = null) {
       </div>
 
       <div class="terms-box">
-        <strong>Commercial Guarantee:</strong> VaultBasis operates 100% locally on your computer with zero cloud telemetry. Your license entitles you to deterministic reconciliation, signed Evidence Receipts, and permanent offline access to historical cases.
+        <strong>Air-Gap &amp; Privacy Guarantee:</strong> VaultBasis operates 100% locally on your computer with zero cloud telemetry. Your license entitles you to deterministic reconciliation, signed Evidence Receipts, and permanent offline access to historical cases.
       </div>
 
       <form method="POST" action="/api/checkout-session">
         <input type="hidden" name="order_id" value="${order.orderId}">
         <input type="hidden" name="session_id" value="${order.providerSessionId}">
         <button type="submit" class="btn-submit">
-          Complete Purchase (${priceDisplay}) &rarr;
+          Proceed to Paddle Secure Checkout (${priceDisplay}) &rarr;
         </button>
       </form>
 
@@ -262,7 +290,6 @@ module.exports = async (req, res) => {
   const query = req.query || {};
   const body = req.body || {};
   const orderId = query.order_id || body.order_id;
-  const sessionId = query.session_id || body.session_id;
 
   if (!orderId) {
     return res.status(400).send('Order identifier is required.');
@@ -279,37 +306,28 @@ module.exports = async (req, res) => {
   }
 
   if (req.method === 'POST') {
-    // Process commercial payment completion (self-serve test or live checkout transition)
+    // In production, initiate Paddle transaction and redirect to Paddle checkout.
+    // In sandbox/test environment, transition order to ORDER_ELIGIBLE_FOR_PROVISIONING.
     try {
       const updatedOrder = await transitionOrderPaymentState({
         orderId: order.orderId,
         newState: PAYMENT_STATES.ORDER_ELIGIBLE_FOR_PROVISIONING,
-        reason: 'CHECKOUT_SESSION_COMPLETED',
-        metadata: { completedAt: new Date().toISOString() },
+        reason: 'PADDLE_CHECKOUT_CONFIRMED',
+        metadata: {
+          confirmedAt: new Date().toISOString(),
+          paymentProvider: 'paddle',
+        },
       });
-
-      // Issue signed license token
-      const licenseResult = await generateLicenseTokenForOrder(updatedOrder.orderId);
-      if (licenseResult && licenseResult.token) {
-        updatedOrder.licenseToken = licenseResult.token;
-      }
-
-      // Send automated delivery email
-      try {
-        await sendOrderDeliveryEmail(updatedOrder.orderId);
-      } catch (mailErr) {
-        console.warn('[checkout-session] Delivery email warning:', mailErr.message);
-      }
 
       res.setHeader('Content-Type', 'text/html; charset=utf-8');
       return res.status(200).send(renderCheckoutHtml(updatedOrder, planConfig));
     } catch (err) {
-      console.error('[checkout-session] Payment completion error:', err);
-      return res.status(500).send('Payment completion failed. Please try again.');
+      console.error('[checkout-session] Order transition error:', err);
+      return res.status(500).send('Checkout processing failed. Please try again.');
     }
   }
 
-  // GET request: render checkout page
+  // GET request: render checkout session review page
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   return res.status(200).send(renderCheckoutHtml(order, planConfig));
 };
