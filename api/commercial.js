@@ -335,13 +335,23 @@ function renderCheckoutHtml(order, planConfig) {
             const env = overrideEnv || cfg.environment || 'sandbox';
             const token = overrideToken || cfg.clientToken || '';
 
+            if (!token) {
+              console.warn('[paddle-init] No client-side token provided; Paddle.Initialize postponed.');
+              return false;
+            }
+
             try {
               if (env === 'sandbox' && typeof Paddle.Environment !== 'undefined') {
                 Paddle.Environment.set('sandbox');
               }
-              if (token && typeof Paddle.Initialize !== 'undefined') {
+              if (typeof Paddle.Initialize !== 'undefined') {
                 Paddle.Initialize({ token: token });
                 paddleInitialized = true;
+                const secureBadge = document.getElementById('badge-secure-status');
+                if (secureBadge) {
+                  secureBadge.textContent = '🔒 SECURE CHECKOUT';
+                  secureBadge.style.opacity = '1';
+                }
                 return true;
               }
             } catch (initErr) {
@@ -414,10 +424,10 @@ function renderCheckoutHtml(order, planConfig) {
                 }
 
                 // Ensure Paddle.Initialize is invoked with client token
-                initPaddleInstance(data.paddle_client_token, data.paddle_environment);
+                const isReady = initPaddleInstance(data.paddle_client_token, data.paddle_environment);
 
-                // 1. Direct Paddle.js modal overlay (preferred for transaction checkout)
-                if (window.Paddle && data.provider_transaction_id) {
+                // 1. Direct Paddle.js modal overlay (strictly requiring successful initialization)
+                if (isReady && window.Paddle && data.provider_transaction_id) {
                   try {
                     Paddle.Checkout.open({
                       transactionId: data.provider_transaction_id,
@@ -441,7 +451,11 @@ function renderCheckoutHtml(order, planConfig) {
                   return;
                 }
 
-                // 3. Fallback message if neither checkout URL nor overlay opened
+                // 3. Fallback message if client token unconfigured and no direct URL
+                if (!isReady) {
+                  throw new Error("Secure checkout is temporarily unavailable. Client token is being configured. No payment was taken.");
+                }
+
                 throw new Error("Checkout initialized. Please complete payment through the secure Paddle dialog.");
               } catch (err) {
                 console.error('[checkout-handoff]', err);
