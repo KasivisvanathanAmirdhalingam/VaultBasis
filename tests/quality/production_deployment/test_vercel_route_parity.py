@@ -309,6 +309,84 @@ def test_commercial_checkout_handoff_contract():
     assert res["jsonBody"]["state"] == "PAYMENT_PENDING"
     assert "paddle.com" in res["jsonBody"]["checkout_url"]
     assert res["jsonBody"]["provider"] == "PADDLE"
+    assert res["jsonBody"]["provider_transaction_id"].startswith("txn_")
     assert res["orderPaymentState"] == "PAYMENT_PENDING"
     assert res["orderProvisioningState"] == "NOT_ELIGIBLE"
     assert res["hasTxnId"] is True
+
+
+@pytest.mark.regression
+def test_paddle_webhook_transaction_completed_lifecycle():
+    """Validates that a real Paddle webhook transaction.completed advances state to ORDER_ELIGIBLE_FOR_PROVISIONING."""
+    code = """
+    const billingStore = require('./api/_lib/billing-store.js');
+    const webhookHandler = require('./api/webhook-payment.js');
+    process.env.ALLOW_TEST_WEBHOOKS = 'true';
+
+    const order = await billingStore.createOrder({
+        customerEmail: 'paddle_cpa@firm.com',
+        customerName: 'Paddle CPA',
+        planId: 'PRACTICE' // $1,499 -> 149900 cents
+    });
+
+    // Advance to PAYMENT_PENDING with real Paddle transaction
+    await billingStore.transitionOrderPaymentState(order.orderId, billingStore.PAYMENT_STATES.PAYMENT_PENDING, {
+        providerTransactionId: 'txn_01jmpractice999888777'
+    });
+
+    let statusCode = null;
+    let jsonBody = null;
+
+    const mockRes = {
+        status(code) {
+            statusCode = code;
+            return {
+                json(body) {
+                    jsonBody = body;
+                    return body;
+                }
+            };
+        }
+    };
+
+    // Authentic Paddle webhook payload
+    const paddlePayload = {
+        event_id: 'evt_01paddle_test_event_123',
+        event_type: 'transaction.completed',
+        data: {
+            id: 'txn_01jmpractice999888777',
+            status: 'completed',
+            custom_data: {
+                order_id: order.orderId
+            },
+            details: {
+                totals: {
+                    total: '149900',
+                    currency_code: 'USD'
+                }
+            }
+        }
+    };
+
+    await webhookHandler({
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: paddlePayload
+    }, mockRes);
+
+    const updatedOrder = await billingStore.getOrder(order.orderId);
+
+    console.log(JSON.stringify({
+        statusCode,
+        jsonBody,
+        paymentState: updatedOrder.paymentState,
+        provisioningState: updatedOrder.provisioningState,
+        providerTxnId: updatedOrder.providerTransactionId
+    }));
+    """
+    res = run_node_snippet(code)
+    assert res["statusCode"] == 200
+    assert res["paymentState"] == "ORDER_ELIGIBLE_FOR_PROVISIONING"
+    assert res["provisioningState"] == "ELIGIBLE"
+    assert res["providerTxnId"] == "txn_01jmpractice999888777"
+

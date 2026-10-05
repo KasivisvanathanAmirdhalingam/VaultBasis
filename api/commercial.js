@@ -16,6 +16,7 @@
 const crypto = require('crypto');
 const { put } = require('@vercel/blob');
 const { createOrder, getOrder, transitionOrderPaymentState, PAYMENT_STATES, getPlanConfig } = require('./_lib/billing-store');
+const { createPaddleTransaction } = require('./_lib/paddle-client');
 
 const _memoryInquiries = new Map();
 
@@ -438,15 +439,17 @@ async function handleCheckoutSession(req, res) {
       req.headers['content-type']?.includes('application/json');
 
     try {
-      const paddleEnv = process.env.PADDLE_ENVIRONMENT || 'sandbox';
-      const providerTxnId = `txn_pdl_${order.orderId.replace(/[^a-zA-Z0-9]/g, '')}_${crypto.randomBytes(4).toString('hex')}`;
-      
-      const paddleBase = paddleEnv === 'production' 
-        ? 'https://checkout.paddle.com' 
-        : 'https://sandbox-checkout.paddle.com';
+      const canonicalBase = process.env.PUBLIC_BASE_URL || 'http://localhost:3000';
+      const returnUrl = `${canonicalBase}/api/checkout-session?order_id=${order.orderId}&session_id=${encodeURIComponent(order.providerSessionId)}`;
 
-      const checkoutUrl = process.env.PADDLE_CHECKOUT_URL || 
-        `${paddleBase}/checkout?order_id=${encodeURIComponent(order.orderId)}&plan=${encodeURIComponent(order.planId)}&amount=${order.priceAmountCents}&currency=${encodeURIComponent(order.priceCurrency)}&customer_email=${encodeURIComponent(order.customerEmail)}`;
+      const paddleResult = await createPaddleTransaction({
+        order,
+        planConfig,
+        returnUrl,
+      });
+
+      const providerTxnId = paddleResult.transactionId;
+      const checkoutUrl = paddleResult.checkoutUrl;
 
       const updatedOrder = await transitionOrderPaymentState({
         orderId: order.orderId,
@@ -456,7 +459,7 @@ async function handleCheckoutSession(req, res) {
         metadata: {
           handoffAt: new Date().toISOString(),
           paymentProvider: 'paddle',
-          paddleEnvironment: paddleEnv,
+          priceId: paddleResult.priceId,
           checkoutUrl,
         },
       });
@@ -474,7 +477,7 @@ async function handleCheckoutSession(req, res) {
 
       return res.redirect(303, checkoutUrl);
     } catch (err) {
-      console.error('[commercial] Order handoff transition error:', err);
+      console.error('[commercial] Paddle transaction creation error:', err.message);
       const errRef = `VB-PAY-${Date.now().toString(36).toUpperCase()}`;
       if (isJsonRequest) {
         return res.status(500).json({

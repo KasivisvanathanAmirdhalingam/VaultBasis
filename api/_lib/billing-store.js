@@ -31,6 +31,7 @@ const PLAN_CATALOG = Object.freeze({
     caseCapacity: 10,
     termDurationDays: 365,
     isSelfServe: true,
+    paddlePriceId: process.env.PADDLE_SOLO_PRICE_ID || 'pri_01jm_solo_annual_499',
   }),
   PRACTICE: Object.freeze({
     planId: 'PRACTICE',
@@ -40,6 +41,7 @@ const PLAN_CATALOG = Object.freeze({
     caseCapacity: 50,
     termDurationDays: 365,
     isSelfServe: true,
+    paddlePriceId: process.env.PADDLE_PRACTICE_PRICE_ID || 'pri_01jm_practice_annual_1499',
   }),
   ENTERPRISE: Object.freeze({
     planId: 'ENTERPRISE',
