@@ -157,6 +157,7 @@
         }
 
         if (res.ok) {
+          const primaryBtn = document.getElementById('btn-success-primary');
           if (tier === 'TRIAL') {
             document.getElementById('request-form-container').style.display = 'none';
             const succ = document.getElementById('request-success');
@@ -164,6 +165,7 @@
             const desc = document.getElementById('success-desc');
             if (title) title.innerText = 'Evaluation Authorization Dispatched';
             if (desc) desc.innerText = `Your free evaluation download link has been sent to ${email}. Check your work inbox within 2 minutes.`;
+            if (primaryBtn) primaryBtn.style.display = 'none';
             succ.style.display = 'block';
           } else if (tier === 'ENTERPRISE') {
             document.getElementById('request-form-container').style.display = 'none';
@@ -172,6 +174,7 @@
             const desc = document.getElementById('success-desc');
             if (title) title.innerText = 'Enterprise Inquiry Received';
             if (desc) desc.innerText = `Thank you, ${name}. Our enterprise team will follow up at ${email} with custom deployment options.`;
+            if (primaryBtn) primaryBtn.style.display = 'none';
             succ.style.display = 'block';
           } else {
             // Commercial Self-Serve Checkout (Solo or Practice)
@@ -183,7 +186,12 @@
               const title = document.getElementById('success-title');
               const desc = document.getElementById('success-desc');
               if (title) title.innerText = `Order Created: ${data.orderId || 'PENDING'}`;
-              if (desc) desc.innerText = `Your ${data.orderSummary ? data.orderSummary.displayName : 'commercial'} order has been registered. Checkout session initiated for ${email}.`;
+              if (desc) desc.innerText = `Your ${data.orderSummary ? data.orderSummary.displayName : 'commercial'} order has been registered. Proceed to secure checkout to complete payment and receive your signed license token.`;
+              if (primaryBtn) {
+                primaryBtn.href = data.checkoutUrl || '#';
+                primaryBtn.innerText = 'Proceed to Payment & Delivery →';
+                primaryBtn.style.display = 'inline-flex';
+              }
               succ.style.display = 'block';
             }
           }

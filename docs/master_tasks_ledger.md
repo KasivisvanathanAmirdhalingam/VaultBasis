@@ -228,6 +228,7 @@ vercel.json & Packager ───> Localhost Airgap Bridge ───> WebCrypto V
 | **MMP15-PROD-MAIL-001** | Transactional Delivery | Automated delivery email generator with dual download link and `.license` attachment | P0 | Resilient serverless transport fallback, zero PII / tax data | **COMPLETED** | `c41f0a7` |
 | **MMP15-PROD-DL-001** | Download Resolver | 72h TTL signed token resolver against canonical `release-manifest.json` SHA-256 | P0 | Valid token grants exact byte-stream; expired/invalid denied | **COMPLETED** | `7f9e71f` |
 | **MMP15-PROD-ACT-001** | In-App Activation | Desktop Settings -> Activate License import with offline verification & status display | P0 | Offline activation unlocks full capacity; unmetered evaluation preserved | **COMPLETED** | `7f9e71f` |
+| **MMP15-PROD-EDGE-INT-001** | Edge Journey Integration | Synchronous SQLite persistence, search/filter pills, precondition gating, sample immutability UX, toast notifications | P0 | 3 core practitioner journeys (A, B, C) pass 100% | **COMPLETED** | `HEAD` |
 | **MMP15-PROD-001** | Commercial Journey | First-time CPA discovery, evaluation, license, case, export, verifier | P0 | 18 production release gates (PROD-GATES) satisfied | **ACTIVE** | `a12323e` |
 
 ---

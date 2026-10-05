@@ -30,9 +30,12 @@
       <div id="request-success" style="display:none;padding:1.5rem;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:12px;text-align:center;">
         <h4 id="success-title" style="color:#059669;margin-bottom:0.75rem;font-size:1.15rem;font-weight:700;">Delivery Initiated</h4>
         <p id="success-desc" style="color:#064e3b;font-size:0.95rem;margin-bottom:1.5rem;line-height:1.6;">Your authorized download link and license token have been sent. Check your work inbox within 2 minutes.</p>
-        <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;">
+        <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;align-items:center;">
+          <a id="btn-success-primary" href="/contact" class="btn btn-primary btn-sm" style="display:none;">Proceed to Payment &amp; Download →</a>
           <button onclick="closeAccessModal()" class="btn btn-secondary btn-sm">← Return to VaultBasis</button>
-          <a href="/trust-assurance" onclick="closeAccessModal()" class="btn btn-primary btn-sm">Review Security &amp; Trust →</a>
+        </div>
+        <div style="margin-top:1.25rem;font-size:0.82rem;">
+          <a href="/trust-assurance" onclick="closeAccessModal()" style="color:#047857;text-decoration:underline;">Questions about security? Review Security &amp; Trust →</a>
         </div>
       </div>
     </div>

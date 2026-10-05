@@ -523,6 +523,8 @@ def get_case(case_id: str):
         "tax_year": case.tax_year,
         "jurisdiction": case.jurisdiction,
         "case_status": case.case_status,
+        "case_kind": getattr(case, "case_kind", "PRODUCTION") or "PRODUCTION",
+        "sample_definition_id": getattr(case, "sample_definition_id", None),
         "outcome_state": case.outcome_state,
         "assurance_level": case.assurance_level,
         "receipt_id": case.receipt_id,
