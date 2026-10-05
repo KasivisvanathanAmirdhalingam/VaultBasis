@@ -222,6 +222,12 @@ vercel.json & Packager ───> Localhost Airgap Bridge ───> WebCrypto V
 | **MMP15-PROD-SAMPLE-001** | Sample Provenance | Central `CaseWritePolicy` immutability & canonical digest verification | P0 | Persisted SQLite provenance check; 0 sample laundering | **COMPLETED** | `33b4c1c` |
 | **MMP15-CORPUS-2025-001** | Challenge Corpus | Decoupled 3-tier corpus & 4-state regulatory oracle framework | P1 | Zero raw input pollution; metamorphic tests green | **ACTIVE** | `2f6e556` |
 | **MMP15-PROD-ARTIFACT-001** | Artifact Provenance | Desktop candidate build from approved main with embedded build info | P0 | Runtime build SHA matches release manifest | **FUNCTIONAL PASS / SIGNING OPEN** | `1abe6f1` |
+| **MMP15-PROD-SUBPROC-001** | Subprocessor Governance | Formal Subprocessor Register, MoR evaluation (Paddle vs Stripe), zero tax-data egress | P0 | `docs/commercial/VaultBasis_Subprocessor_Register.md` established | **COMPLETED** | `c41f0a7` |
+| **MMP15-PROD-BILL-001** | Billing & Order Ledger | Authoritative pricing catalog ($499/$1,499), serverless order state machine, idempotency | P0 | Verified checkout creation, dual-mode storage fallback | **COMPLETED** | `c41f0a7` |
+| **MMP15-PROD-LIC-001** | License Provisioning | Air-gapped Ed25519 signing engine, monotonic revision, `ORDER_ELIGIBLE_FOR_PROVISIONING` | P0 | Isolated signing authority, lineage protection, replay rejection | **COMPLETED** | `7f9e71f` |
+| **MMP15-PROD-MAIL-001** | Transactional Delivery | Automated delivery email generator with dual download link and `.license` attachment | P0 | Resilient serverless transport fallback, zero PII / tax data | **COMPLETED** | `c41f0a7` |
+| **MMP15-PROD-DL-001** | Download Resolver | 72h TTL signed token resolver against canonical `release-manifest.json` SHA-256 | P0 | Valid token grants exact byte-stream; expired/invalid denied | **COMPLETED** | `7f9e71f` |
+| **MMP15-PROD-ACT-001** | In-App Activation | Desktop Settings -> Activate License import with offline verification & status display | P0 | Offline activation unlocks full capacity; unmetered evaluation preserved | **COMPLETED** | `7f9e71f` |
 | **MMP15-PROD-001** | Commercial Journey | First-time CPA discovery, evaluation, license, case, export, verifier | P0 | 18 production release gates (PROD-GATES) satisfied | **ACTIVE** | `a12323e` |
 
 ---
