@@ -50,6 +50,30 @@ function validatePaddleCheckoutUrl(urlStr) {
   return urlStr;
 }
 
+function validatePaddleEnvironmentCoherence() {
+  const env = process.env.PADDLE_ENVIRONMENT || 'sandbox';
+  const clientToken = process.env.PADDLE_CLIENT_TOKEN || '';
+  const apiKey = process.env.PADDLE_API_KEY || '';
+
+  const errors = [];
+  if (env === 'sandbox') {
+    if (clientToken && !clientToken.startsWith('test_')) {
+      errors.push(`PADDLE_CLIENT_TOKEN in sandbox environment must start with 'test_', got '${clientToken.substring(0, 5)}...'`);
+    }
+    if (apiKey && apiKey.startsWith('paddlelive_')) {
+      errors.push('PADDLE_API_KEY in sandbox environment cannot be a live credential.');
+    }
+  } else if (env === 'production') {
+    if (clientToken && !clientToken.startsWith('live_')) {
+      errors.push(`PADDLE_CLIENT_TOKEN in production environment must start with 'live_', got '${clientToken.substring(0, 5)}...'`);
+    }
+    if (apiKey && apiKey.startsWith('paddlesandbox_')) {
+      errors.push('PADDLE_API_KEY in production environment cannot be a sandbox credential.');
+    }
+  }
+  return { ok: errors.length === 0, errors, env };
+}
+
 function getPaddleApiBase() {
   const env = process.env.PADDLE_ENVIRONMENT || 'sandbox';
   return env === 'production' ? 'https://api.paddle.com' : 'https://sandbox-api.paddle.com';
@@ -168,6 +192,7 @@ module.exports = {
   getPaddleApiBase,
   getPaddlePriceIdForPlan,
   validatePaddleCheckoutUrl,
+  validatePaddleEnvironmentCoherence,
   isApprovedCheckoutHost,
   createPaddleTransaction,
 };

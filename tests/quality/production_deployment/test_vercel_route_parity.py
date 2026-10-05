@@ -666,5 +666,83 @@ def test_paddle_checkout_url_integrity_and_allowlist_validation():
     assert res["generatedCheckoutUrl"] is None
 
 
+@pytest.mark.regression
+def test_paddle_environment_coherence_and_client_token_isolation():
+    """MMP15-PAY-PADDLEJS-INIT-001: Validates environment token coherence and asserts that server API keys are never exposed in rendered checkout HTML."""
+    code = """
+    const paddleClient = require('./api/_lib/paddle-client.js');
+    const commercialHandler = require('./api/commercial.js');
+    const billingStore = require('./api/_lib/billing-store.js');
+
+    const results = {};
+
+    // 1. Sandbox with valid test_ token
+    process.env.PADDLE_ENVIRONMENT = 'sandbox';
+    process.env.PADDLE_CLIENT_TOKEN = 'test_01jm_valid_client_token';
+    process.env.PADDLE_API_KEY = 'secret_sandbox_key';
+    results.sandboxValid = paddleClient.validatePaddleEnvironmentCoherence();
+
+    // 2. Sandbox with live_ token (mismatch)
+    process.env.PADDLE_ENVIRONMENT = 'sandbox';
+    process.env.PADDLE_CLIENT_TOKEN = 'live_01jm_mismatched_token';
+    results.sandboxMismatch = paddleClient.validatePaddleEnvironmentCoherence();
+
+    // 3. Production with live_ token
+    process.env.PADDLE_ENVIRONMENT = 'production';
+    process.env.PADDLE_CLIENT_TOKEN = 'live_01jm_valid_prod_token';
+    process.env.PADDLE_API_KEY = 'live_server_api_key';
+    results.prodValid = paddleClient.validatePaddleEnvironmentCoherence();
+
+    // 4. Production with test_ token (mismatch)
+    process.env.PADDLE_ENVIRONMENT = 'production';
+    process.env.PADDLE_CLIENT_TOKEN = 'test_01jm_mismatched_token';
+    results.prodMismatch = paddleClient.validatePaddleEnvironmentCoherence();
+
+    // 5. Test secret key isolation in rendered checkout HTML
+    const secretApiKey = 'SUPER_SECRET_PADDLE_API_KEY_12345';
+    process.env.PADDLE_API_KEY = secretApiKey;
+    process.env.PADDLE_CLIENT_TOKEN = 'test_safe_client_token_67890';
+    process.env.PADDLE_ENVIRONMENT = 'sandbox';
+
+    const order = await billingStore.createOrder({
+        customerEmail: 'isolation@firm.com',
+        customerName: 'Isolation Test',
+        planId: 'SOLO'
+    });
+
+    let renderedHtml = '';
+    const mockRes = {
+        setHeader() {},
+        status() {
+            return {
+                send(html) { renderedHtml = html; return html; }
+            };
+        }
+    };
+
+    await commercialHandler({
+        method: 'GET',
+        query: { order_id: order.orderId, session_id: order.providerSessionId }
+    }, mockRes);
+
+    results.apiKeyLeakedInHtml = renderedHtml.includes(secretApiKey);
+    results.clientTokenInHtml = renderedHtml.includes('test_safe_client_token_67890');
+    results.hasPaddleScript = renderedHtml.includes('https://cdn.paddle.com/paddle/v2/paddle.js');
+
+    console.log(JSON.stringify(results));
+    """
+    res = run_node_snippet(code)
+    assert res["sandboxValid"]["ok"] is True
+    assert res["sandboxMismatch"]["ok"] is False
+    assert "must start with 'test_'" in res["sandboxMismatch"]["errors"][0]
+    assert res["prodValid"]["ok"] is True
+    assert res["prodMismatch"]["ok"] is False
+    assert "must start with 'live_'" in res["prodMismatch"]["errors"][0]
+    assert res["apiKeyLeakedInHtml"] is False
+    assert res["clientTokenInHtml"] is True
+    assert res["hasPaddleScript"] is True
+
+
+
 
 

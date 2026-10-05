@@ -227,7 +227,7 @@ function renderCheckoutHtml(order, planConfig) {
         <line x1="19" y1="26" x2="19" y2="30" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
       </svg>
       <div class="brand-title">VaultBasis Commercial Checkout</div>
-      <div id="badge-secure-status" class="badge-secure">🔒 SECURE CHECKOUT</div>
+      <div id="badge-secure-status" class="badge-secure" style="background: rgba(148, 163, 184, 0.15); color: #94a3b8; border: 1px solid rgba(148, 163, 184, 0.3);">⏳ CHECKOUT INITIALIZING…</div>
     </div>
 
     ${isPaidOrEligible ? `
@@ -337,6 +337,13 @@ function renderCheckoutHtml(order, planConfig) {
 
             if (!token) {
               console.warn('[paddle-init] No client-side token provided; Paddle.Initialize postponed.');
+              const secureBadge = document.getElementById('badge-secure-status');
+              if (secureBadge && !paddleInitialized) {
+                secureBadge.textContent = '⚠️ CHECKOUT PENDING CONFIG';
+                secureBadge.style.background = 'rgba(245, 158, 11, 0.15)';
+                secureBadge.style.color = '#fbbf24';
+                secureBadge.style.border = '1px solid rgba(245, 158, 11, 0.3)';
+              }
               return false;
             }
 
@@ -349,8 +356,10 @@ function renderCheckoutHtml(order, planConfig) {
                 paddleInitialized = true;
                 const secureBadge = document.getElementById('badge-secure-status');
                 if (secureBadge) {
-                  secureBadge.textContent = '🔒 SECURE CHECKOUT';
-                  secureBadge.style.opacity = '1';
+                  secureBadge.textContent = '🔒 SECURE CHECKOUT READY';
+                  secureBadge.style.background = 'rgba(16, 185, 129, 0.15)';
+                  secureBadge.style.color = '#34d399';
+                  secureBadge.style.border = '1px solid rgba(16, 185, 129, 0.3)';
                 }
                 return true;
               }
