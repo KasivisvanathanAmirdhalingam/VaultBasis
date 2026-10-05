@@ -34,7 +34,17 @@ node_modules/
 .claude/
 test-results/
 ci_artifacts/
-*.js
-*.txt
+scratch_*.js
+test-local.js
+generate_associate_*.js
+list_blobs.js
+revoke_old_token.js
+test_preview_ledger*.js
+test_vercel_occ.js
+update_manifest.js
+upload_blob.js
+associate_handoff_link.txt
+vercel_logs.txt
 patch_html.py
+
 
