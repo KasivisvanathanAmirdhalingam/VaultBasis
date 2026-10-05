@@ -1343,9 +1343,9 @@
           let errData = {};
           try { errData = await res.json(); } catch(e) {}
           
-          let userMsg = errData.detail || errData.message || `Server error (HTTP ${res.status})`;
-          if (res.status === 402 || res.status === 403 || (errData.error_code && errData.error_code.includes('LICENSE'))) {
-            userMsg = 'Active commercial license required to create client cases. Please install a valid license token in Settings or explore the Free Sample Case.';
+          let userMsg = (errData.error && errData.error.message) || errData.detail || errData.message || `Server error (HTTP ${res.status})`;
+          if (res.status === 402 || res.status === 403 || (errData.error && errData.error.code === 'ENTITLEMENT_REQUIRED')) {
+            userMsg = (errData.error && errData.error.message) || 'Active commercial license or Evaluation required to create client cases. Please install a valid license token in Settings or explore the Free Sample Case.';
           }
 
           if (errBox) {
@@ -1589,13 +1589,17 @@
         if (!res.ok) {
           let err = {};
           try { err = await res.json(); } catch(e) {}
-          showToast("Reconciliation Error: " + (err.detail || "Preconditions not met."), "error");
+          const errorMsg = (err.error && err.error.message) || err.detail || err.message || "Reconciliation preconditions not met. Please verify evidence sources are ready.";
+          showToast("Reconciliation: " + errorMsg, "error");
           btn.innerText = originalText;
           btn.disabled = false;
           return;
         }
         const data = await res.json();
-        showToast("Deterministic reconciliation complete.", "success");
+        const successMsg = data.status === 'RECEIPT_ALREADY_ISSUED' 
+          ? "Deterministic reconciliation re-verified." 
+          : "Deterministic reconciliation complete.";
+        showToast(successMsg, "success");
         await refreshCaseDetails();
 
         const recon = data.reconciliation || {};

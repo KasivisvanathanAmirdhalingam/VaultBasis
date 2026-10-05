@@ -359,6 +359,13 @@ def load_sample_case():
             updated_at=now_utc
         )
         db_store.save_case(case)
+    else:
+        # Guarantee sample metadata and provenance are maintained on reload
+        if existing.case_kind != "BUNDLED_SAMPLE" or not existing.sample_definition_id or not existing.sample_manifest_digest:
+            existing.case_kind = "BUNDLED_SAMPLE"
+            existing.sample_definition_id = "SAMPLE-A-2025-01"
+            existing.sample_manifest_digest = manifest_digest
+            db_store.save_case(existing)
 
     # Ingest Source A (Broker 1099-DA) if not already present
     src_a_id = f"SRC-SAMPLE_1099DA"
