@@ -55,7 +55,16 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-24.04, macos-14, windows-2022]
+        include:
+          - os: macos-14
+            target: macos-arm64
+            artifact_name: vaultbasis-edge-bundle-macos-arm64
+          - os: windows-2022
+            target: windows-x64
+            artifact_name: vaultbasis-edge-bundle-windows-x64
+          - os: ubuntu-24.04
+            target: linux-x64
+            artifact_name: vaultbasis-ci-bundle-linux-x64
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -74,7 +83,7 @@ jobs:
     - name: Upload Secure Bundle to Workflow Artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: vaultbasis-edge-bundle-${{ matrix.os }}
+        name: ${{ matrix.artifact_name }}
         path: dist/*-Release.zip
         retention-days: 7
 
@@ -86,8 +95,12 @@ jobs:
       matrix:
         include:
           - os: macos-14
+            target: macos-arm64
+            artifact_name: vaultbasis-rc3-candidate-macos-arm64
             script: scripts/build_rc3_macos.py
           - os: windows-2022
+            target: windows-x64
+            artifact_name: vaultbasis-rc3-candidate-windows-x64
             script: scripts/build_rc3_windows.py
     steps:
     - name: Checkout repository
@@ -123,7 +136,7 @@ jobs:
     - name: Upload RC3 candidate (7-day workflow artifact, NOT a release)
       uses: actions/upload-artifact@v4
       with:
-        name: vaultbasis-rc3-candidate-${{ matrix.os }}
+        name: ${{ matrix.artifact_name }}
         path: |
           dist/VaultBasis-RC3-*.zip
           dist/VaultBasis-RC3-*.manifest.json
@@ -141,13 +154,13 @@ jobs:
     - name: Download macOS RC3 candidate
       uses: actions/download-artifact@v4
       with:
-        name: vaultbasis-rc3-candidate-macos-14
+        name: vaultbasis-rc3-candidate-macos-arm64
         path: downloaded/macos
 
     - name: Download Windows RC3 candidate
       uses: actions/download-artifact@v4
       with:
-        name: vaultbasis-rc3-candidate-windows-2022
+        name: vaultbasis-rc3-candidate-windows-x64
         path: downloaded/windows
 
     - name: Inspect both candidates and emit build-verified report
@@ -321,13 +334,13 @@ jobs:
     - name: Download macOS RC3 candidate
       uses: actions/download-artifact@v4
       with:
-        name: vaultbasis-rc3-candidate-macos-14
+        name: vaultbasis-rc3-candidate-macos-arm64
         path: downloaded/macos
 
     - name: Download Windows RC3 candidate
       uses: actions/download-artifact@v4
       with:
-        name: vaultbasis-rc3-candidate-windows-2022
+        name: vaultbasis-rc3-candidate-windows-x64
         path: downloaded/windows
 
     - name: Download verified identities from inspection job
