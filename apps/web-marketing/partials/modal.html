@@ -9,7 +9,7 @@
       <div id="request-form-container">
         <div style="margin-bottom:1.25rem;">
           <label for="req-tier" style="display:block;color:#334155;font-size:0.88rem;margin-bottom:0.5rem;font-weight:600;">Selected Plan</label>
-          <select id="req-tier" name="tier" style="width:100%;padding:12px;border-radius:8px;background:#f8fafc;border:1px solid #cbd5e1;color:#0f172a;font-family:inherit;font-size:0.95rem;font-weight:600;">
+          <select id="req-tier" name="tier" onchange="onTierSelectionChange()" style="width:100%;padding:12px;border-radius:8px;background:#f8fafc;border:1px solid #cbd5e1;color:#0f172a;font-family:inherit;font-size:0.95rem;font-weight:600;">
             <option value="TRIAL">Free Evaluation (Sample Data Only — $0)</option>
             <option value="ESSENTIAL">Solo Practitioner (Up to 10 Client Cases — $499/term)</option>
             <option value="PRACTICE" selected>Practice License (Up to 50 Client Cases — $1,499/term)</option>
@@ -24,12 +24,12 @@
           <label for="req-email" style="display:block;color:#334155;font-size:0.88rem;margin-bottom:0.5rem;font-weight:600;">Work Email (for Download &amp; License Delivery)</label>
           <input type="email" id="req-email" name="email" placeholder="jane@cpa-firm.com" autocomplete="email" style="width:100%;padding:12px;border-radius:8px;background:#f8fafc;border:1px solid #cbd5e1;color:#0f172a;font-family:inherit;font-size:1rem;">
         </div>
-        <button onclick="submitAccessRequest()" id="btn-submit-req" class="btn btn-primary" style="width:100%;justify-content:center;padding:13px;font-size:1.05rem;">Request Download &amp; License</button>
+        <button onclick="submitAccessRequest()" id="btn-submit-req" class="btn btn-primary" style="width:100%;justify-content:center;padding:13px;font-size:1.05rem;">Continue to Checkout ($1,499/yr) →</button>
       </div>
 
       <div id="request-success" style="display:none;padding:1.5rem;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:12px;text-align:center;">
-        <h4 style="color:#059669;margin-bottom:0.75rem;font-size:1.15rem;font-weight:700;">Delivery Initiated</h4>
-        <p style="color:#064e3b;font-size:0.95rem;margin-bottom:1.5rem;line-height:1.6;">Your authorized download link and license token have been sent. Check your work inbox within 2 minutes.</p>
+        <h4 id="success-title" style="color:#059669;margin-bottom:0.75rem;font-size:1.15rem;font-weight:700;">Delivery Initiated</h4>
+        <p id="success-desc" style="color:#064e3b;font-size:0.95rem;margin-bottom:1.5rem;line-height:1.6;">Your authorized download link and license token have been sent. Check your work inbox within 2 minutes.</p>
         <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;">
           <button onclick="closeAccessModal()" class="btn btn-secondary btn-sm">← Return to VaultBasis</button>
           <a href="/trust-assurance" onclick="closeAccessModal()" class="btn btn-primary btn-sm">Review Security &amp; Trust →</a>
