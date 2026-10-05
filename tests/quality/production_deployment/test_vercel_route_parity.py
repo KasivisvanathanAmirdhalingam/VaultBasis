@@ -252,3 +252,63 @@ def test_commercial_checkout_session_rendering_contract():
     assert res["hasGuarantee"] is True
     assert res["hasSubmitBtn"] is True
     assert res["noEd25519Private"] is True
+
+
+@pytest.mark.regression
+def test_commercial_checkout_handoff_contract():
+    """Validates that POST /api/checkout-session produces an authentic Paddle checkout URL & advances state to PAYMENT_PENDING."""
+    code = """
+    const billingStore = require('./api/_lib/billing-store.js');
+    const order = await billingStore.createOrder({
+        customerEmail: 'practitioner@cpa.org',
+        customerName: 'Senior Practitioner',
+        planId: 'PRACTICE'
+    });
+
+    let statusCode = null;
+    let jsonBody = null;
+
+    const mockRes = {
+        status(code) {
+            statusCode = code;
+            return {
+                json(body) {
+                    jsonBody = body;
+                    return body;
+                },
+                send(body) {
+                    jsonBody = body;
+                    return body;
+                }
+            };
+        },
+        setHeader() {}
+    };
+
+    // Trigger payment handoff via POST with JSON accept header
+    await commercialHandler({
+        method: 'POST',
+        headers: { 'accept': 'application/json', 'content-type': 'application/json' },
+        query: { action: 'checkout-session' },
+        body: { order_id: order.orderId, session_id: order.providerSessionId }
+    }, mockRes);
+
+    const freshOrder = await billingStore.getOrder(order.orderId);
+
+    console.log(JSON.stringify({
+        statusCode,
+        jsonBody,
+        orderPaymentState: freshOrder.paymentState,
+        orderProvisioningState: freshOrder.provisioningState,
+        hasTxnId: Boolean(freshOrder.providerTransactionId),
+    }));
+    """
+    res = run_node_snippet(code)
+    assert res["statusCode"] == 200
+    assert res["jsonBody"]["ok"] is True
+    assert res["jsonBody"]["state"] == "PAYMENT_PENDING"
+    assert "paddle.com" in res["jsonBody"]["checkout_url"]
+    assert res["jsonBody"]["provider"] == "PADDLE"
+    assert res["orderPaymentState"] == "PAYMENT_PENDING"
+    assert res["orderProvisioningState"] == "NOT_ELIGIBLE"
+    assert res["hasTxnId"] is True

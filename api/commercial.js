@@ -251,6 +251,11 @@ function renderCheckoutHtml(order, planConfig) {
         <a href="/trust-assurance" class="btn-secondary">Review Security &amp; Trust &rarr;</a>
       </div>
     ` : `
+      <div id="checkout-error-banner" style="display:none; background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.4); border-radius:8px; padding:1rem; margin-bottom:1.25rem;">
+        <p id="checkout-error-msg" style="color:#fca5a5; font-size:0.9rem; font-weight:600; margin:0 0 4px 0;"></p>
+        <p id="checkout-error-ref" style="color:#94a3b8; font-size:0.78rem; font-family:'JetBrains Mono',monospace; margin:0;"></p>
+      </div>
+
       <div class="order-card">
         <div class="order-row">
           <span class="order-label">Selected Plan</span>
@@ -278,10 +283,10 @@ function renderCheckoutHtml(order, planConfig) {
         <strong>Local Case Processing:</strong> VaultBasis Edge processes client reconciliation and evidence locally on your computer. Client tax records are not required to be uploaded to VaultBasis cloud services for normal case processing. Your license enables local reconciliation, Evidence Receipts, offline verification, and access to existing case records according to your plan.
       </div>
 
-      <form method="POST" action="/api/checkout-session">
+      <form id="checkout-handoff-form" method="POST" action="/api/checkout-session">
         <input type="hidden" name="order_id" value="${order.orderId}">
         <input type="hidden" name="session_id" value="${order.providerSessionId}">
-        <button type="submit" class="btn-submit">
+        <button type="submit" id="btn-checkout-submit" class="btn-submit">
           Continue to Secure Checkout — ${priceDisplay} &rarr;
         </button>
       </form>
@@ -289,6 +294,62 @@ function renderCheckoutHtml(order, planConfig) {
       <div style="text-align:center; margin-top:1.25rem;">
         <a href="/" class="btn-secondary">&larr; Cancel &amp; Return to Home</a>
       </div>
+
+      <script>
+        (function() {
+          const form = document.getElementById('checkout-handoff-form');
+          const btn = document.getElementById('btn-checkout-submit');
+          const errBanner = document.getElementById('checkout-error-banner');
+          const errMsg = document.getElementById('checkout-error-msg');
+          const errRef = document.getElementById('checkout-error-ref');
+
+          if (form && btn) {
+            form.addEventListener('submit', async function(e) {
+              e.preventDefault();
+              btn.disabled = true;
+              btn.style.opacity = '0.75';
+              btn.style.cursor = 'wait';
+              btn.textContent = 'Starting secure checkout…';
+              if (errBanner) errBanner.style.display = 'none';
+
+              try {
+                const orderId = form.querySelector('input[name="order_id"]').value;
+                const sessionId = form.querySelector('input[name="session_id"]').value;
+
+                const res = await fetch('/api/checkout-session', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                  },
+                  body: JSON.stringify({ order_id: orderId, session_id: sessionId })
+                });
+
+                const data = await res.json();
+                if (res.ok && data.ok && data.checkout_url) {
+                  window.location.href = data.checkout_url;
+                } else {
+                  throw new Error(data.error || "We couldn't start secure checkout. No payment was taken. Please try again.");
+                }
+              } catch (err) {
+                console.error('[checkout-handoff]', err);
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                btn.style.cursor = 'pointer';
+                btn.innerHTML = 'Continue to Secure Checkout — ${priceDisplay} &rarr;';
+
+                if (errBanner && errMsg && errRef) {
+                  errMsg.textContent = err.message || "We couldn't start secure checkout. No payment was taken. Please try again.";
+                  errRef.textContent = 'Error reference: VB-PAY-' + Math.random().toString(36).substring(2, 9).toUpperCase();
+                  errBanner.style.display = 'block';
+                } else {
+                  alert("We couldn't start secure checkout. No payment was taken. Please try again.");
+                }
+              }
+            });
+          }
+        })();
+      </script>
     `}
   </main>
 </body>
@@ -372,29 +433,57 @@ async function handleCheckoutSession(req, res) {
   }
 
   if (req.method === 'POST') {
+    const isJsonRequest =
+      req.headers['accept']?.includes('application/json') ||
+      req.headers['content-type']?.includes('application/json');
+
     try {
-      // In production/sandbox, transition state to PAYMENT_PENDING.
-      // (Only verified webhook advances state to ORDER_ELIGIBLE_FOR_PROVISIONING).
+      const paddleEnv = process.env.PADDLE_ENVIRONMENT || 'sandbox';
+      const providerTxnId = `txn_pdl_${order.orderId.replace(/[^a-zA-Z0-9]/g, '')}_${crypto.randomBytes(4).toString('hex')}`;
+      
+      const paddleBase = paddleEnv === 'production' 
+        ? 'https://checkout.paddle.com' 
+        : 'https://sandbox-checkout.paddle.com';
+
+      const checkoutUrl = process.env.PADDLE_CHECKOUT_URL || 
+        `${paddleBase}/checkout?order_id=${encodeURIComponent(order.orderId)}&plan=${encodeURIComponent(order.planId)}&amount=${order.priceAmountCents}&currency=${encodeURIComponent(order.priceCurrency)}&customer_email=${encodeURIComponent(order.customerEmail)}`;
+
       const updatedOrder = await transitionOrderPaymentState({
         orderId: order.orderId,
         newState: PAYMENT_STATES.PAYMENT_PENDING,
         reason: 'CHECKOUT_PADDLE_HANDOFF',
+        providerTransactionId: providerTxnId,
         metadata: {
           handoffAt: new Date().toISOString(),
           paymentProvider: 'paddle',
+          paddleEnvironment: paddleEnv,
+          checkoutUrl,
         },
       });
 
-      // When Paddle integration is active, redirect to Paddle transaction checkout URL.
-      if (process.env.PADDLE_CHECKOUT_URL) {
-        return res.redirect(303, `${process.env.PADDLE_CHECKOUT_URL}?order=${order.orderId}`);
+      if (isJsonRequest) {
+        return res.status(200).json({
+          ok: true,
+          order_id: updatedOrder.orderId,
+          state: PAYMENT_STATES.PAYMENT_PENDING,
+          checkout_url: checkoutUrl,
+          provider: 'PADDLE',
+          provider_transaction_id: providerTxnId,
+        });
       }
 
-      res.setHeader('Content-Type', 'text/html; charset=utf-8');
-      return res.status(200).send(renderCheckoutHtml(updatedOrder, planConfig));
+      return res.redirect(303, checkoutUrl);
     } catch (err) {
-      console.error('[commercial] Order transition error:', err);
-      return res.status(500).send('Checkout processing failed. Please try again.');
+      console.error('[commercial] Order handoff transition error:', err);
+      const errRef = `VB-PAY-${Date.now().toString(36).toUpperCase()}`;
+      if (isJsonRequest) {
+        return res.status(500).json({
+          ok: false,
+          error: "We couldn't start secure checkout. No payment was taken. Please try again.",
+          error_reference: errRef,
+        });
+      }
+      return res.status(500).send(`Checkout processing failed (${errRef}). Please try again.`);
     }
   }
 

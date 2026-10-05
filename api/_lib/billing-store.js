@@ -354,6 +354,10 @@ async function transitionOrderPaymentState(arg1, arg2, arg3) {
   const now = new Date().toISOString();
   order.updatedAt = now;
 
+  if (providerTransactionId) {
+    order.providerTransactionId = providerTransactionId;
+  }
+
   if (targetState === PAYMENT_STATES.PAYMENT_CONFIRMED || targetState === PAYMENT_STATES.ORDER_ELIGIBLE_FOR_PROVISIONING) {
     if (currentState !== PAYMENT_STATES.CHECKOUT_CREATED && currentState !== PAYMENT_STATES.PAYMENT_PENDING) {
       throw new Error(`Illegal state transition to PAYMENT_CONFIRMED from ${currentState}`);
@@ -361,9 +365,6 @@ async function transitionOrderPaymentState(arg1, arg2, arg3) {
     order.paymentState = PAYMENT_STATES.ORDER_ELIGIBLE_FOR_PROVISIONING;
     order.provisioningState = PROVISIONING_STATES.ELIGIBLE;
     order.confirmedAt = now;
-    if (providerTransactionId) {
-      order.providerTransactionId = providerTransactionId;
-    }
   } else if (targetState === PAYMENT_STATES.PAYMENT_FAILED) {
     order.paymentState = PAYMENT_STATES.PAYMENT_FAILED;
     order.provisioningState = PROVISIONING_STATES.NOT_ELIGIBLE;
