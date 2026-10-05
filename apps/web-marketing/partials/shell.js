@@ -35,15 +35,15 @@
       const tier = tierSelect ? tierSelect.value : 'PRACTICE';
 
       if (tier === 'TRIAL') {
-        if (modalTitle) modalTitle.innerText = 'Start Free Evaluation';
-        if (modalDesc) modalDesc.innerText = 'VaultBasis runs entirely on your local computer. Enter your details to receive your evaluation download authorization via email.';
-        if (btn) btn.innerText = 'Get Evaluation Download';
+        if (modalTitle) modalTitle.innerText = 'Start 3-Day Evaluation';
+        if (modalDesc) modalDesc.innerText = 'Experience the complete VaultBasis practitioner workflow with your own files for 72 hours. Enter your details to receive your secure download authorization via email.';
+        if (btn) btn.innerText = 'Start 3-Day Evaluation →';
       } else if (tier === 'ESSENTIAL') {
-        if (modalTitle) modalTitle.innerText = 'Order Solo Practitioner License';
+        if (modalTitle) modalTitle.innerText = 'Get Solo License';
         if (modalDesc) modalDesc.innerText = 'VaultBasis Solo License ($499/year) covers up to 10 client cases with 100% local computer storage and signed Evidence Receipts.';
         if (btn) btn.innerText = 'Continue to Checkout ($499/yr) →';
       } else if (tier === 'PRACTICE') {
-        if (modalTitle) modalTitle.innerText = 'Order Practice License';
+        if (modalTitle) modalTitle.innerText = 'Get Practice License';
         if (modalDesc) modalDesc.innerText = 'VaultBasis Practice License ($1,499/year) covers up to 50 client cases for CPA firms with preparer provenance on Evidence Receipts.';
         if (btn) btn.innerText = 'Continue to Checkout ($1,499/yr) →';
       } else if (tier === 'ENTERPRISE') {
