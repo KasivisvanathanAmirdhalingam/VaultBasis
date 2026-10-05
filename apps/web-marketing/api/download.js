@@ -11,8 +11,9 @@ const PLATFORM_MAP = {
 
 const SUPPORTED_DISPLAY = ['macOS Apple Silicon (arm64)', 'Windows x64'];
 
-// Stable pointer in private Blob — overwritten on each RC3 promotion.
-const MANIFEST_BLOB_PATHNAME = 'rc3/current/manifest.json';
+// Canonical release manifest path in private Blob storage.
+const RELEASE_MANIFEST_BLOB_PATHNAME = 'release/current/release-manifest.json';
+const LEGACY_MANIFEST_BLOB_PATHNAME = 'rc3/current/manifest.json';
 
 // Generic denial response — never reveal why a specific token/entitlement was denied.
 function deny(res) {
@@ -52,19 +53,46 @@ module.exports = async (req, res) => {
     return deny(res);
   }
 
-  // Resolve the promotion manifest — must exist before any authorization.
+  // Resolve the release manifest — must exist before any authorization.
   let manifest;
   try {
-    manifest = await readBlobJson(MANIFEST_BLOB_PATHNAME);
+    manifest = await readBlobJson(RELEASE_MANIFEST_BLOB_PATHNAME);
+    if (!manifest) {
+      manifest = await readBlobJson(LEGACY_MANIFEST_BLOB_PATHNAME);
+    }
     if (!manifest) {
       return res.status(503).json({
-        error: 'VaultBasis preview download is temporarily being updated. Please try again shortly.',
+        error: 'VaultBasis release download is temporarily being updated. Please try again shortly.',
         supported: SUPPORTED_DISPLAY,
       });
     }
   } catch (e) {
-    console.error('manifest read/parse error:', e.message);
+    console.error('release manifest read/parse error:', e.message);
     return res.status(503).json({ error: 'Release manifest could not be read.' });
+  }
+
+  // Release State Lifecycle Gate
+  // Canonical release authority derives from distribution_status (or release_state).
+  // Valid lifecycle: BUILD_CREATED | FUNCTIONALLY_QUALIFIED | TRUST_QUALIFIED | RELEASE_MANIFEST_FROZEN | DISTRIBUTION_ACTIVE | SUPERSEDED | REVOKED
+  const releaseState = (manifest.distribution_status || manifest.release_state || 'UNSPECIFIED').toUpperCase();
+
+  // Canonical Authority Invariant: If legacy active boolean exists, enforce state == DISTRIBUTION_ACTIVE <=> active == true.
+  if (typeof manifest.active === 'boolean') {
+    const isStateActive = (releaseState === 'DISTRIBUTION_ACTIVE');
+    if (manifest.active !== isStateActive) {
+      console.error('Release authority conflict: state/active boolean divergence detected.');
+      return res.status(403).json({ error: 'This release manifest has a conflicting authorization state.' });
+    }
+  }
+
+  if (releaseState === 'REVOKED') {
+    return res.status(410).json({ error: 'This release has been revoked for security or integrity reasons.' });
+  }
+  if (releaseState === 'SUPERSEDED') {
+    return res.status(403).json({ error: 'This release is superseded. Please request the currently active release.' });
+  }
+  if (releaseState !== 'DISTRIBUTION_ACTIVE') {
+    return res.status(403).json({ error: 'This release is not currently authorized for distribution.' });
   }
 
   // Resolve platform and artifact entry.
@@ -73,20 +101,25 @@ module.exports = async (req, res) => {
 
   if (!platformKey || !PLATFORM_MAP[platformKey]) {
     return res.status(503).json({
-      error: 'VaultBasis preview is not yet available for this platform.',
+      error: 'VaultBasis is not yet available for this platform.',
       supported: SUPPORTED_DISPLAY,
       hint: 'Use ?platform=mac-arm64 or ?platform=windows-x64',
     });
   }
 
   const target = PLATFORM_MAP[platformKey];
-  const entry = manifest.artifacts.find(
-    (a) => a.os === target.os && a.architecture === target.architecture
-  );
+  let entry;
+  if (Array.isArray(manifest.artifacts)) {
+    entry = manifest.artifacts.find(
+      (a) => (a.os === target.os && a.architecture === target.architecture) || a.platform === platformKey
+    );
+  } else if (manifest.artifacts && typeof manifest.artifacts === 'object') {
+    entry = manifest.artifacts[platformKey] || manifest.artifacts[`${target.os}-${target.architecture}`];
+  }
 
-  if (!entry) {
+  if (!entry || !entry.sha256) {
     return res.status(503).json({
-      error: 'VaultBasis preview is not yet available for this platform.',
+      error: 'VaultBasis is not yet available for this platform.',
       supported: SUPPORTED_DISPLAY,
     });
   }

@@ -56,6 +56,13 @@ function isWellFormedToken(token) {
   );
 }
 
+// In-memory fallback for local testing & preview environments when BLOB_READ_WRITE_TOKEN is absent
+const _memoryEntitlements = new Map();
+
+function _hasBlobStorage() {
+  return Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+}
+
 /**
  * Write a new entitlement record to private Blob storage.
  *
@@ -79,12 +86,16 @@ async function createEntitlement(rawToken, { entitlementId, email, qualifiedArti
   };
 
   const pathname = entitlementPathname(rawToken);
-  await put(pathname, JSON.stringify(record), {
-    access: 'private',
-    contentType: 'application/json',
-    addRandomSuffix: false,
-    allowOverwrite: false, // never silently overwrite an existing entitlement
-  });
+  if (_hasBlobStorage()) {
+    await put(pathname, JSON.stringify(record), {
+      access: 'private',
+      contentType: 'application/json',
+      addRandomSuffix: false,
+      allowOverwrite: false, // never silently overwrite an existing entitlement
+    });
+  } else {
+    _memoryEntitlements.set(pathname, record);
+  }
 }
 
 /**
@@ -106,27 +117,35 @@ async function validateEntitlement(rawToken, entitlementId, artifactHash) {
 
   // 2. Blob lookup — missing key = token does not exist
   let record;
-  try {
-    const pathname = entitlementPathname(rawToken);
-    const result = await get(pathname, { access: 'private' });
-    if (!result) {
+  const pathname = entitlementPathname(rawToken);
+
+  if (!_hasBlobStorage()) {
+    record = _memoryEntitlements.get(pathname);
+    if (!record) {
       return { ok: false, reason: 'not_found' };
     }
-    const chunks = [];
-    const reader = result.stream.getReader();
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      chunks.push(value);
+  } else {
+    try {
+      const result = await get(pathname, { access: 'private' });
+      if (!result) {
+        return { ok: false, reason: 'not_found' };
+      }
+      const chunks = [];
+      const reader = result.stream.getReader();
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        chunks.push(value);
+      }
+      record = JSON.parse(Buffer.concat(chunks.map(c => Buffer.from(c))).toString('utf8'));
+    } catch (e) {
+      if (e && e.name === 'BlobNotFoundError') {
+        return { ok: false, reason: 'not_found' };
+      }
+      // Any other storage error → fail closed
+      console.error('[entitlement-store] lookup error:', e.message);
+      return { ok: false, reason: 'storage_error' };
     }
-    record = JSON.parse(Buffer.concat(chunks.map(c => Buffer.from(c))).toString('utf8'));
-  } catch (e) {
-    if (e && e.name === 'BlobNotFoundError') {
-      return { ok: false, reason: 'not_found' };
-    }
-    // Any other storage error → fail closed
-    console.error('[entitlement-store] lookup error:', e.message);
-    return { ok: false, reason: 'storage_error' };
   }
 
   // 3. Status check
