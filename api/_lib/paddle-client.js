@@ -20,19 +20,20 @@ const APPROVED_PADDLE_HOSTS = new Set([
   'sandbox-checkout.paddle.com',
 ]);
 
-function getPaddleApiBase() {
-  const env = process.env.PADDLE_ENVIRONMENT || 'sandbox';
-  return env === 'production' ? 'https://api.paddle.com' : 'https://sandbox-api.paddle.com';
-}
-
-function getPaddleBuyBase() {
-  const env = process.env.PADDLE_ENVIRONMENT || 'sandbox';
-  return env === 'production' ? 'https://buy.paddle.com' : 'https://sandbox-buy.paddle.com';
+function isApprovedCheckoutHost(hostname) {
+  if (!hostname) return false;
+  if (hostname === 'localhost' || hostname === '127.0.0.1') return true;
+  if (APPROVED_PADDLE_HOSTS.has(hostname)) return true;
+  if (hostname === 'vaultbasis.com' || hostname.endsWith('.vaultbasis.com')) return true;
+  const customApproved = process.env.APPROVED_CHECKOUT_HOST;
+  if (customApproved && (hostname === customApproved || hostname.endsWith(`.${customApproved}`))) return true;
+  return false;
 }
 
 function validatePaddleCheckoutUrl(urlStr) {
-  if (!urlStr || typeof urlStr !== 'string') {
-    throw new Error('Invalid Paddle checkout URL: URL must be a non-empty string.');
+  if (!urlStr) return null;
+  if (typeof urlStr !== 'string') {
+    throw new Error('Invalid Paddle checkout URL: URL must be a string.');
   }
   let parsed;
   try {
@@ -40,13 +41,18 @@ function validatePaddleCheckoutUrl(urlStr) {
   } catch (e) {
     throw new Error(`Invalid Paddle checkout URL format: ${e.message}`);
   }
-  if (parsed.protocol !== 'https:') {
+  if (parsed.protocol !== 'https:' && parsed.hostname !== 'localhost' && parsed.hostname !== '127.0.0.1') {
     throw new Error(`Insecure Paddle checkout URL protocol: '${parsed.protocol}'. Must be https:`);
   }
-  if (!APPROVED_PADDLE_HOSTS.has(parsed.hostname)) {
-    throw new Error(`Unrecognized Paddle checkout hostname: '${parsed.hostname}'. Must be on approved Paddle host allowlist.`);
+  if (!isApprovedCheckoutHost(parsed.hostname)) {
+    throw new Error(`Unapproved checkout hostname: '${parsed.hostname}'.`);
   }
   return urlStr;
+}
+
+function getPaddleApiBase() {
+  const env = process.env.PADDLE_ENVIRONMENT || 'sandbox';
+  return env === 'production' ? 'https://api.paddle.com' : 'https://sandbox-api.paddle.com';
 }
 
 function getPaddlePriceIdForPlan(planId) {
@@ -63,7 +69,6 @@ async function createPaddleTransaction({ order, planConfig, returnUrl, agreement
   const apiKey = process.env.PADDLE_API_KEY;
   const env = process.env.PADDLE_ENVIRONMENT || 'sandbox';
   const apiBase = getPaddleApiBase();
-  const buyBase = getPaddleBuyBase();
   const priceId = planConfig?.paddlePriceId || getPaddlePriceIdForPlan(order.planId);
 
   // If no API key is provided:
@@ -75,13 +80,12 @@ async function createPaddleTransaction({ order, planConfig, returnUrl, agreement
 
     // In sandbox / development / testing mode, generate a compliant sandbox transaction envelope
     const mockTxnId = `txn_01${Buffer.from(order.orderId).toString('hex').padEnd(20, '0').substring(0, 22)}`;
-    const rawMockCheckoutUrl = process.env.PADDLE_CHECKOUT_URL || `${buyBase}/checkout?_ptxn=${mockTxnId}&order_id=${encodeURIComponent(order.orderId)}&plan=${encodeURIComponent(order.planId)}&amount=${order.priceAmountCents}&currency=${encodeURIComponent(order.priceCurrency)}&customer_email=${encodeURIComponent(order.customerEmail)}`;
-    const mockCheckoutUrl = validatePaddleCheckoutUrl(rawMockCheckoutUrl);
+    const customCheckoutUrl = process.env.PADDLE_CHECKOUT_URL ? validatePaddleCheckoutUrl(process.env.PADDLE_CHECKOUT_URL) : null;
 
     console.warn(`[paddle-client] PADDLE_API_KEY unconfigured; initialized sandbox transaction ${mockTxnId} for plan ${order.planId} (${priceId}).`);
     return {
       transactionId: mockTxnId,
-      checkoutUrl: mockCheckoutUrl,
+      checkoutUrl: customCheckoutUrl,
       priceId,
       status: 'draft',
       simulated: true,
@@ -133,8 +137,7 @@ async function createPaddleTransaction({ order, planConfig, returnUrl, agreement
             const json = JSON.parse(raw);
             if (res.statusCode >= 200 && res.statusCode < 300 && json.data?.id) {
               const txn = json.data;
-              const rawCheckoutUrl = txn.checkout?.url || `${buyBase}/checkout?_ptxn=${txn.id}`;
-              const checkoutUrl = validatePaddleCheckoutUrl(rawCheckoutUrl);
+              const checkoutUrl = txn.checkout?.url ? validatePaddleCheckoutUrl(txn.checkout.url) : null;
               return resolve({
                 transactionId: txn.id,
                 checkoutUrl,
@@ -163,9 +166,8 @@ async function createPaddleTransaction({ order, planConfig, returnUrl, agreement
 
 module.exports = {
   getPaddleApiBase,
-  getPaddleBuyBase,
   getPaddlePriceIdForPlan,
   validatePaddleCheckoutUrl,
-  APPROVED_PADDLE_HOSTS,
+  isApprovedCheckoutHost,
   createPaddleTransaction,
 };

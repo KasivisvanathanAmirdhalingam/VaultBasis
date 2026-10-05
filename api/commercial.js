@@ -203,6 +203,7 @@ function renderCheckoutHtml(order, planConfig) {
       flex-shrink: 0;
     }
   </style>
+  <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
 </head>
 <body>
   <main class="checkout-container">
@@ -368,11 +369,43 @@ function renderCheckoutHtml(order, planConfig) {
                 });
 
                 const data = await res.json();
-                if (res.ok && data.ok && data.checkout_url) {
-                  window.location.href = data.checkout_url;
-                } else {
+                if (!res.ok || !data.ok) {
                   throw new Error(data.error || "We couldn't start secure checkout. No payment was taken. Please try again.");
                 }
+
+                // 1. Direct Paddle.js modal overlay (preferred for transaction checkout)
+                if (window.Paddle && data.provider_transaction_id) {
+                  try {
+                    if (data.paddle_environment === 'sandbox' && typeof Paddle.Environment !== 'undefined') {
+                      Paddle.Environment.set('sandbox');
+                    }
+                    if (data.paddle_client_token && typeof Paddle.Initialize !== 'undefined') {
+                      Paddle.Initialize({ token: data.paddle_client_token });
+                    }
+                    Paddle.Checkout.open({
+                      transactionId: data.provider_transaction_id,
+                      settings: {
+                        successUrl: window.location.href
+                      }
+                    });
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                    btn.style.cursor = 'pointer';
+                    btn.innerHTML = 'Continue to Secure Checkout — ${priceDisplay} &rarr;';
+                    return;
+                  } catch (paddleErr) {
+                    console.warn('[checkout-handoff] Paddle.Checkout.open failed, falling back to URL redirect:', paddleErr);
+                  }
+                }
+
+                // 2. Direct URL redirect if Paddle returned an approved checkout.url
+                if (data.checkout_url) {
+                  window.location.href = data.checkout_url;
+                  return;
+                }
+
+                // 3. Fallback message if neither checkout URL nor overlay opened
+                throw new Error("Checkout initialized. Please complete payment through the secure Paddle dialog.");
               } catch (err) {
                 console.error('[checkout-handoff]', err);
                 btn.disabled = false;
@@ -507,19 +540,24 @@ async function handleCheckoutSession(req, res) {
         order.events?.length > 0
       ) {
         const lastHandoff = order.events.slice().reverse().find(e => e.state === PAYMENT_STATES.PAYMENT_PENDING);
-        const existingCheckoutUrl = lastHandoff?.metadata?.checkoutUrl;
+        const paddleEnv = process.env.PADDLE_ENVIRONMENT || 'sandbox';
+        const paddleClientToken = process.env.PADDLE_CLIENT_TOKEN || '';
+        const existingCheckoutUrl = lastHandoff?.metadata?.checkoutUrl || null;
+
+        if (isJsonRequest) {
+          return res.status(200).json({
+            ok: true,
+            order_id: order.orderId,
+            state: PAYMENT_STATES.PAYMENT_PENDING,
+            checkout_url: existingCheckoutUrl,
+            provider: 'PADDLE',
+            provider_transaction_id: order.providerTransactionId,
+            paddle_environment: paddleEnv,
+            paddle_client_token: paddleClientToken,
+            reused: true,
+          });
+        }
         if (existingCheckoutUrl) {
-          if (isJsonRequest) {
-            return res.status(200).json({
-              ok: true,
-              order_id: order.orderId,
-              state: PAYMENT_STATES.PAYMENT_PENDING,
-              checkout_url: existingCheckoutUrl,
-              provider: 'PADDLE',
-              provider_transaction_id: order.providerTransactionId,
-              reused: true,
-            });
-          }
           return res.redirect(303, existingCheckoutUrl);
         }
       }
@@ -535,7 +573,9 @@ async function handleCheckoutSession(req, res) {
       });
 
       const providerTxnId = paddleResult.transactionId;
-      const checkoutUrl = paddleResult.checkoutUrl;
+      const checkoutUrl = paddleResult.checkoutUrl || null;
+      const paddleEnv = process.env.PADDLE_ENVIRONMENT || 'sandbox';
+      const paddleClientToken = process.env.PADDLE_CLIENT_TOKEN || '';
 
       const updatedOrder = await transitionOrderPaymentState({
         orderId: order.orderId,
@@ -559,10 +599,16 @@ async function handleCheckoutSession(req, res) {
           checkout_url: checkoutUrl,
           provider: 'PADDLE',
           provider_transaction_id: providerTxnId,
+          paddle_environment: paddleEnv,
+          paddle_client_token: paddleClientToken,
         });
       }
 
-      return res.redirect(303, checkoutUrl);
+      if (checkoutUrl) {
+        return res.redirect(303, checkoutUrl);
+      }
+
+      return res.redirect(303, `/api/checkout-session?order_id=${order.orderId}&session_id=${encodeURIComponent(order.providerSessionId)}`);
     } catch (err) {
       console.error('[commercial] Paddle transaction creation error:', err.message);
       const errRef = `VB-PAY-${Date.now().toString(36).toUpperCase()}`;

@@ -322,7 +322,6 @@ def test_commercial_checkout_handoff_contract():
     assert res["statusCode"] == 200
     assert res["jsonBody"]["ok"] is True
     assert res["jsonBody"]["state"] == "PAYMENT_PENDING"
-    assert "paddle.com" in res["jsonBody"]["checkout_url"]
     assert res["jsonBody"]["provider"] == "PADDLE"
     assert res["jsonBody"]["provider_transaction_id"].startswith("txn_")
     assert res["orderPaymentState"] == "PAYMENT_PENDING"
@@ -641,7 +640,7 @@ def test_paddle_checkout_url_integrity_and_allowlist_validation():
         results.rogueDomainRejected = true;
     }
 
-    // 6. Test sandbox transaction creation URL shape
+    // 6. Test sandbox transaction creation URL shape and direct Paddle.js transaction ID
     const mockOrder = {
         orderId: 'ORD-2026-TESTURL',
         planId: 'SOLO',
@@ -652,8 +651,8 @@ def test_paddle_checkout_url_integrity_and_allowlist_validation():
         priceCurrency: 'USD'
     };
     const txn = await paddleClient.createPaddleTransaction({ order: mockOrder });
+    results.generatedTransactionId = txn.transactionId;
     results.generatedCheckoutUrl = txn.checkoutUrl;
-    results.generatedHostname = new URL(txn.checkoutUrl).hostname;
 
     console.log(JSON.stringify(results));
     """
@@ -663,8 +662,9 @@ def test_paddle_checkout_url_integrity_and_allowlist_validation():
     assert res["doublePrefixedRejected"] is True
     assert res["httpRejected"] is True
     assert res["rogueDomainRejected"] is True
-    assert res["generatedHostname"] == "sandbox-buy.paddle.com"
-    assert "sandbox-sandbox" not in res["generatedCheckoutUrl"]
+    assert res["generatedTransactionId"].startswith("txn_01")
+    assert res["generatedCheckoutUrl"] is None
+
 
 
 
