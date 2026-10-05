@@ -204,6 +204,12 @@ function renderCheckoutHtml(order, planConfig) {
     }
   </style>
   <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
+  <script>
+    window.VAULTBASIS_PADDLE_CONFIG = {
+      environment: "${process.env.PADDLE_ENVIRONMENT || 'sandbox'}",
+      clientToken: "${process.env.PADDLE_CLIENT_TOKEN || ''}"
+    };
+  </script>
 </head>
 <body>
   <main class="checkout-container">
@@ -221,7 +227,7 @@ function renderCheckoutHtml(order, planConfig) {
         <line x1="19" y1="26" x2="19" y2="30" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
       </svg>
       <div class="brand-title">VaultBasis Commercial Checkout</div>
-      <div class="badge-secure">🔒 SECURE CHECKOUT</div>
+      <div id="badge-secure-status" class="badge-secure">🔒 SECURE CHECKOUT</div>
     </div>
 
     ${isPaidOrEligible ? `
@@ -319,6 +325,40 @@ function renderCheckoutHtml(order, planConfig) {
           const errMsg = document.getElementById('checkout-error-msg');
           const errRef = document.getElementById('checkout-error-ref');
 
+          let paddleInitialized = false;
+
+          function initPaddleInstance(overrideToken, overrideEnv) {
+            if (paddleInitialized) return true;
+            if (!window.Paddle) return false;
+
+            const cfg = window.VAULTBASIS_PADDLE_CONFIG || {};
+            const env = overrideEnv || cfg.environment || 'sandbox';
+            const token = overrideToken || cfg.clientToken || '';
+
+            try {
+              if (env === 'sandbox' && typeof Paddle.Environment !== 'undefined') {
+                Paddle.Environment.set('sandbox');
+              }
+              if (token && typeof Paddle.Initialize !== 'undefined') {
+                Paddle.Initialize({ token: token });
+                paddleInitialized = true;
+                return true;
+              }
+            } catch (initErr) {
+              console.warn('[paddle-init] Initialization error:', initErr);
+            }
+            return false;
+          }
+
+          // Initialize on page load if Paddle script is already ready
+          if (window.Paddle) {
+            initPaddleInstance();
+          } else {
+            window.addEventListener('load', function() {
+              initPaddleInstance();
+            });
+          }
+
           if (chk && btn) {
             chk.addEventListener('change', function() {
               if (chk.checked) {
@@ -373,15 +413,12 @@ function renderCheckoutHtml(order, planConfig) {
                   throw new Error(data.error || "We couldn't start secure checkout. No payment was taken. Please try again.");
                 }
 
+                // Ensure Paddle.Initialize is invoked with client token
+                initPaddleInstance(data.paddle_client_token, data.paddle_environment);
+
                 // 1. Direct Paddle.js modal overlay (preferred for transaction checkout)
                 if (window.Paddle && data.provider_transaction_id) {
                   try {
-                    if (data.paddle_environment === 'sandbox' && typeof Paddle.Environment !== 'undefined') {
-                      Paddle.Environment.set('sandbox');
-                    }
-                    if (data.paddle_client_token && typeof Paddle.Initialize !== 'undefined') {
-                      Paddle.Initialize({ token: data.paddle_client_token });
-                    }
                     Paddle.Checkout.open({
                       transactionId: data.provider_transaction_id,
                       settings: {
