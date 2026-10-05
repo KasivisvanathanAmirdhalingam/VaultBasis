@@ -37,7 +37,7 @@ def run_node_delivery_script(script_code: str) -> dict:
     """Executes a Node.js snippet against api/delivery-mailer.js and returns parsed JSON output."""
     wrapped_code = f"""
     const path = require('path');
-    const mailer = require('{API_DIR / "delivery-mailer.js"}');
+    const mailer = require('{API_DIR / "_lib" / "delivery-mailer.js"}');
 
     async function main() {{
         {script_code}
@@ -133,7 +133,7 @@ def test_mail_paid_license_template_rendering():
 def test_download_token_well_formed_gate():
     """Validates that download resolver requires properly formatted tokens and entitlements."""
     code = f"""
-    const store = require('{API_DIR / "entitlement-store.js"}');
+    const store = require('{API_DIR / "_lib" / "entitlement-store.js"}');
 
     const validToken = store.generateToken();
     const isWellFormedValid = store.isWellFormedToken(validToken);

@@ -25,10 +25,10 @@ def run_node_script(script_code: str) -> dict:
     """Executes a Node.js snippet against the api/ modules and returns parsed JSON output."""
     wrapped_code = f"""
     const path = require('path');
-    const billingStore = require('{API_DIR / "billing-store.js"}');
-    const checkoutHandler = require('{API_DIR / "checkout.js"}');
+    const billingStore = require('{API_DIR / "_lib" / "billing-store.js"}');
+    const checkoutHandler = require('{API_DIR / "commercial.js"}');
     const webhookHandler = require('{API_DIR / "webhook-payment.js"}');
-    const enterpriseHandler = require('{API_DIR / "enterprise-inquiry.js"}');
+    const enterpriseHandler = require('{API_DIR / "commercial.js"}');
 
     async function main() {{
         {script_code}
@@ -487,13 +487,13 @@ def test_audit_event_trail_records_state_transitions():
 
 def test_zero_signing_key_and_evidence_bleed():
     """Verifies that billing stores and handlers contain zero private keys and zero client data."""
-    billing_store_content = (API_DIR / "billing-store.js").read_text(encoding="utf-8")
-    checkout_content = (API_DIR / "checkout.js").read_text(encoding="utf-8")
+    billing_store_content = (API_DIR / "_lib" / "billing-store.js").read_text(encoding="utf-8")
+    commercial_content = (API_DIR / "commercial.js").read_text(encoding="utf-8")
     webhook_content = (API_DIR / "webhook-payment.js").read_text(encoding="utf-8")
 
     for file_name, content in [
         ("billing-store.js", billing_store_content),
-        ("checkout.js", checkout_content),
+        ("commercial.js", commercial_content),
         ("webhook-payment.js", webhook_content),
     ]:
         assert "BEGIN PRIVATE KEY" not in content, f"Private key header in {file_name}"

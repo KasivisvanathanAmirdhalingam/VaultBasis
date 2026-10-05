@@ -7,8 +7,8 @@
 
 const crypto = require('crypto');
 const { get } = require('@vercel/blob');
-const { generateToken, createEntitlement } = require('./entitlement-store');
-const { sendDeliveryEmail } = require('./delivery-mailer');
+const { generateToken, createEntitlement } = require('./_lib/entitlement-store');
+const { sendDeliveryEmail } = require('./_lib/delivery-mailer');
 
 const RELEASE_MANIFEST_BLOB_PATHNAME = 'release/current/release-manifest.json';
 const LEGACY_MANIFEST_BLOB_PATHNAME = 'rc3/current/manifest.json';

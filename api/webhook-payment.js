@@ -19,7 +19,7 @@ const {
   isEventProcessed,
   recordWebhookEvent,
   transitionOrderPaymentState,
-} = require('./billing-store');
+} = require('./_lib/billing-store');
 
 function verifyWebhookSignature(payloadBuffer, signatureHeader, secret, toleranceSec = 300) {
   if (!secret) {

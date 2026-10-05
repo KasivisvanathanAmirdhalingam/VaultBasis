@@ -38,7 +38,7 @@
 
 const crypto = require('crypto');
 const { put, get } = require('@vercel/blob');
-const { isWellFormedToken, validatePreviewAccess, previewAccessPathname } = require('./preview-access-store');
+const { isWellFormedToken, validatePreviewAccess, previewAccessPathname } = require('./_lib/preview-access-store');
 
 const SESSION_COOKIE_NAME = 'vb_session';
 const SESSION_TTL_MS = 4 * 60 * 60 * 1000;

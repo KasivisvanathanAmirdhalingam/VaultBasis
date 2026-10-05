@@ -1,7 +1,7 @@
 'use strict';
 
 const { get } = require('@vercel/blob');
-const { validateEntitlement, isWellFormedToken } = require('./entitlement-store');
+const { validateEntitlement, isWellFormedToken } = require('./_lib/entitlement-store');
 
 // Platform routing — explicit ?platform= param takes precedence over User-Agent.
 const PLATFORM_MAP = {

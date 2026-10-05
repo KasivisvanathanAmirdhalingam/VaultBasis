@@ -12,6 +12,18 @@
       "destination": "/api/verifier-page"
     },
     {
+      "source": "/api/checkout",
+      "destination": "/api/commercial?action=checkout"
+    },
+    {
+      "source": "/api/checkout-session",
+      "destination": "/api/commercial?action=checkout-session"
+    },
+    {
+      "source": "/api/enterprise-inquiry",
+      "destination": "/api/commercial?action=enterprise-inquiry"
+    },
+    {
       "source": "/schemas/(.*)",
       "destination": "/schemas/$1"
     },

@@ -1,20 +1,28 @@
 'use strict';
 
 /**
- * VaultBasis — Commercial Checkout Session & Delivery Status Page (MMP15-PROD-BILL-001)
+ * VaultBasis — Commercial Bounded Services Handler (MMP15-INFRA-VCL-001)
  *
- * Conforms to Track B Air-Gapped Trust Boundary:
- * - Public Web / Vercel Serverless runtime has ZERO commercial signing authority.
- * - Zero Ed25519 commercial private keys accessible in this runtime.
- * - Serves authoritative order review, plan verification, and Paddle MoR handoff.
- * - On verified payment (via Paddle webhook or sandbox trigger), advances order state
- *   to ORDER_ELIGIBLE_FOR_PROVISIONING for offline air-gapped signing.
- * - Delivery instructions direct practitioners to their secure email delivery.
+ * Consolidates commercial endpoints (checkout, checkout-session, enterprise-inquiry)
+ * into a single bounded Serverless Function to stay strictly within Vercel platform limits.
+ *
+ * Security Invariants:
+ * - ZERO Ed25519 commercial private keys accessible in this runtime.
+ * - ZERO customer tax or reconciliation data processed or stored.
+ * - Air-gapped license provisioning decoupled via ORDER_ELIGIBLE_FOR_PROVISIONING state.
  */
 
-const { getOrder, transitionOrderPaymentState, PAYMENT_STATES, getPlanConfig } = require('./billing-store');
+const crypto = require('crypto');
+const { put } = require('@vercel/blob');
+const { createOrder, getOrder, transitionOrderPaymentState, PAYMENT_STATES, getPlanConfig } = require('./_lib/billing-store');
 
-function renderCheckoutHtml(order, planConfig, error = null, notice = null) {
+const _memoryInquiries = new Map();
+
+function _hasBlobStorage() {
+  return Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+}
+
+function renderCheckoutHtml(order, planConfig) {
   const isPaidOrEligible =
     order.paymentState === PAYMENT_STATES.PAID ||
     order.paymentState === PAYMENT_STATES.ORDER_ELIGIBLE_FOR_PROVISIONING;
@@ -286,7 +294,66 @@ function renderCheckoutHtml(order, planConfig, error = null, notice = null) {
 </html>`;
 }
 
-module.exports = async (req, res) => {
+// Sub-handler: Checkout Order Creation
+async function handleCheckout(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  const { plan, name, email, firm } = req.body || {};
+
+  if (!plan || !name || !email) {
+    return res.status(400).json({ error: 'Plan, name, and email are required.' });
+  }
+
+  const planConfig = getPlanConfig(plan);
+  if (!planConfig) {
+    return res.status(400).json({ error: `Unrecognized plan: '${plan}'.` });
+  }
+
+  if (!planConfig.isSelfServe) {
+    return res.status(400).json({
+      error: `Plan '${planConfig.displayName}' requires assisted commercial inquiry. Please contact sales.`,
+      redirectRoute: '/contact',
+    });
+  }
+
+  try {
+    const providerSessionId = `sess_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+
+    const order = await createOrder({
+      providerSessionId,
+      customerEmail: email,
+      customerName: name,
+      firmName: firm,
+      planId: planConfig.planId,
+    });
+
+    const canonicalBase = process.env.PUBLIC_BASE_URL || 'http://localhost:3000';
+    const checkoutUrl = `${canonicalBase}/api/checkout-session?order_id=${order.orderId}&session_id=${providerSessionId}`;
+
+    return res.status(200).json({
+      status: 'success',
+      orderId: order.orderId,
+      providerSessionId,
+      checkoutUrl,
+      orderSummary: {
+        plan: order.planId,
+        displayName: planConfig.displayName,
+        amountCents: order.priceAmountCents,
+        currency: order.priceCurrency,
+        caseCapacity: order.caseCapacity,
+        termDays: planConfig.termDurationDays,
+      },
+    });
+  } catch (error) {
+    console.error('[commercial] Checkout initiation error:', error);
+    return res.status(500).json({ error: 'Failed to initiate checkout session.' });
+  }
+}
+
+// Sub-handler: Checkout Session Review & Payment Transition
+async function handleCheckoutSession(req, res) {
   const query = req.query || {};
   const body = req.body || {};
   const orderId = query.order_id || body.order_id;
@@ -306,8 +373,6 @@ module.exports = async (req, res) => {
   }
 
   if (req.method === 'POST') {
-    // In production, initiate Paddle transaction and redirect to Paddle checkout.
-    // In sandbox/test environment, transition order to ORDER_ELIGIBLE_FOR_PROVISIONING.
     try {
       const updatedOrder = await transitionOrderPaymentState({
         orderId: order.orderId,
@@ -322,12 +387,87 @@ module.exports = async (req, res) => {
       res.setHeader('Content-Type', 'text/html; charset=utf-8');
       return res.status(200).send(renderCheckoutHtml(updatedOrder, planConfig));
     } catch (err) {
-      console.error('[checkout-session] Order transition error:', err);
+      console.error('[commercial] Order transition error:', err);
       return res.status(500).send('Checkout processing failed. Please try again.');
     }
   }
 
-  // GET request: render checkout session review page
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   return res.status(200).send(renderCheckoutHtml(order, planConfig));
+}
+
+// Sub-handler: Enterprise Inquiry
+async function handleEnterpriseInquiry(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  const { name, email, firm, estimatedCases, notes } = req.body || {};
+
+  if (!name || !email) {
+    return res.status(400).json({ error: 'Name and work email are required.' });
+  }
+
+  const inquiryId = `INQ-${new Date().getUTCFullYear()}-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
+  const now = new Date().toISOString();
+
+  const inquiryRecord = {
+    inquiryId,
+    customerName: name.trim(),
+    customerEmail: email.trim().toLowerCase(),
+    firmName: firm ? firm.trim() : null,
+    estimatedCases: estimatedCases || '250+',
+    notes: notes ? notes.trim() : null,
+    status: 'RECEIVED',
+    createdAt: now,
+  };
+
+  try {
+    if (_hasBlobStorage()) {
+      await put(`inquiries/${inquiryId}.json`, JSON.stringify(inquiryRecord), {
+        access: 'private',
+        contentType: 'application/json',
+        addRandomSuffix: false,
+        allowOverwrite: false,
+      });
+    } else {
+      _memoryInquiries.set(inquiryId, inquiryRecord);
+    }
+
+    return res.status(200).json({
+      status: 'success',
+      inquiryId,
+      message: 'Enterprise inquiry received. Our commercial team will provide an IT security pack and custom quote.',
+    });
+  } catch (error) {
+    console.error('[commercial] Error recording inquiry:', error);
+    return res.status(500).json({ error: 'Failed to record enterprise inquiry.' });
+  }
+}
+
+// Central Dispatcher
+module.exports = async (req, res) => {
+  const query = req.query || {};
+  const action = query.action;
+  const url = req.url || '';
+
+  if (action === 'checkout-session' || url.includes('/checkout-session')) {
+    return handleCheckoutSession(req, res);
+  }
+  if (action === 'enterprise-inquiry' || url.includes('/enterprise-inquiry')) {
+    return handleEnterpriseInquiry(req, res);
+  }
+  if (action === 'checkout' || url.includes('/checkout')) {
+    return handleCheckout(req, res);
+  }
+
+  // Default: if POST with plan field, treat as checkout; if has order_id, treat as session
+  if (req.body && req.body.plan) {
+    return handleCheckout(req, res);
+  }
+  if (query.order_id || (req.body && req.body.order_id)) {
+    return handleCheckoutSession(req, res);
+  }
+
+  return res.status(400).json({ error: 'Unrecognized commercial operation.' });
 };

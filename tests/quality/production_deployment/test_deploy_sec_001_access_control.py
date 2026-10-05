@@ -32,8 +32,8 @@ VERCEL_JSON = os.path.join(REPO_ROOT, 'vercel.json')
 VERIFIER_SESSION_JS = os.path.join(REPO_ROOT, 'api', 'verifier-session.js')
 VERIFIER_SESSION_CHECK_JS = os.path.join(REPO_ROOT, 'api', 'verifier-session-check.js')
 VERIFIER_PAGE_JS = os.path.join(REPO_ROOT, 'api', 'verifier-page.js')
-ENTITLEMENT_STORE_JS = os.path.join(REPO_ROOT, 'api', 'entitlement-store.js')
-PREVIEW_ACCESS_STORE_JS = os.path.join(REPO_ROOT, 'api', 'preview-access-store.js')
+ENTITLEMENT_STORE_JS = os.path.join(REPO_ROOT, 'api', '_lib', 'entitlement-store.js')
+PREVIEW_ACCESS_STORE_JS = os.path.join(REPO_ROOT, 'api', '_lib', 'preview-access-store.js')
 
 
 def read(path):
@@ -57,7 +57,7 @@ class TestArchitectureInvariants:
         It must use the preview-access/ Blob namespace, not entitlements/.
         """
         assert os.path.isfile(PREVIEW_ACCESS_STORE_JS), (
-            "api/preview-access-store.js must exist as a separate module from entitlement-store.js"
+            "api/_lib/preview-access-store.js must exist as a separate module from entitlement-store.js"
         )
         src = read(PREVIEW_ACCESS_STORE_JS)
         assert 'preview-access/' in src, (
