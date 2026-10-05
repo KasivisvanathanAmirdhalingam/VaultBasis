@@ -16,6 +16,7 @@ const crypto = require('crypto');
 const {
   PAYMENT_STATES,
   getOrder,
+  getPlanConfig,
   isEventProcessed,
   recordWebhookEvent,
   transitionOrderPaymentState,
@@ -48,10 +49,11 @@ function verifyWebhookSignature(payloadBuffer, signatureHeader, secret, toleranc
       const nowSec = Math.floor(Date.now() / 1000);
       const eventSec = parseInt(timestamp, 10);
       if (isNaN(eventSec) || Math.abs(nowSec - eventSec) > toleranceSec) {
+        console.warn(`[webhook-payment] Stale webhook timestamp: delta=${Math.abs(nowSec - eventSec)}s > tolerance=${toleranceSec}s`);
         return false;
       }
 
-      // Paddle signed payload is `timestamp:payloadBuffer` or Stripe `${timestamp}.${payloadBuffer}`
+      // Paddle signed payload is `${timestamp}:${rawBody}`
       const delimiter = signatureHeader.includes('ts=') ? ':' : '.';
       const signedPayload = `${timestamp}${delimiter}${payloadBuffer}`;
       const expectedSig = crypto
@@ -142,26 +144,64 @@ module.exports = async (req, res) => {
       eventType === 'payment_intent.succeeded';
 
     if (isSuccessEvent) {
-      // Validate payment integrity
-      const rawTotal = data.details?.totals?.total || data.amount_total || data.amount || order.priceAmountCents;
-      const amountReceived = typeof rawTotal === 'string' ? parseInt(rawTotal, 10) : Number(rawTotal);
-      const currencyReceived = (data.currency_code || data.currency || order.priceCurrency).toUpperCase();
-
-      if (amountReceived !== order.priceAmountCents || currencyReceived !== order.priceCurrency) {
+      // 1. Transaction ID Binding Check: If order already bound to a transaction ID, enforce matching
+      if (order.providerTransactionId && data.id && order.providerTransactionId !== data.id) {
         console.error(
-          `[webhook-payment] Commercial integrity conflict for order ${orderId}: ` +
-            `expected ${order.priceAmountCents} ${order.priceCurrency}, got ${amountReceived} ${currencyReceived}`
+          `[webhook-payment] Transaction mismatch for order ${orderId}: ` +
+            `expected ${order.providerTransactionId}, got ${data.id}`
         );
-        return res.status(409).json({ error: 'Payment amount or currency mismatch with order record.' });
+        return res.status(409).json({ error: 'Transaction ID mismatch with order record.' });
       }
 
-      await transitionOrderPaymentState(orderId, PAYMENT_STATES.PAYMENT_CONFIRMED, {
-        providerEventId: eventId,
-        providerTransactionId: data.id || order.providerTransactionId,
-        detail: `Payment verified via ${eventType}`,
-      });
+      // 2. Validate price mapping if present
+      const itemPriceId = data.items?.[0]?.price?.id || data.items?.[0]?.price_id;
+      const planConfig = getPlanConfig(order.planId);
+      const expectedPriceId = planConfig?.paddlePriceId;
+      if (itemPriceId && expectedPriceId && itemPriceId !== expectedPriceId) {
+        console.error(
+          `[webhook-payment] Price ID mismatch for order ${orderId}: ` +
+            `expected ${expectedPriceId}, got ${itemPriceId}`
+        );
+        return res.status(409).json({ error: 'Price identifier mismatch with plan catalog.' });
+      }
+
+      // 3. Validate payment currency & base amount (allow total >= base due to MoR sales tax / VAT)
+      const currencyReceived = (data.currency_code || data.currency || order.priceCurrency).toUpperCase();
+      if (currencyReceived !== order.priceCurrency) {
+        console.error(`[webhook-payment] Currency conflict for order ${orderId}: expected ${order.priceCurrency}, got ${currencyReceived}`);
+        return res.status(409).json({ error: 'Payment currency mismatch with order record.' });
+      }
+
+      const rawSubtotal = data.details?.totals?.subtotal;
+      const rawTotal = data.details?.totals?.total || data.amount_total || data.amount;
+      const subtotalCents = rawSubtotal ? parseInt(rawSubtotal, 10) : null;
+      const totalCents = rawTotal ? parseInt(rawTotal, 10) : null;
+
+      if (subtotalCents !== null && subtotalCents !== order.priceAmountCents) {
+        console.error(`[webhook-payment] Base price mismatch for order ${orderId}: expected ${order.priceAmountCents}, got subtotal ${subtotalCents}`);
+        return res.status(409).json({ error: 'Base price mismatch with order record.' });
+      } else if (subtotalCents === null && totalCents !== null && totalCents < order.priceAmountCents) {
+        console.error(`[webhook-payment] Underpayment for order ${orderId}: expected >= ${order.priceAmountCents}, got ${totalCents}`);
+        return res.status(409).json({ error: 'Payment amount is less than order amount.' });
+      }
+
+      // 4. Distinguish transaction.paid vs transaction.completed
+      if (eventType === 'transaction.completed') {
+        await transitionOrderPaymentState(orderId, PAYMENT_STATES.ORDER_ELIGIBLE_FOR_PROVISIONING, {
+          providerEventId: eventId,
+          providerTransactionId: data.id || order.providerTransactionId,
+          detail: `Transaction completed and eligible for provisioning via ${eventType}`,
+        });
+      } else {
+        await transitionOrderPaymentState(orderId, PAYMENT_STATES.PAYMENT_CONFIRMED, {
+          providerEventId: eventId,
+          providerTransactionId: data.id || order.providerTransactionId,
+          detail: `Payment confirmed via ${eventType}`,
+        });
+      }
     } else if (
       eventType === 'transaction.past_due' ||
+      eventType === 'transaction.canceled' ||
       eventType === 'payment_intent.payment_failed' ||
       eventType === 'charge.failed'
     ) {
@@ -172,7 +212,7 @@ module.exports = async (req, res) => {
     } else if (eventType === 'adjustment.created' || eventType === 'charge.refunded') {
       await transitionOrderPaymentState(orderId, PAYMENT_STATES.REFUNDED, {
         providerEventId: eventId,
-        detail: `Refund processed via ${eventType}`,
+        detail: `Commercial adjustment/refund recorded via ${eventType}`,
       });
     } else {
       // Ignored event types acknowledge receipt

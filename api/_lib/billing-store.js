@@ -360,12 +360,19 @@ async function transitionOrderPaymentState(arg1, arg2, arg3) {
     order.providerTransactionId = providerTransactionId;
   }
 
-  if (targetState === PAYMENT_STATES.PAYMENT_CONFIRMED || targetState === PAYMENT_STATES.ORDER_ELIGIBLE_FOR_PROVISIONING) {
-    if (currentState !== PAYMENT_STATES.CHECKOUT_CREATED && currentState !== PAYMENT_STATES.PAYMENT_PENDING) {
-      throw new Error(`Illegal state transition to PAYMENT_CONFIRMED from ${currentState}`);
+  if (targetState === PAYMENT_STATES.ORDER_ELIGIBLE_FOR_PROVISIONING) {
+    if (currentState !== PAYMENT_STATES.CHECKOUT_CREATED && currentState !== PAYMENT_STATES.PAYMENT_PENDING && currentState !== PAYMENT_STATES.PAYMENT_CONFIRMED) {
+      throw new Error(`Illegal state transition to ORDER_ELIGIBLE_FOR_PROVISIONING from ${currentState}`);
     }
     order.paymentState = PAYMENT_STATES.ORDER_ELIGIBLE_FOR_PROVISIONING;
     order.provisioningState = PROVISIONING_STATES.ELIGIBLE;
+    if (!order.confirmedAt) order.confirmedAt = now;
+  } else if (targetState === PAYMENT_STATES.PAYMENT_CONFIRMED) {
+    if (currentState !== PAYMENT_STATES.CHECKOUT_CREATED && currentState !== PAYMENT_STATES.PAYMENT_PENDING) {
+      throw new Error(`Illegal state transition to PAYMENT_CONFIRMED from ${currentState}`);
+    }
+    order.paymentState = PAYMENT_STATES.PAYMENT_CONFIRMED;
+    order.provisioningState = PROVISIONING_STATES.NOT_ELIGIBLE;
     order.confirmedAt = now;
   } else if (targetState === PAYMENT_STATES.PAYMENT_FAILED) {
     order.paymentState = PAYMENT_STATES.PAYMENT_FAILED;

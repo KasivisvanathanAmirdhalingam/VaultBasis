@@ -439,6 +439,30 @@ async function handleCheckoutSession(req, res) {
       req.headers['content-type']?.includes('application/json');
 
     try {
+      // Idempotency: If order already has an active Paddle transaction in PAYMENT_PENDING, reuse it
+      if (
+        order.paymentState === PAYMENT_STATES.PAYMENT_PENDING &&
+        order.providerTransactionId &&
+        order.events?.length > 0
+      ) {
+        const lastHandoff = order.events.slice().reverse().find(e => e.state === PAYMENT_STATES.PAYMENT_PENDING);
+        const existingCheckoutUrl = lastHandoff?.metadata?.checkoutUrl;
+        if (existingCheckoutUrl) {
+          if (isJsonRequest) {
+            return res.status(200).json({
+              ok: true,
+              order_id: order.orderId,
+              state: PAYMENT_STATES.PAYMENT_PENDING,
+              checkout_url: existingCheckoutUrl,
+              provider: 'PADDLE',
+              provider_transaction_id: order.providerTransactionId,
+              reused: true,
+            });
+          }
+          return res.redirect(303, existingCheckoutUrl);
+        }
+      }
+
       const canonicalBase = process.env.PUBLIC_BASE_URL || 'http://localhost:3000';
       const returnUrl = `${canonicalBase}/api/checkout-session?order_id=${order.orderId}&session_id=${encodeURIComponent(order.providerSessionId)}`;
 

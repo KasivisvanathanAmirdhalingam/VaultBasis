@@ -390,3 +390,194 @@ def test_paddle_webhook_transaction_completed_lifecycle():
     assert res["provisioningState"] == "ELIGIBLE"
     assert res["providerTxnId"] == "txn_01jmpractice999888777"
 
+
+@pytest.mark.regression
+def test_commercial_checkout_handoff_idempotency_reuses_active_session():
+    """Validates that repeating POST /api/checkout-session reuses the existing active Paddle transaction without duplicate creations."""
+    code = """
+    const billingStore = require('./api/_lib/billing-store.js');
+    const order = await billingStore.createOrder({
+        customerEmail: 'repeat_checkout@cpa.org',
+        customerName: 'Repeat Checkout',
+        planId: 'SOLO'
+    });
+
+    let firstRes = null;
+    let secondRes = null;
+
+    function createMockRes(collector) {
+        return {
+            status(code) {
+                return {
+                    json(body) { collector.status = code; collector.body = body; return body; },
+                    send(body) { collector.status = code; collector.body = body; return body; }
+                };
+            },
+            setHeader() {}
+        };
+    }
+
+    // Call 1
+    const res1 = {};
+    await commercialHandler({
+        method: 'POST',
+        headers: { 'accept': 'application/json', 'content-type': 'application/json' },
+        query: { action: 'checkout-session' },
+        body: { order_id: order.orderId, session_id: order.providerSessionId }
+    }, createMockRes(res1));
+
+    // Call 2 (duplicate click/retry)
+    const res2 = {};
+    await commercialHandler({
+        method: 'POST',
+        headers: { 'accept': 'application/json', 'content-type': 'application/json' },
+        query: { action: 'checkout-session' },
+        body: { order_id: order.orderId, session_id: order.providerSessionId }
+    }, createMockRes(res2));
+
+    console.log(JSON.stringify({
+        res1Status: res1.status,
+        res2Status: res2.status,
+        txn1: res1.body.provider_transaction_id,
+        txn2: res2.body.provider_transaction_id,
+        reused: res2.body.reused
+    }));
+    """
+    res = run_node_snippet(code)
+    assert res["res1Status"] == 200
+    assert res["res2Status"] == 200
+    assert res["txn1"] == res["txn2"]
+    assert res["reused"] is True
+
+
+@pytest.mark.regression
+def test_paddle_webhook_paid_vs_completed_progression():
+    """Validates that transaction.paid moves order to PAYMENT_CONFIRMED, and transaction.completed to ORDER_ELIGIBLE_FOR_PROVISIONING."""
+    code = """
+    const billingStore = require('./api/_lib/billing-store.js');
+    const webhookHandler = require('./api/webhook-payment.js');
+    process.env.ALLOW_TEST_WEBHOOKS = 'true';
+
+    const order = await billingStore.createOrder({
+        customerEmail: 'progression@firm.com',
+        customerName: 'Progression Test',
+        planId: 'SOLO' // $499
+    });
+
+    await billingStore.transitionOrderPaymentState(order.orderId, billingStore.PAYMENT_STATES.PAYMENT_PENDING, {
+        providerTransactionId: 'txn_01jmsolo111222333'
+    });
+
+    let mockRes = { status: (c) => ({ json: (b) => {} }) };
+
+    // Step 1: transaction.paid
+    await webhookHandler({
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: {
+            event_id: 'evt_paid_001',
+            event_type: 'transaction.paid',
+            data: {
+                id: 'txn_01jmsolo111222333',
+                status: 'paid',
+                custom_data: { order_id: order.orderId },
+                details: { totals: { subtotal: '49900', total: '54890', currency_code: 'USD' } } // MoR tax added
+            }
+        }
+    }, mockRes);
+
+    const afterPaid = await billingStore.getOrder(order.orderId);
+    const paidState = afterPaid.paymentState;
+    const paidProvState = afterPaid.provisioningState;
+
+    // Step 2: transaction.completed
+    await webhookHandler({
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: {
+            event_id: 'evt_completed_002',
+            event_type: 'transaction.completed',
+            data: {
+                id: 'txn_01jmsolo111222333',
+                status: 'completed',
+                custom_data: { order_id: order.orderId },
+                details: { totals: { subtotal: '49900', total: '54890', currency_code: 'USD' } }
+            }
+        }
+    }, mockRes);
+
+    const afterCompleted = await billingStore.getOrder(order.orderId);
+
+    console.log(JSON.stringify({
+        paidState,
+        paidProvState,
+        completedState: afterCompleted.paymentState,
+        completedProvState: afterCompleted.provisioningState
+    }));
+    """
+    res = run_node_snippet(code)
+    assert res["paidState"] == "PAYMENT_CONFIRMED"
+    assert res["paidProvState"] == "NOT_ELIGIBLE"
+    assert res["completedState"] == "ORDER_ELIGIBLE_FOR_PROVISIONING"
+    assert res["completedProvState"] == "ELIGIBLE"
+
+
+@pytest.mark.regression
+def test_paddle_webhook_transaction_binding_conflict_rejection():
+    """Validates that a webhook event with a mismatched transaction ID is rejected with 409 Conflict."""
+    code = """
+    const billingStore = require('./api/_lib/billing-store.js');
+    const webhookHandler = require('./api/webhook-payment.js');
+    process.env.ALLOW_TEST_WEBHOOKS = 'true';
+
+    const order = await billingStore.createOrder({
+        customerEmail: 'tamper@firm.com',
+        customerName: 'Tamper CPA',
+        planId: 'SOLO'
+    });
+
+    // Order bound to legitimate transaction
+    await billingStore.transitionOrderPaymentState(order.orderId, billingStore.PAYMENT_STATES.PAYMENT_PENDING, {
+        providerTransactionId: 'txn_01jm_legitimate_id'
+    });
+
+    let statusCode = null;
+    let jsonBody = null;
+
+    const mockRes = {
+        status(code) {
+            statusCode = code;
+            return { json(b) { jsonBody = b; return b; } };
+        }
+    };
+
+    // Webhook with rogue transaction ID trying to claim this order
+    await webhookHandler({
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: {
+            event_id: 'evt_rogue_001',
+            event_type: 'transaction.completed',
+            data: {
+                id: 'txn_01jm_rogue_different_id',
+                custom_data: { order_id: order.orderId },
+                details: { totals: { total: '49900', currency_code: 'USD' } }
+            }
+        }
+    }, mockRes);
+
+    const freshOrder = await billingStore.getOrder(order.orderId);
+
+    console.log(JSON.stringify({
+        statusCode,
+        jsonBody,
+        orderState: freshOrder.paymentState,
+        provState: freshOrder.provisioningState
+    }));
+    """
+    res = run_node_snippet(code)
+    assert res["statusCode"] == 409
+    assert res["orderState"] == "PAYMENT_PENDING"
+    assert res["provState"] == "NOT_ELIGIBLE"
+
+

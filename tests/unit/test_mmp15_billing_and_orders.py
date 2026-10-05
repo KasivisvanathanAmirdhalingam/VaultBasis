@@ -173,11 +173,11 @@ def test_webhook_payment_confirmation_transitions_to_eligible():
         planId: 'SOLO'
     });
 
-    // Advance to confirmed via webhook simulation
+    // Advance to confirmed & eligible via webhook simulation
     const updated = await billingStore.transitionOrderPaymentState(
         order.orderId,
-        billingStore.PAYMENT_STATES.PAYMENT_CONFIRMED,
-        { providerEventId: 'evt_test_123', detail: 'Stripe charge succeeded' }
+        billingStore.PAYMENT_STATES.ORDER_ELIGIBLE_FOR_PROVISIONING,
+        { providerEventId: 'evt_test_123', detail: 'Paddle transaction completed' }
     );
 
     console.log(JSON.stringify({
@@ -481,7 +481,7 @@ def test_audit_event_trail_records_state_transitions():
     assert result["states"] == [
         "CHECKOUT_CREATED",
         "PAYMENT_PENDING",
-        "ORDER_ELIGIBLE_FOR_PROVISIONING",
+        "PAYMENT_CONFIRMED",
     ]
 
 
