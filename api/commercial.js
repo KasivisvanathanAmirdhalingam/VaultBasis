@@ -281,14 +281,14 @@ function renderCheckoutHtml(order, planConfig) {
       </div>
 
       <div class="terms-box">
-        <strong>Local Case Processing &amp; Data Protection:</strong> VaultBasis Edge processes all client reconciliation, tax-basis calculations, and Evidence Receipts locally on your computer. Client tax records and ledger data are never uploaded to VaultBasis cloud servers.
+        <strong>Local Case Processing &amp; Data Protection:</strong> VaultBasis Edge processes all client reconciliation, tax-basis calculations, and Evidence Receipts locally on your computer. Client tax records and ledger data are not uploaded to VaultBasis cloud services for normal Edge case processing.
       </div>
 
       <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid var(--border-accent); border-radius: 8px; padding: 1.25rem; margin-bottom: 1.5rem; text-align: left;">
         <label style="display: flex; align-items: flex-start; gap: 12px; cursor: pointer; font-size: 0.88rem; line-height: 1.5; color: #cbd5e1;">
           <input type="checkbox" id="agreement-checkbox" name="agreement_accepted" value="true" style="margin-top: 3px; width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer;">
           <span>
-            <strong>I have read and agree to the <a href="/terms-of-service" target="_blank" rel="noopener" style="color: #38bdf8; text-decoration: underline;">Software License Agreement</a> and <a href="/terms-of-service" target="_blank" rel="noopener" style="color: #38bdf8; text-decoration: underline;">Terms of Service</a>.</strong>
+            <strong>I agree to the <a href="/terms-of-service" target="_blank" rel="noopener" style="color: #38bdf8; text-decoration: underline;">Software License Agreement</a> and <a href="/terms-of-service" target="_blank" rel="noopener" style="color: #38bdf8; text-decoration: underline;">Terms of Service</a>.</strong>
             <br>
             <span style="font-size: 0.82rem; color: #94a3b8; display: block; margin-top: 4px;">
               I acknowledge the <a href="/privacy-policy" target="_blank" rel="noopener" style="color: #94a3b8; text-decoration: underline;">Privacy Policy</a>, <a href="/trust-assurance" target="_blank" rel="noopener" style="color: #94a3b8; text-decoration: underline;">Security &amp; Trust Model</a>, and <a href="/docs/scope_and_limitations_v0.1" target="_blank" rel="noopener" style="color: #94a3b8; text-decoration: underline;">Scope &amp; Limitations</a> describing local Edge processing and practitioner responsibilities.

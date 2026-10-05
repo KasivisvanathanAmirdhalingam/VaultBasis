@@ -13,9 +13,40 @@
 
 const https = require('https');
 
+const APPROVED_PADDLE_HOSTS = new Set([
+  'buy.paddle.com',
+  'sandbox-buy.paddle.com',
+  'checkout.paddle.com',
+  'sandbox-checkout.paddle.com',
+]);
+
 function getPaddleApiBase() {
   const env = process.env.PADDLE_ENVIRONMENT || 'sandbox';
   return env === 'production' ? 'https://api.paddle.com' : 'https://sandbox-api.paddle.com';
+}
+
+function getPaddleBuyBase() {
+  const env = process.env.PADDLE_ENVIRONMENT || 'sandbox';
+  return env === 'production' ? 'https://buy.paddle.com' : 'https://sandbox-buy.paddle.com';
+}
+
+function validatePaddleCheckoutUrl(urlStr) {
+  if (!urlStr || typeof urlStr !== 'string') {
+    throw new Error('Invalid Paddle checkout URL: URL must be a non-empty string.');
+  }
+  let parsed;
+  try {
+    parsed = new URL(urlStr);
+  } catch (e) {
+    throw new Error(`Invalid Paddle checkout URL format: ${e.message}`);
+  }
+  if (parsed.protocol !== 'https:') {
+    throw new Error(`Insecure Paddle checkout URL protocol: '${parsed.protocol}'. Must be https:`);
+  }
+  if (!APPROVED_PADDLE_HOSTS.has(parsed.hostname)) {
+    throw new Error(`Unrecognized Paddle checkout hostname: '${parsed.hostname}'. Must be on approved Paddle host allowlist.`);
+  }
+  return urlStr;
 }
 
 function getPaddlePriceIdForPlan(planId) {
@@ -32,6 +63,7 @@ async function createPaddleTransaction({ order, planConfig, returnUrl, agreement
   const apiKey = process.env.PADDLE_API_KEY;
   const env = process.env.PADDLE_ENVIRONMENT || 'sandbox';
   const apiBase = getPaddleApiBase();
+  const buyBase = getPaddleBuyBase();
   const priceId = planConfig?.paddlePriceId || getPaddlePriceIdForPlan(order.planId);
 
   // If no API key is provided:
@@ -43,8 +75,9 @@ async function createPaddleTransaction({ order, planConfig, returnUrl, agreement
 
     // In sandbox / development / testing mode, generate a compliant sandbox transaction envelope
     const mockTxnId = `txn_01${Buffer.from(order.orderId).toString('hex').padEnd(20, '0').substring(0, 22)}`;
-    const mockCheckoutUrl = process.env.PADDLE_CHECKOUT_URL || `${apiBase.replace('api.', 'sandbox-buy.')}/checkout?_ptxn=${mockTxnId}&order_id=${encodeURIComponent(order.orderId)}&plan=${encodeURIComponent(order.planId)}&amount=${order.priceAmountCents}&currency=${encodeURIComponent(order.priceCurrency)}&customer_email=${encodeURIComponent(order.customerEmail)}`;
-    
+    const rawMockCheckoutUrl = process.env.PADDLE_CHECKOUT_URL || `${buyBase}/checkout?_ptxn=${mockTxnId}&order_id=${encodeURIComponent(order.orderId)}&plan=${encodeURIComponent(order.planId)}&amount=${order.priceAmountCents}&currency=${encodeURIComponent(order.priceCurrency)}&customer_email=${encodeURIComponent(order.customerEmail)}`;
+    const mockCheckoutUrl = validatePaddleCheckoutUrl(rawMockCheckoutUrl);
+
     console.warn(`[paddle-client] PADDLE_API_KEY unconfigured; initialized sandbox transaction ${mockTxnId} for plan ${order.planId} (${priceId}).`);
     return {
       transactionId: mockTxnId,
@@ -71,6 +104,7 @@ async function createPaddleTransaction({ order, planConfig, returnUrl, agreement
       plan: order.planId,
       case_capacity: order.caseCapacity,
       customer_email: order.customerEmail,
+      agreement_version: agreementRecord?.agreementVersion || 'MMP-1.5-2026.1',
     },
     checkout: {
       url: returnUrl || process.env.PUBLIC_BASE_URL || 'https://www.vaultbasis.com',
@@ -99,7 +133,8 @@ async function createPaddleTransaction({ order, planConfig, returnUrl, agreement
             const json = JSON.parse(raw);
             if (res.statusCode >= 200 && res.statusCode < 300 && json.data?.id) {
               const txn = json.data;
-              const checkoutUrl = txn.checkout?.url || `${apiBase.replace('api.', 'buy.')}/checkout?_ptxn=${txn.id}`;
+              const rawCheckoutUrl = txn.checkout?.url || `${buyBase}/checkout?_ptxn=${txn.id}`;
+              const checkoutUrl = validatePaddleCheckoutUrl(rawCheckoutUrl);
               return resolve({
                 transactionId: txn.id,
                 checkoutUrl,
@@ -128,6 +163,9 @@ async function createPaddleTransaction({ order, planConfig, returnUrl, agreement
 
 module.exports = {
   getPaddleApiBase,
+  getPaddleBuyBase,
   getPaddlePriceIdForPlan,
+  validatePaddleCheckoutUrl,
+  APPROVED_PADDLE_HOSTS,
   createPaddleTransaction,
 };

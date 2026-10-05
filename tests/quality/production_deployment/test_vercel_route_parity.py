@@ -597,3 +597,74 @@ def test_paddle_webhook_transaction_binding_conflict_rejection():
     assert res["provState"] == "NOT_ELIGIBLE"
 
 
+@pytest.mark.regression
+def test_paddle_checkout_url_integrity_and_allowlist_validation():
+    """MMP15-PAY-URL-001: Asserts that Paddle checkout URLs are strictly validated against approved hosts and never double-prefixed."""
+    code = """
+    const paddleClient = require('./api/_lib/paddle-client.js');
+
+    const results = {};
+
+    // 1. Valid sandbox URL
+    try {
+        const u1 = paddleClient.validatePaddleCheckoutUrl('https://sandbox-buy.paddle.com/checkout?_ptxn=txn_01jm123');
+        results.validSandbox = u1;
+    } catch (e) { results.validSandboxError = e.message; }
+
+    // 2. Valid production URL
+    try {
+        const u2 = paddleClient.validatePaddleCheckoutUrl('https://buy.paddle.com/checkout?_ptxn=txn_01jm456');
+        results.validProd = u2;
+    } catch (e) { results.validProdError = e.message; }
+
+    // 3. Double-prefixed URL rejection
+    try {
+        paddleClient.validatePaddleCheckoutUrl('https://sandbox-sandbox-buy.paddle.com/checkout?_ptxn=txn_01jm789');
+        results.doublePrefixedRejected = false;
+    } catch (e) {
+        results.doublePrefixedRejected = true;
+    }
+
+    // 4. Insecure HTTP scheme rejection
+    try {
+        paddleClient.validatePaddleCheckoutUrl('http://buy.paddle.com/checkout?_ptxn=txn_01jm000');
+        results.httpRejected = false;
+    } catch (e) {
+        results.httpRejected = true;
+    }
+
+    // 5. Rogue external domain rejection
+    try {
+        paddleClient.validatePaddleCheckoutUrl('https://malicious-site.com/checkout?_ptxn=txn_01jm000');
+        results.rogueDomainRejected = false;
+    } catch (e) {
+        results.rogueDomainRejected = true;
+    }
+
+    // 6. Test sandbox transaction creation URL shape
+    const mockOrder = {
+        orderId: 'ORD-2026-TESTURL',
+        planId: 'SOLO',
+        caseCapacity: 10,
+        customerEmail: 'urltest@firm.com',
+        customerName: 'URL Test',
+        priceAmountCents: 49900,
+        priceCurrency: 'USD'
+    };
+    const txn = await paddleClient.createPaddleTransaction({ order: mockOrder });
+    results.generatedCheckoutUrl = txn.checkoutUrl;
+    results.generatedHostname = new URL(txn.checkoutUrl).hostname;
+
+    console.log(JSON.stringify(results));
+    """
+    res = run_node_snippet(code)
+    assert res["validSandbox"] == "https://sandbox-buy.paddle.com/checkout?_ptxn=txn_01jm123"
+    assert res["validProd"] == "https://buy.paddle.com/checkout?_ptxn=txn_01jm456"
+    assert res["doublePrefixedRejected"] is True
+    assert res["httpRejected"] is True
+    assert res["rogueDomainRejected"] is True
+    assert res["generatedHostname"] == "sandbox-buy.paddle.com"
+    assert "sandbox-sandbox" not in res["generatedCheckoutUrl"]
+
+
+
