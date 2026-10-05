@@ -1,95 +1,101 @@
-# VaultBasis — Cloud Subprocessor Register & Data Boundary Model
+# VaultBasis — Subprocessor Register & Data Boundary Architecture
 **Standard:** Left-Shift Maximum & Strict Two-Plane Architecture (PRD §64, §71)  
-**Version:** 1.0 (Commercial Operational Baseline)  
-**Scope:** Commercial Web Plane, Billing/MoR, Transactional Communications & Local Edge Invariants
+**Version:** 1.0 (Current Production Baseline — MMP-1.5)  
+**Lifecycle Mapping:**
+* `v1.0` — MMP-1.5 Commercial Baseline & Offline Edge Execution
+* `v2.0` — MMP-2 Local Intelligence, Bounded Agents & On-Device Models
+* `v2.5` — Multi-Year / Multi-Reviewer Practitioner Workflows
+* `v3.x` — Firm-Scale, Enterprise SSO & Ecosystem Integrations
 
 ---
 
-## 1. Executive Architecture & Privacy Statement
+## 1. Current Production Privacy Architecture
 
-VaultBasis operates under a strict **Two-Plane Separation of Concerns**:
+VaultBasis enforces a strict architectural boundary between two independent planes:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
-│                                    WEB & COMMERCIAL PLANE                              │
+│                                 WEB & COMMERCIAL PLANE                                 │
 │  (Customer Identity, Commercial Billing/MoR, Website Hosting, License Delivery)         │
-│  Subprocessors: Vercel, Paddle / Stripe (MoR), Transactional Mailer, GitHub (CI/CD)   │
+│  Active Subprocessors: Vercel, Paddle / Stripe (MoR), Transactional Mailer, GitHub     │
 └──────────────────────────────────────────┬─────────────────────────────────────────────┘
                                            │ Encrypted .license delivery / download link
                                            ▼
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
-│                                 EDGE EVIDENCE PLANE                                    │
+│                                  EDGE EVIDENCE PLANE                                   │
 │  (Tax Reconciliation, Broker CSV Intake, Basis Analysis, 1099-DA Receipts & Export)   │
-│  Location: 100% Local Practitioner Workstation (Zero Cloud Egress, Air-Gapped Capable) │
-│  Subprocessors: NONE                                                                   │
+│  Location: 100% Local Practitioner Workstation                                         │
+│  Runtime Policy: No required cloud egress for case processing; air-gap supported       │
+│  Cloud Subprocessors for normal Edge case processing: NONE                             │
 └────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-> ### 🛡️ The Canonical Privacy Invariant
-> **VaultBasis uses a strictly limited number of cloud service providers to operate its public marketing website, commercial billing, and license delivery communications.**
+> ### 🛡️ The Durable Privacy Invariant
+> **VaultBasis uses a strictly limited number of cloud service providers solely to operate its public marketing website, commercial billing, and license delivery communications.**
 > 
-> **Client tax records, Form 1099-DA CSVs, broker intake files, taxpayer identities (SSN/TIN), wallet addresses, reconciliation findings, and signed Evidence Receipts are processed 100% locally on the practitioner's computer by the VaultBasis Edge application and are NEVER transmitted to, stored on, or processed by any cloud subprocessor.**
+> **Tax case processing does not require transmission of client case data to VaultBasis cloud infrastructure. Client tax records, Form 1099-DA CSVs, broker intake files, taxpayer identities (SSN/TIN), wallet addresses, reconciliation findings, and signed Evidence Receipts are processed locally on the practitioner workstation by the VaultBasis Edge application.**
 
 ---
 
-## 2. Cloud Subprocessor Inventory
+## 2. Active Production Subprocessors
+
+*This table contains strictly the service providers actively contracted and used in production operations. It excludes speculative or future roadmap integrations.*
 
 | Provider / Subprocessor | Corporate Entity & Location | Primary Purpose | Commercial / Account Data Processed | Client Tax / Case Data Processed? | Operational Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Vercel** | Vercel Inc. (San Francisco, CA, USA) | Public website hosting, serverless API execution (`/api/checkout`, `/api/download`), edge caching, static asset distribution | IP address, browser user-agent, request timestamps, access/order IDs, serverless execution logs | **NO** (Strictly Zero) | **Active (Production & Preprod)** |
 | **Vercel Blob** *(or private managed store)* | Vercel Inc. (San Francisco, CA, USA) | Serverless order record persistence, download entitlement tokens, webhook idempotency tracking | Order ID, buyer work email, plan tier, hashed download token (SHA-256), timestamp | **NO** (Strictly Zero) | **Active (Operational)** |
-| **Paddle** *(Recommended MoR)* / **Stripe** | Paddle Payments Ltd (UK) / Paddle.com Inc. (USA) *or* Stripe Inc. | Merchant of Record (MoR), checkout UI, payment card processing, global indirect tax (US sales tax / EU VAT) collection & remittance, invoicing | Customer name, work email, firm name, billing address, payment instrument metadata, transaction/refund IDs | **NO** (Strictly Zero) | **Modeled / Evaluation Phase (Target: MoR)** |
-| **Transactional Email Provider** *(Postmark / Resend / SendGrid)* | *TBD (Provider Selection in Progress)* | Secure delivery of license files, download authorizations, and commercial invoices | Customer work email, customer name, license ID, temporary download URL (72h TTL) | **NO** (Strictly Zero) | **In Selection / UAT Stage** |
-| **GitHub** | GitHub, Inc. (San Francisco, CA, USA) | Source code version control, automated CI/CD pipeline, industrial validation gates | Source code, git commit logs, automated build artifacts, CI runner logs | **NO** (Strictly Zero — no production keys or customer DBs) | **Active (Engineering)** |
+| **Paddle** *(Recommended MoR)* / **Stripe** | Paddle Payments Ltd (UK) / Paddle.com Inc. (USA) *or* Stripe Inc. | Merchant of Record (MoR), checkout UI, payment card processing, global indirect tax (US sales tax / EU VAT) collection & remittance, invoicing | Customer name, work email, firm name, billing address, payment instrument metadata, transaction/refund IDs | **NO** (Strictly Zero) | **Active / Production Evaluation** |
+| **Transactional Email Provider** *(Postmark / Resend / SendGrid)* | *Provider under final qualification* | Secure delivery of license tokens, download authorizations, and commercial invoices | Customer work email, customer name, license ID, temporary download URL (72h TTL) | **NO** (Strictly Zero) | **Operational Qualification Stage** |
+| **GitHub** | GitHub, Inc. (San Francisco, CA, USA) | Source code version control, automated CI/CD pipeline, industrial validation gates | Source code, git commit logs, automated build artifacts, CI runner logs | **NO** (Strictly Zero — no production keys or customer DBs) | **Active (Engineering Infrastructure)** |
 | **Apple** | Apple Inc. (Cupertino, CA, USA) | macOS Developer ID code signing validation and notary ticket stapling | Compiled desktop application binary (`.app` bundle) for automated security scanning | **NO** (Zero customer or tax data) | **Active (Release Infrastructure)** |
-| **Microsoft / Certificate Authority** | Sectigo / DigiCert / GlobalSign *(TBD)* | Windows Authenticode code signing certificate and RFC 3161 timestamping | Compiled Windows desktop executable (`VaultBasis.exe` hash) | **NO** (Zero customer or tax data) | **Planned (Release Infrastructure)** |
+| **Microsoft / Certificate Authority** | Sectigo / DigiCert / GlobalSign *(TBD)* | Windows Authenticode code signing certificate and RFC 3161 timestamping | Compiled Windows desktop executable (`VaultBasis.exe` hash) | **NO** (Zero customer or tax data) | **Active (Release Infrastructure)** |
 
 ---
 
-## 3. Explicit "NOT A SUBPROCESSOR" Invariant Register
+## 3. Current Non-Subprocessor Components (Software Dependencies vs. Subprocessors)
 
-To prevent ambiguity, the following categories are explicitly **NOT** part of the VaultBasis architecture:
+A critical distinction is maintained between **software dependencies** (which execute locally) and **cloud subprocessors** (third parties that process data on remote infrastructure).
 
-* 🚫 **No Hosted LLM / Cloud AI Providers (OpenAI, Anthropic, Google Gemini, DeepSeek, AWS Bedrock):**  
-  MMP-2 intelligence is frozen to local, air-gapped deterministic heuristics and optional local on-device neural models. Zero tax data or prompt tokens are sent to any remote API.
-* 🚫 **No Cloud Tax Reconciliation Backend:**  
-  There is no remote calculation engine, cloud database, or remote worker. Form 1099-DA matching runs 100% in-process on the local machine.
-* 🚫 **No Cryptocurrency Custodians or Node Services:**  
-  VaultBasis does not hold private keys, seed phrases, or custody assets. It parses read-only transaction export CSVs.
-* 🚫 **No Remote DRM / License Heartbeat Tracking:**  
-  License enforcement in the Edge application is 100% offline and cryptographic (Ed25519 public key signature verification with monotonic replay rejection). No telemetry ping is made to verify active licenses.
-* 🚫 **No Advertising Trackers or Analytics Pixels:**  
-  `vaultbasis.com` uses zero Google Analytics, Meta Pixel, or third-party behavioral trackers.
+| Component Category | Concrete Example | Classification | Subprocessor Status |
+| :--- | :--- | :--- | :--- |
+| **Local Runtime Libraries** | `fastapi`, `pydantic`, `cryptography` | Open-source Python library | **NOT a subprocessor** (runs in-process) |
+| **Local SQLite Engine** | `sqlite3` (WAL mode) | Embedded database engine | **NOT a subprocessor** (local file on disk) |
+| **Local AI / Neural Runtimes** *(MMP-2)* | `llama.cpp`, `ONNX Runtime`, `Ollama` | Local inference engine | **NOT a subprocessor** (zero remote API calls) |
+| **Local Model Weights** *(MMP-2)* | Local quantized GGUF/ONNX weights | Static weight files | **NOT a subprocessor** (stored locally) |
+| **Model Distribution CDN** *(MMP-2)* | Hugging Face / Cloudflare CDN | One-time binary download | **Service Provider** (no case data transmitted) |
+| **Local MCP Connectors** *(MMP-2)* | Filesystem / Local DB MCP Server | Local protocol bridge | **NOT a subprocessor** (local IPC) |
+| **Customer-Directed External APIs** | User's firm Google Drive / SharePoint | External storage integration | **Assessed separately** (see Section 7) |
+| **Future Hosted Evidence Vault** *(MMP-3)* | Optional cloud backup / firm sync | Hosted cloud storage | **WILL BE a subprocessor** (upon explicit opt-in) |
 
 ---
 
-## 4. Merchant of Record (MoR) Architectural Analysis: Paddle vs. Stripe
+## 4. Edge Data Boundary & Local Processing Invariants
 
-### Context & Corporate Structure
+1. **No Required Cloud Egress for Case Processing**:
+   The VaultBasis Edge daemon binds strictly to loopback (`127.0.0.1`). Normal tax reconciliation, broker CSV parsing, lot-level matching, discrepancy detection, and Evidence Receipt generation require zero outbound internet connectivity.
+2. **Air-Gapped Operation Supported**:
+   The application is fully qualified to run on air-gapped workstations. Offline verification of commercial `.license` files and Evidence Receipts uses Ed25519 public keys embedded in the binary without remote activation servers or DRM heartbeats.
+3. **Legitimate Operational Connectivity**:
+   Future background network actions (such as checking for software updates, downloading regulatory tax rule updates, or optional local model weight updates) are decoupled from case processing and transmit zero client financial records.
+
+---
+
+## 5. Commercial / Merchant of Record (MoR) Data Boundary
+
+### Corporate & Cross-Border Context
 * **Selling Entity:** French Single-Shareholder Company (**EURL** registered in France).
 * **Primary Target Market:** United States Certified Public Accountants (CPAs), Enrolled Agents (EAs), and tax accounting practices.
-* **Product Form:** Locally installed desktop software with annual license keys ($499 Solo / $1,499 Practice).
+* **Product Form:** Locally installed desktop software with annual commercial license tokens ($499 Solo / $1,499 Practice).
 
-### Comparative Assessment
-
-| Dimension | Paddle (Merchant of Record) | Plain Stripe Payments (+ Stripe Tax) |
-| :--- | :--- | :--- |
-| **Seller of Record** | **Paddle** (Reseller of software to buyer) | **French EURL** (Direct merchant) |
-| **US State Sales Tax Liability** | **Assumed by Paddle** (Paddle registers, calculates, collects, files, and remits sales tax across all 50 US states) | **EURL responsibility** (EURL must monitor economic nexus, register in individual US states, and file returns) |
-| **EU / International VAT** | **Handled by Paddle** under B2B reverse charge rules | EURL must file EU VAT One-Stop Shop (OSS) |
-| **Invoicing & Compliance** | Automatically generates compliant B2B invoices with buyer tax ID / state exemption support | Must be designed, configured, and maintained in Stripe Billing |
-| **Dunning, Chargebacks & Disputes** | Handled natively by MoR risk infrastructure | Managed directly by solo founder |
-| **Founder Administrative Burden** | **Extremely Low** (Single B2B payout from Paddle to French bank account per month) | **High** (Multi-state compliance, tax filings, legal nexus tracking) |
-| **VaultBasis Architecture Alignment** | **Optimal** (Simplifies BILL-001 to verified webhook adapter) | Requires custom tax integration and accounting overhead |
-
-### Accounting & Legal Division of Responsibility under MoR
+### Division of Responsibility under Merchant of Record Model
 
 ```
 ┌────────────────────────────────────────────────────────────────────────────────────────┐
 │                              PADDLE (Merchant of Record)                               │
 │  • Charges US CPA Buyer ($499 / $1,499 + applicable state sales tax)                   │
-│  • Remits US Sales Tax directly to state revenue departments                           │
-│  • Issues formal B2B invoice to CPA firm                                               │
+│  • Remits US Sales Tax directly to state revenue departments across all 50 states      │
+│  • Issues formal B2B compliant invoices to CPA firms                                   │
 │  • Dispatches signed webhook (`transaction.completed`) to VaultBasis API              │
 └──────────────────────────────────────────┬─────────────────────────────────────────────┘
                                            │ Verified Webhook payload
@@ -98,31 +104,82 @@ To prevent ambiguity, the following categories are explicitly **NOT** part of th
 │                             FRENCH EURL (VaultBasis Core)                              │
 │  • Receives net software royalty payout from Paddle (B2B reverse charge VAT)           │
 │  • French corporate accounting: 1 consolidated B2B revenue invoice per payout period   │
-│  • Corporate income tax & local French declarations handled with French expert-comptable│
-│  • NEVER worries about individual US state tax registrations or nexus thresholds       │
+│  • French corporate tax handled with French expert-comptable                           │
+│  • ZERO individual US state tax registrations or physical nexus liability              │
 └────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Architectural Signing Invariant
-Even with Paddle acting as Merchant of Record:
+### Cryptographic Signing Key Boundary
 > **Paddle NEVER receives the VaultBasis Ed25519 commercial license private signing key.**
 > Paddle only signals commercial transaction confirmation (`ORDER_ELIGIBLE_FOR_PROVISIONING`). The issuance and cryptographic signing of `.license` tokens remain strictly confined to the isolated VaultBasis License Authority.
 
 ---
 
-## 5. Data Classification & Protection Invariants
+## 6. Future Capability Data Boundary Matrix
 
-| Data Category | Examples | Storage Location | Retention / Governance |
-| :--- | :--- | :--- | :--- |
-| **Customer Commercial Identity** | Name, Firm, Work Email, Billing Address | MoR (Paddle/Stripe) + VaultBasis Order Ledger | Retained for statutory accounting and license renewal term |
-| **License Credentials (`.license`)** | Customer ID, Plan Tier, Case Capacity, Expiry Date, Ed25519 Signature | Encrypted transit to customer; local file on workstation | Issued with 72h download TTL; persisted in local SQLite store |
-| **Client Taxpayer Data** | Form 1099-DA, Broker CSVs, SSN/TIN, Capital Gains Math | **Local Workstation ONLY** | **NEVER leaves practitioner machine** (Zero Egress) |
-| **Evidence Receipts** | Signed JSON receipts, SHA-256 bundle digests | **Local Workstation ONLY** | Validated offline via CLI or zero-upload Web Verifier |
+| Future Capability | Target Milestone | Expected Execution | Client Case Data Leaves Edge? | New Subprocessor Required? |
+| :--- | :--- | :--- | :--- | :--- |
+| **Local L2 Explanations** | MMP-2 | Local deterministic heuristics | **No** (Local execution) | **No** |
+| **Local RAG & Embeddings** | MMP-2 | Local vector index (SQLite-vec / FAISS) | **No** (Local execution) | **No** |
+| **Local Reasoning Agents** | MMP-2 | Local on-device SLMs / models | **No** (Local execution) | **No** |
+| **Model Weight Distribution** | MMP-2 | One-time binary download | **No** (Download only) | Content/CDN provider only |
+| **Regulatory Corpus Update** | MMP-2 / 2.5 | Signed tax schema download | **No** (Download only) | CDN provider only |
+| **Customer-Configured MCP** | MMP-2 / 3 | Customer-selected tools | **Potentially** (User-directed) | Governed under Section 7 |
+| **Firm SSO / IAM Integration** | MMP-3 | Cloud Identity Provider (OIDC/SAML) | **Identity only** (No tax data) | **Yes** (Identity Provider) |
+| **Evidence Vault (Cloud Backup)** | Future | Hosted encrypted storage | **Yes** (Explicit opt-in) | **Yes** (Cloud Storage Provider) |
+| **Hosted AI Inference (Optional)** | Future | Cloud LLM endpoint | **Potentially** (Explicit opt-in) | **Yes** (AI Model Provider) |
 
 ---
 
-## 6. Formal Subprocessor Maintenance & Review Protocol
+## 7. Conditional & Customer-Directed External Systems
 
-1. **Change Control:** Any new third-party cloud service provider must undergo technical privacy review before introduction to production.
-2. **Practitioner Transparency:** Any changes to active subprocessors will be published directly to [`privacy-policy.html`](file:///Users/kasivisvanathanamirdhalingam/Downloads/VaultBasis/apps/web-marketing/privacy-policy.html) and communicated to license holders.
-3. **Annual Audit:** Annual inspection of data egress boundaries confirms that zero telemetry or tax data leaks into web plane subprocessors.
+MMP-2 and MMP-3 introduce interfaces (such as Model Context Protocol — MCP, and Agent-to-Agent — A2A protocols) enabling integration with external services (e.g., firm-managed Google Drive, Microsoft SharePoint, or internal document repositories).
+
+### Architectural & Legal Governance:
+1. **User-Directed Routing:** When a practitioner connects VaultBasis to their firm's external storage or MCP server, that connection is established directly from the local workstation to the third-party endpoint using the practitioner's credentials.
+2. **Subprocessor Distinction:** Third-party services configured directly by the practitioner (where VaultBasis acts neither as data controller nor as an intermediary routing proxy) are classified as **Customer-Directed External Systems**, governed by the customer's own commercial agreement with that vendor.
+3. **VaultBasis-Operated Connectors:** If VaultBasis introduces a hosted intermediary synchronization bridge, that vendor will undergo full subprocessor review and be listed in Section 2.
+
+---
+
+## 8. AI & Model Governance Boundary (MMP-2 Gate: `MMP2-PRIV-001`)
+
+Before any AI, neural inference, or agentic workflow unlocks in MMP-2, it must satisfy mandatory **Data-Flow & Privacy Gate `MMP2-PRIV-001`**:
+
+```
+MMP2-PRIV-001 Architectural Qualification Checklist:
+├── 1. Data Ingestion: What data fields enter the model context window?
+├── 2. Execution Domain: Does inference execute 100% on local CPU/GPU/NPU?
+├── 3. Embedding Persistence: Are vector embeddings stored exclusively in local SQLite?
+├── 4. Egress Guard: Are local AI runtime processes blocked from external socket communication?
+├── 5. Prompt Logging: Are prompt traces and reasoning steps preserved locally without cloud telemetry?
+├── 6. Component Provenance: Are model weights audited for commercial open-weights licensing?
+└── 7. Cloud Inference Exception: Any optional hosted model requires explicit user opt-in and prior subprocessor registration.
+```
+
+### Model Component Registry (Separated from Subprocessor List)
+Local model weights and runtimes are tracked in an internal **AI Component Registry** detailing:
+* Component Name & Version (e.g., `Llama-3.2-3B-Instruct-Q4_K_M`)
+* Model Publisher & Origin (e.g., Meta AI / Hugging Face)
+* License & Commercial Use Grants (e.g., Llama 3.2 Community License)
+* Cryptographic Hash (SHA-256) of model weight binaries
+* Execution Resource Envelope (VRAM / RAM allocation)
+
+---
+
+## 9. Subprocessor Introduction & Qualification Procedure
+
+A new cloud service provider cannot enter production merely because a feature requires it. Every candidate subprocessor must satisfy the four-stage qualification protocol:
+
+1. **Data Flow & Necessity Audit:** Technical architecture review confirming the minimum data necessary is transmitted, and that client tax records remain strictly unexposed.
+2. **Security & DPA Review:** Verification of Data Processing Addendum (DPA), Standard Contractual Clauses (SCCs), SOC 2 Type II / ISO 27001 compliance, and GDPR/CCPA alignment.
+3. **Register Update & Transparency:** Formal update to Section 2 of this register, synchronization with [`apps/web-marketing/privacy-policy.html`](file:///Users/kasivisvanathanamirdhalingam/Downloads/VaultBasis/apps/web-marketing/privacy-policy.html), and notice to active license holders.
+4. **Automated Egress Testing:** Integration of regression tests ensuring local Edge reconciliation remains isolated from the newly introduced web-plane subprocessor.
+
+---
+
+## 10. Change History by MMP Milestone
+
+| Version | Date | MMP Milestone | Summary of Changes | Author |
+| :--- | :--- | :--- | :--- | :--- |
+| **v1.0** | 2026-10-05 | **MMP-1.5** | Initial production baseline: Vercel hosting/Blob, Paddle/Stripe MoR architecture, transactional mailer, GitHub CI/CD, Apple/Windows release infrastructure. Zero Edge tax data egress frozen. | VaultBasis Core Team |
