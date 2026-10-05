@@ -16,7 +16,7 @@ on:
 jobs:
   validate:
     name: 11-Gate Integrity Check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
     - name: Checkout repository
@@ -55,7 +55,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-24.04, macos-14, windows-2022]
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -85,9 +85,9 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: macos-latest
+          - os: macos-14
             script: scripts/build_rc3_macos.py
-          - os: windows-latest
+          - os: windows-2022
             script: scripts/build_rc3_windows.py
     steps:
     - name: Checkout repository
@@ -132,7 +132,7 @@ jobs:
   inspect-rc3:
     name: RC3 Candidate Inspection (BUILD_VERIFIED — not UAT-READY)
     needs: [rc3-candidates]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
     - name: Checkout repository
@@ -141,13 +141,13 @@ jobs:
     - name: Download macOS RC3 candidate
       uses: actions/download-artifact@v4
       with:
-        name: vaultbasis-rc3-candidate-macos-latest
+        name: vaultbasis-rc3-candidate-macos-14
         path: downloaded/macos
 
     - name: Download Windows RC3 candidate
       uses: actions/download-artifact@v4
       with:
-        name: vaultbasis-rc3-candidate-windows-latest
+        name: vaultbasis-rc3-candidate-windows-2022
         path: downloaded/windows
 
     - name: Inspect both candidates and emit build-verified report
@@ -309,7 +309,7 @@ jobs:
   store-rc3:
     name: Promote BUILD_VERIFIED Artifacts to Private Blob Storage
     needs: [inspect-rc3]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     # Promotion is explicit — must be triggered via workflow_dispatch with promote: true.
     # Automatic pushes to main never promote artifacts; inspect-rc3 still runs automatically.
     if: github.event_name == 'workflow_dispatch' && inputs.promote == true
@@ -321,13 +321,13 @@ jobs:
     - name: Download macOS RC3 candidate
       uses: actions/download-artifact@v4
       with:
-        name: vaultbasis-rc3-candidate-macos-latest
+        name: vaultbasis-rc3-candidate-macos-14
         path: downloaded/macos
 
     - name: Download Windows RC3 candidate
       uses: actions/download-artifact@v4
       with:
-        name: vaultbasis-rc3-candidate-windows-latest
+        name: vaultbasis-rc3-candidate-windows-2022
         path: downloaded/windows
 
     - name: Download verified identities from inspection job
