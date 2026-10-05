@@ -10,6 +10,7 @@
  * - ZERO Ed25519 commercial private keys accessible in this runtime.
  * - ZERO customer tax or reconciliation data processed or stored.
  * - Air-gapped license provisioning decoupled via ORDER_ELIGIBLE_FOR_PROVISIONING state.
+ * - Client-side requests cannot assert payment completion.
  */
 
 const crypto = require('crypto');
@@ -24,7 +25,7 @@ function _hasBlobStorage() {
 
 function renderCheckoutHtml(order, planConfig) {
   const isPaidOrEligible =
-    order.paymentState === PAYMENT_STATES.PAID ||
+    order.paymentState === PAYMENT_STATES.PAYMENT_CONFIRMED ||
     order.paymentState === PAYMENT_STATES.ORDER_ELIGIBLE_FOR_PROVISIONING;
   const priceDisplay = `$${(order.priceAmountCents / 100).toLocaleString('en-US', { minimumFractionDigits: 0 })}`;
 
@@ -274,14 +275,14 @@ function renderCheckoutHtml(order, planConfig) {
       </div>
 
       <div class="terms-box">
-        <strong>Air-Gap &amp; Privacy Guarantee:</strong> VaultBasis operates 100% locally on your computer with zero cloud telemetry. Your license entitles you to deterministic reconciliation, signed Evidence Receipts, and permanent offline access to historical cases.
+        <strong>Local Case Processing:</strong> VaultBasis Edge processes client reconciliation and evidence locally on your computer. Client tax records are not required to be uploaded to VaultBasis cloud services for normal case processing. Your license enables local reconciliation, Evidence Receipts, offline verification, and access to existing case records according to your plan.
       </div>
 
       <form method="POST" action="/api/checkout-session">
         <input type="hidden" name="order_id" value="${order.orderId}">
         <input type="hidden" name="session_id" value="${order.providerSessionId}">
         <button type="submit" class="btn-submit">
-          Proceed to Paddle Secure Checkout (${priceDisplay}) &rarr;
+          Continue to Secure Checkout — ${priceDisplay} &rarr;
         </button>
       </form>
 
@@ -319,10 +320,7 @@ async function handleCheckout(req, res) {
   }
 
   try {
-    const providerSessionId = `sess_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-
     const order = await createOrder({
-      providerSessionId,
       customerEmail: email,
       customerName: name,
       firmName: firm,
@@ -330,12 +328,12 @@ async function handleCheckout(req, res) {
     });
 
     const canonicalBase = process.env.PUBLIC_BASE_URL || 'http://localhost:3000';
-    const checkoutUrl = `${canonicalBase}/api/checkout-session?order_id=${order.orderId}&session_id=${providerSessionId}`;
+    const checkoutUrl = `${canonicalBase}/api/checkout-session?order_id=${order.orderId}&session_id=${encodeURIComponent(order.providerSessionId)}`;
 
     return res.status(200).json({
       status: 'success',
       orderId: order.orderId,
-      providerSessionId,
+      providerSessionId: order.providerSessionId,
       checkoutUrl,
       orderSummary: {
         plan: order.planId,
@@ -352,17 +350,18 @@ async function handleCheckout(req, res) {
   }
 }
 
-// Sub-handler: Checkout Session Review & Payment Transition
+// Sub-handler: Checkout Session Review & Payment Handoff
 async function handleCheckoutSession(req, res) {
   const query = req.query || {};
   const body = req.body || {};
   const orderId = query.order_id || body.order_id;
+  const sessionId = query.session_id || body.session_id;
 
   if (!orderId) {
     return res.status(400).send('Order identifier is required.');
   }
 
-  const order = await getOrder(orderId);
+  const order = await getOrder(orderId, sessionId);
   if (!order) {
     return res.status(404).send(`Order '${orderId}' not found.`);
   }
@@ -374,15 +373,22 @@ async function handleCheckoutSession(req, res) {
 
   if (req.method === 'POST') {
     try {
+      // In production/sandbox, transition state to PAYMENT_PENDING.
+      // (Only verified webhook advances state to ORDER_ELIGIBLE_FOR_PROVISIONING).
       const updatedOrder = await transitionOrderPaymentState({
         orderId: order.orderId,
-        newState: PAYMENT_STATES.ORDER_ELIGIBLE_FOR_PROVISIONING,
-        reason: 'PADDLE_CHECKOUT_CONFIRMED',
+        newState: PAYMENT_STATES.PAYMENT_PENDING,
+        reason: 'CHECKOUT_PADDLE_HANDOFF',
         metadata: {
-          confirmedAt: new Date().toISOString(),
+          handoffAt: new Date().toISOString(),
           paymentProvider: 'paddle',
         },
       });
+
+      // When Paddle integration is active, redirect to Paddle transaction checkout URL.
+      if (process.env.PADDLE_CHECKOUT_URL) {
+        return res.redirect(303, `${process.env.PADDLE_CHECKOUT_URL}?order=${order.orderId}`);
+      }
 
       res.setHeader('Content-Type', 'text/html; charset=utf-8');
       return res.status(200).send(renderCheckoutHtml(updatedOrder, planConfig));
@@ -461,7 +467,7 @@ module.exports = async (req, res) => {
     return handleCheckout(req, res);
   }
 
-  // Default: if POST with plan field, treat as checkout; if has order_id, treat as session
+  // Default fallback routing
   if (req.body && req.body.plan) {
     return handleCheckout(req, res);
   }

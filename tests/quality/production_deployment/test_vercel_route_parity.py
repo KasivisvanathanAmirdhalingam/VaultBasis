@@ -239,8 +239,8 @@ def test_commercial_checkout_session_rendering_contract():
         hasTitle: htmlContent.includes('VaultBasis Commercial Checkout'),
         hasPlan: htmlContent.includes('Practice License'),
         hasCapacity: htmlContent.includes('50 Cases / Annual Term'),
-        hasGuarantee: htmlContent.includes('Air-Gap &amp; Privacy Guarantee') || htmlContent.includes('Air-Gap & Privacy Guarantee'),
-        hasSubmitBtn: htmlContent.includes('Proceed to Paddle Secure Checkout'),
+        hasGuarantee: htmlContent.includes('Local Case Processing') || htmlContent.includes('Air-Gap & Privacy Guarantee'),
+        hasSubmitBtn: htmlContent.includes('Continue to Secure Checkout') || htmlContent.includes('Proceed to Paddle Secure Checkout'),
         noEd25519Private: !htmlContent.includes('PRIVATE KEY'),
     }));
     """
