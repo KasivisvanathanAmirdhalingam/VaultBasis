@@ -285,25 +285,40 @@ def test_commercial_checkout_handoff_contract():
         setHeader() {}
     };
 
-    // Trigger payment handoff via POST with JSON accept header
+    // Test 1: Missing agreement -> 400 rejection
     await commercialHandler({
         method: 'POST',
         headers: { 'accept': 'application/json', 'content-type': 'application/json' },
         query: { action: 'checkout-session' },
         body: { order_id: order.orderId, session_id: order.providerSessionId }
     }, mockRes);
+    const unacceptedStatus = statusCode;
+    const unacceptedBody = jsonBody;
+
+    // Test 2: With affirmative agreement -> 200 handoff
+    await commercialHandler({
+        method: 'POST',
+        headers: { 'accept': 'application/json', 'content-type': 'application/json' },
+        query: { action: 'checkout-session' },
+        body: { order_id: order.orderId, session_id: order.providerSessionId, agreement_accepted: true }
+    }, mockRes);
 
     const freshOrder = await billingStore.getOrder(order.orderId);
 
     console.log(JSON.stringify({
+        unacceptedStatus,
+        unacceptedBody,
         statusCode,
         jsonBody,
         orderPaymentState: freshOrder.paymentState,
         orderProvisioningState: freshOrder.provisioningState,
         hasTxnId: Boolean(freshOrder.providerTransactionId),
+        agreementVersion: freshOrder.events.find(e => e.metadata?.agreement)?.metadata?.agreement?.agreementVersion
     }));
     """
     res = run_node_snippet(code)
+    assert res["unacceptedStatus"] == 400
+    assert "agree to the Software License Agreement" in res["unacceptedBody"]["error"]
     assert res["statusCode"] == 200
     assert res["jsonBody"]["ok"] is True
     assert res["jsonBody"]["state"] == "PAYMENT_PENDING"
@@ -313,6 +328,7 @@ def test_commercial_checkout_handoff_contract():
     assert res["orderPaymentState"] == "PAYMENT_PENDING"
     assert res["orderProvisioningState"] == "NOT_ELIGIBLE"
     assert res["hasTxnId"] is True
+    assert res["agreementVersion"] == "MMP-1.5-2026.1"
 
 
 @pytest.mark.regression
@@ -423,7 +439,7 @@ def test_commercial_checkout_handoff_idempotency_reuses_active_session():
         method: 'POST',
         headers: { 'accept': 'application/json', 'content-type': 'application/json' },
         query: { action: 'checkout-session' },
-        body: { order_id: order.orderId, session_id: order.providerSessionId }
+        body: { order_id: order.orderId, session_id: order.providerSessionId, agreement_accepted: true }
     }, createMockRes(res1));
 
     // Call 2 (duplicate click/retry)
@@ -432,7 +448,7 @@ def test_commercial_checkout_handoff_idempotency_reuses_active_session():
         method: 'POST',
         headers: { 'accept': 'application/json', 'content-type': 'application/json' },
         query: { action: 'checkout-session' },
-        body: { order_id: order.orderId, session_id: order.providerSessionId }
+        body: { order_id: order.orderId, session_id: order.providerSessionId, agreement_accepted: true }
     }, createMockRes(res2));
 
     console.log(JSON.stringify({

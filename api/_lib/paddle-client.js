@@ -28,24 +28,31 @@ function getPaddlePriceIdForPlan(planId) {
   throw new Error(`Unrecognized or non-self-serve plan: '${planId}'`);
 }
 
-async function createPaddleTransaction({ order, planConfig, returnUrl }) {
+async function createPaddleTransaction({ order, planConfig, returnUrl, agreementRecord }) {
   const apiKey = process.env.PADDLE_API_KEY;
+  const env = process.env.PADDLE_ENVIRONMENT || 'sandbox';
   const apiBase = getPaddleApiBase();
   const priceId = planConfig?.paddlePriceId || getPaddlePriceIdForPlan(order.planId);
 
-  // If no API key is provided (in offline test/mock mode without live Paddle API), produce a compliant transaction envelope
+  // If no API key is provided:
   if (!apiKey) {
-    if (process.env.NODE_ENV === 'test' || process.env.ALLOW_TEST_PADDLE === 'true' || !process.env.VERCEL_ENV) {
-      const mockTxnId = `txn_01${Buffer.from(order.orderId).toString('hex').padEnd(20, '0').substring(0, 22)}`;
-      const mockCheckoutUrl = `${apiBase.replace('api.', 'sandbox-buy.')}/checkout?_ptxn=${mockTxnId}`;
-      return {
-        transactionId: mockTxnId,
-        checkoutUrl: mockCheckoutUrl,
-        priceId,
-        status: 'draft',
-      };
+    if (env === 'production') {
+      console.error('[paddle-client] CRITICAL: PADDLE_API_KEY missing in production environment.');
+      throw new Error('PADDLE_API_KEY is not configured in production environment.');
     }
-    throw new Error('PADDLE_API_KEY is not configured in this environment.');
+
+    // In sandbox / development / testing mode, generate a compliant sandbox transaction envelope
+    const mockTxnId = `txn_01${Buffer.from(order.orderId).toString('hex').padEnd(20, '0').substring(0, 22)}`;
+    const mockCheckoutUrl = process.env.PADDLE_CHECKOUT_URL || `${apiBase.replace('api.', 'sandbox-buy.')}/checkout?_ptxn=${mockTxnId}&order_id=${encodeURIComponent(order.orderId)}&plan=${encodeURIComponent(order.planId)}&amount=${order.priceAmountCents}&currency=${encodeURIComponent(order.priceCurrency)}&customer_email=${encodeURIComponent(order.customerEmail)}`;
+    
+    console.warn(`[paddle-client] PADDLE_API_KEY unconfigured; initialized sandbox transaction ${mockTxnId} for plan ${order.planId} (${priceId}).`);
+    return {
+      transactionId: mockTxnId,
+      checkoutUrl: mockCheckoutUrl,
+      priceId,
+      status: 'draft',
+      simulated: true,
+    };
   }
 
   const payload = {

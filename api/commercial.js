@@ -281,13 +281,26 @@ function renderCheckoutHtml(order, planConfig) {
       </div>
 
       <div class="terms-box">
-        <strong>Local Case Processing:</strong> VaultBasis Edge processes client reconciliation and evidence locally on your computer. Client tax records are not required to be uploaded to VaultBasis cloud services for normal case processing. Your license enables local reconciliation, Evidence Receipts, offline verification, and access to existing case records according to your plan.
+        <strong>Local Case Processing &amp; Data Protection:</strong> VaultBasis Edge processes all client reconciliation, tax-basis calculations, and Evidence Receipts locally on your computer. Client tax records and ledger data are never uploaded to VaultBasis cloud servers.
+      </div>
+
+      <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid var(--border-accent); border-radius: 8px; padding: 1.25rem; margin-bottom: 1.5rem; text-align: left;">
+        <label style="display: flex; align-items: flex-start; gap: 12px; cursor: pointer; font-size: 0.88rem; line-height: 1.5; color: #cbd5e1;">
+          <input type="checkbox" id="agreement-checkbox" name="agreement_accepted" value="true" style="margin-top: 3px; width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer;">
+          <span>
+            <strong>I have read and agree to the <a href="/terms-of-service" target="_blank" rel="noopener" style="color: #38bdf8; text-decoration: underline;">Software License Agreement</a> and <a href="/terms-of-service" target="_blank" rel="noopener" style="color: #38bdf8; text-decoration: underline;">Terms of Service</a>.</strong>
+            <br>
+            <span style="font-size: 0.82rem; color: #94a3b8; display: block; margin-top: 4px;">
+              I acknowledge the <a href="/privacy-policy" target="_blank" rel="noopener" style="color: #94a3b8; text-decoration: underline;">Privacy Policy</a>, <a href="/trust-assurance" target="_blank" rel="noopener" style="color: #94a3b8; text-decoration: underline;">Security &amp; Trust Model</a>, and <a href="/docs/scope_and_limitations_v0.1" target="_blank" rel="noopener" style="color: #94a3b8; text-decoration: underline;">Scope &amp; Limitations</a> describing local Edge processing and practitioner responsibilities.
+            </span>
+          </span>
+        </label>
       </div>
 
       <form id="checkout-handoff-form" method="POST" action="/api/checkout-session">
         <input type="hidden" name="order_id" value="${order.orderId}">
         <input type="hidden" name="session_id" value="${order.providerSessionId}">
-        <button type="submit" id="btn-checkout-submit" class="btn-submit">
+        <button type="submit" id="btn-checkout-submit" class="btn-submit" disabled style="opacity: 0.5; cursor: not-allowed;">
           Continue to Secure Checkout — ${priceDisplay} &rarr;
         </button>
       </form>
@@ -300,13 +313,37 @@ function renderCheckoutHtml(order, planConfig) {
         (function() {
           const form = document.getElementById('checkout-handoff-form');
           const btn = document.getElementById('btn-checkout-submit');
+          const chk = document.getElementById('agreement-checkbox');
           const errBanner = document.getElementById('checkout-error-banner');
           const errMsg = document.getElementById('checkout-error-msg');
           const errRef = document.getElementById('checkout-error-ref');
 
+          if (chk && btn) {
+            chk.addEventListener('change', function() {
+              if (chk.checked) {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                btn.style.cursor = 'pointer';
+              } else {
+                btn.disabled = true;
+                btn.style.opacity = '0.5';
+                btn.style.cursor = 'not-allowed';
+              }
+            });
+          }
+
           if (form && btn) {
             form.addEventListener('submit', async function(e) {
               e.preventDefault();
+              if (chk && !chk.checked) {
+                if (errBanner && errMsg && errRef) {
+                  errMsg.textContent = 'Please agree to the Software License Agreement and acknowledge the local processing terms before proceeding.';
+                  errRef.textContent = 'Requirement: Agreement Acceptance';
+                  errBanner.style.display = 'block';
+                }
+                return;
+              }
+
               btn.disabled = true;
               btn.style.opacity = '0.75';
               btn.style.cursor = 'wait';
@@ -323,7 +360,11 @@ function renderCheckoutHtml(order, planConfig) {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
                   },
-                  body: JSON.stringify({ order_id: orderId, session_id: sessionId })
+                  body: JSON.stringify({
+                    order_id: orderId,
+                    session_id: sessionId,
+                    agreement_accepted: true
+                  })
                 });
 
                 const data = await res.json();
@@ -438,7 +479,27 @@ async function handleCheckoutSession(req, res) {
       req.headers['accept']?.includes('application/json') ||
       req.headers['content-type']?.includes('application/json');
 
+    // Mandatory Agreement Gate validation
+    const agreementAccepted = body.agreement_accepted === true || body.agreement_accepted === 'true' || query.agreement_accepted === 'true';
+    if (!agreementAccepted) {
+      const errMsg = 'You must agree to the Software License Agreement and acknowledge the local processing terms to continue.';
+      if (isJsonRequest) {
+        return res.status(400).json({ ok: false, error: errMsg });
+      }
+      return res.status(400).send(errMsg);
+    }
+
     try {
+      const agreementRecord = {
+        acceptedAt: new Date().toISOString(),
+        agreementVersion: 'MMP-1.5-2026.1',
+        termsVersion: 'v1.0',
+        privacyPolicyVersion: 'v1.0',
+        securityTrustVersion: 'v1.0',
+        scopeLimitationsVersion: 'v0.1',
+        acceptanceMethod: 'CLICKWRAP',
+      };
+
       // Idempotency: If order already has an active Paddle transaction in PAYMENT_PENDING, reuse it
       if (
         order.paymentState === PAYMENT_STATES.PAYMENT_PENDING &&
@@ -470,6 +531,7 @@ async function handleCheckoutSession(req, res) {
         order,
         planConfig,
         returnUrl,
+        agreementRecord,
       });
 
       const providerTxnId = paddleResult.transactionId;
@@ -485,6 +547,7 @@ async function handleCheckoutSession(req, res) {
           paymentProvider: 'paddle',
           priceId: paddleResult.priceId,
           checkoutUrl,
+          agreement: agreementRecord,
         },
       });
 
