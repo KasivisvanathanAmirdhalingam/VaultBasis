@@ -1293,8 +1293,10 @@
     async function loadCases() {
       const tbody = document.getElementById('case-table-body');
       try {
+        console.log("[edge-boot] FETCH_CASES_START");
         const res = await fetch('/api/cases');
         if (!res.ok) {
+          console.error("[edge-boot] FETCH_CASES_FAILED status=" + res.status);
           if (tbody) {
             tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--danger); padding: 2.5rem;">Unable to load case list from local store (HTTP ${res.status}). <button class="btn btn-sm" onclick="loadCases()" style="margin-left: 8px;">Retry</button></td></tr>`;
           }
@@ -1302,9 +1304,10 @@
           return;
         }
         allLoadedCases = await res.json();
+        console.log("[edge-boot] FETCH_CASES_OK count=" + allLoadedCases.length);
         filterCases();
       } catch (err) {
-        console.error("Failed to load cases:", err);
+        console.error("[edge-boot] FETCH_CASES_ERROR:", err);
         if (tbody) {
           tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--danger); padding: 2.5rem;">Connection error reaching VaultBasis local store. <button class="btn btn-sm" onclick="loadCases()" style="margin-left: 8px;">Retry</button></td></tr>`;
         }
@@ -1524,11 +1527,9 @@
 
         // Derived Domain Action Gating (MMP15-EDGE-STATE-002)
         const canReconcile = c.actions ? c.actions.can_reconcile : ((srcAObj && srcBObj) || (sources.length >= 2));
-        const isSample = (c.case_kind === 'BUNDLED_SAMPLE' || c.case_id === 'CASE-SAMPLE-2025');
         const isReconciled = Boolean(c.receipt_id || c.outcome_state);
         const btnRunRecon = document.getElementById('btn-run-recon');
         const btnRestartSample = document.getElementById('btn-restart-sample');
-        const btnCloneSample = document.getElementById('btn-clone-sample');
 
         if (btnRunRecon) {
           btnRunRecon.disabled = !canReconcile;
@@ -1748,11 +1749,45 @@
       window.location.href = `/api/cases/${currentCaseId}/export`;
     }
 
-    // Clean DOM ready bootstrap
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', loadCases);
-    } else {
+    // Global Error & Promise Rejection Handlers
+    window.addEventListener('error', function(e) {
+      console.error("[edge-boot] Runtime Error:", e.error || e.message);
+    });
+    window.addEventListener('unhandledrejection', function(e) {
+      console.error("[edge-boot] Unhandled Promise Rejection:", e.reason);
+    });
+
+    // Explicit Global Window Bindings for Inline Event Handlers
+    window.showToast = showToast;
+    window.showScreen = showScreen;
+    window.openNewCaseModal = openNewCaseModal;
+    window.closeNewCaseModal = closeNewCaseModal;
+    window.setStatusFilter = setStatusFilter;
+    window.filterCases = filterCases;
+    window.renderCaseTable = renderCaseTable;
+    window.loadCases = loadCases;
+    window.exploreSampleCase = exploreSampleCase;
+    window.submitCreateCase = submitCreateCase;
+    window.cloneCurrentSample = cloneCurrentSample;
+    window.openCase = openCase;
+    window.refreshCaseDetails = refreshCaseDetails;
+    window.handleSourceUpload = handleSourceUpload;
+    window.triggerReconciliation = triggerReconciliation;
+    window.restartCurrentSample = restartCurrentSample;
+    window.viewReceiptScreen = viewReceiptScreen;
+    window.downloadExportBundle = downloadExportBundle;
+
+    // Structured Boot Lifecycle
+    function bootstrap() {
+      console.log("[edge-boot] DOM_READY");
+      console.log("[edge-boot] ACTION_BINDINGS_READY");
       loadCases();
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', bootstrap);
+    } else {
+      bootstrap();
     }
   </script>
 </body>

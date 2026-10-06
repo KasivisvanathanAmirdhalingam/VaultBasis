@@ -198,6 +198,43 @@ def test_receipts_verify_rejects_tampered_receipt(client):
     assert data.get("is_valid") is False, "Tampered receipt must return is_valid=False"
 
 
+@pytest.mark.regression
+def test_dashboard_javascript_syntax_and_bootstrap_contract():
+    """Validates that web-dashboard/index.html has 100% clean JavaScript syntax and bootstrap exports."""
+    import subprocess
+    assert DASHBOARD_FILE.is_file(), "Dashboard HTML must exist"
+    html = DASHBOARD_FILE.read_text(encoding="utf-8")
+    
+    # Assert bootstrap structured logs and key handler definitions exist
+    assert "bootstrap()" in html, "Bootstrap lifecycle must be defined"
+    assert "loadCases" in html, "loadCases must be defined"
+    assert "exploreSampleCase" in html, "exploreSampleCase must be defined"
+    assert "openNewCaseModal" in html, "openNewCaseModal must be defined"
+    assert "triggerReconciliation" in html, "triggerReconciliation must be defined"
+    
+    # Run Node syntax parser across all embedded scripts
+    node_cmd = [
+        "node", "-e",
+        """
+        const fs = require('fs');
+        const html = fs.readFileSync(process.argv[1], 'utf8');
+        const scriptMatches = html.match(/<script[\\s\\S]*?>([\\s\\S]*?)<\\/script>/gi);
+        if (!scriptMatches || scriptMatches.length === 0) {
+            console.error('No script tags found');
+            process.exit(1);
+        }
+        scriptMatches.forEach((s, idx) => {
+            if (s.includes('application/ld+json')) return;
+            const code = s.replace(/<script[\\s\\S]*?>/i, '').replace(/<\\/script>/i, '');
+            new Function(code);
+        });
+        """,
+        str(DASHBOARD_FILE)
+    ]
+    res = subprocess.run(node_cmd, capture_output=True, text=True)
+    assert res.returncode == 0, f"Dashboard JavaScript syntax error: {res.stderr}"
+
+
 # ── Negative control ──────────────────────────────────────────────────────────
 
 @pytest.mark.regression
@@ -214,3 +251,4 @@ def test_negative_control_broken_local_href_detected():
             return
     # If none matched, the negative control itself is broken — fail loudly.
     pytest.fail("Negative control did not exercise any prohibited href pattern.")
+
