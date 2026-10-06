@@ -327,6 +327,7 @@ class CommercialPolicyService:
     def get_status(self, current_time: Optional[datetime] = None) -> Dict[str, Any]:
         """
         Returns safe, non-sensitive commercial status metadata for UI dashboards and health diagnostics.
+        Vocabulary: NO_ENTITLEMENT, ACTIVE_EVALUATION, ACTIVE_PAID_LICENSE, EXPIRED_EVALUATION, EXPIRED_PAID_LICENSE.
         """
         token = self.get_active_token()
         has_token = bool(token)
@@ -336,6 +337,7 @@ class CommercialPolicyService:
             return {
                 "licensed": False,
                 "license_state": "UNLICENSED",
+                "entitlement_state": "NO_ENTITLEMENT",
                 "tier": None,
                 "license_id": None,
                 "customer_id": None,
@@ -344,13 +346,29 @@ class CommercialPolicyService:
                 "days_remaining": 0,
                 "grace_days_remaining": 0,
                 "unmetered_verification_active": True,
-                "message": "VaultBasis is operating in unmetered verification mode. A commercial license is required to create or reconcile cases.",
+                "message": "Start your 3-day Evaluation or activate a purchased license.",
             }
 
         eval_res = self.evaluate_current_license(current_time=current_time)
+        is_eval = (eval_res.tier in (LicenseTier.TRIAL, LicenseTier.EVALUATION))
+        
+        if eval_res.is_active:
+            entitlement_state = "ACTIVE_EVALUATION" if is_eval else "ACTIVE_PAID_LICENSE"
+            if is_eval:
+                msg = f"Evaluation Active · {eval_res.days_remaining or 0} days remaining · {billable_cases}/{eval_res.max_cases_per_installation or 1} client case used."
+            else:
+                msg = f"{eval_res.tier.value if eval_res.tier else 'Commercial'} Plan Active · {billable_cases}/{eval_res.max_cases_per_installation or 0} cases used."
+        else:
+            entitlement_state = "EXPIRED_EVALUATION" if is_eval else "EXPIRED_PAID_LICENSE"
+            if is_eval:
+                msg = "Your 3-day Evaluation has ended. Existing evaluation work remains accessible. Activate a plan to continue new client work."
+            else:
+                msg = "Installed commercial license is not active. Existing cases and verification remain accessible."
+
         return {
             "licensed": eval_res.is_active,
             "license_state": eval_res.state.value,
+            "entitlement_state": entitlement_state,
             "tier": eval_res.tier.value if eval_res.tier else None,
             "license_id": eval_res.license_id,
             "customer_id": eval_res.customer_id,
@@ -360,6 +378,7 @@ class CommercialPolicyService:
             "grace_days_remaining": eval_res.grace_days_remaining or 0,
             "unmetered_verification_active": True,
             "diagnostic_reason": eval_res.diagnostic_reason,
+            "message": msg,
         }
 
     def authorize(
@@ -421,8 +440,8 @@ class CommercialPolicyService:
                 allowed=False,
                 reason_code=CommercialDenialCode.ENTITLEMENT_REQUIRED,
                 http_status=402,
-                message="A valid commercial license is required to create or reconcile client cases. Existing cases, exports, and independent evidence verification remain fully accessible.",
-                upgrade_guidance="Request a license at vaultbasis.com/#pricing or contact sales@vaultbasis.com to activate a practitioner subscription.",
+                message="A valid commercial license is required to create or reconcile client cases (or an active Evaluation). Existing cases, exports, and independent evidence verification remain fully accessible.",
+                upgrade_guidance="Start your 3-day Evaluation or activate a plan at vaultbasis.com/#pricing to continue client engagements.",
                 correlation_id=correlation_id,
             )
 
@@ -503,11 +522,17 @@ class CommercialPolicyService:
         # Capacity Check for case creation
         if operation == CommercialOperation.CREATE_CASE:
             if max_cases > 0 and billable_count >= max_cases:
+                is_eval = (eval_res.tier == LicenseTier.EVALUATION and max_cases == 1)
+                msg = (
+                    f"You have used your 1 client case included with Evaluation (1/1 cases used). Upgrade to Solo or Practice to create additional client cases."
+                    if is_eval else
+                    f"You've reached the case limit for your current license ({billable_count} of {max_cases} client cases used). Your existing cases remain available. Upgrade your license to start another client case."
+                )
                 return CommercialPolicyDecision(
                     allowed=False,
                     reason_code=CommercialDenialCode.CASE_CAPACITY_REACHED,
                     http_status=402,
-                    message=f"You've reached the case limit for your current license ({billable_count} of {max_cases} client cases used). Your existing cases remain available. Upgrade your license to start another client case.",
+                    message=msg,
                     upgrade_guidance="Upgrade your license at vaultbasis.com/#pricing or contact sales@vaultbasis.com to increase your case volume.",
                     correlation_id=correlation_id,
                     license_state=eval_res.state,

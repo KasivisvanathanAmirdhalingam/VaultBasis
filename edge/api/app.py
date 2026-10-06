@@ -396,6 +396,51 @@ def load_sample_case():
     return get_case(case_id)
 
 
+@app.post("/api/sample-case/reset")
+def reset_sample_case():
+    """
+    Resets the canonical sample case to its pristine, unreconciled baseline state.
+    Clears any generated receipt/findings while preserving the immutable authentic sources.
+    """
+    case_id = "CASE-SAMPLE-2025"
+    case = db_store.get_case(case_id)
+    if not case:
+        return load_sample_case()
+
+    case.case_status = "SOURCES_INGESTED"
+    case.outcome_state = None
+    case.assurance_level = None
+    if case.receipt_id:
+        db_store.delete_receipt(case.receipt_id)
+    case.receipt_id = None
+    case.updated_at = datetime.now(timezone.utc).isoformat()
+    db_store.save_case(case)
+    return get_case(case_id)
+
+
+@app.post("/api/cases/{case_id}/reset")
+def reset_case_by_id(case_id: str):
+    """
+    Resets a sample case by ID.
+    """
+    if case_id == "CASE-SAMPLE-2025":
+        return reset_sample_case()
+    case = db_store.get_case(case_id)
+    if not case:
+        raise HTTPException(status_code=404, detail=f"Case '{case_id}' not found")
+    if getattr(case, "case_kind", "PRODUCTION") == "BUNDLED_SAMPLE":
+        case.case_status = "SOURCES_INGESTED"
+        case.outcome_state = None
+        case.assurance_level = None
+        if case.receipt_id:
+            db_store.delete_receipt(case.receipt_id)
+        case.receipt_id = None
+        case.updated_at = datetime.now(timezone.utc).isoformat()
+        db_store.save_case(case)
+        return get_case(case_id)
+    raise HTTPException(status_code=400, detail="Only sample cases support automated reset.")
+
+
 @app.post("/api/cases", response_model=CaseSummaryResponse, status_code=status.HTTP_201_CREATED)
 def create_case(req: CreateCaseRequest):
     case_id = req.case_id or f"CASE-{uuid.uuid4().hex[:8].upper()}"
@@ -523,7 +568,14 @@ def get_case(case_id: str):
     if not case:
         raise HTTPException(status_code=404, detail=f"Case '{case_id}' not found")
     
-    # Return structured case details
+    is_sample = (getattr(case, "case_kind", "PRODUCTION") == "BUNDLED_SAMPLE" or case.case_id == "CASE-SAMPLE-2025")
+    recon_decision = commercial_policy.authorize(
+        CommercialOperation.RECONCILE_CASE,
+        context={"case_id": case.case_id, "case_kind": getattr(case, "case_kind", "PRODUCTION")}
+    )
+    can_reconcile = (len(case.sources) >= 2) and recon_decision.allowed
+
+    # Return structured case details with domain actions
     return {
         "case_id": case.case_id,
         "client_reference": getattr(case, "client_reference", "Sample Client") or "Sample Client",
@@ -538,7 +590,15 @@ def get_case(case_id: str):
         "sources": {k: v.model_dump() for k, v in case.sources.items()},
         "transactions": [t.to_summary_dict() for t in case.transactions],
         "created_at": case.created_at,
-        "updated_at": case.updated_at
+        "updated_at": case.updated_at,
+        "actions": {
+            "can_reconcile": can_reconcile,
+            "can_upload_source_a": not is_sample and case.receipt_id is None,
+            "can_upload_source_b": not is_sample and case.receipt_id is None,
+            "can_clone": True,
+            "can_view_receipt": case.receipt_id is not None,
+            "can_restart_sample": is_sample,
+        }
     }
 
 

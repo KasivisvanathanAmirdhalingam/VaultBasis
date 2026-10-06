@@ -765,6 +765,7 @@
         </div>
         <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
           <button class="btn btn-secondary" id="btn-clone-sample" onclick="cloneCurrentSample()" style="display: none;">📋 Clone as Client Case</button>
+          <button class="btn btn-secondary" id="btn-restart-sample" onclick="restartCurrentSample()" style="display: none;">↺ Restart Sample</button>
           <button class="btn btn-primary" id="btn-run-recon" onclick="triggerReconciliation()" disabled title="Add both evidence sources to run reconciliation">⚡ Run Deterministic Reconciliation</button>
           <button class="btn btn-success" id="btn-view-receipt" onclick="viewReceiptScreen()" style="display: none;">📜 View Evidence Receipt</button>
         </div>
@@ -1498,14 +1499,32 @@
           if (btnUploadSrcB) btnUploadSrcB.innerText = '+ Upload Koinly CSV';
         }
 
-        // Precondition state machine: Gating Run Reconciliation button
-        const canReconcile = (srcAObj && srcBObj) || (sources.length >= 2);
+        // Derived Domain Action Gating (MMP15-EDGE-STATE-002)
+        const canReconcile = c.actions ? c.actions.can_reconcile : ((srcAObj && srcBObj) || (sources.length >= 2));
+        const isSample = (c.case_kind === 'BUNDLED_SAMPLE' || c.case_id === 'CASE-SAMPLE-2025');
+        const isReconciled = Boolean(c.receipt_id || c.outcome_state);
         const btnRunRecon = document.getElementById('btn-run-recon');
+        const btnRestartSample = document.getElementById('btn-restart-sample');
+        const btnCloneSample = document.getElementById('btn-clone-sample');
+
         if (btnRunRecon) {
           btnRunRecon.disabled = !canReconcile;
-          btnRunRecon.title = canReconcile 
-            ? "Run deterministic comparison under declared rules" 
-            : "Add both evidence sources (Form 1099-DA & Tax Ledger) to run reconciliation";
+          if (isSample && isReconciled) {
+            btnRunRecon.innerText = '⚡ Re-run Deterministic Reconciliation';
+            btnRunRecon.title = 'Re-run deterministic comparison against authentic sample baseline';
+          } else {
+            btnRunRecon.innerText = '⚡ Run Deterministic Reconciliation';
+            btnRunRecon.title = canReconcile 
+              ? "Run deterministic comparison under declared rules" 
+              : "Add both evidence sources (Form 1099-DA & Tax Ledger) to run reconciliation";
+          }
+        }
+
+        if (btnRestartSample) {
+          btnRestartSample.style.display = isSample ? 'inline-flex' : 'none';
+        }
+        if (btnCloneSample) {
+          btnCloneSample.style.display = isSample ? 'inline-flex' : 'none';
         }
 
         if (canReconcile) {
@@ -1663,6 +1682,22 @@
       } finally {
         btn.innerText = originalText;
         btn.disabled = false;
+      }
+    }
+
+    async function restartCurrentSample() {
+      if (!currentCaseId) return;
+      if (!confirm("Restart this sample case to its clean, unreconciled baseline state?")) return;
+      try {
+        const res = await fetch('/api/sample-case/reset', { method: 'POST' });
+        if (res.ok) {
+          showToast("Sample case restored to initial baseline.", "success");
+          await refreshCaseDetails();
+        } else {
+          showToast("Unable to reset sample case.", "error");
+        }
+      } catch (err) {
+        showToast("Error resetting sample case.", "error");
       }
     }
 

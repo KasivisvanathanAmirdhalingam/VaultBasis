@@ -12,6 +12,8 @@ from pydantic import BaseModel, Field, field_validator, model_validator
 class LicenseTier(str, Enum):
     """Commercial product tiers."""
     TRIAL = "TRIAL"
+    EVALUATION = "EVALUATION"
+    SOLO = "SOLO"
     ESSENTIAL = "ESSENTIAL"
     PRACTICE = "PRACTICE"
     ENTERPRISE = "ENTERPRISE"

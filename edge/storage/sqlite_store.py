@@ -361,6 +361,10 @@ class SQLiteStore:
                 return json.loads(row["receipt_json"])
             return None
 
+    def delete_receipt(self, receipt_id: str):
+        with self._get_connection() as conn:
+            conn.execute("DELETE FROM receipts WHERE receipt_id = ?", (receipt_id,))
+
     def get_source_file_bytes(self, source_id: str) -> Optional[bytes]:
         with self._get_connection() as conn:
             row = conn.execute("SELECT raw_content FROM sources WHERE source_id = ?", (source_id,)).fetchone()

@@ -584,4 +584,102 @@ def test_adversarial_tampered_sample_manifest_digest_denied_without_license(clea
     assert res_recon.json()["error"]["code"] == "ENTITLEMENT_REQUIRED"
 
 
+def test_sample_case_actions_rerun_and_reset_workflow(clean_commercial_env, client):
+    """
+    MMP15-EDGE-STATE-002:
+    Validates sample case domain actions, unmetered reconciliation, deterministic rerun,
+    and automated reset to pristine baseline.
+    """
+    policy, store, _ = clean_commercial_env
+
+    # 1. Load canonical sample case
+    res_load = client.post("/api/sample-case/load")
+    assert res_load.status_code == 200
+    case_data = res_load.json()
+    assert case_data["case_id"] == "CASE-SAMPLE-2025"
+    assert "actions" in case_data
+    assert case_data["actions"]["can_reconcile"] is True
+    assert case_data["actions"]["can_restart_sample"] is True
+    assert case_data["actions"]["can_view_receipt"] is False
+
+    # 2. Run deterministic reconciliation without any commercial license
+    res_recon = client.post("/api/cases/CASE-SAMPLE-2025/reconcile")
+    assert res_recon.status_code == 200
+    assert "reconciliation" in res_recon.json()
+
+    # 3. Fetch case detail and verify actions reflect completed state
+    res_detail = client.get("/api/cases/CASE-SAMPLE-2025")
+    assert res_detail.status_code == 200
+    detail_data = res_detail.json()
+    assert detail_data["actions"]["can_reconcile"] is True  # Rerun enabled
+    assert detail_data["actions"]["can_view_receipt"] is True
+    assert detail_data["actions"]["can_restart_sample"] is True
+
+    # 4. Rerun deterministic reconciliation (Option A: deterministic rerun returns 200)
+    res_rerun = client.post("/api/cases/CASE-SAMPLE-2025/reconcile")
+    assert res_rerun.status_code == 200
+    assert res_rerun.json()["status"] == "RECEIPT_ALREADY_ISSUED"
+
+    # 5. Reset sample case to pristine baseline
+    res_reset = client.post("/api/sample-case/reset")
+    assert res_reset.status_code == 200
+    reset_data = res_reset.json()
+    assert reset_data["receipt_id"] is None
+    assert reset_data["outcome_state"] is None
+    assert reset_data["actions"]["can_view_receipt"] is False
+    assert reset_data["actions"]["can_reconcile"] is True
+
+
+def test_five_state_entitlement_status_vocabulary(clean_commercial_env):
+    """
+    MMP15-EDGE-STATE-002:
+    Validates explicit 5-state entitlement status vocabulary:
+    NO_ENTITLEMENT, ACTIVE_EVALUATION, ACTIVE_PAID_LICENSE, EXPIRED_EVALUATION, EXPIRED_PAID_LICENSE.
+    """
+    policy, store, _ = clean_commercial_env
+    now = datetime.now(timezone.utc)
+
+    # 1. No license installed -> NO_ENTITLEMENT
+    status_none = policy.get_status(current_time=now)
+    assert status_none["entitlement_state"] == "NO_ENTITLEMENT"
+    assert status_none["licensed"] is False
+
+    # 2. Active Evaluation license -> ACTIVE_EVALUATION
+    eval_token = _make_test_token(
+        tier=LicenseTier.EVALUATION,
+        max_cases=1,
+        expires_at_dt=now + timedelta(days=3),
+        grace_until_dt=now + timedelta(days=5),
+    )
+    policy.install_license_token(eval_token)
+    status_eval = policy.get_status(current_time=now)
+    assert status_eval["entitlement_state"] == "ACTIVE_EVALUATION"
+    assert status_eval["licensed"] is True
+    assert "Evaluation Active" in status_eval["message"]
+
+    # 3. Expired Evaluation license -> EXPIRED_EVALUATION
+    status_eval_exp = policy.get_status(current_time=now + timedelta(days=6))
+    assert status_eval_exp["entitlement_state"] == "EXPIRED_EVALUATION"
+    assert status_eval_exp["licensed"] is False
+
+    # 4. Active Paid license (Solo / Practice) -> ACTIVE_PAID_LICENSE
+    paid_token = _make_test_token(
+        tier=LicenseTier.PRACTICE,
+        max_cases=50,
+        expires_at_dt=now + timedelta(days=365),
+        grace_until_dt=now + timedelta(days=375),
+    )
+    policy.remove_license_token()
+    policy.install_license_token(paid_token)
+    status_paid = policy.get_status(current_time=now)
+    assert status_paid["entitlement_state"] == "ACTIVE_PAID_LICENSE"
+    assert status_paid["licensed"] is True
+
+    # 5. Expired Paid license -> EXPIRED_PAID_LICENSE
+    status_paid_exp = policy.get_status(current_time=now + timedelta(days=380))
+    assert status_paid_exp["entitlement_state"] == "EXPIRED_PAID_LICENSE"
+    assert status_paid_exp["licensed"] is False
+
+
+
 
