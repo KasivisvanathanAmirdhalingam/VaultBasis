@@ -12,11 +12,13 @@
 const fs = require('fs');
 const path = require('path');
 const { execSync } = require('child_process');
+const crypto = require('crypto');
 
 const REPO_ROOT = path.resolve(__dirname, '..');
 const DIST_DIR = path.join(REPO_ROOT, 'dist', 'public-web');
 const APPS_DIR = path.join(REPO_ROOT, 'apps');
 const SCHEMAS_DIR = path.join(REPO_ROOT, 'schemas', 'receipt');
+const COMMERCIAL_SCHEMAS_DIR = path.join(REPO_ROOT, 'schemas', 'commercial');
 const PARTIALS_DIR = path.join(APPS_DIR, 'web-marketing', 'partials');
 
 // Load shared partials once.
@@ -49,13 +51,30 @@ console.log('===================================================================
 
 // 1. Get Build Metadata
 let commitSha = 'preview';
+let fullCommitSha = 'preview';
 try {
   commitSha = execSync('git rev-parse --short HEAD', { cwd: REPO_ROOT }).toString().trim();
+  fullCommitSha = execSync('git rev-parse HEAD', { cwd: REPO_ROOT }).toString().trim();
 } catch (e) {
   console.warn('⚠️ Unable to determine git commit hash. Using "preview".');
 }
 const buildTimestamp = new Date().toISOString();
-console.log(`Commit SHA:      ${commitSha}`);
+
+// Read Canonical Commercial Catalog and compute SHA-256
+const canonicalCatalogPath = path.join(COMMERCIAL_SCHEMAS_DIR, 'canonical_catalog.json');
+let canonicalCatalogRaw = '';
+let canonicalCatalogSha256 = '';
+let canonicalCatalogJson = {};
+if (fs.existsSync(canonicalCatalogPath)) {
+  canonicalCatalogRaw = fs.readFileSync(canonicalCatalogPath, 'utf8');
+  canonicalCatalogSha256 = crypto.createHash('sha256').update(canonicalCatalogRaw).digest('hex');
+  canonicalCatalogJson = JSON.parse(canonicalCatalogRaw);
+} else {
+  console.warn('⚠️ Canonical commercial catalog not found at ' + canonicalCatalogPath);
+}
+
+console.log(`Commit SHA:      ${commitSha} (${fullCommitSha})`);
+console.log(`Catalog SHA256:  ${canonicalCatalogSha256}`);
 console.log(`Build Timestamp: ${buildTimestamp}`);
 console.log(`Output Target:   ${DIST_DIR}`);
 console.log('--------------------------------------------------------------------------------');
@@ -133,12 +152,36 @@ if (!fs.existsSync(verifierSourcePath)) {
 }
 console.log('✓ Web Verifier source verified (served by api/verifier-page.js — not placed in outputDirectory)');
 
-// 5. Copy Normative Schema (dist/public-web/schemas/receipt-v0.1.json)
+// 5. Copy Normative Schema (dist/public-web/schemas/receipt-v0.1.json) and Commercial Catalog
 const schemaSourcePath = path.join(SCHEMAS_DIR, 'receipt-v0.1.json');
 if (fs.existsSync(schemaSourcePath)) {
   fs.copyFileSync(schemaSourcePath, path.join(DIST_DIR, 'schemas', 'receipt-v0.1.json'));
   console.log('✓ Packaged Evidence Contract Schema -> dist/public-web/schemas/receipt-v0.1.json');
 }
+
+if (fs.existsSync(canonicalCatalogPath)) {
+  fs.mkdirSync(path.join(DIST_DIR, 'schemas', 'commercial'), { recursive: true });
+  fs.copyFileSync(canonicalCatalogPath, path.join(DIST_DIR, 'schemas', 'canonical_catalog.json'));
+  fs.copyFileSync(canonicalCatalogPath, path.join(DIST_DIR, 'schemas', 'commercial', 'canonical_catalog.json'));
+  console.log('✓ Packaged Canonical Commercial Catalog -> dist/public-web/schemas/canonical_catalog.json');
+}
+
+// 5.1. Generate Production Release Identity Metadata (/release.json)
+const releaseMetadata = {
+  product: 'VaultBasis Web',
+  source_commit: fullCommitSha,
+  source_commit_short: commitSha,
+  catalog_version: canonicalCatalogJson.version || '1.0.0',
+  canonical_catalog_sha256: canonicalCatalogSha256,
+  environment: 'production',
+  built_at: buildTimestamp
+};
+fs.writeFileSync(
+  path.join(DIST_DIR, 'release.json'),
+  JSON.stringify(releaseMetadata, null, 2) + '\n',
+  'utf8'
+);
+console.log('✓ Generated Production Release Identity -> dist/public-web/release.json');
 
 // 5b. Copy Golden Sample Receipts and Documentation
 const sampleValidSource = path.join(REPO_ROOT, 'tests', 'fixtures', 'golden_receipt_valid.json');
@@ -265,6 +308,7 @@ const PUBLIC_PREFIXES = [
   '/terms-of-service',
   '/docs/',
   '/schemas/',
+  '/release.json',
   '/sample-receipt',
   '/marketing',
   '/404',

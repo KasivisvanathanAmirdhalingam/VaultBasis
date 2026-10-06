@@ -120,3 +120,23 @@ def test_public_web_dist_strict_negative_drift_invariants():
                 violations.append(f"{html_file.name}: Matched forbidden pattern '{pattern}' -> {matches}")
 
     assert not violations, "Commercial drift detected in built public-web artifacts:\n" + "\n".join(violations)
+
+
+def test_release_json_metadata_integrity():
+    """Ensures dist/public-web/release.json exists and exposes correct provenance metadata."""
+    if not DIST_PUBLIC_WEB.exists():
+        pytest.skip("dist/public-web not yet built")
+
+    release_file = DIST_PUBLIC_WEB / "release.json"
+    assert release_file.exists(), f"release.json missing at {release_file}"
+
+    with open(release_file, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    assert data.get("product") == "VaultBasis Web"
+    assert "source_commit" in data
+    assert "source_commit_short" in data
+    assert data.get("catalog_version") == "1.0.0"
+    assert len(data.get("canonical_catalog_sha256", "")) == 64
+    assert data.get("environment") == "production"
+
