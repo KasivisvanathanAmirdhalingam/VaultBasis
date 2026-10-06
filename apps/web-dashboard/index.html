@@ -4,6 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>VaultBasis Edge — Outcome Verification Dashboard</title>
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -725,6 +729,7 @@
       </div>
       <span class="brand-badge">PREVIEW</span>
       <span class="brand-badge" style="color: #059669; border-color: rgba(5, 150, 105, 0.3);">LOCAL EVIDENCE PROCESSING</span>
+      <span class="brand-badge" id="header-entitlement-badge" style="display: none; cursor: pointer; background: #f0fdf4; border-color: #86efac; color: #166534;" onclick="openNewCaseModal()" title="View commercial license status">⚡ Evaluation</span>
     </div>
     <div class="nav-links">
       <button class="nav-btn active" id="nav-btn-cases" onclick="showScreen('screen-cases')">Cases</button>
@@ -1142,25 +1147,40 @@
         Establish practitioner context for this digital asset review engagement.
       </p>
 
+      <!-- Active Entitlement Banner (Shown when licensed) -->
+      <div id="modal-entitlement-active-banner" style="display: none; background: #f0fdf4; border: 1px solid #bbf7d0; border-left: 4px solid #059669; border-radius: 6px; padding: 12px 14px; margin-bottom: 1.25rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-size: 0.88rem; font-weight: 700; color: #166534;" id="modal-active-tier-text">⚡ 3-Day Evaluation Active</div>
+            <div style="font-size: 0.78rem; color: #15803d; margin-top: 3px;" id="modal-active-meta-text">72 hours remaining · 0 of 1 client case used</div>
+          </div>
+          <span class="badge badge-success" style="font-size: 0.72rem;">ACTIVE</span>
+        </div>
+      </div>
+
       <!-- Entitlement Gate Banner (Shown when NO_ENTITLEMENT or EXPIRED) -->
       <div id="modal-entitlement-gate" style="display: none; background: #fffbeb; border: 1px solid #fef3c7; border-left: 4px solid #f59e0b; border-radius: 6px; padding: 14px; margin-bottom: 1.25rem;">
         <div id="modal-entitlement-msg" style="font-size: 0.88rem; font-weight: 600; color: #92400e; margin-bottom: 0.75rem;">
           Client work requires an active Evaluation or paid license.
         </div>
-        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
           <button class="btn btn-primary" id="btn-modal-start-eval" onclick="startEvaluationFromModal()" style="font-size: 0.85rem; padding: 8px 14px;">
             ⚡ Start 3-Day Evaluation
           </button>
-          <button class="btn btn-secondary" id="btn-modal-toggle-token" onclick="toggleTokenActivationInput()" style="font-size: 0.85rem; padding: 8px 14px;">
-            🔑 Activate License Token
+          <input type="file" id="file-modal-license-input" accept=".license,.lic,.txt" style="display: none;" onchange="handleModalLicenseFileSelect(event)">
+          <button class="btn btn-secondary" onclick="document.getElementById('file-modal-license-input').click()" style="font-size: 0.85rem; padding: 8px 14px;">
+            📁 Import License File
+          </button>
+          <button class="btn" id="btn-modal-toggle-token" onclick="toggleTokenActivationInput()" style="font-size: 0.82rem; padding: 6px 10px; background: transparent; border: none; color: #78350f; text-decoration: underline; cursor: pointer;">
+            or paste token
           </button>
         </div>
         <!-- Inline Token Activation -->
         <div id="modal-token-input-box" style="display: none; margin-top: 12px; padding-top: 12px; border-top: 1px dashed #fde68a;">
-          <label style="font-size: 0.78rem; font-weight: 600; color: #78350f; display: block; margin-bottom: 4px;">Paste Commercial License Token:</label>
-          <textarea id="input-modal-license-token" rows="3" placeholder="eyJhbGciOi..." style="width: 100%; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; resize: vertical;"></textarea>
+          <label style="font-size: 0.78rem; font-weight: 600; color: #78350f; display: block; margin-bottom: 4px;">Paste VaultBasis License String:</label>
+          <textarea id="input-modal-license-token" rows="3" placeholder="Paste license text here..." style="width: 100%; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; resize: vertical;"></textarea>
           <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px;">
-            <button class="btn btn-sm btn-primary" onclick="submitModalLicenseToken()">Install Token →</button>
+            <button class="btn btn-sm btn-primary" onclick="submitModalLicenseToken()">Install License →</button>
           </div>
         </div>
       </div>
@@ -1283,6 +1303,44 @@
       }
     }
 
+    let currentCommercialStatus = null;
+
+    async function checkGlobalCommercialStatus() {
+      try {
+        const res = await fetch('/api/commercial/status');
+        if (res.ok) {
+          currentCommercialStatus = await res.json();
+          updateHeaderEntitlementBadge(currentCommercialStatus);
+        }
+      } catch (e) {
+        console.warn("Commercial status check failed:", e);
+      }
+    }
+
+    function updateHeaderEntitlementBadge(commStatus) {
+      const badge = document.getElementById('header-entitlement-badge');
+      if (!badge) return;
+      if (!commStatus || !commStatus.licensed) {
+        badge.style.display = 'inline-flex';
+        badge.style.background = '#fffbeb';
+        badge.style.borderColor = '#fde68a';
+        badge.style.color = '#92400e';
+        badge.innerText = '⚡ Start Evaluation';
+      } else if (commStatus.entitlement_state === 'ACTIVE_EVALUATION' || commStatus.tier === 'EVALUATION') {
+        badge.style.display = 'inline-flex';
+        badge.style.background = '#f0fdf4';
+        badge.style.borderColor = '#86efac';
+        badge.style.color = '#166534';
+        badge.innerText = `⚡ Evaluation (${commStatus.days_remaining ? commStatus.days_remaining + 'd' : '72h'})`;
+      } else {
+        badge.style.display = 'inline-flex';
+        badge.style.background = '#eff6ff';
+        badge.style.borderColor = '#93c5fd';
+        badge.style.color = '#1e40af';
+        badge.innerText = `🔑 ${commStatus.tier || 'Practitioner'}`;
+      }
+    }
+
     async function openNewCaseModal() {
       const errBox = document.getElementById('modal-case-error');
       if (errBox) { errBox.style.display = 'none'; errBox.innerText = ''; }
@@ -1297,7 +1355,10 @@
       let commStatus = { licensed: false, entitlement_state: 'NO_ENTITLEMENT' };
       try {
         const res = await fetch('/api/commercial/status');
-        if (res.ok) commStatus = await res.json();
+        if (res.ok) {
+          commStatus = await res.json();
+          currentCommercialStatus = commStatus;
+        }
       } catch (e) {
         console.warn("Could not check commercial status:", e);
       }
@@ -1311,20 +1372,29 @@
 
     function renderNewCaseEntitlementState(commStatus) {
       const gateBanner = document.getElementById('modal-entitlement-gate');
+      const activeBanner = document.getElementById('modal-entitlement-active-banner');
       const gateMsg = document.getElementById('modal-entitlement-msg');
       const formFields = document.getElementById('modal-case-form-fields');
       const btnSubmit = document.getElementById('btn-submit-create-case');
       const btnStartEval = document.getElementById('btn-modal-start-eval');
+      const activeTierText = document.getElementById('modal-active-tier-text');
+      const activeMetaText = document.getElementById('modal-active-meta-text');
 
-      if (!commStatus.licensed) {
+      updateHeaderEntitlementBadge(commStatus);
+
+      if (!commStatus || !commStatus.licensed) {
+        if (activeBanner) activeBanner.style.display = 'none';
         if (gateBanner) gateBanner.style.display = 'block';
-        if (formFields) formFields.style.opacity = '0.4';
+        if (formFields) {
+          formFields.style.opacity = '0.45';
+          formFields.style.pointerEvents = 'none';
+        }
         if (btnSubmit) {
           btnSubmit.disabled = true;
           btnSubmit.style.display = 'none';
         }
 
-        if (commStatus.entitlement_state === 'EXPIRED_EVALUATION' || commStatus.entitlement_state === 'EXPIRED_PAID_LICENSE') {
+        if (commStatus && (commStatus.entitlement_state === 'EXPIRED_EVALUATION' || commStatus.entitlement_state === 'EXPIRED_PAID_LICENSE')) {
           if (gateMsg) gateMsg.innerText = 'Your Evaluation has ended. Your existing work remains available. Activate a license to start or reconcile new client work.';
           if (btnStartEval) btnStartEval.style.display = 'none';
         } else {
@@ -1333,11 +1403,27 @@
         }
       } else {
         if (gateBanner) gateBanner.style.display = 'none';
-        if (formFields) formFields.style.opacity = '1.0';
+        if (activeBanner) activeBanner.style.display = 'block';
+        if (formFields) {
+          formFields.style.opacity = '1.0';
+          formFields.style.pointerEvents = 'auto';
+        }
         if (btnSubmit) {
           btnSubmit.disabled = false;
           btnSubmit.style.display = 'inline-flex';
-          btnSubmit.innerText = 'Create Case →';
+          const casesUsed = commStatus.billable_cases_count || 0;
+          btnSubmit.innerText = casesUsed === 0 ? 'Create First Case →' : 'Create Case →';
+        }
+
+        if (commStatus.entitlement_state === 'ACTIVE_EVALUATION' || commStatus.tier === 'EVALUATION') {
+          if (activeTierText) activeTierText.innerText = '⚡ 3-Day Evaluation Active';
+          const remainingText = commStatus.days_remaining ? `${commStatus.days_remaining} days remaining` : '72 hours remaining';
+          const casesText = `${commStatus.billable_cases_count || 0} of ${commStatus.max_cases_per_installation || 1} client case used`;
+          if (activeMetaText) activeMetaText.innerText = `${remainingText} · ${casesText}`;
+        } else {
+          if (activeTierText) activeTierText.innerText = `🔑 ${commStatus.tier || 'Practitioner'} Plan Active`;
+          const casesText = `Client cases: ${commStatus.billable_cases_count || 0} of ${commStatus.max_cases_per_installation || 10} used`;
+          if (activeMetaText) activeMetaText.innerText = casesText;
         }
       }
     }
@@ -1364,8 +1450,13 @@
         if (res.ok) {
           showToast('3-Day Evaluation active. 1 client case included.', 'success');
           const statusRes = await fetch('/api/commercial/status');
-          const commStatus = statusRes.ok ? await statusRes.json() : { licensed: true, entitlement_state: 'ACTIVE_EVALUATION' };
+          const commStatus = statusRes.ok ? await statusRes.json() : { licensed: true, entitlement_state: 'ACTIVE_EVALUATION', tier: 'EVALUATION' };
+          currentCommercialStatus = commStatus;
           renderNewCaseEntitlementState(commStatus);
+          setTimeout(() => {
+            const clientInput = document.getElementById('input-client-ref');
+            if (clientInput) clientInput.focus();
+          }, 60);
         } else {
           showToast('Unable to activate Evaluation token.', 'error');
         }
@@ -1377,6 +1468,18 @@
       }
     }
 
+    async function handleModalLicenseFileSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      try {
+        const text = await file.text();
+        await installLicenseString(text.trim());
+      } catch (e) {
+        showToast('Unable to read selected license file.', 'error');
+      }
+      event.target.value = '';
+    }
+
     async function submitModalLicenseToken() {
       const textarea = document.getElementById('input-modal-license-token');
       const token = textarea ? textarea.value.trim() : '';
@@ -1384,6 +1487,10 @@
         showToast('Please paste a valid license token string.', 'warning');
         return;
       }
+      await installLicenseString(token);
+    }
+
+    async function installLicenseString(token) {
       try {
         const res = await fetch('/api/commercial/license', {
           method: 'POST',
@@ -1395,9 +1502,20 @@
           showToast(`License activated (${data.tier || 'Commercial Plan'}).`, 'success');
           const statusRes = await fetch('/api/commercial/status');
           const commStatus = statusRes.ok ? await statusRes.json() : { licensed: true };
+          currentCommercialStatus = commStatus;
           renderNewCaseEntitlementState(commStatus);
+          setTimeout(() => {
+            const clientInput = document.getElementById('input-client-ref');
+            if (clientInput) clientInput.focus();
+          }, 60);
         } else {
-          showToast(`License rejected: ${data.diagnostic_reason || 'Invalid signature.'}`, 'error');
+          let userMsg = 'License not recognized. Please select or paste the complete VaultBasis license file issued to your firm.';
+          if (data.license_state === 'INSTALLATION_MISMATCH') {
+            userMsg = 'This VaultBasis license was issued for another installation. Contact VaultBasis to transfer or reissue your license.';
+          } else if (data.license_state === 'EXPIRED') {
+            userMsg = 'License expired. Please renew your license to continue new client work.';
+          }
+          showToast(userMsg, 'error');
         }
       } catch (err) {
         showToast('Connection error installing license token.', 'error');

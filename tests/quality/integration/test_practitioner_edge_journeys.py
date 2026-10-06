@@ -218,3 +218,105 @@ def test_journey_c_existing_case_durability_and_export(test_client):
         receipt_bytes = zf.read("receipt-v0.1.json")
         rcpt = json.loads(receipt_bytes)
         assert rcpt["outcome_state"] in ("MATCHED", "PROCEEDS_DIFFERENCE")
+
+
+def test_branding_and_favicon_routes(test_client):
+    """
+    Assert canonical branding assets return HTTP 200 OK on Edge server.
+    - /favicon.ico
+    - /favicon.svg
+    - /apple-touch-icon.png
+    - /site.webmanifest
+    """
+    client = test_client["client"]
+    for asset_path in ["/favicon.ico", "/favicon.svg", "/apple-touch-icon.png", "/site.webmanifest"]:
+        res = client.get(asset_path)
+        assert res.status_code == 200, f"Asset {asset_path} returned {res.status_code}"
+        assert len(res.content) > 0, f"Asset {asset_path} was empty"
+
+
+def test_journey_evaluation_activation_and_capacity_enforcement(test_client):
+    """
+    MMP15-EVAL-UX-TRANSITION-001:
+    1. Start 3-day evaluation via POST /api/commercial/start-evaluation -> 200 OK
+    2. Entitlement status reflects ACTIVE evaluation with 1 client case capacity
+    3. First client case creation succeeds (HTTP 201)
+    4. Second client case creation is rejected (HTTP 403) due to evaluation capacity limit
+    """
+    client = test_client["client"]
+
+    # 1. Start Evaluation
+    start_res = client.post("/api/commercial/start-evaluation")
+    assert start_res.status_code == 200, start_res.text
+    eval_data = start_res.json()
+    assert eval_data["status"] == "INSTALLED"
+    assert eval_data["license_state"] == "ACTIVE"
+    assert eval_data["tier"] == "EVALUATION"
+    assert eval_data["max_cases_per_installation"] == 1
+
+    # 2. Check authoritative current commercial status
+    status_res = client.get("/api/commercial/status")
+    assert status_res.status_code == 200
+    status_data = status_res.json()
+    assert status_data["license_state"] == "ACTIVE"
+    assert status_data["entitlement_state"] == "ACTIVE_EVALUATION"
+    assert status_data["tier"] == "EVALUATION"
+    assert status_data["billable_cases_count"] == 0
+    assert status_data["max_cases_per_installation"] == 1
+
+    # 3. Create First Client Case -> Allowed
+    case1_res = client.post(
+        "/api/cases",
+        json={"case_id": "CASE-EVAL-001", "client_reference": "Eval Client Alpha", "tax_year": 2025}
+    )
+    assert case1_res.status_code == 201, case1_res.text
+    assert case1_res.json()["case_id"] == "CASE-EVAL-001"
+
+    # 4. Check updated usage
+    status_res2 = client.get("/api/commercial/status")
+    assert status_res2.json()["billable_cases_count"] == 1
+
+    # 5. Create Second Client Case -> Blocked by capacity limit
+    case2_res = client.post(
+        "/api/cases",
+        json={"case_id": "CASE-EVAL-002", "client_reference": "Eval Client Beta", "tax_year": 2025}
+    )
+    assert case2_res.status_code in (402, 403)
+
+
+def test_practitioner_facing_license_error_messages(test_client):
+    """
+    Ensure invalid or mismatched license activation yields practitioner language,
+    not engineering / parser terminology (no JSON, Base64, etc.).
+    """
+    client = test_client["client"]
+
+    # 1. Garbage text submission
+    res_garbage = client.post("/api/commercial/license", json={"token": "sfddsfsdsdfdfs"})
+    assert res_garbage.status_code == 200
+    data_garbage = res_garbage.json()
+    assert data_garbage["status"] == "REJECTED"
+    err_text = data_garbage.get("diagnostic_reason", "")
+    assert "JSON" not in err_text
+    assert "Base64" not in err_text
+    assert "License not recognized" in err_text
+
+    # 2. License issued for different installation ID
+    token_mismatched = issue_commercial_license(
+        signing_key_hex=_TEST_PRIV_HEX,
+        customer_id="CUST-OTHER-001",
+        tier="PRACTICE",
+        max_cases=10,
+        valid_days=365,
+        license_id="LIC-OTHER-001",
+        key_id=_TEST_KEY_ID,
+        installation_id="INST-DIFFERENT-MACHINE",
+    )
+    res_mismatch = client.post("/api/commercial/license", json={"token": token_mismatched})
+    assert res_mismatch.status_code == 200
+    data_mismatch = res_mismatch.json()
+    assert data_mismatch["status"] == "REJECTED"
+    err_mismatch = data_mismatch.get("diagnostic_reason", "")
+    assert "another installation" in err_mismatch
+
+

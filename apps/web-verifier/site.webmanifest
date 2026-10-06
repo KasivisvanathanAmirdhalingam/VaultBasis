@@ -1,0 +1,11 @@
+{
+  "name": "VaultBasis Edge",
+  "short_name": "VaultBasis",
+  "icons": [
+    { "src": "/favicon.svg", "type": "image/svg+xml", "sizes": "any" },
+    { "src": "/favicon.ico", "type": "image/x-icon", "sizes": "32x32" }
+  ],
+  "theme_color": "#2563eb",
+  "background_color": "#f8fafc",
+  "display": "standalone"
+}

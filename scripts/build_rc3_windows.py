@@ -251,6 +251,7 @@ def main() -> int:
            "--add-data", f"docs/scope_and_limitations_v0.1.md{os.pathsep}docs",
            "--add-data", f"tests/fixtures/golden_receipt_valid.json{os.pathsep}sample",
            "--add-data", f"tests/fixtures/golden_receipt_tampered.json{os.pathsep}sample",
+           "--icon", str(REPO / "apps" / "web-dashboard" / "favicon.ico"),
            "main.py"]
     sh(*cmd)
 
@@ -260,9 +261,29 @@ def main() -> int:
     arch = pe_machine(exe)
     assert arch == "x64", f"wrong-arch Windows binary: {arch} (need x64)"
 
+    # Build Setup Installer (VaultBasis-Setup.exe)
+    installer_zip = REPO / "build" / "vaultbasis_app.zip"
+    installer_zip.parent.mkdir(parents=True, exist_ok=True)
+    with zipfile.ZipFile(installer_zip, "w", zipfile.ZIP_DEFLATED) as zf:
+        for f in sorted(exe.parent.rglob("*")):
+            if f.is_file():
+                zf.write(f, arcname=str(f.relative_to(exe.parent)))
+
+    installer_cmd = [
+        sys.executable, "-m", "PyInstaller", "--clean", "--noconfirm",
+        "--name", "VaultBasis-Setup", "--onefile", "--windowed",
+        "--icon", str(REPO / "apps" / "web-dashboard" / "favicon.ico"),
+        "--add-data", f"{installer_zip}{os.pathsep}.",
+        str(REPO / "scripts" / "installer_windows.py")
+    ]
+    sh(*installer_cmd)
+    setup_exe = REPO / "dist" / "VaultBasis-Setup.exe"
+    assert setup_exe.is_file(), "VaultBasis-Setup.exe missing in installer output"
+
     pkg = REPO / "dist" / PACKAGE_NAME
     pkg.mkdir(parents=True)
-    # Copy entire onedir bundle (exe + _internal/) into package
+    # Copy setup installer and onedir bundle into package
+    shutil.copy2(setup_exe, pkg / "VaultBasis-Setup.exe")
     shutil.copytree(exe.parent, pkg / "VaultBasis", dirs_exist_ok=True)
     guides = {
         "VaultBasis_Practitioner_Quick_Start.html": "VaultBasis-Quick-Start.html",

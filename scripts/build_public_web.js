@@ -112,6 +112,16 @@ if (fs.existsSync(guideSrc)) {
   console.log('✓ Packaged Evidence Receipt Guide -> dist/public-web/evidence-receipt-guide.html');
 }
 
+// 3.5. Copy Canonical Branding & Favicon Assets
+const brandAssets = ['favicon.ico', 'favicon.svg', 'apple-touch-icon.png', 'site.webmanifest'];
+for (const asset of brandAssets) {
+  const assetSrc = path.join(APPS_DIR, 'web-marketing', asset);
+  if (fs.existsSync(assetSrc)) {
+    fs.copyFileSync(assetSrc, path.join(DIST_DIR, asset));
+    console.log(`✓ Packaged Brand Asset: ${asset} -> dist/public-web/${asset}`);
+  }
+}
+
 // 4. Web Verifier — served by api/verifier-page.js, NOT as a static file.
 // The verifier HTML is read from apps/web-verifier/index.html by the serverless
 // function at request time, after server-side session validation.

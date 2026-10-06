@@ -14,7 +14,7 @@ from typing import Any, Dict, List, Optional
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response, StreamingResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -988,6 +988,37 @@ WEB_MARKETING_DIR = RESOURCE_BASE / "apps" / "web-marketing"
 
 if WEB_DASHBOARD_DIR.exists():
     app.mount("/static", StaticFiles(directory=str(WEB_DASHBOARD_DIR)), name="static")
+
+@app.get("/favicon.ico")
+def serve_favicon_ico():
+    ico_file = WEB_DASHBOARD_DIR / "favicon.ico"
+    if ico_file.is_file():
+        return FileResponse(path=str(ico_file), media_type="image/x-icon")
+    svg_file = WEB_DASHBOARD_DIR / "favicon.svg"
+    if svg_file.is_file():
+        return Response(content=svg_file.read_bytes(), media_type="image/svg+xml")
+    raise HTTPException(status_code=404, detail="Favicon not found")
+
+@app.get("/favicon.svg")
+def serve_favicon_svg():
+    svg_file = WEB_DASHBOARD_DIR / "favicon.svg"
+    if svg_file.is_file():
+        return Response(content=svg_file.read_bytes(), media_type="image/svg+xml")
+    raise HTTPException(status_code=404, detail="Favicon not found")
+
+@app.get("/apple-touch-icon.png")
+def serve_apple_touch_icon():
+    png_file = WEB_DASHBOARD_DIR / "apple-touch-icon.png"
+    if png_file.is_file():
+        return FileResponse(path=str(png_file), media_type="image/png")
+    raise HTTPException(status_code=404, detail="Icon not found")
+
+@app.get("/site.webmanifest")
+def serve_site_webmanifest():
+    manifest_file = WEB_DASHBOARD_DIR / "site.webmanifest"
+    if manifest_file.is_file():
+        return Response(content=manifest_file.read_bytes(), media_type="application/manifest+json")
+    raise HTTPException(status_code=404, detail="Manifest not found")
 
 @app.get("/", response_class=HTMLResponse)
 def serve_dashboard():

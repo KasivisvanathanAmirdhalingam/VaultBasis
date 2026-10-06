@@ -154,8 +154,8 @@ def evaluate_license_envelope(
                 entitlements=payload.entitlements,
                 installation_bound=True,
                 diagnostic_reason=(
-                    f"Installation binding mismatch: license bound to '{payload.installation_id}', "
-                    f"current environment is '{current_installation_id}'"
+                    f"This VaultBasis license was issued for another installation (bound to '{payload.installation_id}'). "
+                    f"Contact VaultBasis to transfer or reissue your license."
                 ),
             )
 
@@ -282,7 +282,7 @@ def evaluate_license_token(
         return LicenseEvaluationResult(
             state=LicenseState.MALFORMED,
             is_active=False,
-            diagnostic_reason="License token is neither valid JSON nor valid Base64 JSON payload",
+            diagnostic_reason="License not recognized. Paste or import the complete VaultBasis license file issued to your firm.",
         )
 
     # Parse with strict duplicate key rejection
@@ -292,14 +292,14 @@ def evaluate_license_token(
         return LicenseEvaluationResult(
             state=LicenseState.MALFORMED,
             is_active=False,
-            diagnostic_reason=f"Failed to parse license JSON (or duplicate keys present): {e}",
+            diagnostic_reason=f"Failed to parse license: {e}",
         )
 
     if not isinstance(envelope_dict, dict):
         return LicenseEvaluationResult(
             state=LicenseState.MALFORMED,
             is_active=False,
-            diagnostic_reason="License envelope must be a JSON object",
+            diagnostic_reason="License envelope must be a valid VaultBasis license object",
         )
 
     return evaluate_license_envelope(
