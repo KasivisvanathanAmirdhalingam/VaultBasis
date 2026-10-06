@@ -102,6 +102,7 @@ commercial_policy = CommercialPolicyService(
     license_dir=DATA_DIR / "license",
     installation_id=os.environ.get("VAULTBASIS_INSTALLATION_ID"),
     audit_service=commercial_audit_service,
+    allow_dev_preview=os.environ.get("VAULTBASIS_ALLOW_DEV_PREVIEW", "true").lower() in ("true", "1", "yes"),
 )
 firm_identity_service = FirmIdentityService(db_store, audit_service=commercial_audit_service)
 diagnostic_packager = DiagnosticPackager(db_store, commercial_policy, firm_identity_service)

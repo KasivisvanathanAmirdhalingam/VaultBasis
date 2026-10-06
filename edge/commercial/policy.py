@@ -131,13 +131,16 @@ class CommercialPolicyService:
         keyring_override: Optional[Dict[str, str]] = None,
         installation_id: Optional[str] = None,
         audit_service: Optional[Any] = None,
+        allow_dev_preview: bool = False,
     ):
         self.store = store
         self.license_dir = Path(license_dir) if license_dir else None
         self.keyring_override = keyring_override
         self.installation_id = installation_id
         self.audit_service = audit_service
+        self.allow_dev_preview = allow_dev_preview
         self._runtime_token: Optional[str] = None
+
 
     def set_runtime_token(self, token: Optional[str]):
         """Sets an in-memory runtime token override (useful for testing and dynamic configuration)."""
@@ -334,6 +337,21 @@ class CommercialPolicyService:
         billable_cases = self.store.count_billable_cases() if self.store else 0
 
         if not has_token:
+            if self.allow_dev_preview:
+                return {
+                    "licensed": True,
+                    "license_state": "ACTIVE",
+                    "entitlement_state": "ACTIVE_EVALUATION",
+                    "tier": "EVALUATION",
+                    "license_id": "PREVIEW-DEV-EVAL",
+                    "customer_id": "Practitioner Preview",
+                    "billable_cases_count": billable_cases,
+                    "max_cases_per_installation": 50,
+                    "days_remaining": 30,
+                    "grace_days_remaining": 0,
+                    "unmetered_verification_active": True,
+                    "message": f"Preview Evaluation Active · {billable_cases}/50 client cases used.",
+                }
             return {
                 "licensed": False,
                 "license_state": "UNLICENSED",
@@ -436,6 +454,24 @@ class CommercialPolicyService:
         # 1. Check for token presence
         token = self.get_active_token()
         if not token:
+            if self.allow_dev_preview:
+                billable_cases = self.store.count_billable_cases() if self.store else 0
+                max_dev_cases = 50
+                if billable_cases >= max_dev_cases:
+                    return CommercialPolicyDecision(
+                        allowed=False,
+                        reason_code=CommercialDenialCode.CASE_CAPACITY_REACHED,
+                        http_status=402,
+                        message=f"Preview case capacity reached ({billable_cases}/{max_dev_cases} cases). Install a commercial license token in Settings to create additional cases.",
+                        correlation_id=correlation_id,
+                    )
+                return CommercialPolicyDecision(
+                    allowed=True,
+                    http_status=200,
+                    correlation_id=correlation_id,
+                    message=f"Preview development mode active ({billable_cases}/{max_dev_cases} cases used).",
+                )
+
             return CommercialPolicyDecision(
                 allowed=False,
                 reason_code=CommercialDenialCode.ENTITLEMENT_REQUIRED,
@@ -444,6 +480,7 @@ class CommercialPolicyService:
                 upgrade_guidance="Start your 3-day Evaluation or activate a plan at vaultbasis.com/#pricing to continue client engagements.",
                 correlation_id=correlation_id,
             )
+
 
         # 2. Cryptographic & Temporal Evaluation via frozen engine
         eval_res = evaluate_license_token(
