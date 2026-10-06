@@ -37,25 +37,25 @@ function formatEvaluationEmailHtml({ customerName, downloadUrl, expiresAtIso }) 
   return `
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; color: #0f172a; line-height: 1.6;">
       <div style="margin-bottom: 24px;">
-        <h2 style="font-size: 22px; font-weight: 800; color: #0f172a; margin: 0 0 8px 0;">VaultBasis Free Evaluation</h2>
-        <p style="color: #475569; font-size: 15px; margin: 0;">Try full digital-asset reconciliation with preloaded sample data.</p>
+        <h2 style="font-size: 22px; font-weight: 800; color: #0f172a; margin: 0 0 8px 0;">VaultBasis 3-Day Evaluation</h2>
+        <p style="color: #475569; font-size: 15px; margin: 0;">Experience full digital-asset reconciliation with your client files (1 live evaluation case included) and preloaded sample scenarios.</p>
       </div>
 
       <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin-bottom: 24px;">
         <p style="margin: 0 0 12px 0; font-size: 15px;">Hello <strong>${customerName}</strong>,</p>
-        <p style="margin: 0; font-size: 14px; color: #334155;">Your evaluation download authorization is ready. You can explore complete Form 1099-DA reconciliation using bundled sample cases.</p>
+        <p style="margin: 0; font-size: 14px; color: #334155;">Your 3-Day Evaluation download authorization is ready. You have 72 hours of full workflow access, including 1 live client reconciliation case.</p>
       </div>
 
       <div style="text-align: center; margin: 32px 0;">
-        <a href="${downloadUrl}" style="display: inline-block; background: #2563eb; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: 700; font-size: 16px;">Download VaultBasis (.zip)</a>
+        <a href="${downloadUrl}" style="display: inline-block; background: #2563eb; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: 700; font-size: 16px;">Download VaultBasis</a>
       </div>
 
       <div style="border-top: 1px solid #e2e8f0; padding-top: 20px; margin-top: 28px;">
         <h4 style="font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; margin: 0 0 12px 0;">Getting Started in 3 Steps</h4>
         <ol style="margin: 0 0 20px 0; padding-left: 20px; font-size: 14px; color: #334155; line-height: 1.8;">
-          <li><strong>Download and extract</strong> the ZIP package on your local computer.</li>
-          <li><strong>Launch VaultBasis</strong> (no license key required for sample evaluation).</li>
-          <li><strong>Open Sample Cases</strong> to review reconciliation math and verify signed Evidence Receipts.</li>
+          <li><strong>Download and launch</strong> VaultBasis on your local computer.</li>
+          <li><strong>Click "+ New Case"</strong> and start your 3-day evaluation directly.</li>
+          <li><strong>Reconcile Form 1099-DA &amp; Tax Ledger</strong> to generate signed, verifiable Evidence Receipts.</li>
         </ol>
       </div>
 
