@@ -247,9 +247,9 @@ def test_policy_capacity_limit_enforcement(clean_commercial_env):
     # At capacity (2/2) -> new case creation denied
     d2 = policy.authorize(CommercialOperation.CREATE_CASE)
     assert not d2.allowed
-    assert d2.reason_code == CommercialDenialCode.CASE_CAPACITY_REACHED
-    assert d2.http_status == 402
-    assert "reached the case limit for your current license" in d2.message
+    assert d2.reason_code == CommercialDenialCode.EVALUATION_CAPACITY_REACHED
+    assert d2.http_status == 403
+    assert "used all 3 client cases" in d2.message or "reached the case limit" in d2.message
 
     # Bundled sample case does NOT consume capacity
     store.save_case(CanonicalCase(case_id="CASE-SAMPLE-2025", tax_year=2025, jurisdiction="US", case_status="CREATED", created_at=now_utc, updated_at=now_utc))
@@ -551,7 +551,7 @@ def test_clone_sample_to_production_requires_license_and_consumes_capacity(clean
 
     # 4. Next case creation is blocked because capacity (1/1) is now reached
     res_next = client.post("/api/cases", json={"case_id": "CASE-EXCEEDED-002", "tax_year": 2025})
-    assert res_next.status_code == 402
+    assert res_next.status_code == 403
     assert res_next.json()["error"]["code"] == "CASE_CAPACITY_REACHED"
 
 

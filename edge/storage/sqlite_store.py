@@ -247,6 +247,70 @@ class SQLiteStore:
                 sample_digest
             ))
 
+    def create_case_atomic(
+        self,
+        case: CanonicalCase,
+        is_evaluation: bool = False,
+        max_cases: int = 0,
+        since_iso: Optional[str] = None
+    ) -> CanonicalCase:
+        """
+        Atomically checks capacity limits and persists a new case in a single SQLite transaction.
+        Increments the monotonic evaluation case counter in the same transaction for evaluation cases.
+        """
+        now_utc = datetime.now(timezone.utc).isoformat()
+        client_ref = getattr(case, "client_reference", "Sample Client") or "Sample Client"
+        case_kind = getattr(case, "case_kind", "PRODUCTION") or "PRODUCTION"
+        sample_def_id = getattr(case, "sample_definition_id", None)
+        sample_digest = getattr(case, "sample_manifest_digest", None)
+
+        with self._get_connection() as conn:
+            if is_evaluation:
+                row = conn.execute("SELECT cases_created_count FROM installation_evaluation WHERE id = 1").fetchone()
+                eval_cases = row[0] if (row and row[0] is not None) else 0
+                if max_cases > 0 and eval_cases >= max_cases:
+                    raise ValueError(f"Evaluation capacity reached ({eval_cases}/{max_cases})")
+                conn.execute("""
+                    INSERT INTO cases (
+                        case_id, client_reference, tax_year, jurisdiction, case_status,
+                        outcome_state, assurance_level, receipt_id, created_at, updated_at,
+                        case_kind, sample_definition_id, sample_manifest_digest
+                    )
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (
+                    case.case_id, client_ref, case.tax_year, case.jurisdiction, case.case_status,
+                    case.outcome_state, case.assurance_level, case.receipt_id, case.created_at,
+                    now_utc, case_kind, sample_def_id, sample_digest
+                ))
+                conn.execute("UPDATE installation_evaluation SET cases_created_count = cases_created_count + 1 WHERE id = 1")
+            else:
+                if max_cases > 0:
+                    if since_iso:
+                        c_row = conn.execute(
+                            "SELECT COUNT(*) FROM cases WHERE (case_kind IS NULL OR case_kind != 'BUNDLED_SAMPLE') AND created_at >= ?",
+                            (since_iso,)
+                        ).fetchone()
+                    else:
+                        c_row = conn.execute(
+                            "SELECT COUNT(*) FROM cases WHERE (case_kind IS NULL OR case_kind != 'BUNDLED_SAMPLE')"
+                        ).fetchone()
+                    count = c_row[0] if c_row else 0
+                    if count >= max_cases:
+                        raise ValueError(f"Plan capacity reached ({count}/{max_cases})")
+                conn.execute("""
+                    INSERT INTO cases (
+                        case_id, client_reference, tax_year, jurisdiction, case_status,
+                        outcome_state, assurance_level, receipt_id, created_at, updated_at,
+                        case_kind, sample_definition_id, sample_manifest_digest
+                    )
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (
+                    case.case_id, client_ref, case.tax_year, case.jurisdiction, case.case_status,
+                    case.outcome_state, case.assurance_level, case.receipt_id, case.created_at,
+                    now_utc, case_kind, sample_def_id, sample_digest
+                ))
+        return case
+
     def get_case(self, case_id: str) -> Optional[CanonicalCase]:
         with self._get_connection() as conn:
             row = conn.execute("SELECT * FROM cases WHERE case_id = ?", (case_id,)).fetchone()

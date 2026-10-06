@@ -48,7 +48,7 @@
         if (btn) btn.innerText = 'Continue to Checkout ($1,499/yr) →';
       } else if (tier === 'ENTERPRISE') {
         if (modalTitle) modalTitle.innerText = 'Enterprise & Larger Practices';
-        if (modalDesc) modalDesc.innerText = 'Custom / high-volume case allocations, multi-seat firm deployments, and priority CPA workflow support.';
+        if (modalDesc) modalDesc.innerText = 'Custom / high-volume case capacity, multi-seat deployments, and commercial terms agreed with the firm.';
         if (btn) btn.innerText = 'Submit Enterprise Inquiry →';
       }
     }

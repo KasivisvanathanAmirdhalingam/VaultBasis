@@ -516,10 +516,26 @@ def create_case(req: CreateCaseRequest):
         created_at=now_utc,
         updated_at=now_utc
     )
-    db_store.save_case(case)
     eval_res = commercial_policy.evaluate_current_license()
-    if eval_res.tier in (LicenseTier.TRIAL, LicenseTier.EVALUATION):
-        db_store.record_evaluation_case_created()
+    is_eval = (eval_res.tier in (LicenseTier.TRIAL, LicenseTier.EVALUATION))
+    max_cases = eval_res.max_cases_per_installation or (3 if is_eval else 0)
+    eval_state = db_store.get_installation_evaluation() if is_eval else None
+    since_iso = eval_state.get("activated_at") if (is_eval and eval_state) else None
+
+    try:
+        db_store.create_case_atomic(
+            case=case,
+            is_evaluation=is_eval,
+            max_cases=max_cases,
+            since_iso=since_iso
+        )
+    except ValueError as e:
+        denial = commercial_policy.authorize(CommercialOperation.CREATE_CASE)
+        return JSONResponse(
+            status_code=denial.http_status,
+            content=denial.to_error_dict()
+        )
+
     return CaseSummaryResponse(
         case_id=case.case_id,
         client_reference=case.client_reference,

@@ -117,8 +117,8 @@ def test_mmp15_eval_e2e_001_lifecycle(freeze_test_env):
 
     # 4. Create fourth client case -> Rejected due to evaluation capacity limit
     case4_resp = client.post("/api/cases", json={"client_reference": "Client 4", "tax_year": 2025})
-    assert case4_resp.status_code == 402
-    assert case4_resp.json()["error"]["code"] == CommercialDenialCode.CASE_CAPACITY_REACHED.value
+    assert case4_resp.status_code == 403
+    assert case4_resp.json()["error"]["code"] == CommercialDenialCode.EVALUATION_CAPACITY_REACHED.value
 
     # 5. Existing cases remain readable and listable
     list_resp = client.get("/api/cases")

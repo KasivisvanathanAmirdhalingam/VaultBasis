@@ -87,6 +87,7 @@ class CommercialDenialCode(str, Enum):
     LICENSE_GRACE_RESTRICTED = "LICENSE_GRACE_RESTRICTED"
     INSTALLATION_MISMATCH = "INSTALLATION_MISMATCH"
     CASE_CAPACITY_REACHED = "CASE_CAPACITY_REACHED"
+    EVALUATION_CAPACITY_REACHED = "EVALUATION_CAPACITY_REACHED"
     CAPABILITY_NOT_LICENSED = "CAPABILITY_NOT_LICENSED"
     LICENSE_INVALID = "LICENSE_INVALID"
 
@@ -675,16 +676,21 @@ class CommercialPolicyService:
         # Capacity Check for case creation
         if operation == CommercialOperation.CREATE_CASE:
             if max_cases > 0 and billable_count >= max_cases:
-                is_eval_cap = (eval_res.tier == LicenseTier.EVALUATION and max_cases == 3)
+                is_eval_cap = (eval_res.tier in (LicenseTier.TRIAL, LicenseTier.EVALUATION))
                 msg = (
                     f"You have used all 3 client cases included with your 3-Day Evaluation ({billable_count}/{max_cases} cases used). Upgrade to Practitioner or Firm to create additional client cases."
                     if is_eval_cap else
                     f"You've reached the case limit for your current license ({billable_count} of {max_cases} client cases used). Your existing cases remain available. Upgrade your license to start another client case."
                 )
+                denial_code = (
+                    CommercialDenialCode.EVALUATION_CAPACITY_REACHED
+                    if is_eval_cap else
+                    CommercialDenialCode.CASE_CAPACITY_REACHED
+                )
                 return CommercialPolicyDecision(
                     allowed=False,
-                    reason_code=CommercialDenialCode.CASE_CAPACITY_REACHED,
-                    http_status=402,
+                    reason_code=denial_code,
+                    http_status=403,
                     message=msg,
                     upgrade_guidance="Upgrade your license at vaultbasis.com/#pricing or contact sales@vaultbasis.com to increase your case volume.",
                     correlation_id=correlation_id,
