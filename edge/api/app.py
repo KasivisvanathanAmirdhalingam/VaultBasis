@@ -688,6 +688,35 @@ def get_case(case_id: str):
     can_reconcile = (len(case.sources) >= 2) and recon_decision.allowed
     meta = _derive_case_metadata(case)
 
+    # Attach existing reconciliation and receipt findings if case has been reconciled
+    reconciliation_data = None
+    receipt_data = None
+    if case.receipt_id:
+        receipt_data = db_store.get_receipt(case.receipt_id)
+        if len(case.sources) >= 2:
+            try:
+                recon_res = DeterministicReconciliationEngine.reconcile_case(case)
+                reconciliation_data = recon_res.to_dict()
+            except Exception:
+                if receipt_data:
+                    reconciliation_data = {
+                        "outcome_state": receipt_data.get("outcome_state"),
+                        "assurance_level": receipt_data.get("assurance_level"),
+                        "material_differences": receipt_data.get("material_differences", []),
+                        "unresolved_items": receipt_data.get("unresolved_items", []),
+                        "agreed_records": [],
+                        "total_evaluated_count": len(receipt_data.get("material_differences", [])) + len(receipt_data.get("unresolved_items", []))
+                    }
+        elif receipt_data:
+            reconciliation_data = {
+                "outcome_state": receipt_data.get("outcome_state"),
+                "assurance_level": receipt_data.get("assurance_level"),
+                "material_differences": receipt_data.get("material_differences", []),
+                "unresolved_items": receipt_data.get("unresolved_items", []),
+                "agreed_records": [],
+                "total_evaluated_count": len(receipt_data.get("material_differences", [])) + len(receipt_data.get("unresolved_items", []))
+            }
+
     # Return structured case details with domain actions
     return {
         "case_id": case.case_id,
@@ -702,6 +731,8 @@ def get_case(case_id: str):
         "outcome_state": case.outcome_state,
         "assurance_level": case.assurance_level,
         "receipt_id": case.receipt_id,
+        "reconciliation": reconciliation_data,
+        "receipt": receipt_data,
         "sources": {k: v.model_dump() for k, v in case.sources.items()},
         "transactions": [t.to_summary_dict() for t in case.transactions],
         "created_at": case.created_at,

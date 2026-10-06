@@ -353,6 +353,16 @@
       flex-direction: column;
       gap: 4px;
     }
+    .summary-card.clickable {
+      cursor: pointer;
+      transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+      user-select: none;
+      position: relative;
+    }
+    .summary-card.clickable:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
     .summary-card.agreed {
       border-left: 4px solid var(--success);
       background: #f0fdf4;
@@ -364,6 +374,49 @@
     .summary-card.unresolved {
       border-left: 4px solid var(--unresolved);
       background: #fff7ed;
+    }
+    .summary-card.clickable.active-filter {
+      border: 2px solid #2563eb !important;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18) !important;
+      background: #f8fafc;
+    }
+    .summary-card.clickable.active-filter.agreed {
+      border: 2px solid #059669 !important;
+      box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.18) !important;
+      background: #f0fdf4;
+    }
+    .summary-card.clickable.active-filter.difference {
+      border: 2px solid #b45309 !important;
+      box-shadow: 0 0 0 3px rgba(180, 83, 9, 0.18) !important;
+      background: #fffbeb;
+    }
+    .summary-card.clickable.active-filter.unresolved {
+      border: 2px solid #d97706 !important;
+      box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.18) !important;
+      background: #fff7ed;
+    }
+    .card-filter-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-top: 6px;
+      padding-top: 4px;
+      border-top: 1px dashed var(--border);
+    }
+    .summary-card.active-filter .card-filter-action {
+      color: #2563eb;
+    }
+    .summary-card.active-filter.agreed .card-filter-action {
+      color: #059669;
+    }
+    .summary-card.active-filter.difference .card-filter-action {
+      color: #b45309;
+    }
+    .summary-card.active-filter.unresolved .card-filter-action {
+      color: #d97706;
     }
     .summary-title {
       font-size: 0.78rem;
@@ -908,39 +961,46 @@
         </div>
 
         <div class="summary-grid">
-          <div class="summary-card">
+          <div class="summary-card clickable" id="card-total" onclick="setFindingsTab('all')" title="Click to view all evaluated records">
             <span class="summary-title">Total Evaluated</span>
             <span class="summary-count" id="count-total">0</span>
             <span class="summary-hint">Comparable records evaluated under declared rules</span>
+            <span class="card-filter-action"><span>View All Records</span> <span>↓</span></span>
           </div>
-          <div class="summary-card agreed">
+          <div class="summary-card agreed clickable" id="card-agreed" onclick="setFindingsTab('agreed')" title="Click to view agreed records">
             <span class="summary-title">Agreed Records</span>
             <span class="summary-count" id="count-agreed">0</span>
             <span class="summary-hint">Supported information agrees (does not determine tax correctness)</span>
+            <span class="card-filter-action"><span>View Agreed Records</span> <span>↓</span></span>
           </div>
-          <div class="summary-card difference">
+          <div class="summary-card difference clickable" id="card-diffs" onclick="setFindingsTab('diffs')" title="Click to view material differences">
             <span class="summary-title">Material Differences</span>
             <span class="summary-count" id="count-diffs">0</span>
             <span class="summary-hint">Requires practitioner review to determine appropriate treatment</span>
+            <span class="card-filter-action"><span>View Differences</span> <span>↓</span></span>
           </div>
-          <div class="summary-card unresolved">
+          <div class="summary-card unresolved clickable" id="card-unres" onclick="setFindingsTab('unres')" title="Click to view unresolved evidence items">
             <span class="summary-title">Unresolved Items</span>
             <span class="summary-count" id="count-unres">0</span>
             <span class="summary-hint">Evidence insufficient to establish agreement; follow-up needed</span>
+            <span class="card-filter-action"><span>View Unresolved Items</span> <span>↓</span></span>
           </div>
         </div>
 
-        <!-- Material Differences Table -->
-        <div class="card">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-            <h4 style="font-size: 1rem; color: #b45309;">Material Differences (Requires Attention)</h4>
-            <span class="badge badge-warning" id="diff-count-badge">0 Differences</span>
+        <!-- Dynamic Findings Table (filtered by selected card) -->
+        <div class="card" id="findings-table-card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 8px;">
+            <div>
+              <h4 id="findings-table-title" style="font-size: 1rem; color: #b45309; margin: 0;">Material Differences (Requires Attention)</h4>
+              <p id="findings-table-subtitle" style="font-size: 0.8rem; color: var(--text-muted); margin: 3px 0 0 0;">Review differences requiring practitioner review to determine appropriate treatment.</p>
+            </div>
+            <span class="badge badge-warning" id="findings-count-badge">0 Differences</span>
           </div>
           <div class="table-container">
             <table>
               <thead>
                 <tr>
-                  <th>Diff ID</th>
+                  <th id="th-record-id">Diff / Record ID</th>
                   <th>Classification</th>
                   <th>Asset</th>
                   <th>Source A (1099-DA)</th>
@@ -950,7 +1010,7 @@
                 </tr>
               </thead>
               <tbody id="differences-table-body">
-                <tr><td colspan="7" style="text-align: center; color: var(--text-muted);">No material differences recorded.</td></tr>
+                <tr><td colspan="7" style="text-align: center; color: var(--text-muted);">No records found.</td></tr>
               </tbody>
             </table>
           </div>
@@ -1751,12 +1811,252 @@
           btnViewRcpt.style.display = 'inline-flex';
           document.getElementById('result-overall-badge').innerText = c.outcome_state;
           document.getElementById('result-overall-badge').className = `badge ${c.outcome_state === 'MATCHED' ? 'badge-success' : 'badge-warning'}`;
+
+          if (c.reconciliation) {
+            currentCaseReconciliation = c.reconciliation;
+          } else if (c.receipt && c.receipt.payload) {
+            currentCaseReconciliation = c.receipt.payload;
+          }
+
+          if (currentCaseReconciliation) {
+            setFindingsTab(currentFindingsTab || (currentCaseReconciliation.material_differences?.length > 0 ? 'diffs' : 'all'));
+          }
         } else {
           resultsPanel.style.display = 'none';
           btnViewRcpt.style.display = 'none';
+          currentCaseReconciliation = null;
         }
       } catch (err) {
         console.error("Error refreshing case details:", err);
+      }
+    }
+
+    let currentFindingsTab = 'diffs';
+    let currentCaseReconciliation = null;
+
+    function setFindingsTab(tab) {
+      currentFindingsTab = tab || 'diffs';
+
+      const cardTotal = document.getElementById('card-total');
+      const cardAgreed = document.getElementById('card-agreed');
+      const cardDiffs = document.getElementById('card-diffs');
+      const cardUnres = document.getElementById('card-unres');
+
+      if (cardTotal) cardTotal.classList.toggle('active-filter', currentFindingsTab === 'all');
+      if (cardAgreed) cardAgreed.classList.toggle('active-filter', currentFindingsTab === 'agreed');
+      if (cardDiffs) cardDiffs.classList.toggle('active-filter', currentFindingsTab === 'diffs');
+      if (cardUnres) cardUnres.classList.toggle('active-filter', currentFindingsTab === 'unres');
+
+      renderFindingsView();
+    }
+
+    function renderFindingsView() {
+      const recon = currentCaseReconciliation || {};
+      const diffs = recon.material_differences || [];
+      const unres = recon.unresolved_items || [];
+      const agreed = recon.agreed_records || [];
+
+      // Calculate totals
+      const totalEvaluated = recon.total_evaluated_count || (agreed.length + diffs.length + unres.length);
+      const diffCount = diffs.length;
+      const unresCount = unres.length;
+      const agreedCount = agreed.length;
+
+      const countTotalEl = document.getElementById('count-total');
+      const countAgreedEl = document.getElementById('count-agreed');
+      const countDiffsEl = document.getElementById('count-diffs');
+      const countUnresEl = document.getElementById('count-unres');
+
+      if (countTotalEl) countTotalEl.innerText = totalEvaluated;
+      if (countAgreedEl) countAgreedEl.innerText = agreedCount;
+      if (countDiffsEl) countDiffsEl.innerText = diffCount;
+      if (countUnresEl) countUnresEl.innerText = unresCount;
+
+      const titleEl = document.getElementById('findings-table-title');
+      const subtitleEl = document.getElementById('findings-table-subtitle');
+      const badgeEl = document.getElementById('findings-count-badge');
+      const tbody = document.getElementById('differences-table-body');
+      const unresBadgeEl = document.getElementById('unres-count-badge');
+
+      if (unresBadgeEl) unresBadgeEl.innerText = `${unresCount} Unresolved`;
+
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      if (currentFindingsTab === 'all') {
+        if (titleEl) {
+          titleEl.innerText = `Total Evaluated Records (${totalEvaluated} Records)`;
+          titleEl.style.color = '#1e3a8a';
+        }
+        if (subtitleEl) subtitleEl.innerText = `Showing all ${totalEvaluated} records evaluated under declared deterministic rules.`;
+        if (badgeEl) {
+          badgeEl.className = 'badge badge-neutral';
+          badgeEl.innerText = `${totalEvaluated} Records`;
+        }
+
+        if (totalEvaluated === 0) {
+          tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No evaluated records available.</td></tr>`;
+        } else {
+          // 1. Agreed records
+          agreed.forEach(a => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td><code>${a.record_id || 'AGR'}</code></td>
+              <td><span class="badge badge-success">MATCHED</span></td>
+              <td><strong>${a.asset}</strong></td>
+              <td>${a.source_a_value ? (a.source_a_value.startsWith('$') ? a.source_a_value : '$' + a.source_a_value) : '-'}</td>
+              <td>${a.source_b_value ? (a.source_b_value.startsWith('$') ? a.source_b_value : '$' + a.source_b_value) : '-'}</td>
+              <td><span style="color:#059669; font-weight:700;">$0.00</span></td>
+              <td>
+                <div style="font-size: 0.82rem; color: #1e293b;">${a.description || 'Supported information agrees identically.'}</div>
+                <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 3px;">Rule: Form 1099-DA / Tax Ledger Reconciliation</div>
+              </td>
+            `;
+            tbody.appendChild(tr);
+          });
+          // 2. Material differences
+          diffs.forEach(d => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td><code>${d.difference_id}</code></td>
+              <td><span class="badge badge-warning">${d.difference_state}</span></td>
+              <td><strong>${d.asset}</strong></td>
+              <td>${d.source_a_value ? (d.source_a_value.startsWith('$') ? d.source_a_value : '$' + d.source_a_value) : '-'}</td>
+              <td>${d.source_b_value ? (d.source_b_value.startsWith('$') ? d.source_b_value : '$' + d.source_b_value) : '-'}</td>
+              <td>${d.variance ? '<strong style="color:#b45309;">$' + d.variance + '</strong>' : '-'}</td>
+              <td>
+                <div style="font-size: 0.82rem; color: #1e293b;">${d.description}</div>
+                <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 3px;">Rule: ${d.rule_id || d.rule_reference || 'US_IRC_1099DA'}</div>
+              </td>
+            `;
+            tbody.appendChild(tr);
+          });
+          // 3. Unresolved items
+          unres.forEach(u => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td><code>${u.item_id || 'UNRES'}</code></td>
+              <td><span class="badge badge-unresolved">${u.reason_code}</span></td>
+              <td><strong>${u.affected_source_id || 'Source'}</strong></td>
+              <td>-</td>
+              <td>-</td>
+              <td><span style="color:#d97706; font-weight:700;">UNRESOLVED</span></td>
+              <td>
+                <div style="font-size: 0.82rem; color: #1e293b;">${u.description}</div>
+                <div style="font-size: 0.72rem; color: #d97706; margin-top: 3px;">Affected Record: <code>${u.affected_row_ref}</code> • Practitioner follow-up recommended</div>
+              </td>
+            `;
+            tbody.appendChild(tr);
+          });
+        }
+      } else if (currentFindingsTab === 'agreed') {
+        if (titleEl) {
+          titleEl.innerText = `Agreed Records (${agreedCount} Records)`;
+          titleEl.style.color = '#059669';
+        }
+        if (subtitleEl) subtitleEl.innerText = `Supported information agrees identically (does not determine underlying tax correctness).`;
+        if (badgeEl) {
+          badgeEl.className = 'badge badge-success';
+          badgeEl.innerText = `${agreedCount} Agreed`;
+        }
+
+        if (agreed.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No agreed records detected in this comparison.</td></tr>`;
+        } else {
+          agreed.forEach(a => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td><code>${a.record_id || 'AGR'}</code></td>
+              <td><span class="badge badge-success">MATCHED</span></td>
+              <td><strong>${a.asset}</strong></td>
+              <td>${a.source_a_value ? (a.source_a_value.startsWith('$') ? a.source_a_value : '$' + a.source_a_value) : '-'}</td>
+              <td>${a.source_b_value ? (a.source_b_value.startsWith('$') ? a.source_b_value : '$' + a.source_b_value) : '-'}</td>
+              <td><span style="color:#059669; font-weight:700;">$0.00</span></td>
+              <td>
+                <div style="font-size: 0.82rem; color: #1e293b;">${a.description || 'Supported information agrees identically.'}</div>
+                <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 3px;">Rule: Form 1099-DA / Tax Ledger Reconciliation</div>
+              </td>
+            `;
+            tbody.appendChild(tr);
+          });
+        }
+      } else if (currentFindingsTab === 'diffs') {
+        if (titleEl) {
+          titleEl.innerText = `Material Differences (Requires Attention) (${diffCount} Differences)`;
+          titleEl.style.color = '#b45309';
+        }
+        if (subtitleEl) subtitleEl.innerText = `Differences detected requiring practitioner review to determine appropriate treatment.`;
+        if (badgeEl) {
+          badgeEl.className = 'badge badge-warning';
+          badgeEl.innerText = `${diffCount} Differences`;
+        }
+
+        if (diffs.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #059669; padding: 1.5rem; font-weight: 600;">✓ All comparable records agree under declared reconciliation rules.</td></tr>`;
+        } else {
+          diffs.forEach(d => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td><code>${d.difference_id}</code></td>
+              <td><span class="badge badge-warning">${d.difference_state}</span></td>
+              <td><strong>${d.asset}</strong></td>
+              <td>${d.source_a_value ? (d.source_a_value.startsWith('$') ? d.source_a_value : '$' + d.source_a_value) : '-'}</td>
+              <td>${d.source_b_value ? (d.source_b_value.startsWith('$') ? d.source_b_value : '$' + d.source_b_value) : '-'}</td>
+              <td>${d.variance ? '<strong style="color:#b45309;">$' + d.variance + '</strong>' : '-'}</td>
+              <td>
+                <div style="font-size: 0.82rem; color: #1e293b;">${d.description}</div>
+                <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 3px;">Rule: ${d.rule_id || d.rule_reference || 'US_IRC_1099DA'}</div>
+              </td>
+            `;
+            tbody.appendChild(tr);
+          });
+        }
+      } else if (currentFindingsTab === 'unres') {
+        if (titleEl) {
+          titleEl.innerText = `Unresolved Evidence Items (${unresCount} Items)`;
+          titleEl.style.color = '#d97706';
+        }
+        if (subtitleEl) subtitleEl.innerText = `Missing or non-covered facts are explicitly preserved as unresolved evidence.`;
+        if (badgeEl) {
+          badgeEl.className = 'badge badge-unresolved';
+          badgeEl.innerText = `${unresCount} Unresolved`;
+        }
+
+        if (unres.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #059669; padding: 1.5rem; font-weight: 600;">✓ No unresolved evidence items detected.</td></tr>`;
+        } else {
+          unres.forEach(u => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td><code>${u.item_id || 'UNRES'}</code></td>
+              <td><span class="badge badge-unresolved">${u.reason_code}</span></td>
+              <td><strong>${u.affected_source_id || 'Source'}</strong></td>
+              <td>-</td>
+              <td>-</td>
+              <td><span style="color:#d97706; font-weight:700;">UNRESOLVED</span></td>
+              <td>
+                <div style="font-size: 0.82rem; color: #1e293b;">${u.description}</div>
+                <div style="font-size: 0.72rem; color: #d97706; margin-top: 3px;">Affected Record: <code>${u.affected_row_ref}</code> • Practitioner follow-up recommended</div>
+              </td>
+            `;
+            tbody.appendChild(tr);
+          });
+        }
+      }
+
+      // Render unresolved items in bottom container
+      const unresDiv = document.getElementById('unresolved-list');
+      if (unresDiv) {
+        if (unres.length === 0) {
+          unresDiv.innerHTML = `<p style="color: var(--text-muted); margin: 0;">No unresolved data items detected in this reconciliation.</p>`;
+        } else {
+          unresDiv.innerHTML = unres.map(u => `
+            <div style="background: rgba(217, 119, 6, 0.08); border-left: 3px solid #d97706; border-radius: 4px; padding: 10px 14px; margin-bottom: 8px;">
+              <div style="font-weight: 700; color: #b45309; font-size: 0.85rem;">${u.reason_code}: ${u.description}</div>
+              <div style="font-size: 0.75rem; color: #475569; margin-top: 4px;">Affected Record: <code>${u.affected_row_ref}</code> • Practitioner follow-up recommended</div>
+            </div>
+          `).join('');
+        }
       }
     }
 
@@ -1824,64 +2124,12 @@
           ? "Deterministic reconciliation re-verified." 
           : "Deterministic reconciliation complete.";
         showToast(successMsg, "success");
+        if (data.reconciliation) {
+          currentCaseReconciliation = data.reconciliation;
+        }
         await refreshCaseDetails();
-
-        const recon = data.reconciliation || {};
-        const diffs = recon.material_differences || [];
-        const unres = recon.unresolved_items || [];
-
-        // Calculate totals
-        const totalEvaluated = (data.receipt && data.receipt.source_ids ? 5 : diffs.length + 2); 
-        const diffCount = diffs.length;
-        const unresCount = unres.length;
-        const agreedCount = Math.max(0, totalEvaluated - diffCount - unresCount);
-
-        document.getElementById('count-total').innerText = totalEvaluated;
-        document.getElementById('count-agreed').innerText = agreedCount;
-        document.getElementById('count-diffs').innerText = diffCount;
-        document.getElementById('count-unres').innerText = unresCount;
-
-        document.getElementById('diff-count-badge').innerText = `${diffCount} Material Differences`;
-        document.getElementById('unres-count-badge').innerText = `${unresCount} Unresolved Items`;
-
-        // Render differences
-        const tbody = document.getElementById('differences-table-body');
-        tbody.innerHTML = '';
-        if (diffs.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #059669; padding: 1.5rem; font-weight: 600;">✓ All comparable records agree under declared reconciliation rules.</td></tr>`;
-        } else {
-          diffs.forEach(d => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-              <td><code>${d.difference_id}</code></td>
-              <td><span class="badge badge-warning">${d.difference_state}</span></td>
-              <td><strong>${d.asset}</strong></td>
-              <td>${d.source_a_value ? '$' + d.source_a_value : '-'}</td>
-              <td>${d.source_b_value ? '$' + d.source_b_value : '-'}</td>
-              <td>${d.variance ? '<strong style="color:#b45309;">$' + d.variance + '</strong>' : '-'}</td>
-              <td>
-                <div style="font-size: 0.82rem; color: #1e293b;">${d.description}</div>
-                <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 3px;">Rule: ${d.rule_id || 'US_IRC_1099DA'}</div>
-              </td>
-            `;
-            tbody.appendChild(tr);
-          });
-        }
-
-        // Render unresolved items
-        const unresDiv = document.getElementById('unresolved-list');
-        if (unres.length === 0) {
-          unresDiv.innerHTML = `<p style="color: var(--text-muted);">No unresolved data items detected in this reconciliation.</p>`;
-        } else {
-          unresDiv.innerHTML = unres.map(u => `
-            <div style="background: rgba(217, 119, 6, 0.08); border-left: 3px solid #d97706; border-radius: 4px; padding: 10px 14px; margin-bottom: 8px;">
-              <div style="font-weight: 700; color: #b45309; font-size: 0.85rem;">${u.reason_code}: ${u.description}</div>
-              <div style="font-size: 0.75rem; color: #475569; margin-top: 4px;">Affected Record: <code>${u.affected_row_ref}</code> • Practitioner follow-up recommended</div>
-            </div>
-          `).join('');
-        }
-
-        document.getElementById('results-narrative-panel').scrollIntoView({ behavior: 'smooth' });
+        setFindingsTab(currentCaseReconciliation?.material_differences?.length > 0 ? 'diffs' : 'all');
+        document.getElementById('results-narrative-panel')?.scrollIntoView({ behavior: 'smooth' });
       } catch (err) {
         showToast("Connection failure during reconciliation.", "error");
       } finally {
@@ -1954,6 +2202,8 @@
     window.refreshCaseDetails = refreshCaseDetails;
     window.handleSourceUpload = handleSourceUpload;
     window.triggerReconciliation = triggerReconciliation;
+    window.setFindingsTab = setFindingsTab;
+    window.renderFindingsView = renderFindingsView;
     window.restartCurrentSample = restartCurrentSample;
     window.viewReceiptScreen = viewReceiptScreen;
     window.downloadExportBundle = downloadExportBundle;

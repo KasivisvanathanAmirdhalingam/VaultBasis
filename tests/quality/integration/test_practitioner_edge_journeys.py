@@ -199,6 +199,11 @@ def test_journey_c_existing_case_durability_and_export(test_client):
     assert case_detail["case_id"] == "CASE-SAMPLE-2025"
     assert case_detail["outcome_state"] in ("MATCHED", "PROCEEDS_DIFFERENCE")
     assert len(case_detail["sources"]) == 2
+    assert case_detail["reconciliation"] is not None
+    assert case_detail["reconciliation"]["total_evaluated_count"] == 5
+    assert len(case_detail["reconciliation"]["agreed_records"]) == 2
+    assert len(case_detail["reconciliation"]["material_differences"]) == 3
+    assert len(case_detail["reconciliation"]["unresolved_items"]) == 0
 
     # Download export ZIP bundle
     export_res = client.get("/api/cases/CASE-SAMPLE-2025/export")

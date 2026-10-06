@@ -61,13 +61,16 @@ class ReconciliationResult:
         self.assurance_level: str = "L2_EVIDENCE_RECONCILED"
         self.material_differences: List[DifferenceRecord] = []
         self.unresolved_items: List[Dict[str, Any]] = []
+        self.agreed_records: List[Dict[str, Any]] = []
 
     def to_dict(self) -> Dict[str, Any]:
         return {
             "outcome_state": self.outcome_state,
             "assurance_level": self.assurance_level,
             "material_differences": [d.to_dict() for d in self.material_differences],
-            "unresolved_items": self.unresolved_items
+            "unresolved_items": self.unresolved_items,
+            "agreed_records": self.agreed_records,
+            "total_evaluated_count": len(self.agreed_records) + len(self.material_differences) + len(self.unresolved_items)
         }
 
 
@@ -116,6 +119,8 @@ class DeterministicReconciliationEngine:
 
         for tx_a in txs_a:
             prov_a = build_prov(tx_a, src_a_id)
+            start_diff_count = len(result.material_differences)
+            start_unres_count = len(result.unresolved_items)
 
             if tx_a.is_unresolved and tx_a.basis_reported_to_irs != "NO":
                 result.unresolved_items.append({
@@ -266,6 +271,20 @@ class DeterministicReconciliationEngine:
                         provenance_references=prov_both
                     ))
                     diff_counter += 1
+
+            if len(result.material_differences) == start_diff_count and len(result.unresolved_items) == start_unres_count:
+                agr_counter = len(result.agreed_records) + 1
+                result.agreed_records.append({
+                    "record_id": f"AGR-{agr_counter:03d}",
+                    "classification": "MATCHED",
+                    "asset": tx_a.asset,
+                    "source_a_ref": f"{src_a_id}:{tx_a.source_row_reference}",
+                    "source_a_value": str(tx_a.proceeds) if tx_a.proceeds is not None else "-",
+                    "source_b_ref": f"{src_b_id}:{tx_b.source_row_reference}",
+                    "source_b_value": str(tx_b.proceeds) if tx_b.proceeds is not None else "-",
+                    "variance": "0.00",
+                    "description": "Supported information agrees (proceeds and cost basis match identically between Form 1099-DA and tax ledger)."
+                })
 
         for idx_b, tx_b in enumerate(txs_b):
             if idx_b not in matched_b_indices:
