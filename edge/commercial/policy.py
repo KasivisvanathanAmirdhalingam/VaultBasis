@@ -448,11 +448,13 @@ class CommercialPolicyService:
         Returns safe, non-sensitive commercial status metadata for UI dashboards and health diagnostics.
         Vocabulary: NO_ENTITLEMENT, ACTIVE_EVALUATION, ACTIVE_PAID_LICENSE, EXPIRED_EVALUATION, EXPIRED_PAID_LICENSE.
         """
-        billable_cases = self.store.count_billable_cases() if self.store else 0
-
         eval_res = self.evaluate_current_license(current_time=current_time)
         is_eval = (eval_res.tier in (LicenseTier.TRIAL, LicenseTier.EVALUATION))
         
+        eval_state = self.store.get_installation_evaluation() if self.store else None
+        since_iso = eval_state.get("activated_at") if (is_eval and eval_state) else None
+        billable_cases = self.store.count_billable_cases(since_iso=since_iso) if self.store else 0
+
         if eval_res.is_active:
             entitlement_state = "ACTIVE_EVALUATION" if is_eval else "ACTIVE_PAID_LICENSE"
             if is_eval:
@@ -659,7 +661,10 @@ class CommercialPolicyService:
             )
 
         # 4. Active license validations
-        billable_count = self.store.count_billable_cases() if self.store else 0
+        eval_state = self.store.get_installation_evaluation() if self.store else None
+        is_eval = (eval_res.tier in (LicenseTier.TRIAL, LicenseTier.EVALUATION))
+        since_iso = eval_state.get("activated_at") if (is_eval and eval_state) else None
+        billable_count = self.store.count_billable_cases(since_iso=since_iso) if self.store else 0
         max_cases = eval_res.max_cases_per_installation or 0
 
         # Capacity Check for case creation

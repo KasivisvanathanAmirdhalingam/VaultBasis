@@ -1177,8 +1177,8 @@
         </div>
         <!-- Inline Token Activation -->
         <div id="modal-token-input-box" style="display: none; margin-top: 12px; padding-top: 12px; border-top: 1px dashed #fde68a;">
-          <label style="font-size: 0.78rem; font-weight: 600; color: #78350f; display: block; margin-bottom: 4px;">Paste VaultBasis License String:</label>
-          <textarea id="input-modal-license-token" rows="3" placeholder="Paste license text here..." style="width: 100%; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; resize: vertical;"></textarea>
+          <label style="font-size: 0.78rem; font-weight: 600; color: #78350f; display: block; margin-bottom: 4px;">Paste VaultBasis License Token:</label>
+          <textarea id="input-modal-license-token" rows="3" placeholder="Paste your cryptographically signed license token here..." style="width: 100%; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; resize: vertical;"></textarea>
           <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px;">
             <button class="btn btn-sm btn-primary" onclick="submitModalLicenseToken()">Install License →</button>
           </div>
@@ -1420,12 +1420,16 @@
 
         if (commStatus.entitlement_state === 'ACTIVE_EVALUATION' || commStatus.tier === 'EVALUATION') {
           if (activeTierText) activeTierText.innerText = '⚡ 3-Day Evaluation Active';
-          const remainingText = commStatus.days_remaining ? `${commStatus.days_remaining} days remaining` : '72 hours remaining';
-          const casesText = `${commStatus.billable_cases_count || 0} of ${commStatus.max_cases_per_installation || 1} client case used`;
-          if (activeMetaText) activeMetaText.innerText = `${remainingText} · ${casesText}`;
+          const remaining = commStatus.days_remaining ? (commStatus.days_remaining === 1 ? '1 day remaining' : `${commStatus.days_remaining} days remaining`) : '72 hours remaining';
+          const used = commStatus.billable_cases_count || 0;
+          const max = commStatus.max_cases_per_installation || 1;
+          const casesText = used === 0 ? `1 client case included (0 used)` : `${used} of ${max} client case used`;
+          if (activeMetaText) activeMetaText.innerText = `${remaining} · ${casesText}`;
         } else {
           if (activeTierText) activeTierText.innerText = `🔑 ${commStatus.tier || 'Practitioner'} Plan Active`;
-          const casesText = `Client cases: ${commStatus.billable_cases_count || 0} of ${commStatus.max_cases_per_installation || 10} used`;
+          const used = commStatus.billable_cases_count || 0;
+          const max = commStatus.max_cases_per_installation || 10;
+          const casesText = `Client cases: ${used} of ${max} used`;
           if (activeMetaText) activeMetaText.innerText = casesText;
         }
       }
