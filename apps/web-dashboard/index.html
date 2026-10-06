@@ -1382,21 +1382,28 @@
 
       updateHeaderEntitlementBadge(commStatus);
 
+      // Form fields are ALWAYS fully interactive, selectable, and clickable
+      if (formFields) {
+        formFields.style.opacity = '1.0';
+        formFields.style.pointerEvents = 'auto';
+      }
+
       if (!commStatus || !commStatus.licensed) {
         if (activeBanner) activeBanner.style.display = 'none';
         if (gateBanner) gateBanner.style.display = 'block';
-        if (formFields) {
-          formFields.style.opacity = '0.45';
-          formFields.style.pointerEvents = 'none';
-        }
         if (btnSubmit) {
-          btnSubmit.disabled = true;
-          btnSubmit.style.display = 'none';
+          btnSubmit.disabled = false;
+          btnSubmit.style.display = 'inline-flex';
+          btnSubmit.innerText = '⚡ Start Evaluation & Create Case →';
         }
 
         if (commStatus && (commStatus.entitlement_state === 'EXPIRED_EVALUATION' || commStatus.entitlement_state === 'EXPIRED_PAID_LICENSE')) {
           if (gateMsg) gateMsg.innerText = 'Your Evaluation has ended. Your existing work remains available. Activate a license to start or reconcile new client work.';
           if (btnStartEval) btnStartEval.style.display = 'none';
+          if (btnSubmit) {
+            btnSubmit.disabled = true;
+            btnSubmit.innerText = 'Active License Required';
+          }
         } else {
           if (gateMsg) gateMsg.innerText = 'Client work requires an active Evaluation or paid license.';
           if (btnStartEval) btnStartEval.style.display = 'inline-flex';
@@ -1404,10 +1411,6 @@
       } else {
         if (gateBanner) gateBanner.style.display = 'none';
         if (activeBanner) activeBanner.style.display = 'block';
-        if (formFields) {
-          formFields.style.opacity = '1.0';
-          formFields.style.pointerEvents = 'auto';
-        }
         if (btnSubmit) {
           btnSubmit.disabled = false;
           btnSubmit.style.display = 'inline-flex';
@@ -1447,10 +1450,11 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ customer_name: 'Evaluation Practitioner' })
         });
-        if (res.ok) {
+        const data = await res.json();
+        if (res.ok && (data.status === 'INSTALLED' || data.license_state === 'ACTIVE')) {
           showToast('3-Day Evaluation active. 1 client case included.', 'success');
           const statusRes = await fetch('/api/commercial/status');
-          const commStatus = statusRes.ok ? await statusRes.json() : { licensed: true, entitlement_state: 'ACTIVE_EVALUATION', tier: 'EVALUATION' };
+          const commStatus = statusRes.ok ? await statusRes.json() : { licensed: true, entitlement_state: 'ACTIVE_EVALUATION', tier: 'EVALUATION', billable_cases_count: 0, max_cases_per_installation: 1 };
           currentCommercialStatus = commStatus;
           renderNewCaseEntitlementState(commStatus);
           setTimeout(() => {
@@ -1458,7 +1462,7 @@
             if (clientInput) clientInput.focus();
           }, 60);
         } else {
-          showToast('Unable to activate Evaluation token.', 'error');
+          showToast('Unable to activate Evaluation: ' + (data.diagnostic_reason || 'Please try again.'), 'error');
         }
       } catch (err) {
         console.error("Evaluation activation error:", err);
@@ -1705,6 +1709,26 @@
       if (errBox) { errBox.style.display = 'none'; errBox.innerText = ''; }
       btn.innerText = 'Creating case...';
       btn.disabled = true;
+
+      // If not yet licensed, auto-activate 3-day evaluation first
+      if (!currentCommercialStatus || !currentCommercialStatus.licensed) {
+        try {
+          const evalRes = await fetch('/api/commercial/start-evaluation', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ customer_name: 'Evaluation Practitioner' })
+          });
+          if (evalRes.ok) {
+            const statusRes = await fetch('/api/commercial/status');
+            if (statusRes.ok) {
+              currentCommercialStatus = await statusRes.json();
+              renderNewCaseEntitlementState(currentCommercialStatus);
+            }
+          }
+        } catch (e) {
+          console.warn("Auto-evaluation start failed:", e);
+        }
+      }
 
       try {
         const res = await fetch('/api/cases', {

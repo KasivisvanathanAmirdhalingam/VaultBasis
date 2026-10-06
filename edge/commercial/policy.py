@@ -230,13 +230,19 @@ class CommercialPolicyService:
                     )
                 return rejected_res
 
-        # Save to persistence if no active license, or if valid replacement
-        if self.store:
-            self.store.save_commercial_license(token_text)
-        elif self.license_dir:
-            self.license_dir.mkdir(parents=True, exist_ok=True)
-            (self.license_dir / "license.lic").write_text(token_text, encoding="utf-8")
-        self._runtime_token = token_text
+        # Save to persistence if the token is structurally valid (even if expired/mismatched for audit/enforcement)
+        # Malformed tokens (e.g. random pasted text) are never persisted.
+        if res.state != LicenseState.MALFORMED:
+            if self.store:
+                self.store.save_commercial_license(token_text)
+            elif self.license_dir:
+                self.license_dir.mkdir(parents=True, exist_ok=True)
+                (self.license_dir / "license.lic").write_text(token_text, encoding="utf-8")
+            self._runtime_token = token_text
+        else:
+            # Do not persist malformed tokens
+            if self._runtime_token == token_text:
+                self._runtime_token = None
 
         if self.audit_service:
             from edge.commercial.audit import AuditEventType
@@ -291,6 +297,15 @@ class CommercialPolicyService:
         paid-license cryptographic signing keys are never present in the client.
         Capacity: Exactly 1 client case; 72-hour temporal boundary.
         """
+        # Clear any failed/malformed runtime token
+        self._runtime_token = None
+        if self.store:
+            stored_tok = self.store.get_commercial_license()
+            if stored_tok:
+                tok_res = evaluate_license_token(stored_tok, keyring_override=self.keyring_override)
+                if not tok_res.is_active and tok_res.state not in (LicenseState.EXPIRED, LicenseState.GRACE):
+                    self.store.remove_commercial_license()
+
         current_res = self.evaluate_current_license()
         if current_res.is_active:
             return current_res

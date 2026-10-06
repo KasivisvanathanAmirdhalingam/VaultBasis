@@ -397,16 +397,21 @@ class SQLiteStore:
                 return row["raw_content"]
             return None
 
-    def count_billable_cases(self, sample_case_ids: Optional[Set[str]] = None) -> int:
+    def count_billable_cases(self, sample_case_ids: Optional[Set[str]] = None, since_iso: Optional[str] = None) -> int:
         """
         Returns count of persistent practitioner-created production cases.
         Explicitly excludes bundled sample cases and test fixtures from capacity metering.
+        Optionally filters by cases created since a specific ISO timestamp (e.g. evaluation activation).
         """
         excluded = sample_case_ids or {"CASE-SAMPLE-2025"}
         placeholders = ",".join("?" for _ in excluded)
+        params: List[Any] = list(excluded)
+        query = f"SELECT COUNT(*) FROM cases WHERE case_kind = 'PRODUCTION' AND case_id NOT IN ({placeholders})"
+        if since_iso:
+            query += " AND created_at >= ?"
+            params.append(since_iso)
         with self._get_connection() as conn:
-            query = f"SELECT COUNT(*) FROM cases WHERE case_kind = 'PRODUCTION' AND case_id NOT IN ({placeholders})"
-            cursor = conn.execute(query, list(excluded))
+            cursor = conn.execute(query, params)
             row = cursor.fetchone()
             return row[0] if row else 0
 
