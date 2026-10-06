@@ -182,8 +182,14 @@ def main() -> int:
         print("RC3-MAC candidate requires Apple Silicon arm64.", file=sys.stderr)
         return 2
 
-    commit = subprocess.run(["git", "rev-parse", "HEAD"], cwd=REPO,
-                            capture_output=True, text=True, check=True).stdout.strip()
+    commit = (
+        os.environ.get("VAULTBASIS_CANDIDATE_SHA")
+        or os.environ.get("VAULTBASIS_BUILD_SHA")
+        or subprocess.run(["git", "rev-parse", "HEAD"], cwd=REPO, capture_output=True, text=True, check=True).stdout.strip()
+    )
+    # Embed build_info.json into source tree for frozen runtime provenance
+    build_info_path = REPO / "edge" / "system" / "build_info.json"
+    build_info_path.write_text(json.dumps({"build_sha": commit}), encoding="utf-8")
 
     # 1. Clean previous candidate outputs (never the sealed RC2 history).
     for p in [REPO / "build" / "VaultBasis", REPO / "dist" / APP_NAME,

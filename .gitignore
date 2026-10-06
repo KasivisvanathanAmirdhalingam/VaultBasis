@@ -46,5 +46,6 @@ upload_blob.js
 associate_handoff_link.txt
 vercel_logs.txt
 patch_html.py
+edge/system/build_info.json
 
 
