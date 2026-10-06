@@ -102,7 +102,7 @@ def test_web_dashboard_header_and_industrial_footer():
     assert "Cases" in html
     assert "Why VaultBasis? ↗" in html
     assert "Independent Web Verifier ↗" in html
-    assert "Evidence Schema" in html
+    assert "Evidence Receipt Guide" in html
     assert "screen-help" in html  # Help screen present and reachable via nav
 
     # Engineering vocabulary must not be practitioner-visible (LANG-001)
@@ -140,6 +140,11 @@ def test_edge_daemon_serves_all_web_routes(client):
     res = client.get("/offline-verifier")
     assert res.status_code == 200
     assert "VaultBasis" in res.text
+
+    # 2c. Evidence Receipt Guide serves HTML locally
+    res = client.get("/evidence-receipt-guide")
+    assert res.status_code == 200
+    assert "Evidence Receipt Guide" in res.text
 
     # 3. Marketing / About
     res = client.get("/about")

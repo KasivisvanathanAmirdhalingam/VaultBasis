@@ -728,10 +728,10 @@
 
         </div>
         <div>
-          <select id="filter-tax-year" class="filter-select" onchange="filterCases()">
+          <select id="filter-tax-year" class="filter-select" onchange="filterCases()" title="Filter cases by supported tax year">
             <option value="all">All Tax Years</option>
-            <option value="2025">Tax Year 2025</option>
-            <option value="2024">Tax Year 2024</option>
+            <option value="2025" selected>Tax Year 2025 (Form 1099-DA Qualified)</option>
+            <option value="2024">Tax Year 2024 (Prior-Year Ledger Qualified)</option>
           </select>
         </div>
       </div>
@@ -745,7 +745,7 @@
                 <th>Tax Year</th>
                 <th>Case Identifier</th>
                 <th>Reconciliation Status</th>
-                <th>Last Updated</th>
+                <th>Last Activity</th>
                 <th>Action</th>
               </tr>
             </thead>
@@ -803,6 +803,10 @@
           <div class="meta-group">
             <span class="meta-label">Case Identifier</span>
             <span class="meta-value" id="ctx-case-id" style="font-family: 'JetBrains Mono'; font-size: 0.85rem;">CASE-SAMPLE</span>
+          </div>
+          <div class="meta-group">
+            <span class="meta-label">Chronology</span>
+            <span class="meta-value" id="ctx-chronology" style="font-size: 0.82rem; color: #475569;">—</span>
           </div>
         </div>
         <div>
@@ -1058,7 +1062,8 @@
             <li><a href="https://vaultbasis.com" target="_blank" rel="noopener" style="color: var(--primary);">Why VaultBasis? ↗</a></li>
             <li><a href="https://vaultbasis.com/verifier" target="_blank" rel="noopener" style="color: var(--primary);">Independent Web Verifier ↗</a></li>
             <li><a href="/offline-verifier" target="_blank" style="color: var(--primary);">Local Offline Verifier</a></li>
-            <li><a href="/schemas/receipt-v0.1.json" target="_blank" style="color: var(--primary);">Evidence Receipt JSON Schema</a></li>
+            <li><a href="/evidence-receipt-guide" target="_blank" style="color: var(--primary);">Evidence Receipt Guide</a></li>
+            <li><a href="/schemas/receipt-v0.1.json" target="_blank" style="color: var(--primary);">Technical Schema (JSON) ↗</a></li>
             <li><a href="/docs/scope_and_limitations_v0.1.html" target="_blank" style="color: var(--primary);">Scope &amp; Limitations ↗</a></li>
             <li><a href="https://vaultbasis.com/faq" target="_blank" rel="noopener" style="color: var(--primary);">Full FAQ ↗</a></li>
             <li><a href="https://vaultbasis.com/contact" target="_blank" rel="noopener" style="color: var(--primary);">Contact Support ↗</a></li>
@@ -1071,29 +1076,58 @@
 
   <!-- Create Case Modal -->
   <div class="modal-backdrop" id="new-case-modal" role="dialog" aria-modal="true" aria-labelledby="modal-case-title">
-    <div class="modal-card">
-      <h3 id="modal-case-title" style="font-size: 1.2rem; margin-bottom: 0.5rem;">Start New Reconciliation Case</h3>
-      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+    <div class="modal-card" style="max-width: 540px;">
+      <h3 id="modal-case-title" style="font-size: 1.25rem; margin-bottom: 0.35rem;">Start New Reconciliation Case</h3>
+      <p id="modal-case-desc" style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.25rem;">
         Establish practitioner context for this digital asset review engagement.
       </p>
 
+      <!-- Entitlement Gate Banner (Shown when NO_ENTITLEMENT or EXPIRED) -->
+      <div id="modal-entitlement-gate" style="display: none; background: #fffbeb; border: 1px solid #fef3c7; border-left: 4px solid #f59e0b; border-radius: 6px; padding: 14px; margin-bottom: 1.25rem;">
+        <div id="modal-entitlement-msg" style="font-size: 0.88rem; font-weight: 600; color: #92400e; margin-bottom: 0.75rem;">
+          Client work requires an active Evaluation or paid license.
+        </div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button class="btn btn-primary" id="btn-modal-start-eval" onclick="startEvaluationFromModal()" style="font-size: 0.85rem; padding: 8px 14px;">
+            ⚡ Start 3-Day Evaluation
+          </button>
+          <button class="btn btn-secondary" id="btn-modal-toggle-token" onclick="toggleTokenActivationInput()" style="font-size: 0.85rem; padding: 8px 14px;">
+            🔑 Activate License Token
+          </button>
+        </div>
+        <!-- Inline Token Activation -->
+        <div id="modal-token-input-box" style="display: none; margin-top: 12px; padding-top: 12px; border-top: 1px dashed #fde68a;">
+          <label style="font-size: 0.78rem; font-weight: 600; color: #78350f; display: block; margin-bottom: 4px;">Paste Commercial License Token:</label>
+          <textarea id="input-modal-license-token" rows="3" placeholder="eyJhbGciOi..." style="width: 100%; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; resize: vertical;"></textarea>
+          <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px;">
+            <button class="btn btn-sm btn-primary" onclick="submitModalLicenseToken()">Install Token →</button>
+          </div>
+        </div>
+      </div>
+
       <div id="modal-case-error" style="display: none; background: #fef2f2; border: 1px solid #fecaca; border-left: 4px solid #dc2626; border-radius: 6px; padding: 10px 12px; margin-bottom: 1rem; font-size: 0.82rem; color: #991b1b; line-height: 1.45;"></div>
 
-      <div class="form-group">
-        <label for="input-client-ref">Client / Entity Reference *</label>
-        <input type="text" id="input-client-ref" placeholder="e.g. Redwood Consulting LLC" value="Redwood Consulting LLC">
+      <div id="modal-case-form-fields">
+        <div class="form-group">
+          <label for="input-client-ref">Client / Entity Reference *</label>
+          <input type="text" id="input-client-ref" placeholder="e.g. Redwood Consulting LLC" value="Redwood Consulting LLC">
+        </div>
+        <div class="form-group">
+          <label for="input-tax-year">Tax Year</label>
+          <select id="input-tax-year">
+            <option value="2025" selected>Tax Year 2025 (Qualified Form 1099-DA &amp; Tax Ledger)</option>
+            <option value="2024">Tax Year 2024 (Qualified Tax-Ledger Reconciliation)</option>
+          </select>
+          <div style="font-size: 0.76rem; color: #64748b; margin-top: 4px;">
+            Driven by deterministic ruleset compatibility. <a href="/docs/scope_and_limitations_v0.1.html" target="_blank" style="color: var(--primary);">View supported scope ↗</a>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="input-case-id">Case Identifier (Optional)</label>
+          <input type="text" id="input-case-id" placeholder="Auto-generated if blank">
+        </div>
       </div>
-      <div class="form-group">
-        <label for="input-tax-year">Tax Year</label>
-        <select id="input-tax-year">
-          <option value="2025" selected>2025</option>
-          <option value="2024">2024</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label for="input-case-id">Case Identifier (Optional)</label>
-        <input type="text" id="input-case-id" placeholder="Auto-generated if blank">
-      </div>
+
       <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 1.5rem;">
         <button class="btn" onclick="closeNewCaseModal()">Cancel</button>
         <button class="btn btn-primary" id="btn-submit-create-case" onclick="submitCreateCase()">Create Case →</button>
@@ -1110,7 +1144,7 @@
       <div style="display: flex; gap: 1.5rem;">
         <a href="https://vaultbasis.com" target="_blank" rel="noopener" style="color: var(--text-muted); text-decoration: none;">About ↗</a>
         <a href="/offline-verifier" target="_blank" style="color: var(--text-muted); text-decoration: none;">Offline Verifier</a>
-        <a href="/schemas/receipt-v0.1.json" target="_blank" style="color: var(--text-muted); text-decoration: none;">Evidence Schema</a>
+        <a href="/evidence-receipt-guide" target="_blank" style="color: var(--text-muted); text-decoration: none;">Evidence Receipt Guide</a>
         <a href="https://vaultbasis.com/faq" target="_blank" rel="noopener" style="color: var(--text-muted); text-decoration: none;">Help &amp; FAQ ↗</a>
         <a href="https://vaultbasis.com/contact" target="_blank" rel="noopener" style="color: var(--text-muted); text-decoration: none;">Contact ↗</a>
         <a href="https://vaultbasis.com/security-disclosure" target="_blank" rel="noopener" style="color: var(--text-muted); text-decoration: none;">Security ↗</a>
@@ -1176,16 +1210,138 @@
       }
     }
 
-    function openNewCaseModal() {
+    function formatDateTime(isoStr) {
+      if (!isoStr) return '—';
+      try {
+        const d = new Date(isoStr);
+        if (isNaN(d.getTime())) return isoStr;
+        const datePart = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+        const timePart = d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+        return `${datePart} · ${timePart}`;
+      } catch (e) {
+        return isoStr;
+      }
+    }
+
+    async function openNewCaseModal() {
       const errBox = document.getElementById('modal-case-error');
       if (errBox) { errBox.style.display = 'none'; errBox.innerText = ''; }
       document.getElementById('input-client-ref').value = 'Redwood Consulting LLC';
       document.getElementById('input-tax-year').value = '2025';
       document.getElementById('input-case-id').value = `CASE-${Date.now().toString().slice(-6)}`;
-      const btn = document.getElementById('btn-submit-create-case');
-      if (btn) { btn.disabled = false; btn.innerText = 'Create Case →'; }
+      
+      const tokenBox = document.getElementById('modal-token-input-box');
+      if (tokenBox) tokenBox.style.display = 'none';
+
+      // Check commercial status to set modal affordance
+      let commStatus = { licensed: false, entitlement_state: 'NO_ENTITLEMENT' };
+      try {
+        const res = await fetch('/api/commercial/status');
+        if (res.ok) commStatus = await res.json();
+      } catch (e) {
+        console.warn("Could not check commercial status:", e);
+      }
+
+      renderNewCaseEntitlementState(commStatus);
       document.getElementById('new-case-modal').style.display = 'flex';
-      setTimeout(() => document.getElementById('input-client-ref').focus(), 50);
+      if (commStatus.licensed) {
+        setTimeout(() => document.getElementById('input-client-ref').focus(), 50);
+      }
+    }
+
+    function renderNewCaseEntitlementState(commStatus) {
+      const gateBanner = document.getElementById('modal-entitlement-gate');
+      const gateMsg = document.getElementById('modal-entitlement-msg');
+      const formFields = document.getElementById('modal-case-form-fields');
+      const btnSubmit = document.getElementById('btn-submit-create-case');
+      const btnStartEval = document.getElementById('btn-modal-start-eval');
+
+      if (!commStatus.licensed) {
+        if (gateBanner) gateBanner.style.display = 'block';
+        if (formFields) formFields.style.opacity = '0.4';
+        if (btnSubmit) {
+          btnSubmit.disabled = true;
+          btnSubmit.style.display = 'none';
+        }
+
+        if (commStatus.entitlement_state === 'EXPIRED_EVALUATION' || commStatus.entitlement_state === 'EXPIRED_PAID_LICENSE') {
+          if (gateMsg) gateMsg.innerText = 'Your Evaluation has ended. Your existing work remains available. Activate a license to start or reconcile new client work.';
+          if (btnStartEval) btnStartEval.style.display = 'none';
+        } else {
+          if (gateMsg) gateMsg.innerText = 'Client work requires an active Evaluation or paid license.';
+          if (btnStartEval) btnStartEval.style.display = 'inline-flex';
+        }
+      } else {
+        if (gateBanner) gateBanner.style.display = 'none';
+        if (formFields) formFields.style.opacity = '1.0';
+        if (btnSubmit) {
+          btnSubmit.disabled = false;
+          btnSubmit.style.display = 'inline-flex';
+          btnSubmit.innerText = 'Create Case →';
+        }
+      }
+    }
+
+    function toggleTokenActivationInput() {
+      const box = document.getElementById('modal-token-input-box');
+      if (box) {
+        box.style.display = (box.style.display === 'none' || !box.style.display) ? 'block' : 'none';
+        if (box.style.display === 'block') {
+          document.getElementById('input-modal-license-token').focus();
+        }
+      }
+    }
+
+    async function startEvaluationFromModal() {
+      const btn = document.getElementById('btn-modal-start-eval');
+      if (btn) { btn.disabled = true; btn.innerText = 'Activating Evaluation...'; }
+      try {
+        const res = await fetch('/api/commercial/start-evaluation', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ customer_name: 'Evaluation Practitioner' })
+        });
+        if (res.ok) {
+          showToast('3-Day Evaluation active. 1 client case included.', 'success');
+          const statusRes = await fetch('/api/commercial/status');
+          const commStatus = statusRes.ok ? await statusRes.json() : { licensed: true, entitlement_state: 'ACTIVE_EVALUATION' };
+          renderNewCaseEntitlementState(commStatus);
+        } else {
+          showToast('Unable to activate Evaluation token.', 'error');
+        }
+      } catch (err) {
+        console.error("Evaluation activation error:", err);
+        showToast('Connection error activating Evaluation.', 'error');
+      } finally {
+        if (btn) { btn.disabled = false; btn.innerText = '⚡ Start 3-Day Evaluation'; }
+      }
+    }
+
+    async function submitModalLicenseToken() {
+      const textarea = document.getElementById('input-modal-license-token');
+      const token = textarea ? textarea.value.trim() : '';
+      if (!token) {
+        showToast('Please paste a valid license token string.', 'warning');
+        return;
+      }
+      try {
+        const res = await fetch('/api/commercial/license', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: token })
+        });
+        const data = await res.json();
+        if (data.status === 'INSTALLED') {
+          showToast(`License activated (${data.tier || 'Commercial Plan'}).`, 'success');
+          const statusRes = await fetch('/api/commercial/status');
+          const commStatus = statusRes.ok ? await statusRes.json() : { licensed: true };
+          renderNewCaseEntitlementState(commStatus);
+        } else {
+          showToast(`License rejected: ${data.diagnostic_reason || 'Invalid signature.'}`, 'error');
+        }
+      } catch (err) {
+        showToast('Connection error installing license token.', 'error');
+      }
     }
 
     function closeNewCaseModal() {
@@ -1254,16 +1410,33 @@
       cases.forEach(c => {
         const tr = document.createElement('tr');
         
-        // Compute canonical workflow and outcome badge
+        // Compute canonical workflow and outcome badge + actionable next step
         let statusDisplay = '';
+        let actionLabel = 'Open Case →';
+
         if (c.outcome_state) {
           let badgeClass = 'badge-warning';
           if (c.outcome_state === 'MATCHED') badgeClass = 'badge-success';
-          statusDisplay = `<span style="font-weight:600; color:var(--text-muted); font-size:0.75rem; display:block; margin-bottom:2px;">RECONCILED</span><span class="badge ${badgeClass}">${c.outcome_state}</span>`;
+          statusDisplay = `<span style="font-weight:600; color:var(--text-muted); font-size:0.72rem; display:block; margin-bottom:2px;">RECONCILED</span><span class="badge ${badgeClass}">${c.outcome_state}</span>`;
+          actionLabel = 'Open Case →';
         } else if (c.case_status === 'SOURCES_INGESTED' || c.workflow_status === 'READY_TO_RECONCILE') {
           statusDisplay = `<span class="badge badge-info">READY TO RECONCILE</span>`;
+          actionLabel = 'Reconcile Case →';
+        } else if (c.evidence_gap === 'MISSING_1099DA') {
+          statusDisplay = `<span class="badge badge-neutral" style="color: #475569; background: #f1f5f9;">MISSING BROKER EVIDENCE</span>`;
+          actionLabel = 'Add Form 1099-DA →';
+        } else if (c.evidence_gap === 'MISSING_LEDGER') {
+          statusDisplay = `<span class="badge badge-neutral" style="color: #475569; background: #f1f5f9;">MISSING TAX LEDGER</span>`;
+          actionLabel = 'Add client ledger →';
+        } else if (c.evidence_gap === 'MISSING_BOTH') {
+          statusDisplay = `<span class="badge badge-neutral" style="color: #475569; background: #f1f5f9;">MISSING BOTH SOURCES</span>`;
+          actionLabel = 'Complete intake →';
+        } else if (c.evidence_gap === 'SOURCE_REJECTED') {
+          statusDisplay = `<span class="badge badge-danger">SOURCE REJECTED</span>`;
+          actionLabel = 'Review import error →';
         } else {
-          statusDisplay = `<span class="badge badge-neutral">PENDING EVIDENCE</span>`;
+          statusDisplay = `<span class="badge badge-neutral">${c.evidence_status_label || 'PENDING EVIDENCE'}</span>`;
+          actionLabel = c.next_action_label || 'Open Case →';
         }
 
         if (c.attention_status === 'REVIEW_REQUIRED' && c.outcome_state !== 'MATCHED') {
@@ -1275,15 +1448,16 @@
         const isSample = (c.case_kind === 'BUNDLED_SAMPLE' || c.case_id === 'CASE-SAMPLE-2025');
         const sampleTag = isSample ? `<span class="badge badge-sample">SAMPLE</span>` : '';
         const clientRef = c.client_reference || "Sample Client";
+        const formattedActivity = formatDateTime(c.updated_at || c.created_at);
 
         tr.innerHTML = `
           <td><strong>${clientRef}</strong>${sampleTag}</td>
           <td>${c.tax_year}</td>
           <td><code style="font-size: 0.8rem; font-family:'JetBrains Mono',monospace;">${c.case_id}</code></td>
           <td>${statusDisplay}</td>
-          <td>${new Date(c.updated_at || Date.now()).toLocaleDateString()}</td>
+          <td style="font-size: 0.84rem; color: #475569;">${formattedActivity}</td>
           <td>
-            <button class="btn btn-sm" onclick="openCase('${c.case_id}')">Open Case →</button>
+            <button class="btn btn-sm" onclick="openCase('${c.case_id}')">${actionLabel}</button>
           </td>
         `;
         tbody.appendChild(tr);
@@ -1444,6 +1618,13 @@
         document.getElementById('ctx-tax-year').innerText = c.tax_year;
         document.getElementById('ctx-case-id').innerText = c.case_id;
         document.getElementById('review-case-header').innerText = `Case: ${c.client_reference || c.case_id}`;
+
+        const createdFormatted = formatDateTime(c.created_at);
+        const updatedFormatted = formatDateTime(c.updated_at);
+        const chronEl = document.getElementById('ctx-chronology');
+        if (chronEl) {
+          chronEl.innerText = `Created: ${createdFormatted} · Updated: ${updatedFormatted}`;
+        }
 
         const isSample = (c.case_kind === 'BUNDLED_SAMPLE' || c.case_id === 'CASE-SAMPLE-2025');
 

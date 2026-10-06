@@ -105,6 +105,13 @@ for (const page of standalonePages) {
   console.log(`✓ Packaged ${page} -> dist/public-web/${page}.html`);
 }
 
+// Copy Evidence Receipt Guide from web-dashboard
+const guideSrc = path.join(APPS_DIR, 'web-dashboard', 'evidence-receipt-guide.html');
+if (fs.existsSync(guideSrc)) {
+  fs.copyFileSync(guideSrc, path.join(DIST_DIR, 'evidence-receipt-guide.html'));
+  console.log('✓ Packaged Evidence Receipt Guide -> dist/public-web/evidence-receipt-guide.html');
+}
+
 // 4. Web Verifier — served by api/verifier-page.js, NOT as a static file.
 // The verifier HTML is read from apps/web-verifier/index.html by the serverless
 // function at request time, after server-side session validation.

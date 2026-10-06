@@ -13,7 +13,7 @@ Architectural Invariants:
 import hashlib
 import os
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
@@ -284,6 +284,53 @@ class CommercialPolicyService:
                 details={"action": "REMOVED"},
             )
 
+    def start_evaluation(self, customer_name: str = "Evaluation Practitioner") -> LicenseEvaluationResult:
+        """
+        Activates a canonical 72-hour installation-bound Evaluation entitlement (Pattern B).
+        Evaluation state is installation-bound and protected against normal replay/reset paths;
+        paid-license cryptographic signing keys are never present in the client.
+        Capacity: Exactly 1 client case; 72-hour temporal boundary.
+        """
+        current_res = self.evaluate_current_license()
+        if current_res.is_active:
+            return current_res
+
+        # Check anti-replay in local persistence
+        if self.store:
+            existing_eval = self.store.get_installation_evaluation()
+            if existing_eval:
+                # Evaluation was already initiated previously on this installation
+                return self.evaluate_current_license()
+
+        now = datetime.now(timezone.utc)
+        expires = now + timedelta(hours=72)
+        inst_id = self.installation_id or "LOCAL-INSTALLATION"
+
+        if self.store:
+            self.store.save_installation_evaluation(
+                installation_id=inst_id,
+                customer_name=customer_name or "Evaluation Practitioner",
+                activated_at=now.isoformat(),
+                expires_at=expires.isoformat(),
+                max_cases=1,
+            )
+
+        if self.audit_service:
+            from edge.commercial.audit import AuditEventType
+            self.audit_service.record_event(
+                AuditEventType.LICENSE_INSTALLED,
+                actor_type="USER",
+                actor_id=inst_id,
+                details={
+                    "tier": LicenseTier.EVALUATION.value,
+                    "license_id": f"EVAL-{inst_id[:8]}",
+                    "state": LicenseState.ACTIVE.value,
+                    "duration_hours": 72,
+                },
+            )
+
+        return self.evaluate_current_license(current_time=now)
+
     def get_active_token(self) -> Optional[str]:
         """
         Resolves active license token with deterministic precedence:
@@ -312,19 +359,73 @@ class CommercialPolicyService:
         return None
 
     def evaluate_current_license(self, current_time: Optional[datetime] = None) -> LicenseEvaluationResult:
-        """Evaluates currently installed commercial license token."""
+        """
+        Evaluates currently installed commercial license or local installation evaluation.
+        Deterministic precedence:
+        1. Explicit commercial license token (evaluated against COMMERCIAL_KEYRING)
+        2. Local installation-bound Evaluation state in SQLite
+        3. Unlicensed (fail-closed)
+        """
         token = self.get_active_token()
-        if not token:
-            return LicenseEvaluationResult(
-                state=LicenseState.MALFORMED,
-                is_active=False,
-                diagnostic_reason="No commercial license token installed on this system.",
+        if token:
+            return evaluate_license_token(
+                token,
+                keyring_override=self.keyring_override,
+                current_time=current_time,
+                current_installation_id=self.installation_id,
             )
-        return evaluate_license_token(
-            token,
-            keyring_override=self.keyring_override,
-            current_time=current_time,
-            current_installation_id=self.installation_id,
+
+        # Check local installation-bound Evaluation
+        if self.store:
+            eval_rec = self.store.get_installation_evaluation()
+            if eval_rec:
+                check_now = current_time or datetime.now(timezone.utc)
+                try:
+                    exp_str = eval_rec["expires_at"].replace("Z", "+00:00")
+                    expires_dt = datetime.fromisoformat(exp_str)
+                except Exception:
+                    expires_dt = check_now - timedelta(seconds=1)
+
+                inst_id = eval_rec.get("installation_id", self.installation_id or "LOCAL-INSTALLATION")
+                cust_name = eval_rec.get("customer_name", "Evaluation Practitioner")
+                max_cases = eval_rec.get("max_cases", 1)
+
+                if check_now <= expires_dt:
+                    secs_left = max(0, int((expires_dt - check_now).total_seconds()))
+                    days_rem = max(1, secs_left // 86400 + (1 if (secs_left % 86400) > 0 else 0))
+                    return LicenseEvaluationResult(
+                        state=LicenseState.ACTIVE,
+                        is_active=True,
+                        tier=LicenseTier.EVALUATION,
+                        license_id=f"EVAL-{inst_id[:8]}",
+                        customer_id=cust_name,
+                        max_cases_per_installation=max_cases,
+                        revision=1,
+                        entitlements=["reconciliation", "offline_export", "reviewer_workflow"],
+                        days_remaining=days_rem,
+                        grace_days_remaining=0,
+                        installation_bound=True,
+                        diagnostic_reason="Canonical 72-hour installation evaluation active.",
+                    )
+                else:
+                    return LicenseEvaluationResult(
+                        state=LicenseState.EXPIRED,
+                        is_active=False,
+                        tier=LicenseTier.EVALUATION,
+                        license_id=f"EVAL-{inst_id[:8]}",
+                        customer_id=cust_name,
+                        max_cases_per_installation=max_cases,
+                        revision=1,
+                        days_remaining=0,
+                        grace_days_remaining=0,
+                        installation_bound=True,
+                        diagnostic_reason="Your 72-hour Evaluation has ended. Existing cases and exports remain fully accessible.",
+                    )
+
+        return LicenseEvaluationResult(
+            state=LicenseState.MALFORMED,
+            is_active=False,
+            diagnostic_reason="No commercial license token installed on this system.",
         )
 
     def get_status(self, current_time: Optional[datetime] = None) -> Dict[str, Any]:
@@ -332,40 +433,7 @@ class CommercialPolicyService:
         Returns safe, non-sensitive commercial status metadata for UI dashboards and health diagnostics.
         Vocabulary: NO_ENTITLEMENT, ACTIVE_EVALUATION, ACTIVE_PAID_LICENSE, EXPIRED_EVALUATION, EXPIRED_PAID_LICENSE.
         """
-        token = self.get_active_token()
-        has_token = bool(token)
         billable_cases = self.store.count_billable_cases() if self.store else 0
-
-        if not has_token:
-            if self.allow_dev_preview:
-                return {
-                    "licensed": True,
-                    "license_state": "ACTIVE",
-                    "entitlement_state": "ACTIVE_EVALUATION",
-                    "tier": "EVALUATION",
-                    "license_id": "PREVIEW-DEV-EVAL",
-                    "customer_id": "Practitioner Preview",
-                    "billable_cases_count": billable_cases,
-                    "max_cases_per_installation": 50,
-                    "days_remaining": 30,
-                    "grace_days_remaining": 0,
-                    "unmetered_verification_active": True,
-                    "message": f"Preview Evaluation Active · {billable_cases}/50 client cases used.",
-                }
-            return {
-                "licensed": False,
-                "license_state": "UNLICENSED",
-                "entitlement_state": "NO_ENTITLEMENT",
-                "tier": None,
-                "license_id": None,
-                "customer_id": None,
-                "billable_cases_count": billable_cases,
-                "max_cases_per_installation": 0,
-                "days_remaining": 0,
-                "grace_days_remaining": 0,
-                "unmetered_verification_active": True,
-                "message": "Start your 3-day Evaluation or activate a purchased license.",
-            }
 
         eval_res = self.evaluate_current_license(current_time=current_time)
         is_eval = (eval_res.tier in (LicenseTier.TRIAL, LicenseTier.EVALUATION))
@@ -377,11 +445,42 @@ class CommercialPolicyService:
             else:
                 msg = f"{eval_res.tier.value if eval_res.tier else 'Commercial'} Plan Active · {billable_cases}/{eval_res.max_cases_per_installation or 0} cases used."
         else:
-            entitlement_state = "EXPIRED_EVALUATION" if is_eval else "EXPIRED_PAID_LICENSE"
-            if is_eval:
-                msg = "Your 3-day Evaluation has ended. Existing evaluation work remains accessible. Activate a plan to continue new client work."
+            if eval_res.state == LicenseState.EXPIRED:
+                entitlement_state = "EXPIRED_EVALUATION" if is_eval else "EXPIRED_PAID_LICENSE"
+                if is_eval:
+                    msg = "Your 3-day Evaluation has ended. Existing evaluation work remains accessible. Activate a plan to continue new client work."
+                else:
+                    msg = "Installed commercial license is not active. Existing cases and verification remain accessible."
             else:
-                msg = "Installed commercial license is not active. Existing cases and verification remain accessible."
+                if self.allow_dev_preview:
+                    return {
+                        "licensed": True,
+                        "license_state": "ACTIVE",
+                        "entitlement_state": "ACTIVE_EVALUATION",
+                        "tier": "EVALUATION",
+                        "license_id": "PREVIEW-DEV-EVAL",
+                        "customer_id": "Practitioner Preview",
+                        "billable_cases_count": billable_cases,
+                        "max_cases_per_installation": 50,
+                        "days_remaining": 30,
+                        "grace_days_remaining": 0,
+                        "unmetered_verification_active": True,
+                        "message": f"Preview Evaluation Active · {billable_cases}/50 client cases used.",
+                    }
+                return {
+                    "licensed": False,
+                    "license_state": "UNLICENSED",
+                    "entitlement_state": "NO_ENTITLEMENT",
+                    "tier": None,
+                    "license_id": None,
+                    "customer_id": None,
+                    "billable_cases_count": billable_cases,
+                    "max_cases_per_installation": 0,
+                    "days_remaining": 0,
+                    "grace_days_remaining": 0,
+                    "unmetered_verification_active": True,
+                    "message": "Start your 3-day Evaluation or activate a purchased license.",
+                }
 
         return {
             "licensed": eval_res.is_active,
@@ -451,9 +550,10 @@ class CommercialPolicyService:
                 message="Bundled sample case unmetered evaluation authorized.",
             )
 
-        # 1. Check for token presence
-        token = self.get_active_token()
-        if not token:
+        # 1. Evaluate current license / local installation evaluation
+        eval_res = self.evaluate_current_license(current_time=current_time)
+
+        if not eval_res.is_active and eval_res.state == LicenseState.MALFORMED:
             if self.allow_dev_preview:
                 billable_cases = self.store.count_billable_cases() if self.store else 0
                 max_dev_cases = 50
@@ -481,16 +581,7 @@ class CommercialPolicyService:
                 correlation_id=correlation_id,
             )
 
-
-        # 2. Cryptographic & Temporal Evaluation via frozen engine
-        eval_res = evaluate_license_token(
-            token,
-            keyring_override=self.keyring_override,
-            current_time=current_time,
-            current_installation_id=self.installation_id,
-        )
-
-        # 3. Handle specific non-active states
+        # 2. Handle specific non-active states
         if eval_res.state == LicenseState.NOT_YET_VALID:
             return CommercialPolicyDecision(
                 allowed=False,
@@ -561,7 +652,7 @@ class CommercialPolicyService:
             if max_cases > 0 and billable_count >= max_cases:
                 is_eval = (eval_res.tier == LicenseTier.EVALUATION and max_cases == 1)
                 msg = (
-                    f"You have used your 1 client case included with Evaluation (1/1 cases used). Upgrade to Solo or Practice to create additional client cases."
+                    f"You have used your 1 client case included with Evaluation (1/1 cases used). Upgrade to Practitioner or Firm to create additional client cases."
                     if is_eval else
                     f"You've reached the case limit for your current license ({billable_count} of {max_cases} client cases used). Your existing cases remain available. Upgrade your license to start another client case."
                 )
@@ -582,7 +673,16 @@ class CommercialPolicyService:
         if operation == CommercialOperation.RECONCILE_CASE:
             # Check if reconciliation entitlement or recognized tier is present
             has_recon = eval_res.has_entitlement("reconciliation") or (
-                eval_res.tier in (LicenseTier.TRIAL, LicenseTier.ESSENTIAL, LicenseTier.PRACTICE, LicenseTier.ENTERPRISE)
+                eval_res.tier in (
+                    LicenseTier.TRIAL,
+                    LicenseTier.EVALUATION,
+                    LicenseTier.SOLO,
+                    LicenseTier.PRACTITIONER,
+                    LicenseTier.ESSENTIAL,
+                    LicenseTier.PRACTICE,
+                    LicenseTier.FIRM,
+                    LicenseTier.ENTERPRISE,
+                )
             )
             if not has_recon:
                 return CommercialPolicyDecision(

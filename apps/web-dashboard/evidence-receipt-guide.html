@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VaultBasis — Evidence Receipt Guide</title>
+  <meta name="description" content="A practitioner guide to understanding VaultBasis cryptographic Evidence Receipts, outcome states, and verification.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --border: #e2e8f0;
+      --border-accent: #cbd5e1;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --accent: #0284c7;
+      --success: #059669;
+      --success-bg: rgba(5, 150, 105, 0.08);
+      --warning: #b45309;
+      --warning-bg: rgba(180, 83, 9, 0.08);
+      --danger: #dc2626;
+      --radius: 8px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0.85rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text);
+    }
+    .brand h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 800;
+    }
+    .nav-links {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+    }
+    .nav-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 7px 16px;
+      border-radius: var(--radius);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .nav-btn:hover {
+      background: #f1f5f9;
+      color: var(--text);
+    }
+    .nav-btn.primary {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 4rem;
+      flex: 1;
+    }
+    .guide-header {
+      margin-bottom: 2.5rem;
+      text-align: left;
+    }
+    .tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+    .guide-header h2 {
+      font-size: 2.3rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--text);
+      margin-bottom: 0.75rem;
+    }
+    .guide-header p.lead {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+    .card h3 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: var(--text);
+    }
+    .card p {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+      margin-bottom: 1rem;
+    }
+    .card p:last-child { margin-bottom: 0; }
+    .structure-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      margin-top: 1.25rem;
+    }
+    .structure-item {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 1rem 1.25rem;
+    }
+    .structure-item strong {
+      display: block;
+      color: #0f172a;
+      font-size: 0.92rem;
+      margin-bottom: 0.35rem;
+    }
+    .structure-item span {
+      font-size: 0.85rem;
+      color: #475569;
+      line-height: 1.45;
+      display: block;
+    }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .badge-success { background: var(--success-bg); color: var(--success); }
+    .badge-warning { background: var(--warning-bg); color: var(--warning); }
+    .badge-unresolved { background: rgba(217, 119, 6, 0.1); color: #d97706; }
+    footer {
+      border-top: 1px solid var(--border);
+      background: #ffffff;
+      padding: 2rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="/" class="brand">
+      <svg width="28" height="28" viewBox="0 0 38 38" fill="none">
+        <rect width="38" height="38" rx="8" fill="#2563eb"/>
+        <path d="M10 10 L19 26" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M28 10 L19 26" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="19" y1="26" x2="19" y2="30" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+      <h1>VaultBasis Edge</h1>
+    </a>
+    <div class="nav-links">
+      <a href="/" class="nav-btn">← Back to Dashboard</a>
+      <a href="/offline-verifier" class="nav-btn">Offline Verifier</a>
+      <a href="/schemas/receipt-v0.1.json" class="nav-btn" target="_blank">Technical Schema ↗</a>
+    </div>
+  </header>
+
+  <main class="container" role="main">
+    <div class="guide-header">
+      <span class="tag">Practitioner Reference</span>
+      <h2>Evidence Receipt Guide</h2>
+      <p class="lead">
+        A clear, human-readable reference explaining what a VaultBasis Evidence Receipt is, how reconciliation outcomes are structured, and how receipts are independently verified.
+      </p>
+    </div>
+
+    <!-- Section 1: What is an Evidence Receipt? -->
+    <div class="card">
+      <h3>What is a VaultBasis Evidence Receipt?</h3>
+      <p>
+        A <strong>VaultBasis Evidence Receipt</strong> is a portable, tamper-evident record documenting the outcome of a digital-asset tax reconciliation. It records exactly which evidence files VaultBasis compared, what matched, what differed, what remained unresolved, and whether the receipt has been modified since it was cryptographically signed.
+      </p>
+      <p>
+        Practitioners include Evidence Receipts in tax workpapers to establish clear, defensible review chronology for returns involving digital-asset broker reporting (Form 1099-DA) and client tax ledgers.
+      </p>
+    </div>
+
+    <!-- Section 2: Core Components of a Receipt -->
+    <div class="card">
+      <h3>What Information Does an Evidence Receipt Contain?</h3>
+      <p>Every Evidence Receipt contains seven authoritative structural sections:</p>
+      
+      <div class="structure-grid">
+        <div class="structure-item">
+          <strong>1. Case &amp; Taxpayer Context</strong>
+          <span>Unique Case ID, client engagement reference, tax year, and applicable regulatory jurisdiction (e.g. US IRS).</span>
+        </div>
+        <div class="structure-item">
+          <strong>2. Sources Compared &amp; Hashes</strong>
+          <span>Cryptographic SHA-256 digests and file metadata for every ingested source (e.g., broker Form 1099-DA and client ledger).</span>
+        </div>
+        <div class="structure-item">
+          <strong>3. Reconciliation Outcome State</strong>
+          <span>Authoritative high-level outcome (<span class="badge badge-success">MATCHED</span>, <span class="badge badge-warning">PROCEEDS_DIFFERENCE</span>, <span class="badge badge-warning">BASIS_DIFFERENCE</span>, or <span class="badge badge-unresolved">UNRESOLVED</span>).</span>
+        </div>
+        <div class="structure-item">
+          <strong>4. Material Differences</strong>
+          <span>Itemized discrepancies detected between broker reporting and client tax records with rule citations and variance amounts.</span>
+        </div>
+        <div class="structure-item">
+          <strong>5. Unresolved Items</strong>
+          <span>Non-covered assets, missing acquisition dates, or unlinked lots that cannot be coerced to $0.00 and require practitioner review.</span>
+        </div>
+        <div class="structure-item">
+          <strong>6. Issuance Timestamp &amp; Engine Metadata</strong>
+          <span>Strict UTC ISO 8601 timestamp of reconciliation, ruleset version, and deterministic engine version.</span>
+        </div>
+        <div class="structure-item" style="grid-column: span 2;">
+          <strong>7. Ed25519 Cryptographic Signature &amp; Public Key</strong>
+          <span>Digital signature binding the entire payload to the local installation key, preventing retroactive tampering.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 3: How Verification Works -->
+    <div class="card">
+      <h3>How Independent Verification Works</h3>
+      <p>
+        Evidence Receipts are designed to be verified independently by any auditor, CPA, reviewer, or client without needing a VaultBasis subscription or software installation.
+      </p>
+      <p>
+        The verifier recomputes the SHA-256 digests of all referenced evidence files, checks schema conformance, validates the ruleset binding, and verifies the Ed25519 digital signature. If even a single comma or dollar value is altered, verification fails immediately.
+      </p>
+      <div style="display: flex; gap: 1rem; margin-top: 1.25rem;">
+        <a href="/offline-verifier" class="nav-btn primary">Open Local Offline Verifier →</a>
+        <a href="https://vaultbasis.com/verifier" target="_blank" rel="noopener" class="nav-btn">Open Independent Web Verifier ↗</a>
+      </div>
+    </div>
+
+    <!-- Section 4: Technical Schema for Developers & Auditors -->
+    <div class="card" style="background: #f8fafc; border-color: #cbd5e1;">
+      <h3 style="font-size: 1.1rem;">Technical Specification &amp; Schema</h3>
+      <p style="font-size: 0.9rem;">
+        For technical reviewers, IT auditors, and software developers wishing to inspect the normative JSON Schema specification or automate verification pipelines:
+      </p>
+      <div style="margin-top: 1rem;">
+        <a href="/schemas/receipt-v0.1.json" target="_blank" class="nav-btn" style="background: white;">View Technical Schema (JSON) →</a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div style="max-width: 960px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+      <div>VaultBasis Edge · Evidence Receipt Guide</div>
+      <div>© 2026 VaultBasis. All rights reserved.</div>
+    </div>
+  </footer>
+</body>
+</html>

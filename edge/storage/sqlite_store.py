@@ -23,7 +23,7 @@ class SQLiteStore:
     online backup/restore, and corruption health checks.
     """
 
-    CURRENT_SCHEMA_VERSION = 4
+    CURRENT_SCHEMA_VERSION = 5
 
     def __init__(self, db_path: Path, synchronous: str = "FULL"):
         self.db_path = Path(db_path)
@@ -171,6 +171,22 @@ class SQLiteStore:
             now_utc = datetime.now(timezone.utc).isoformat()
             conn.execute("INSERT INTO schema_migrations (version, name, applied_at) VALUES (4, 'commercial_audit_log', ?)", (now_utc,))
 
+        # Migration 5: Local Installation-Bound Evaluation State (MMP15-EVAL-E2E-001)
+        if 5 not in applied_versions:
+            conn.executescript("""
+                CREATE TABLE IF NOT EXISTS installation_evaluation (
+                    id INTEGER PRIMARY KEY CHECK (id = 1),
+                    installation_id TEXT NOT NULL,
+                    customer_name TEXT NOT NULL,
+                    activated_at TEXT NOT NULL,
+                    expires_at TEXT NOT NULL,
+                    max_cases INTEGER NOT NULL DEFAULT 1,
+                    anti_replay_hash TEXT NOT NULL
+                );
+            """)
+            now_utc = datetime.now(timezone.utc).isoformat()
+            conn.execute("INSERT INTO schema_migrations (version, name, applied_at) VALUES (5, 'installation_evaluation', ?)", (now_utc,))
+
         # Idempotent verification for existing databases
         cursor.execute("PRAGMA table_info(cases)")
         existing_cols = [row[1] for row in cursor.fetchall()]
@@ -272,7 +288,16 @@ class SQLiteStore:
     def list_cases(self) -> List[Dict[str, Any]]:
         with self._get_connection() as conn:
             rows = conn.execute("SELECT * FROM cases ORDER BY updated_at DESC").fetchall()
-            return [dict(r) for r in rows]
+            result = []
+            for r in rows:
+                c = dict(r)
+                src_rows = conn.execute(
+                    "SELECT source_id, schema_id, filename FROM sources WHERE case_id = ?",
+                    (c["case_id"],)
+                ).fetchall()
+                c["sources_summary"] = [dict(s) for s in src_rows]
+                result.append(c)
+            return result
 
     def delete_case(self, case_id: str):
         with self._get_connection() as conn:
@@ -409,6 +434,49 @@ class SQLiteStore:
         """Removes installed commercial license token."""
         with self._get_connection() as conn:
             conn.execute("DELETE FROM commercial_license WHERE id = 1")
+
+    # --------------------------------------------------------------------------
+    # Installation-Bound Evaluation Persistence (MMP15-EVAL-E2E-001)
+    # --------------------------------------------------------------------------
+
+    def get_installation_evaluation(self) -> Optional[Dict[str, Any]]:
+        """Retrieves active installation-bound evaluation record if present."""
+        with self._get_connection() as conn:
+            row = conn.execute("SELECT * FROM installation_evaluation WHERE id = 1").fetchone()
+            if row:
+                return dict(row)
+            return None
+
+    def save_installation_evaluation(
+        self,
+        installation_id: str,
+        customer_name: str,
+        activated_at: str,
+        expires_at: str,
+        max_cases: int = 1,
+        anti_replay_hash: Optional[str] = None,
+    ):
+        """Stores local installation evaluation state with anti-replay hash."""
+        import hashlib
+        if not anti_replay_hash:
+            anti_replay_hash = hashlib.sha256(f"{installation_id}:{activated_at}:{expires_at}".encode("utf-8")).hexdigest()
+        with self._get_connection() as conn:
+            conn.execute("""
+                INSERT INTO installation_evaluation (id, installation_id, customer_name, activated_at, expires_at, max_cases, anti_replay_hash)
+                VALUES (1, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(id) DO UPDATE SET
+                    installation_id=excluded.installation_id,
+                    customer_name=excluded.customer_name,
+                    activated_at=excluded.activated_at,
+                    expires_at=excluded.expires_at,
+                    max_cases=excluded.max_cases,
+                    anti_replay_hash=excluded.anti_replay_hash;
+            """, (installation_id, customer_name, activated_at, expires_at, max_cases, anti_replay_hash))
+
+    def remove_installation_evaluation(self):
+        """Clears local installation evaluation state."""
+        with self._get_connection() as conn:
+            conn.execute("DELETE FROM installation_evaluation WHERE id = 1")
 
     # --------------------------------------------------------------------------
     # Durability & Recovery Contract Methods (MMP15-DATA-001)

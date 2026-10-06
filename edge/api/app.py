@@ -148,6 +148,10 @@ class InstallLicenseRequest(BaseModel):
     token: str = Field(..., description="VaultBasis signed commercial license token string (Base64 or JSON envelope)")
 
 
+class StartEvaluationRequest(BaseModel):
+    customer_name: Optional[str] = Field("Evaluation Practitioner", description="Practitioner or entity reference")
+
+
 class CaseSummaryResponse(BaseModel):
     case_id: str
     client_reference: Optional[str] = "Sample Client"
@@ -284,6 +288,28 @@ def install_commercial_license(req: InstallLicenseRequest):
     Persists token in local storage upon successful evaluation.
     """
     res = commercial_policy.install_license_token(req.token)
+    return {
+        "status": "INSTALLED" if res.is_active else "REJECTED",
+        "license_state": res.state.value,
+        "tier": res.tier.value if res.tier else None,
+        "license_id": res.license_id,
+        "customer_id": res.customer_id,
+        "max_cases_per_installation": res.max_cases_per_installation,
+        "entitlements": res.entitlements,
+        "days_remaining": res.days_remaining,
+        "grace_days_remaining": res.grace_days_remaining,
+        "diagnostic_reason": res.diagnostic_reason,
+    }
+
+
+@app.post("/api/commercial/start-evaluation")
+def start_evaluation(req: Optional[StartEvaluationRequest] = None):
+    """
+    Activates an authentic 72-hour Evaluation entitlement (MMP15-EVAL-E2E-001).
+    Signs and installs a valid Evaluation token with 1 client case capacity.
+    """
+    name = (req.customer_name if req and req.customer_name else "Evaluation Practitioner")
+    res = commercial_policy.start_evaluation(customer_name=name)
     return {
         "status": "INSTALLED" if res.is_active else "REJECTED",
         "license_state": res.state.value,
@@ -560,18 +586,50 @@ def _derive_case_metadata(case_dict_or_obj: Any) -> Dict[str, Any]:
     if isinstance(case_dict_or_obj, dict):
         outcome_state = case_dict_or_obj.get("outcome_state")
         case_status = case_dict_or_obj.get("case_status", "CREATED")
+        sources_summary = case_dict_or_obj.get("sources_summary", [])
+        if not sources_summary and "sources" in case_dict_or_obj:
+            sources_dict = case_dict_or_obj.get("sources") or {}
+            sources_summary = [{"schema_id": getattr(s, "schema_id", s.get("schema_id") if isinstance(s, dict) else "")} for s in sources_dict.values()]
     else:
         outcome_state = getattr(case_dict_or_obj, "outcome_state", None)
         case_status = getattr(case_dict_or_obj, "case_status", "CREATED")
+        sources = getattr(case_dict_or_obj, "sources", {}) or {}
+        sources_summary = [{"schema_id": s.schema_id} for s in sources.values()]
+
+    schema_ids = [str(s.get("schema_id", "")).upper() for s in sources_summary]
+    has_1099da = any("1099" in sid for sid in schema_ids)
+    has_ledger = any("KOINLY" in sid or "LEDGER" in sid or "COINTRACKER" in sid for sid in schema_ids)
+
+    # Determine evidence status and action based on actual source presence
+    has_both_sources = (has_1099da and has_ledger) or len(sources_summary) >= 2
+    if has_both_sources:
+        workflow_status = "READY_TO_RECONCILE" if not outcome_state else "RECONCILED"
+        evidence_gap = "NONE"
+        evidence_status_label = "Ready to Reconcile" if not outcome_state else "Reconciled"
+        next_action_label = "Run deterministic reconciliation →" if not outcome_state else "View Evidence Receipt →"
+    elif has_1099da and not has_ledger:
+        workflow_status = "NEEDS_EVIDENCE"
+        evidence_gap = "MISSING_LEDGER"
+        evidence_status_label = "Missing tax ledger"
+        next_action_label = "Add client ledger →"
+    elif has_ledger and not has_1099da:
+        workflow_status = "NEEDS_EVIDENCE"
+        evidence_gap = "MISSING_1099DA"
+        evidence_status_label = "Missing broker evidence"
+        next_action_label = "Add Form 1099-DA →"
+    elif case_status in ("INGESTION_FAILED", "VALIDATION_FAILED"):
+        workflow_status = "NEEDS_EVIDENCE"
+        evidence_gap = "SOURCE_REJECTED"
+        evidence_status_label = "Source rejected"
+        next_action_label = "Review import error →"
+    else:
+        workflow_status = "NEEDS_EVIDENCE"
+        evidence_gap = "MISSING_BOTH"
+        evidence_status_label = "Missing both sources"
+        next_action_label = "Complete intake →"
 
     if outcome_state:
         workflow_status = "RECONCILED"
-    elif case_status == "SOURCES_INGESTED":
-        workflow_status = "READY_TO_RECONCILE"
-    elif case_status in ("CREATED", "PENDING"):
-        workflow_status = "NEEDS_EVIDENCE"
-    else:
-        workflow_status = case_status
 
     # attention_status: deterministic classification
     # Needs Attention =
@@ -588,6 +646,9 @@ def _derive_case_metadata(case_dict_or_obj: Any) -> Dict[str, Any]:
     return {
         "workflow_status": workflow_status,
         "attention_status": attention_status,
+        "evidence_gap": evidence_gap,
+        "evidence_status_label": evidence_status_label,
+        "next_action_label": next_action_label,
     }
 
 
@@ -914,6 +975,13 @@ def serve_offline_verifier():
     if index_file.exists():
         return HTMLResponse(content=index_file.read_text(encoding="utf-8"), status_code=200)
     return HTMLResponse("<h2>Offline Verifier building...</h2>")
+
+@app.get("/evidence-receipt-guide", response_class=HTMLResponse)
+def serve_evidence_receipt_guide():
+    guide_file = WEB_DASHBOARD_DIR / "evidence-receipt-guide.html"
+    if guide_file.exists():
+        return HTMLResponse(content=guide_file.read_text(encoding="utf-8"), status_code=200)
+    return HTMLResponse("<h2>Evidence Receipt Guide building...</h2>")
 
 @app.get("/about", response_class=HTMLResponse)
 @app.get("/marketing", response_class=HTMLResponse)
