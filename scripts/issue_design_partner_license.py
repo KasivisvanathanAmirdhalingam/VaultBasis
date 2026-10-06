@@ -60,11 +60,11 @@ def issue_design_partner_license(
     else:
         private_key = ed25519.Ed25519PrivateKey.from_private_bytes(key_bytes)
 
-    # 2. Chronological Boundaries: 1-Year (365 Days) Term + 30-Day Grace
+    # 2. Chronological Boundaries: 1-Year (365 Days) Term
     now = datetime.now(timezone.utc)
     not_before = now
     expires_at = now + timedelta(days=365)
-    grace_until = expires_at + timedelta(days=30)
+    grace_until = expires_at
 
     inst_hash = installation_id.strip().upper()
     license_id = f"LIC-DP-{now.strftime('%Y%m%d')}-{inst_hash[:8]}"

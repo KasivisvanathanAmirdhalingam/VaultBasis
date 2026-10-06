@@ -1152,7 +1152,7 @@
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <div>
             <div style="font-size: 0.88rem; font-weight: 700; color: #166534;" id="modal-active-tier-text">⚡ 3-Day Evaluation Active</div>
-            <div style="font-size: 0.78rem; color: #15803d; margin-top: 3px;" id="modal-active-meta-text">72 hours remaining · 0 of 1 client case used</div>
+            <div style="font-size: 0.78rem; color: #15803d; margin-top: 3px;" id="modal-active-meta-text">72 hours remaining · 0 of 3 evaluation client cases used</div>
           </div>
           <span class="badge badge-success" style="font-size: 0.72rem;">ACTIVE</span>
         </div>
@@ -1422,8 +1422,8 @@
           if (activeTierText) activeTierText.innerText = '⚡ 3-Day Evaluation Active';
           const remaining = commStatus.days_remaining ? (commStatus.days_remaining === 1 ? '1 day remaining' : `${commStatus.days_remaining} days remaining`) : '72 hours remaining';
           const used = commStatus.billable_cases_count || 0;
-          const max = commStatus.max_cases_per_installation || 1;
-          const casesText = used === 0 ? `1 client case included (0 used)` : `${used} of ${max} client case used`;
+          const max = commStatus.max_cases_per_installation || 3;
+          const casesText = `${used} of ${max} evaluation client cases used`;
           if (activeMetaText) activeMetaText.innerText = `${remaining} · ${casesText}`;
         } else {
           if (activeTierText) activeTierText.innerText = `🔑 ${commStatus.tier || 'Practitioner'} Plan Active`;
@@ -1456,9 +1456,9 @@
         });
         const data = await res.json();
         if (res.ok && (data.status === 'INSTALLED' || data.license_state === 'ACTIVE')) {
-          showToast('3-Day Evaluation active. 1 client case included.', 'success');
+          showToast('3-Day Evaluation active. Up to 3 client cases included.', 'success');
           const statusRes = await fetch('/api/commercial/status');
-          const commStatus = statusRes.ok ? await statusRes.json() : { licensed: true, entitlement_state: 'ACTIVE_EVALUATION', tier: 'EVALUATION', billable_cases_count: 0, max_cases_per_installation: 1 };
+          const commStatus = statusRes.ok ? await statusRes.json() : { licensed: true, entitlement_state: 'ACTIVE_EVALUATION', tier: 'EVALUATION', billable_cases_count: 0, max_cases_per_installation: 3 };
           currentCommercialStatus = commStatus;
           renderNewCaseEntitlementState(commStatus);
           setTimeout(() => {

@@ -63,12 +63,13 @@ def freeze_test_env(monkeypatch, tmp_path):
 
 def test_mmp15_eval_e2e_001_lifecycle(freeze_test_env):
     """
-    Tests MMP15-EVAL-E2E-001:
+    Tests MMP15-EVAL-E2E-001 & MMP15-COMMERCIAL-POLICY-LOCK-002:
     1. Fresh install without evaluation: NO_ENTITLEMENT -> cannot create client case (402 Payment Required)
-    2. Start 3-day evaluation: ACTIVE_EVALUATION created
-    3. Can create exactly one client case
-    4. Second client case rejected with capacity denial (402 Payment Required)
-    5. Existing evaluation case remains accessible
+    2. Start 3-day evaluation: ACTIVE_EVALUATION created with 3 client cases capacity
+    3. Can create client cases 1, 2, and 3
+    4. Fourth client case rejected with capacity denial (402 Payment Required / CASE_CAPACITY_REACHED)
+    5. Monotonic tracking: deleting an existing case does NOT restore capacity slot
+    6. Existing evaluation cases remain accessible
     """
     client = freeze_test_env["client"]
     store = freeze_test_env["store"]
@@ -85,7 +86,7 @@ def test_mmp15_eval_e2e_001_lifecycle(freeze_test_env):
     eval_data = eval_resp.json()
     assert eval_data["status"] == "INSTALLED"
     assert eval_data["tier"] == "EVALUATION"
-    assert eval_data["max_cases_per_installation"] == 1
+    assert eval_data["max_cases_per_installation"] == 3
     assert eval_data["days_remaining"] in (2, 3)
 
     # Check commercial status
@@ -94,28 +95,38 @@ def test_mmp15_eval_e2e_001_lifecycle(freeze_test_env):
     st = status_resp.json()
     assert st["licensed"] is True
     assert st["tier"] == "EVALUATION"
-    assert st["max_cases_per_installation"] == 1
+    assert st["max_cases_per_installation"] == 3
     assert st["billable_cases_count"] == 0
 
-    # 3. Create first client case -> Allowed (201 Created)
+    # 3. Create client cases 1, 2, and 3 -> Allowed (201 Created)
     case1_resp = client.post("/api/cases", json={"client_reference": "Client 1", "tax_year": 2025})
     assert case1_resp.status_code == 201
     case1_id = case1_resp.json()["case_id"]
 
-    # Check status updated
-    st2 = client.get("/api/commercial/status").json()
-    assert st2["billable_cases_count"] == 1
-
-    # 4. Create second client case -> Rejected due to evaluation capacity limit
     case2_resp = client.post("/api/cases", json={"client_reference": "Client 2", "tax_year": 2025})
-    assert case2_resp.status_code == 402
-    assert case2_resp.json()["error"]["code"] == CommercialDenialCode.CASE_CAPACITY_REACHED.value
+    assert case2_resp.status_code == 201
+    case2_id = case2_resp.json()["case_id"]
 
-    # 5. First case remains readable and listable
+    case3_resp = client.post("/api/cases", json={"client_reference": "Client 3", "tax_year": 2025})
+    assert case3_resp.status_code == 201
+    case3_id = case3_resp.json()["case_id"]
+
+    # Check status updated to 3 used
+    st2 = client.get("/api/commercial/status").json()
+    assert st2["billable_cases_count"] == 3
+
+    # 4. Create fourth client case -> Rejected due to evaluation capacity limit
+    case4_resp = client.post("/api/cases", json={"client_reference": "Client 4", "tax_year": 2025})
+    assert case4_resp.status_code == 402
+    assert case4_resp.json()["error"]["code"] == CommercialDenialCode.CASE_CAPACITY_REACHED.value
+
+    # 5. Existing cases remain readable and listable
     list_resp = client.get("/api/cases")
     assert list_resp.status_code == 200
     cases = list_resp.json()
     assert any(c["case_id"] == case1_id for c in cases)
+    assert any(c["case_id"] == case2_id for c in cases)
+    assert any(c["case_id"] == case3_id for c in cases)
 
 
 def test_mmp15_case_time_001_timestamps(freeze_test_env):

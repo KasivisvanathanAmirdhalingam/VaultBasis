@@ -38,12 +38,12 @@ function formatEvaluationEmailHtml({ customerName, downloadUrl, expiresAtIso }) 
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; color: #0f172a; line-height: 1.6;">
       <div style="margin-bottom: 24px;">
         <h2 style="font-size: 22px; font-weight: 800; color: #0f172a; margin: 0 0 8px 0;">VaultBasis 3-Day Evaluation</h2>
-        <p style="color: #475569; font-size: 15px; margin: 0;">Experience full digital-asset reconciliation with your client files (1 live evaluation case included) and preloaded sample scenarios.</p>
+        <p style="color: #475569; font-size: 15px; margin: 0;">Experience full digital-asset reconciliation with your client files (up to 3 evaluation client cases included) and preloaded sample scenarios.</p>
       </div>
 
       <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin-bottom: 24px;">
         <p style="margin: 0 0 12px 0; font-size: 15px;">Hello <strong>${customerName}</strong>,</p>
-        <p style="margin: 0; font-size: 14px; color: #334155;">Your 3-Day Evaluation download authorization is ready. You have 72 hours of full workflow access, including 1 live client reconciliation case.</p>
+        <p style="margin: 0; font-size: 14px; color: #334155;">Your 3-Day Evaluation download authorization is ready. You have 72 hours of full workflow access, including up to 3 evaluation client cases.</p>
       </div>
 
       <div style="text-align: center; margin: 32px 0;">
@@ -133,7 +133,7 @@ function formatPaidLicenseEmailHtml({
 
       <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 14px 18px; margin-top: 24px;">
         <p style="margin: 0; font-size: 13px; color: #1e40af; line-height: 1.5;">
-          <strong>Data Protection &amp; Durability Guarantee:</strong> Your client records and tax workpapers remain exclusively on your computer. If your license term expires, you retain 100% lifetime access to read, reconcile, and export existing case records.
+          <strong>Data Protection &amp; Durability Guarantee:</strong> Your client records and tax workpapers remain exclusively on your computer. Your existing locally stored cases remain available after license expiry; renewal is required only for new client work and new reconciliation.
         </p>
       </div>
 

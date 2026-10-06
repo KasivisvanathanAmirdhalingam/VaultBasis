@@ -327,7 +327,7 @@ class CommercialPolicyService:
                 customer_name=customer_name or "Evaluation Practitioner",
                 activated_at=now.isoformat(),
                 expires_at=expires.isoformat(),
-                max_cases=1,
+                max_cases=3,
             )
 
         if self.audit_service:
@@ -403,7 +403,7 @@ class CommercialPolicyService:
 
                 inst_id = eval_rec.get("installation_id", self.installation_id or "LOCAL-INSTALLATION")
                 cust_name = eval_rec.get("customer_name", "Evaluation Practitioner")
-                max_cases = eval_rec.get("max_cases", 1)
+                max_cases = eval_rec.get("max_cases", 3)
 
                 if check_now <= expires_dt:
                     secs_left = max(0, int((expires_dt - check_now).total_seconds()))
@@ -453,14 +453,17 @@ class CommercialPolicyService:
         
         eval_state = self.store.get_installation_evaluation() if self.store else None
         since_iso = eval_state.get("activated_at") if (is_eval and eval_state) else None
-        billable_cases = self.store.count_billable_cases(since_iso=since_iso) if self.store else 0
+        monotonic_eval_cases = self.store.count_evaluation_cases_created() if (is_eval and self.store) else 0
+        live_billable = self.store.count_billable_cases(since_iso=since_iso) if self.store else 0
+        billable_cases = max(monotonic_eval_cases, live_billable) if is_eval else live_billable
+        max_cases = eval_res.max_cases_per_installation or (3 if is_eval else 0)
 
         if eval_res.is_active:
             entitlement_state = "ACTIVE_EVALUATION" if is_eval else "ACTIVE_PAID_LICENSE"
             if is_eval:
-                msg = f"Evaluation Active · {eval_res.days_remaining or 0} days remaining · {billable_cases}/{eval_res.max_cases_per_installation or 1} client case used."
+                msg = f"Evaluation Active · {eval_res.days_remaining or 0} days remaining · {billable_cases}/{max_cases} client cases used."
             else:
-                msg = f"{eval_res.tier.value if eval_res.tier else 'Commercial'} Plan Active · {billable_cases}/{eval_res.max_cases_per_installation or 0} cases used."
+                msg = f"{eval_res.tier.value if eval_res.tier else 'Commercial'} Plan Active · {billable_cases}/{max_cases} cases used."
         else:
             if eval_res.state == LicenseState.EXPIRED:
                 entitlement_state = "EXPIRED_EVALUATION" if is_eval else "EXPIRED_PAID_LICENSE"
@@ -664,16 +667,18 @@ class CommercialPolicyService:
         eval_state = self.store.get_installation_evaluation() if self.store else None
         is_eval = (eval_res.tier in (LicenseTier.TRIAL, LicenseTier.EVALUATION))
         since_iso = eval_state.get("activated_at") if (is_eval and eval_state) else None
-        billable_count = self.store.count_billable_cases(since_iso=since_iso) if self.store else 0
-        max_cases = eval_res.max_cases_per_installation or 0
+        monotonic_eval_cases = self.store.count_evaluation_cases_created() if (is_eval and self.store) else 0
+        live_billable = self.store.count_billable_cases(since_iso=since_iso) if self.store else 0
+        billable_count = max(monotonic_eval_cases, live_billable) if is_eval else live_billable
+        max_cases = eval_res.max_cases_per_installation or (3 if is_eval else 0)
 
         # Capacity Check for case creation
         if operation == CommercialOperation.CREATE_CASE:
             if max_cases > 0 and billable_count >= max_cases:
-                is_eval = (eval_res.tier == LicenseTier.EVALUATION and max_cases == 1)
+                is_eval_cap = (eval_res.tier == LicenseTier.EVALUATION and max_cases == 3)
                 msg = (
-                    f"You have used your 1 client case included with Evaluation (1/1 cases used). Upgrade to Practitioner or Firm to create additional client cases."
-                    if is_eval else
+                    f"You have used all 3 client cases included with your 3-Day Evaluation ({billable_count}/{max_cases} cases used). Upgrade to Practitioner or Firm to create additional client cases."
+                    if is_eval_cap else
                     f"You've reached the case limit for your current license ({billable_count} of {max_cases} client cases used). Your existing cases remain available. Upgrade your license to start another client case."
                 )
                 return CommercialPolicyDecision(

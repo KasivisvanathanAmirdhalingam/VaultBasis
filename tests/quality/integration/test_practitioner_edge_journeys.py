@@ -237,11 +237,11 @@ def test_branding_and_favicon_routes(test_client):
 
 def test_journey_evaluation_activation_and_capacity_enforcement(test_client):
     """
-    MMP15-EVAL-UX-TRANSITION-001:
+    MMP15-EVAL-UX-TRANSITION-001 & MMP15-COMMERCIAL-POLICY-LOCK-002:
     1. Start 3-day evaluation via POST /api/commercial/start-evaluation -> 200 OK
-    2. Entitlement status reflects ACTIVE evaluation with 1 client case capacity
-    3. First client case creation succeeds (HTTP 201)
-    4. Second client case creation is rejected (HTTP 403) due to evaluation capacity limit
+    2. Entitlement status reflects ACTIVE evaluation with 3 client cases capacity
+    3. First, second, and third client case creations succeed (HTTP 201)
+    4. Fourth client case creation is rejected (HTTP 402/403) due to evaluation capacity limit
     """
     client = test_client["client"]
 
@@ -252,7 +252,7 @@ def test_journey_evaluation_activation_and_capacity_enforcement(test_client):
     assert eval_data["status"] == "INSTALLED"
     assert eval_data["license_state"] == "ACTIVE"
     assert eval_data["tier"] == "EVALUATION"
-    assert eval_data["max_cases_per_installation"] == 1
+    assert eval_data["max_cases_per_installation"] == 3
 
     # 2. Check authoritative current commercial status
     status_res = client.get("/api/commercial/status")
@@ -262,9 +262,9 @@ def test_journey_evaluation_activation_and_capacity_enforcement(test_client):
     assert status_data["entitlement_state"] == "ACTIVE_EVALUATION"
     assert status_data["tier"] == "EVALUATION"
     assert status_data["billable_cases_count"] == 0
-    assert status_data["max_cases_per_installation"] == 1
+    assert status_data["max_cases_per_installation"] == 3
 
-    # 3. Create First Client Case -> Allowed
+    # 3. Create First, Second, and Third Client Cases -> Allowed
     case1_res = client.post(
         "/api/cases",
         json={"case_id": "CASE-EVAL-001", "client_reference": "Eval Client Alpha", "tax_year": 2025}
@@ -272,16 +272,30 @@ def test_journey_evaluation_activation_and_capacity_enforcement(test_client):
     assert case1_res.status_code == 201, case1_res.text
     assert case1_res.json()["case_id"] == "CASE-EVAL-001"
 
-    # 4. Check updated usage
-    status_res2 = client.get("/api/commercial/status")
-    assert status_res2.json()["billable_cases_count"] == 1
-
-    # 5. Create Second Client Case -> Blocked by capacity limit
     case2_res = client.post(
         "/api/cases",
         json={"case_id": "CASE-EVAL-002", "client_reference": "Eval Client Beta", "tax_year": 2025}
     )
-    assert case2_res.status_code in (402, 403)
+    assert case2_res.status_code == 201, case2_res.text
+    assert case2_res.json()["case_id"] == "CASE-EVAL-002"
+
+    case3_res = client.post(
+        "/api/cases",
+        json={"case_id": "CASE-EVAL-003", "client_reference": "Eval Client Gamma", "tax_year": 2025}
+    )
+    assert case3_res.status_code == 201, case3_res.text
+    assert case3_res.json()["case_id"] == "CASE-EVAL-003"
+
+    # 4. Check updated usage (3/3)
+    status_res2 = client.get("/api/commercial/status")
+    assert status_res2.json()["billable_cases_count"] == 3
+
+    # 5. Create Fourth Client Case -> Blocked by capacity limit
+    case4_res = client.post(
+        "/api/cases",
+        json={"case_id": "CASE-EVAL-004", "client_reference": "Eval Client Delta", "tax_year": 2025}
+    )
+    assert case4_res.status_code in (402, 403)
 
 
 def test_practitioner_facing_license_error_messages(test_client):

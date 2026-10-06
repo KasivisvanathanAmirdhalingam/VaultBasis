@@ -180,8 +180,9 @@ class SQLiteStore:
                     customer_name TEXT NOT NULL,
                     activated_at TEXT NOT NULL,
                     expires_at TEXT NOT NULL,
-                    max_cases INTEGER NOT NULL DEFAULT 1,
-                    anti_replay_hash TEXT NOT NULL
+                    max_cases INTEGER NOT NULL DEFAULT 3,
+                    anti_replay_hash TEXT NOT NULL,
+                    cases_created_count INTEGER NOT NULL DEFAULT 0
                 );
             """)
             now_utc = datetime.now(timezone.utc).isoformat()
@@ -199,6 +200,11 @@ class SQLiteStore:
                 cursor.execute("ALTER TABLE cases ADD COLUMN sample_definition_id TEXT")
             if "sample_manifest_digest" not in existing_cols:
                 cursor.execute("ALTER TABLE cases ADD COLUMN sample_manifest_digest TEXT")
+
+        cursor.execute("PRAGMA table_info(installation_evaluation)")
+        eval_cols = [row[1] for row in cursor.fetchall()]
+        if eval_cols and "cases_created_count" not in eval_cols:
+            cursor.execute("ALTER TABLE installation_evaluation ADD COLUMN cases_created_count INTEGER NOT NULL DEFAULT 0")
 
 
     def save_case(self, case: CanonicalCase):
@@ -458,7 +464,7 @@ class SQLiteStore:
         customer_name: str,
         activated_at: str,
         expires_at: str,
-        max_cases: int = 1,
+        max_cases: int = 3,
         anti_replay_hash: Optional[str] = None,
     ):
         """Stores local installation evaluation state with anti-replay hash."""
@@ -467,8 +473,8 @@ class SQLiteStore:
             anti_replay_hash = hashlib.sha256(f"{installation_id}:{activated_at}:{expires_at}".encode("utf-8")).hexdigest()
         with self._get_connection() as conn:
             conn.execute("""
-                INSERT INTO installation_evaluation (id, installation_id, customer_name, activated_at, expires_at, max_cases, anti_replay_hash)
-                VALUES (1, ?, ?, ?, ?, ?, ?)
+                INSERT INTO installation_evaluation (id, installation_id, customer_name, activated_at, expires_at, max_cases, anti_replay_hash, cases_created_count)
+                VALUES (1, ?, ?, ?, ?, ?, ?, 0)
                 ON CONFLICT(id) DO UPDATE SET
                     installation_id=excluded.installation_id,
                     customer_name=excluded.customer_name,
@@ -477,6 +483,19 @@ class SQLiteStore:
                     max_cases=excluded.max_cases,
                     anti_replay_hash=excluded.anti_replay_hash;
             """, (installation_id, customer_name, activated_at, expires_at, max_cases, anti_replay_hash))
+
+    def record_evaluation_case_created(self):
+        """Monotonically increments evaluation case creation counter (anti-delete loophole)."""
+        with self._get_connection() as conn:
+            conn.execute("UPDATE installation_evaluation SET cases_created_count = cases_created_count + 1 WHERE id = 1")
+
+    def count_evaluation_cases_created(self) -> int:
+        """Returns monotonic count of evaluation cases ever created on this installation."""
+        with self._get_connection() as conn:
+            row = conn.execute("SELECT cases_created_count FROM installation_evaluation WHERE id = 1").fetchone()
+            if row and row["cases_created_count"] is not None:
+                return row["cases_created_count"]
+            return 0
 
     def remove_installation_evaluation(self):
         """Clears local installation evaluation state."""

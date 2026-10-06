@@ -133,7 +133,7 @@ function formatPaidLicenseEmailHtml({
 
       <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 14px 18px; margin-top: 24px;">
         <p style="margin: 0; font-size: 13px; color: #1e40af; line-height: 1.5;">
-          <strong>Data Protection &amp; Durability Guarantee:</strong> Your client records and tax workpapers remain exclusively on your computer. If your license term expires, you retain 100% lifetime access to read, reconcile, and export existing case records.
+          <strong>Data Protection &amp; Durability Guarantee:</strong> Your client records and tax workpapers remain exclusively on your computer. Your existing locally stored cases remain available after license expiry; renewal is required only for new client work and new reconciliation.
         </p>
       </div>
 

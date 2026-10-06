@@ -36,6 +36,7 @@ from edge.commercial.policy import (
     CommercialPolicyDecision,
     CommercialPolicyService,
 )
+from edge.commercial.models import LicenseTier
 from edge.connectors.validator import IntakeDispatcher
 from edge.receipts.keygen import InstallationKeyManager
 from edge.receipts.signer import ReceiptSigner
@@ -516,6 +517,9 @@ def create_case(req: CreateCaseRequest):
         updated_at=now_utc
     )
     db_store.save_case(case)
+    eval_res = commercial_policy.evaluate_current_license()
+    if eval_res.tier in (LicenseTier.TRIAL, LicenseTier.EVALUATION):
+        db_store.record_evaluation_case_created()
     return CaseSummaryResponse(
         case_id=case.case_id,
         client_reference=case.client_reference,
