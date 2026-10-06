@@ -97,10 +97,14 @@ jobs:
           - os: macos-14
             target: macos-arm64
             artifact_name: vaultbasis-rc3-candidate-macos-arm64
+            customer_name: VaultBasis-RC3-macOS-arm64
+            pkg_folder: VaultBasis-RC3-macOS-arm64
             script: scripts/build_rc3_macos.py
           - os: windows-2022
             target: windows-x64
             artifact_name: vaultbasis-rc3-candidate-windows-x64
+            customer_name: VaultBasis-RC3-Windows-x64
+            pkg_folder: VaultBasis-RC3-Windows-x64
             script: scripts/build_rc3_windows.py
     steps:
     - name: Checkout repository
@@ -133,7 +137,14 @@ jobs:
           python3 scripts/check_release_content.py "$z"
         done
 
-    - name: Upload RC3 candidate (7-day workflow artifact, NOT a release)
+    - name: Upload RC3 Candidate Package (Single-Layer 1-Click Customer Download)
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.customer_name }}
+        path: dist/${{ matrix.pkg_folder }}/*
+        retention-days: 7
+
+    - name: Upload Pipeline Artifacts (Candidate ZIP + Manifest for automated inspection)
       uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.artifact_name }}
@@ -141,6 +152,7 @@ jobs:
           dist/VaultBasis-RC3-*.zip
           dist/VaultBasis-RC3-*.manifest.json
         retention-days: 7
+
 
   inspect-rc3:
     name: RC3 Candidate Inspection (BUILD_VERIFIED — not UAT-READY)

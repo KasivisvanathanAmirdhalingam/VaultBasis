@@ -218,6 +218,11 @@ def main() -> int:
     pkg = REPO / "dist" / PACKAGE_NAME
     pkg.mkdir(parents=True)
     shutil.copytree(app_dir, pkg / APP_NAME, symlinks=True)
+
+    # Strip any macOS quarantine / extended attributes and ensure clean ad-hoc signature
+    subprocess.run(["xattr", "-cr", str(pkg / APP_NAME)], check=False)
+    subprocess.run(["codesign", "--force", "--deep", "--sign", "-", str(pkg / APP_NAME)], check=True)
+
     guides = {
         "VaultBasis_Practitioner_Quick_Start.html": "VaultBasis-Quick-Start.html",
         "VaultBasis_Troubleshooting.html": "VaultBasis-Troubleshooting.html",
