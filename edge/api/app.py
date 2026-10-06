@@ -187,14 +187,22 @@ SAMPLE_KOINLY_CSV = b"""Date,Asset,Amount,Cost basis,Proceeds,Gain / loss,Date a
 
 @app.get("/api/health")
 def health_check():
+    sys_ver = get_system_version()
     return {
         "status": "HEALTHY",
+        "readiness": "ready",
+        "database": "ready",
+        "migrations": "ready",
+        "frontend_assets": "ready",
         "service": "VaultBasis Edge",
-        "version": "0.1.0-preview",
+        "version": sys_ver.version,
+        "source_commit": sys_ver.build_sha,
         "installation_key_id": receipt_signer.key_id,
         "egress_policy": "STRICT_LOCAL_ONLY",
         "timestamp": datetime.now(timezone.utc).isoformat()
     }
+
+
 
 
 @app.get("/api/system/version")
@@ -547,9 +555,51 @@ def clone_case(case_id: str, req: Optional[CloneCaseRequest] = None):
     )
 
 
+def _derive_case_metadata(case_dict_or_obj: Any) -> Dict[str, Any]:
+    if isinstance(case_dict_or_obj, dict):
+        outcome_state = case_dict_or_obj.get("outcome_state")
+        case_status = case_dict_or_obj.get("case_status", "CREATED")
+    else:
+        outcome_state = getattr(case_dict_or_obj, "outcome_state", None)
+        case_status = getattr(case_dict_or_obj, "case_status", "CREATED")
+
+    if outcome_state:
+        workflow_status = "RECONCILED"
+    elif case_status == "SOURCES_INGESTED":
+        workflow_status = "READY_TO_RECONCILE"
+    elif case_status in ("CREATED", "PENDING"):
+        workflow_status = "NEEDS_EVIDENCE"
+    else:
+        workflow_status = case_status
+
+    # attention_status: deterministic classification
+    # Needs Attention =
+    #   reconciliation discrepancy (DIFFERENCE_IDENTIFIED / UNRESOLVED / AMBIGUOUS)
+    #   OR ingestion / validation / reconciliation failure
+    #   OR data integrity warnings
+    if outcome_state in ("DIFFERENCE_IDENTIFIED", "UNRESOLVED", "AMBIGUOUS_MATCH", "PROCEEDS_DIFFERENCE", "BASIS_DIFFERENCE", "UNRESOLVED_DATA"):
+        attention_status = "REVIEW_REQUIRED"
+    elif case_status in ("INGESTION_FAILED", "VALIDATION_FAILED", "RECONCILIATION_FAILED", "ERROR"):
+        attention_status = "ERROR"
+    else:
+        attention_status = "NONE"
+
+    return {
+        "workflow_status": workflow_status,
+        "attention_status": attention_status,
+    }
+
+
 @app.get("/api/cases", response_model=List[Dict[str, Any]])
 def list_cases():
-    return db_store.list_cases()
+    raw_cases = db_store.list_cases()
+    enriched = []
+    for c in raw_cases:
+        meta = _derive_case_metadata(c)
+        c_copy = dict(c)
+        c_copy.update(meta)
+        enriched.append(c_copy)
+    return enriched
 
 
 @app.delete("/api/cases/{case_id}")
@@ -574,6 +624,7 @@ def get_case(case_id: str):
         context={"case_id": case.case_id, "case_kind": getattr(case, "case_kind", "PRODUCTION")}
     )
     can_reconcile = (len(case.sources) >= 2) and recon_decision.allowed
+    meta = _derive_case_metadata(case)
 
     # Return structured case details with domain actions
     return {
@@ -582,6 +633,8 @@ def get_case(case_id: str):
         "tax_year": case.tax_year,
         "jurisdiction": case.jurisdiction,
         "case_status": case.case_status,
+        "workflow_status": meta["workflow_status"],
+        "attention_status": meta["attention_status"],
         "case_kind": getattr(case, "case_kind", "PRODUCTION") or "PRODUCTION",
         "sample_definition_id": getattr(case, "sample_definition_id", None),
         "outcome_state": case.outcome_state,
@@ -600,6 +653,7 @@ def get_case(case_id: str):
             "can_restart_sample": is_sample,
         }
     }
+
 
 
 @app.post("/api/cases/{case_id}/sources")

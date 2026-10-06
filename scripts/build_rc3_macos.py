@@ -257,28 +257,21 @@ def main() -> int:
     # This directly tests the PyInstaller output before packaging.
     launch_gate(app_dir, "PRE-ZIP: built .app in dist/")
 
-    # 6. Zip + hashes + candidate manifest (schema: schemas/release/manifest-v0.1.json).
+    # 6. Single-Layer Customer ZIP + hashes + candidate manifest (MMP15-DIST-PKG-UX-001).
     # system zip -ry is required (not Python zipfile) because the .app bundle contains
     # symlinks (e.g. python3.13 -> python3__dot__13) that Python zipfile silently drops,
-    # causing ModuleNotFoundError on extraction.  -y stores symlinks as symlinks.
+    # causing ModuleNotFoundError on extraction. -y stores symlinks as symlinks.
+    # We zip directly from inside pkg so customer extraction yields VaultBasis.app at the root.
     zip_path = REPO / "dist" / f"{PACKAGE_NAME}.zip"
     subprocess.run(
-        ["zip", "-ry", str(zip_path), PACKAGE_NAME, "-x", "*.DS_Store"],
-        cwd=REPO / "dist",
+        ["zip", "-ry", str(zip_path), ".", "-x", "*.DS_Store"],
+        cwd=pkg,
         check=True,
     )
     artifact_sha = sha256_of(zip_path)
 
     # 6b. Launch gate — post-ZIP: extract to a fresh temp dir and launch from there.
-    # This tests the actual distributable representation, not merely the build dir.
-    #
-    # Extraction uses system unzip (not Python zipfile.extractall) because:
-    #   1. Python zipfile silently drops symlinks — python3.13 -> python3__dot__13 is
-    #      absent from a Python-extracted tree, causing ModuleNotFoundError on launch.
-    #   2. system unzip -X restores Unix permissions and symlinks faithfully, matching
-    #      what a recipient running Archive Utility or unzip would get.
-    # The Python zipfile read (first pass below) is kept for metadata assertion only —
-    # it reads entry headers without extracting, so symlink absence is not an issue there.
+    # This tests the actual single-layer customer package.
     with tempfile.TemporaryDirectory(prefix="vb_rc3_extract_") as tmp:
         tmp_path = Path(tmp)
         with zipfile.ZipFile(zip_path) as zf:
@@ -297,11 +290,10 @@ def main() -> int:
             ["unzip", "-X", "-q", str(zip_path), "-d", str(tmp_path)],
             check=True,
         )
-        extracted_app = tmp_path / PACKAGE_NAME / APP_NAME
-        assert extracted_app.is_dir(), f"extracted .app missing at {extracted_app}"
+        extracted_app = tmp_path / APP_NAME
+        assert extracted_app.is_dir(), f"extracted single-layer .app missing at {extracted_app}"
         # Confirm PyInstaller python3.X symlink was preserved — absence means the ZIP
-        # was built without -y. The version suffix matches the bundled Python, so we
-        # scan for any python3.* symlink rather than hardcoding the version.
+        # was built without -y.
         frameworks = extracted_app / "Contents" / "Frameworks"
         py_symlinks = [p for p in frameworks.iterdir()
                        if p.name.startswith("python3.") and p.is_symlink()]
@@ -311,7 +303,8 @@ def main() -> int:
             f"  Frameworks contents: {[p.name for p in sorted(frameworks.iterdir())]}"
         )
         print(f"  [symlink-assert] Found: {[p.name + ' -> ' + os.readlink(p) for p in py_symlinks]}")
-        launch_gate(extracted_app, "POST-ZIP: extracted .app from candidate ZIP")
+        launch_gate(extracted_app, "POST-ZIP: extracted .app from single-layer candidate ZIP")
+
 
     # Candidate manifest: honest pre-qualification states. It MUST NOT validate
     # against schemas/release/manifest-v0.1.json yet (that schema's consts —

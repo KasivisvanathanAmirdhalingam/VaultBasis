@@ -296,11 +296,12 @@ def main() -> int:
     launch_gate(exe, "PRE-ZIP: built VaultBasis.exe in dist/VaultBasis/")
     launch_gate(exe, "PRE-ZIP (GUI Mode): built VaultBasis.exe in dist/VaultBasis/", disconnected_stdio=True)
 
+    # 6. Single-Layer Customer ZIP (MMP15-DIST-PKG-UX-001)
     zip_path = REPO / "dist" / f"{PACKAGE_NAME}.zip"
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as z:
         for f in sorted(pkg.rglob("*")):
             if f.is_file():
-                z.write(f, arcname=f"{PACKAGE_NAME}/{f.relative_to(pkg)}")
+                z.write(f, arcname=str(f.relative_to(pkg)))
     artifact_sha = sha256_of(zip_path)
 
     # Launch gate — post-ZIP: extract to fresh temp dir and launch from there.
@@ -308,11 +309,12 @@ def main() -> int:
         tmp_path = Path(tmp)
         with zipfile.ZipFile(zip_path) as zf:
             zf.extractall(tmp_path)
-        # onedir layout: PACKAGE_NAME/VaultBasis/VaultBasis.exe
-        extracted_exe = tmp_path / PACKAGE_NAME / "VaultBasis" / "VaultBasis.exe"
-        assert extracted_exe.is_file(), f"extracted exe missing at {extracted_exe}"
-        launch_gate(extracted_exe, "POST-ZIP: extracted VaultBasis.exe from candidate ZIP")
-        launch_gate(extracted_exe, "POST-ZIP (GUI Mode): extracted VaultBasis.exe from candidate ZIP", disconnected_stdio=True)
+        # Single-layer onedir layout: VaultBasis/VaultBasis.exe
+        extracted_exe = tmp_path / "VaultBasis" / "VaultBasis.exe"
+        assert extracted_exe.is_file(), f"extracted single-layer exe missing at {extracted_exe}"
+        launch_gate(extracted_exe, "POST-ZIP: extracted VaultBasis.exe from single-layer candidate ZIP")
+        launch_gate(extracted_exe, "POST-ZIP (GUI Mode): extracted VaultBasis.exe from single-layer candidate ZIP", disconnected_stdio=True)
+
 
     manifest = {
         "manifest_version": "v0.1",

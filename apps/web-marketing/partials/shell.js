@@ -163,7 +163,7 @@
             const succ = document.getElementById('request-success');
             const title = document.getElementById('success-title');
             const desc = document.getElementById('success-desc');
-            if (title) title.innerText = 'Evaluation Authorization Dispatched';
+            if (title) title.innerText = 'Evaluation Authorization Sent';
             if (desc) desc.innerText = `Your free evaluation download link has been sent to ${email}. Check your work inbox within 2 minutes.`;
             if (primaryBtn) primaryBtn.style.display = 'none';
             succ.style.display = 'block';
@@ -195,6 +195,7 @@
               succ.style.display = 'block';
             }
           }
+
         } else {
           alert(data.error || `Request could not be processed (HTTP ${res.status}). Please try again.`);
           btn.innerText = originalBtnText;

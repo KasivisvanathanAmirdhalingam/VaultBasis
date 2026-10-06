@@ -339,13 +339,14 @@ function renderCheckoutHtml(order, planConfig) {
               console.warn('[paddle-init] No client-side token provided; Paddle.Initialize postponed.');
               const secureBadge = document.getElementById('badge-secure-status');
               if (secureBadge && !paddleInitialized) {
-                secureBadge.textContent = '⚠️ CHECKOUT PENDING CONFIG';
-                secureBadge.style.background = 'rgba(245, 158, 11, 0.15)';
-                secureBadge.style.color = '#fbbf24';
-                secureBadge.style.border = '1px solid rgba(245, 158, 11, 0.3)';
+                secureBadge.textContent = '📋 PURCHASING OPENS AT LAUNCH';
+                secureBadge.style.background = 'rgba(59, 130, 246, 0.15)';
+                secureBadge.style.color = '#60a5fa';
+                secureBadge.style.border = '1px solid rgba(59, 130, 246, 0.3)';
               }
               return false;
             }
+
 
             try {
               if (env === 'sandbox' && typeof Paddle.Environment !== 'undefined') {

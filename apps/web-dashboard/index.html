@@ -720,10 +720,12 @@
           </div>
           <div class="filter-pills" role="tablist" aria-label="Case status filters">
             <button class="filter-pill active" id="filter-pill-all" onclick="setStatusFilter('all')">All</button>
+            <button class="filter-pill" id="filter-pill-needs_attention" onclick="setStatusFilter('needs_attention')">Needs Attention</button>
             <button class="filter-pill" id="filter-pill-needs_evidence" onclick="setStatusFilter('needs_evidence')">Needs Evidence</button>
             <button class="filter-pill" id="filter-pill-ready" onclick="setStatusFilter('ready')">Ready to Reconcile</button>
             <button class="filter-pill" id="filter-pill-reconciled" onclick="setStatusFilter('reconciled')">Reconciled</button>
           </div>
+
         </div>
         <div>
           <select id="filter-tax-year" class="filter-select" onchange="filterCases()">
@@ -1218,13 +1220,19 @@
         // Status filter
         let matchesStatus = true;
         const hasOutcome = Boolean(c.outcome_state);
-        const isIngested = (c.case_status === 'SOURCES_INGESTED');
-        if (currentFilterStatus === 'needs_evidence') {
-          matchesStatus = !hasOutcome && !isIngested;
+        const isIngested = (c.case_status === 'SOURCES_INGESTED' || c.workflow_status === 'READY_TO_RECONCILE');
+        const attentionReq = (c.attention_status && c.attention_status !== 'NONE') ||
+                             (hasOutcome && c.outcome_state !== 'MATCHED') ||
+                             (c.case_status && (c.case_status.includes('ERROR') || c.case_status.includes('FAILED')));
+
+        if (currentFilterStatus === 'needs_attention') {
+          matchesStatus = Boolean(attentionReq);
+        } else if (currentFilterStatus === 'needs_evidence') {
+          matchesStatus = (c.workflow_status === 'NEEDS_EVIDENCE') || (!hasOutcome && !isIngested);
         } else if (currentFilterStatus === 'ready') {
-          matchesStatus = !hasOutcome && isIngested;
+          matchesStatus = (c.workflow_status === 'READY_TO_RECONCILE') || (!hasOutcome && isIngested);
         } else if (currentFilterStatus === 'reconciled') {
-          matchesStatus = hasOutcome;
+          matchesStatus = (c.workflow_status === 'RECONCILED') || hasOutcome;
         }
 
         return matchesQuery && matchesYear && matchesStatus;
@@ -1235,6 +1243,7 @@
 
     function renderCaseTable(cases) {
       const tbody = document.getElementById('case-table-body');
+      if (!tbody) return;
       tbody.innerHTML = '';
 
       if (cases.length === 0) {
@@ -1251,10 +1260,16 @@
           let badgeClass = 'badge-warning';
           if (c.outcome_state === 'MATCHED') badgeClass = 'badge-success';
           statusDisplay = `<span style="font-weight:600; color:var(--text-muted); font-size:0.75rem; display:block; margin-bottom:2px;">RECONCILED</span><span class="badge ${badgeClass}">${c.outcome_state}</span>`;
-        } else if (c.case_status === 'SOURCES_INGESTED') {
+        } else if (c.case_status === 'SOURCES_INGESTED' || c.workflow_status === 'READY_TO_RECONCILE') {
           statusDisplay = `<span class="badge badge-info">READY TO RECONCILE</span>`;
         } else {
           statusDisplay = `<span class="badge badge-neutral">PENDING EVIDENCE</span>`;
+        }
+
+        if (c.attention_status === 'REVIEW_REQUIRED' && c.outcome_state !== 'MATCHED') {
+          statusDisplay += `<span class="badge badge-warning" style="margin-left: 4px; font-size: 0.65rem;">ATTENTION</span>`;
+        } else if (c.attention_status === 'ERROR') {
+          statusDisplay += `<span class="badge badge-danger" style="margin-left: 4px; font-size: 0.65rem;">ERROR</span>`;
         }
 
         const isSample = (c.case_kind === 'BUNDLED_SAMPLE' || c.case_id === 'CASE-SAMPLE-2025');
@@ -1276,9 +1291,13 @@
     }
 
     async function loadCases() {
+      const tbody = document.getElementById('case-table-body');
       try {
         const res = await fetch('/api/cases');
         if (!res.ok) {
+          if (tbody) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--danger); padding: 2.5rem;">Unable to load case list from local store (HTTP ${res.status}). <button class="btn btn-sm" onclick="loadCases()" style="margin-left: 8px;">Retry</button></td></tr>`;
+          }
           showToast("Unable to load case list from local store.", "error");
           return;
         }
@@ -1286,9 +1305,13 @@
         filterCases();
       } catch (err) {
         console.error("Failed to load cases:", err);
+        if (tbody) {
+          tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--danger); padding: 2.5rem;">Connection error reaching VaultBasis local store. <button class="btn btn-sm" onclick="loadCases()" style="margin-left: 8px;">Retry</button></td></tr>`;
+        }
         showToast("Error connecting to VaultBasis local store.", "error");
       }
     }
+
 
     async function exploreSampleCase() {
       try {
@@ -1725,8 +1748,13 @@
       window.location.href = `/api/cases/${currentCaseId}/export`;
     }
 
-    // Auto load cases on startup
-    loadCases();
+    // Clean DOM ready bootstrap
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', loadCases);
+    } else {
+      loadCases();
+    }
   </script>
 </body>
+
 </html>

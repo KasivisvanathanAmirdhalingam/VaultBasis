@@ -71,6 +71,7 @@ app = BUNDLE(
         'CFBundleShortVersionString': '0.1.0',
         'LSMinimumSystemVersion': '14.0',
         'NSHighResolutionCapable': True,
-        'NSPrincipalClass': 'NSApplication',
+        'LSBackgroundOnly': False,
     },
 )
+

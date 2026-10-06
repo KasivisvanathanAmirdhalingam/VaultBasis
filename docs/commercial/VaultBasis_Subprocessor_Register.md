@@ -37,19 +37,21 @@ VaultBasis enforces a strict architectural boundary between two independent plan
 
 ---
 
-## 2. Active Production Subprocessors
+## 2. Production Subprocessors & Service Provider Lifecycle
 
-*This table contains strictly the service providers actively contracted and used in production operations. It excludes speculative or future roadmap integrations.*
+*This table maintains an authoritative lifecycle record of service providers, distinguishing active data processors from infrastructure and planned vendors.*
 
-| Provider / Subprocessor | Corporate Entity & Location | Primary Purpose | Commercial / Account Data Processed | Client Tax / Case Data Processed? | Operational Status |
+| Provider / Service | Corporate Entity & Location | Primary Purpose | Commercial / Account Data Processed | Client Tax / Case Data Processed? | Lifecycle Classification |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Vercel** | Vercel Inc. (San Francisco, CA, USA) | Public website hosting, serverless API execution (`/api/checkout`, `/api/download`), edge caching, static asset distribution | IP address, browser user-agent, request timestamps, access/order IDs, serverless execution logs | **NO** (Strictly Zero) | **Active (Production & Preprod)** |
-| **Vercel Blob** *(or private managed store)* | Vercel Inc. (San Francisco, CA, USA) | Serverless order record persistence, download entitlement tokens, webhook idempotency tracking | Order ID, buyer work email, plan tier, hashed download token (SHA-256), timestamp | **NO** (Strictly Zero) | **Active (Operational)** |
-| **Paddle** *(Recommended MoR)* / **Stripe** | Paddle Payments Ltd (UK) / Paddle.com Inc. (USA) *or* Stripe Inc. | Merchant of Record (MoR), checkout UI, payment card processing, global indirect tax (US sales tax / EU VAT) collection & remittance, invoicing | Customer name, work email, firm name, billing address, payment instrument metadata, transaction/refund IDs | **NO** (Strictly Zero) | **Active / Production Evaluation** |
-| **Transactional Email Provider** *(Postmark / Resend / SendGrid)* | *Provider under final qualification* | Secure delivery of license tokens, download authorizations, and commercial invoices | Customer work email, customer name, license ID, temporary download URL (72h TTL) | **NO** (Strictly Zero) | **Operational Qualification Stage** |
-| **GitHub** | GitHub, Inc. (San Francisco, CA, USA) | Source code version control, automated CI/CD pipeline, industrial validation gates | Source code, git commit logs, automated build artifacts, CI runner logs | **NO** (Strictly Zero — no production keys or customer DBs) | **Active (Engineering Infrastructure)** |
-| **Apple** | Apple Inc. (Cupertino, CA, USA) | macOS Developer ID code signing validation and notary ticket stapling | Compiled desktop application binary (`.app` bundle) for automated security scanning | **NO** (Zero customer or tax data) | **Active (Release Infrastructure)** |
-| **Microsoft / Certificate Authority** | Sectigo / DigiCert / GlobalSign *(TBD)* | Windows Authenticode code signing certificate and RFC 3161 timestamping | Compiled Windows desktop executable (`VaultBasis.exe` hash) | **NO** (Zero customer or tax data) | **Active (Release Infrastructure)** |
+| **Vercel** | Vercel Inc. (San Francisco, CA, USA) | Public website hosting, serverless API execution (`/api/checkout`, `/api/download`), edge caching | IP address, user-agent, request timestamps, access/order IDs, runtime execution logs | **NO** (Strictly Zero) | `ACTIVE` |
+| **Vercel Blob** *(Private Store)* | Vercel Inc. (San Francisco, CA, USA) | Serverless order record persistence, download entitlement tokens, webhook idempotency tracking | Order ID, buyer work email, plan tier, hashed download token (SHA-256), timestamp | **NO** (Strictly Zero) | `ACTIVE` |
+| **Transactional Email Provider** *(Postmark / Resend / SendGrid)* | *Provider under final qualification* | Secure delivery of license tokens, download authorizations, and commercial notices | Customer work email, customer name, license ID, temporary download URL (72h TTL) | **NO** (Strictly Zero) | `QUALIFICATION` |
+| **Paddle** *(Merchant of Record)* | Paddle Payments Ltd (UK) / Paddle.com Inc. (USA) | Merchant of Record (MoR), checkout UI, payment card processing, global sales tax/VAT remittance, invoicing | Customer name, work email, firm name, billing address, payment instrument metadata | **NO** (Strictly Zero) | `PLANNED` |
+| **GitHub** | GitHub, Inc. (San Francisco, CA, USA) | Source code repository, CI/CD pipeline, industrial validation gates | Source code, git commit logs, automated build artifacts, CI runner logs | **NO** (Zero customer data) | `ENGINEERING_INFRASTRUCTURE` |
+| **Apple** | Apple Inc. (Cupertino, CA, USA) | macOS Developer ID code signing validation and notary ticket stapling | Compiled desktop application binary (`.app` bundle) for automated security scanning | **NO** (Zero customer data) | `RELEASE_INFRASTRUCTURE` |
+| **Windows CA / Timestamp Authority** | Sectigo / DigiCert / GlobalSign | Windows Authenticode code signing certificate and RFC 3161 timestamping | Compiled Windows desktop executable (`VaultBasis.exe` hash) | **NO** (Zero customer data) | `RELEASE_INFRASTRUCTURE` |
+| **VaultBasis Offline Signer** | Internal Air-Gapped Workstation | Ed25519 commercial license token generation and signing ceremony | License ID, customer ID, firm metadata, entitlement tier, validity window | **NO** (Internal key custody, not subprocessor) | `INTERNAL_SIGNING_AUTHORITY` |
+
 
 ---
 
