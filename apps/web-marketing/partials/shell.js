@@ -36,19 +36,19 @@
 
       if (tier === 'TRIAL') {
         if (modalTitle) modalTitle.innerText = 'Start 3-Day Evaluation';
-        if (modalDesc) modalDesc.innerText = 'Experience the complete VaultBasis practitioner workflow with your own files for 72 hours. Enter your details to receive your secure download authorization via email.';
+        if (modalDesc) modalDesc.innerText = 'Experience the complete VaultBasis practitioner workflow with up to 3 evaluation client cases and bundled samples for 72 hours. Enter your details to receive your secure download authorization via email.';
         if (btn) btn.innerText = 'Start 3-Day Evaluation →';
       } else if (tier === 'ESSENTIAL') {
-        if (modalTitle) modalTitle.innerText = 'Get Solo License';
-        if (modalDesc) modalDesc.innerText = 'VaultBasis Solo License ($499/year) covers up to 10 client cases with 100% local computer storage and signed Evidence Receipts.';
+        if (modalTitle) modalTitle.innerText = 'Get Practitioner License';
+        if (modalDesc) modalDesc.innerText = 'VaultBasis Practitioner License ($499/year) covers up to 10 client cases with local computer storage and signed Evidence Receipts.';
         if (btn) btn.innerText = 'Continue to Checkout ($499/yr) →';
       } else if (tier === 'PRACTICE') {
-        if (modalTitle) modalTitle.innerText = 'Get Practice License';
-        if (modalDesc) modalDesc.innerText = 'VaultBasis Practice License ($1,499/year) covers up to 50 client cases for CPA firms with preparer provenance on Evidence Receipts.';
+        if (modalTitle) modalTitle.innerText = 'Get Firm License';
+        if (modalDesc) modalDesc.innerText = 'VaultBasis Firm License ($1,499/year) covers up to 50 client cases for CPA and tax practices with signed Evidence Receipts.';
         if (btn) btn.innerText = 'Continue to Checkout ($1,499/yr) →';
       } else if (tier === 'ENTERPRISE') {
-        if (modalTitle) modalTitle.innerText = 'Enterprise & Larger Firms';
-        if (modalDesc) modalDesc.innerText = 'Custom case volume (250+ cases), multi-seat firm deployments, and priority CPA workflow support.';
+        if (modalTitle) modalTitle.innerText = 'Enterprise & Larger Practices';
+        if (modalDesc) modalDesc.innerText = 'Custom / high-volume case allocations, multi-seat firm deployments, and priority CPA workflow support.';
         if (btn) btn.innerText = 'Submit Enterprise Inquiry →';
       }
     }
