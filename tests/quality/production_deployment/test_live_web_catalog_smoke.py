@@ -121,16 +121,16 @@ def verify_live_url(base_url: str) -> dict:
                     if req_str not in html:
                         results["errors"].append(f"Missing required canonical string: '{req_str}'")
 
-                # Assert dynamic modal JS data assertions
-                # Evaluation modal: 3 cases
-                # Practitioner: 10
-                # Firm: 50
-                # Enterprise: Custom
+                # Assert dynamic modal JS & DOM select options
                 modal_invariants = [
-                    (r"evaluation['\"].*?3\s*(?:evaluation\s*)?client\s*cases", "Evaluation modal 3 cases invariant"),
-                    (r"practitioner['\"].*?10\s*client\s*cases", "Practitioner modal 10 cases invariant"),
-                    (r"firm['\"].*?50\s*client\s*cases", "Firm modal 50 cases invariant"),
-                    (r"enterprise['\"].*?Custom", "Enterprise modal Custom invariant"),
+                    (r"Up to 3 Client Cases", "Evaluation modal option 3 cases invariant"),
+                    (r"Up to 10 Client Cases", "Practitioner modal option 10 cases invariant"),
+                    (r"Up to 50 Client Cases", "Firm modal option 50 cases invariant"),
+                    (r"Custom Case Volume|Custom / high-volume", "Enterprise modal Custom invariant"),
+                    (r"TRIAL['\"].*?3\s*(?:evaluation\s*)?client\s*cases", "Evaluation JS modal description 3 cases invariant"),
+                    (r"ESSENTIAL['\"].*?10\s*client\s*cases", "Practitioner JS modal description 10 cases invariant"),
+                    (r"PRACTICE['\"].*?50\s*client\s*cases", "Firm JS modal description 50 cases invariant"),
+                    (r"ENTERPRISE['\"].*?Custom", "Enterprise JS modal description Custom invariant"),
                 ]
                 for pattern, desc in modal_invariants:
                     if not re.search(pattern, html, re.IGNORECASE | re.DOTALL):
