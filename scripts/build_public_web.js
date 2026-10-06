@@ -278,6 +278,8 @@ const PUBLIC_PREFIXES = [
   '/verifier-access',
   '/_next/',
   '/favicon',
+  '/apple-touch-icon',
+  '/site.webmanifest',
 ];
 
 // SESSION_COOKIE_NAME must match api/verifier-session.js
