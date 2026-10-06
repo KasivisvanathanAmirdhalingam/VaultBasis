@@ -61,7 +61,25 @@ def main():
     start_menu_shortcut = start_menu_dir / "VaultBasis.lnk"
     create_shortcut(str(exe_path), str(start_menu_shortcut), icon_path, "VaultBasis Edge — Tax Reconciliation")
 
-    # 4. Launch VaultBasis Edge
+    # 4. Windows Settings -> Installed Apps Registry Entry (HKCU)
+    reg_cmd = f"""
+    $RegPath = "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\VaultBasis"
+    if (!(Test-Path $RegPath)) {{
+        New-Item -Path $RegPath -Force | Out-Null
+    }}
+    Set-ItemProperty -Path $RegPath -Name "DisplayName" -Value "VaultBasis Edge"
+    Set-ItemProperty -Path $RegPath -Name "DisplayVersion" -Value "1.5.0"
+    Set-ItemProperty -Path $RegPath -Name "Publisher" -Value "VaultBasis"
+    Set-ItemProperty -Path $RegPath -Name "DisplayIcon" -Value "{exe_path},0"
+    Set-ItemProperty -Path $RegPath -Name "InstallLocation" -Value "{install_dir}"
+    Set-ItemProperty -Path $RegPath -Name "UninstallString" -Value 'powershell -NoProfile -WindowStyle Hidden -Command "Remove-Item -Recurse -Force \"{install_dir}\"; Remove-Item -Force \"{desktop_shortcut}\" -ErrorAction SilentlyContinue; Remove-Item -Force \"{start_menu_shortcut}\" -ErrorAction SilentlyContinue; Remove-Item -Recurse -Force \"HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\VaultBasis\" -ErrorAction SilentlyContinue"'
+    """
+    try:
+        subprocess.run(["powershell", "-NoProfile", "-NonInteractive", "-Command", reg_cmd], check=False, capture_output=True)
+    except Exception as e:
+        print(f"Warning: Failed to write uninstall registry key: {e}")
+
+    # 5. Launch VaultBasis Edge
     if exe_path.is_file():
         subprocess.Popen([str(exe_path)], cwd=str(install_dir))
 
