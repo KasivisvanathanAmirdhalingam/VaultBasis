@@ -404,7 +404,7 @@ class CommercialPolicyService:
 
                 inst_id = eval_rec.get("installation_id", self.installation_id or "LOCAL-INSTALLATION")
                 cust_name = eval_rec.get("customer_name", "Evaluation Practitioner")
-                max_cases = eval_rec.get("max_cases", 3)
+                max_cases = max(3, int(eval_rec.get("max_cases", 3)))
 
                 if check_now <= expires_dt:
                     secs_left = max(0, int((expires_dt - check_now).total_seconds()))

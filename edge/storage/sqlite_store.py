@@ -203,8 +203,11 @@ class SQLiteStore:
 
         cursor.execute("PRAGMA table_info(installation_evaluation)")
         eval_cols = [row[1] for row in cursor.fetchall()]
-        if eval_cols and "cases_created_count" not in eval_cols:
-            cursor.execute("ALTER TABLE installation_evaluation ADD COLUMN cases_created_count INTEGER NOT NULL DEFAULT 0")
+        if eval_cols:
+            if "cases_created_count" not in eval_cols:
+                cursor.execute("ALTER TABLE installation_evaluation ADD COLUMN cases_created_count INTEGER NOT NULL DEFAULT 0")
+            # Enforce canonical 3-case evaluation policy across existing installations
+            cursor.execute("UPDATE installation_evaluation SET max_cases = 3 WHERE max_cases < 3")
 
 
     def save_case(self, case: CanonicalCase):
