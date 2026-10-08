@@ -177,9 +177,13 @@ def main():
     # UAT-14
     run_live_scenario("UAT-14", "tests/fixtures/uat14/broker_missing_basis.csv", "tests/fixtures/uat14/ledger_missing_basis.csv", "UNRESOLVED_DATA", 4, 0, 1)
     
-    print("=== ALL 10 SCENARIOS (UAT-05..14) QUALIFIED GREEN ON PACKAGED RUNTIME ===")
+    # UAT-15
+    run_live_scenario("UAT-15", "tests/fixtures/uat15/broker_norm.csv", "tests/fixtures/uat15/ledger_norm.csv", "MATCHED", 5, 0, 0)
+    
+    print("=== ALL 11 SCENARIOS (UAT-05..15) QUALIFIED GREEN ON PACKAGED RUNTIME ===")
 
 
 if __name__ == "__main__":
     main()
+
 
