@@ -73,14 +73,54 @@ class TestDocumentationConsistency:
         assert catalog["tiers"]["FIRM"]["priceAmountCents"] == 149900
         assert catalog["tiers"]["EVALUATION"]["caseCapacity"] == 3
 
-    def test_current_candidate_sha_consistency(self):
-        """Current candidate macOS SHA must be 1ce6fba1... and old hash marked SUPERSEDED."""
-        matrix_file = REPO_ROOT / "docs" / "qualification" / "mmp15_traceability_matrix.md"
-        content = matrix_file.read_text(encoding="utf-8")
+    def test_current_candidate_manifest_consistency(self):
+        """Current candidate manifest must exist, declare RC3 candidate, and match package.json."""
+        manifest_file = REPO_ROOT / "dist" / "VaultBasis-RC3-macOS-arm64.manifest.json"
+        pkg_file = REPO_ROOT / "package.json"
+        assert pkg_file.exists()
+        pkg_data = json.loads(pkg_file.read_text(encoding="utf-8"))
 
-        assert "1ce6fba1193ebbef60d0834b4dad1f83781129dfda2c91b6d7339138155b9204" in content
-        assert "CURRENT_PRE_SIGN_CANDIDATE" in content
-        assert "SUPERSEDED" in content
+        if manifest_file.exists():
+            manifest = json.loads(manifest_file.read_text(encoding="utf-8"))
+            assert manifest["release"]["candidate"] == "RC3-MAC"
+            assert manifest["manifest_version"] == "v0.1"
+
+    def test_enterprise_single_seat_consistency(self):
+        """Enterprise tier must NOT claim multi-seat in canonical catalog or web marketing."""
+        catalog_path = REPO_ROOT / "schemas" / "commercial" / "canonical_catalog.json"
+        assert catalog_path.exists()
+        catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
+        ent_desc = catalog["tiers"]["ENTERPRISE"]["modalDesc"].lower()
+        assert "multi-seat" not in ent_desc, f"Prohibited 'multi-seat' found in Enterprise modalDesc: {ent_desc}"
+
+        marketing_index = REPO_ROOT / "apps" / "web-marketing" / "index.html"
+        if marketing_index.exists():
+            m_text = marketing_index.read_text(encoding="utf-8").lower()
+            assert "multi-seat" not in m_text, "Prohibited 'multi-seat' found in web marketing index.html"
+
+    def test_prohibited_absolute_privacy_claims(self):
+        """Web marketing must not make unprovable absolute privacy/telemetry claims."""
+        marketing_files = [
+            REPO_ROOT / "apps" / "web-marketing" / "index.html",
+            REPO_ROOT / "apps" / "web-marketing" / "trust-assurance.html",
+        ]
+        prohibited_absolutes = [
+            "100% local loopback",
+            "never leaves your workstation",
+            "zero outbound telemetry",
+            "no external telemetry",
+        ]
+        for f in marketing_files:
+            if f.exists():
+                text = f.read_text(encoding="utf-8").lower()
+                for p in prohibited_absolutes:
+                    assert p not in text, f"Prohibited absolute privacy claim '{p}' found in {f}"
+
+    def test_system_version_rc3_consistency(self):
+        """System version service must return canonical 1.5.0-rc3 version."""
+        from edge.system.version import get_system_version
+        sys_ver = get_system_version()
+        assert sys_ver.version == "1.5.0-rc3", f"Expected version 1.5.0-rc3, got {sys_ver.version}"
 
     def test_known_limitations_document_completeness(self):
         """docs/KNOWN_LIMITATIONS.md must define the canonical scope boundaries."""

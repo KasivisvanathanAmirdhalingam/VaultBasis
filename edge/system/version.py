@@ -143,12 +143,40 @@ def _resolve_architecture() -> str:
     return platform.machine()
 
 
+def _resolve_version() -> str:
+    """Resolves version from build_info.json, package.json, or environment."""
+    env_ver = os.environ.get("VAULTBASIS_VERSION")
+    if env_ver:
+        return env_ver.strip()
+    info_path = os.path.join(os.path.dirname(__file__), "build_info.json")
+    if os.path.exists(info_path):
+        try:
+            import json
+            with open(info_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if data.get("version"):
+                    return data["version"].strip()
+        except Exception:
+            pass
+    pkg_path = os.path.join(os.path.dirname(__file__), "..", "..", "package.json")
+    if os.path.exists(pkg_path):
+        try:
+            import json
+            with open(pkg_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if data.get("version"):
+                    return data["version"].strip()
+        except Exception:
+            pass
+    return "1.5.0-rc3"
+
+
 class SystemVersionInfo(BaseModel):
     """
     Complete immutable system, build, channel, and compatibility metadata.
     """
     product: str = "VaultBasis"
-    version: str = "1.5.0-rc3"
+    version: str = Field(default_factory=_resolve_version)
     build_sha: str = Field(default_factory=_resolve_build_sha)
     release_channel: ReleaseChannel = Field(default_factory=_resolve_release_channel)
     platform: str = Field(default_factory=_resolve_platform_identifier)

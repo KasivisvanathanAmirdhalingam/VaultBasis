@@ -190,7 +190,11 @@ def main() -> int:
     )
     # Embed build_info.json into source tree for frozen runtime provenance
     build_info_path = REPO / "edge" / "system" / "build_info.json"
-    build_info_path.write_text(json.dumps({"build_sha": commit}), encoding="utf-8")
+    build_info_path.write_text(json.dumps({
+        "build_sha": commit,
+        "version": "1.5.0-rc3",
+        "release_channel": "CANDIDATE"
+    }, indent=2), encoding="utf-8")
 
     # 1. Clean previous candidate outputs (never the sealed RC2 history).
     for p in [REPO / "build" / "VaultBasis", REPO / "dist" / APP_NAME,

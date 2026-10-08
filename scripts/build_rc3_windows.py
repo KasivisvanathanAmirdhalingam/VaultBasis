@@ -203,7 +203,11 @@ def main() -> int:
     )
     # Embed build_info.json into source tree for frozen runtime provenance
     build_info_path = REPO / "edge" / "system" / "build_info.json"
-    build_info_path.write_text(json.dumps({"build_sha": commit}), encoding="utf-8")
+    build_info_path.write_text(json.dumps({
+        "build_sha": commit,
+        "version": "1.5.0-rc3",
+        "release_channel": "CANDIDATE"
+    }, indent=2), encoding="utf-8")
 
     for p in [REPO / "dist" / PACKAGE_NAME, REPO / "dist" / f"{PACKAGE_NAME}.zip",
               REPO / "dist" / "VaultBasis.exe", REPO / "build" / "VaultBasis"]:
