@@ -224,29 +224,34 @@ class DeterministicReconciliationEngine:
                 diff_counter += 1
                 continue
             elif len(candidate_matches) > 1:
-                candidate_refs = ", ".join([f"{src_b_id}:{cand[1].source_row_reference}" for cand in candidate_matches])
-                cand_provs = []
-                for cand in candidate_matches:
-                    cand_provs.extend(build_prov(cand[1], src_b_id))
-                    matched_b_indices.add(cand[0])
+                exact_proceeds_matches = [c for c in candidate_matches if c[1].proceeds is not None and tx_a.proceeds is not None and c[1].proceeds == tx_a.proceeds]
+                if len(exact_proceeds_matches) == 1:
+                    idx_b, tx_b = exact_proceeds_matches[0]
+                else:
+                    candidate_refs = ", ".join([f"{src_b_id}:{cand[1].source_row_reference}" for cand in candidate_matches])
+                    cand_provs = []
+                    for cand in candidate_matches:
+                        cand_provs.extend(build_prov(cand[1], src_b_id))
+                        matched_b_indices.add(cand[0])
 
-                result.material_differences.append(DifferenceRecord(
-                    difference_id=f"DIFF-{diff_counter:03d}",
-                    difference_state="AMBIGUOUS_MATCH",
-                    asset=tx_a.asset,
-                    source_a_ref=f"{src_a_id}:{tx_a.source_row_reference}",
-                    source_a_value=str(tx_a.proceeds) if tx_a.proceeds is not None else None,
-                    source_b_ref=f"MULTIPLE_CANDIDATES ({len(candidate_matches)})",
-                    source_b_value=None,
-                    variance=None,
-                    description=f"Multiple possible ledger counterparts ({candidate_refs}) match broker record for {tx_a.asset}. Next step: Review candidate records and resolve record pairing before finalizing reconciliation.",
-                    rule_reference="VB_US_1099DA_2025_V1",
-                    provenance_references=prov_a + cand_provs
-                ))
-                diff_counter += 1
-                continue
+                    result.material_differences.append(DifferenceRecord(
+                        difference_id=f"DIFF-{diff_counter:03d}",
+                        difference_state="AMBIGUOUS_MATCH",
+                        asset=tx_a.asset,
+                        source_a_ref=f"{src_a_id}:{tx_a.source_row_reference}",
+                        source_a_value=str(tx_a.proceeds) if tx_a.proceeds is not None else None,
+                        source_b_ref=f"MULTIPLE_CANDIDATES ({len(candidate_matches)})",
+                        source_b_value=None,
+                        variance=None,
+                        description=f"Multiple possible ledger counterparts ({candidate_refs}) match broker record for {tx_a.asset}. Next step: Review candidate records and resolve record pairing before finalizing reconciliation.",
+                        rule_reference="VB_US_1099DA_2025_V1",
+                        provenance_references=prov_a + cand_provs
+                    ))
+                    diff_counter += 1
+                    continue
+            else:
+                idx_b, tx_b = candidate_matches[0]
 
-            idx_b, tx_b = candidate_matches[0]
             matched_b_indices.add(idx_b)
             prov_b = build_prov(tx_b, src_b_id)
             prov_both = prov_a + prov_b
