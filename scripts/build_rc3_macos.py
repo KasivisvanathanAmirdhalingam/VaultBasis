@@ -270,7 +270,14 @@ def main() -> int:
     # This directly tests the PyInstaller output before packaging.
     launch_gate(app_dir, "PRE-ZIP: built .app in dist/")
 
-    # 6. Single-Layer Customer DMG + hashes + candidate manifest (MMP15-DIST-PKG-UX-001).
+    # 6a. Platform ZIP archive
+    zip_path = REPO / "dist" / f"{PACKAGE_NAME}.zip"
+    print(f"  [ZIP] Building {zip_path.name} ...")
+    with zipfile.ZipFile(zip_path, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+        for f in pkg.rglob("*"):
+            zf.write(f, arcname=f.relative_to(REPO / "dist"))
+
+    # 6b. Single-Layer Customer DMG + hashes + candidate manifest (MMP15-DIST-PKG-UX-001).
     # Create a staging directory for the DMG contents: VaultBasis.app and an Applications shortcut.
     dmg_stage = REPO / "dist" / f"{PACKAGE_NAME}_dmg_stage"
     if dmg_stage.exists():
