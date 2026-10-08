@@ -44,3 +44,11 @@
 
 * **Receipt Authenticity:** Standalone verifier ([`apps/verifier/verify_receipt.py`](file:///Users/kasivisvanathanamirdhalingam/Downloads/VaultBasis/apps/verifier/verify_receipt.py)) guarantees that the receipt was issued by the installation key and that no row, amount, or hash has been altered since signing.
 * **Tax Advice Disclaimer:** Verification confirms mathematical and evidentiary consistency between provided broker 1099-DA files and client ledgers. It does not constitute legal or tax advice, nor does it certify the underlying factual truth of broker records.
+
+---
+
+## 5. Authentic Bundled Sample Immutability & Objective Findings
+
+* **Authentic Bundled Sample Immutability:** Pre-loaded demonstration cases (e.g. `CASE-SAMPLE-2025`) are vendor-authored reference evidence baselines. They are unmetered and read-only. Mutation of findings dispositions, practitioner notes, review finalization, source modification, and deletion are strictly disallowed on authentic samples. Practitioners who wish to annotate findings or issue revised receipts must clone the sample into a new production case (`case_kind = "PRODUCTION"`), which consumes capacity and receives distinct case provenance.
+* **Objective Finding Semantics:** Deterministic reconciliation findings state only the objective evidence variances (proceeds difference, basis difference, unreported basis, date mismatch) with neutral review guidance. The engine does not generate speculative causal hypotheses or prescriptive tax filing instructions (e.g. Form 8949 Box B / Code B recommendations). Asset classifications avoid non-statutory generalizations (e.g. digital asset missing basis is reported as `Basis Not Reported by Broker (Box 2 = NO)` / `UNREPORTED BASIS`).
+

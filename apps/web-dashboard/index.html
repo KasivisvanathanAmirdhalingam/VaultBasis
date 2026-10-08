@@ -2079,6 +2079,11 @@
 
     async function recordReview(findingId, disposition) {
       if (!currentCaseId) return;
+      const isSample = (currentCaseData && (currentCaseData.case_kind === 'BUNDLED_SAMPLE' || currentCaseData.case_id === 'CASE-SAMPLE-2025'));
+      if (isSample) {
+        showToast('Authentic bundled sample findings are read-only reference evidence. Clone this sample into a new client/evaluation case to make changes.', 'warning');
+        return;
+      }
       try {
         const res = await fetch(`/api/cases/${currentCaseId}/reviews`, {
           method: 'POST',
@@ -2094,7 +2099,8 @@
           showToast(`Disposition saved: ${disposition}`, 'success');
           renderFindingsView();
         } else {
-          showToast('Failed to save review disposition.', 'error');
+          const err = await res.json();
+          showToast(err.detail || 'Failed to save review disposition.', 'error');
         }
       } catch (err) {
         showToast('Connection error saving review disposition.', 'error');
@@ -2103,8 +2109,13 @@
 
     async function promptReviewNote(findingId) {
       if (!currentCaseId) return;
+      const isSample = (currentCaseData && (currentCaseData.case_kind === 'BUNDLED_SAMPLE' || currentCaseData.case_id === 'CASE-SAMPLE-2025'));
+      if (isSample) {
+        showToast('Authentic bundled sample findings are read-only reference evidence. Clone this sample into a new client/evaluation case to make changes.', 'warning');
+        return;
+      }
       const existing = currentCaseReviews[findingId];
-      const existingNote = existing ? existing.practitioner_notes || '' : '';
+      const existingNote = existing ? (existing.note || existing.practitioner_notes || '') : '';
       const newNote = prompt("Enter practitioner workpaper note for finding " + findingId + ":", existingNote);
       if (newNote === null) return; // cancelled
 
@@ -2116,7 +2127,7 @@
           body: JSON.stringify({
             finding_id: findingId,
             disposition: currentDisp,
-            practitioner_notes: newNote
+            note: newNote
           })
         });
         if (res.ok) {
@@ -2125,7 +2136,8 @@
           showToast('Practitioner note saved.', 'success');
           renderFindingsView();
         } else {
-          showToast('Failed to save note.', 'error');
+          const err = await res.json();
+          showToast(err.detail || 'Failed to save note.', 'error');
         }
       } catch (err) {
         showToast('Connection error saving note.', 'error');
@@ -2134,6 +2146,11 @@
 
     async function finalizePractitionerReview() {
       if (!currentCaseId) return;
+      const isSample = (currentCaseData && (currentCaseData.case_kind === 'BUNDLED_SAMPLE' || currentCaseData.case_id === 'CASE-SAMPLE-2025'));
+      if (isSample) {
+        showToast('Authentic bundled sample evidence cannot be reviewed or modified. Clone this sample into a new client/evaluation case to finalize reviews.', 'warning');
+        return;
+      }
       const btn = document.getElementById('btn-finalize-review');
       if (btn) { btn.disabled = true; btn.innerText = 'Issuing Final Receipt...'; }
 
@@ -2172,7 +2189,7 @@
       'AMBIGUOUS_MATCH':             'Ambiguous Match',
       'AGGREGATED_LINE':             'Aggregated Line',
       'TRANSFER_RELATED':            'Transfer (Non-Taxable)',
-      'REPORTING_SCOPE_DIFFERENCE':  'Broker Basis Not Reported',
+      'REPORTING_SCOPE_DIFFERENCE':  'Basis Not Reported by Broker (Box 2 = NO)',
       'SOURCE_ERROR_SUSPECTED':      'Possible Source Error',
       'UNRESOLVED_DATA':             'Unresolved Data',
     };
@@ -2199,6 +2216,7 @@
       const diffs = recon.material_differences || [];
       const unres = recon.unresolved_items || [];
       const agreed = recon.agreed_records || [];
+      const isSample = (currentCaseData && (currentCaseData.case_kind === 'BUNDLED_SAMPLE' || currentCaseData.case_id === 'CASE-SAMPLE-2025'));
 
       // Calculate totals
       const totalEvaluated = recon.total_evaluated_count || (agreed.length + diffs.length + unres.length);
@@ -2216,23 +2234,49 @@
       if (countDiffsEl) countDiffsEl.innerText = diffCount;
       if (countUnresEl) countUnresEl.innerText = unresCount;
 
-      // Update review progress
-      let reviewedCount = 0;
-      diffs.forEach(d => {
-        const rev = currentCaseReviews[d.difference_id];
-        if (rev && rev.disposition && rev.disposition !== 'OPEN') {
-          reviewedCount++;
-        }
-      });
+      // Update banner and review controls
+      const bannerTitle = document.getElementById('review-banner-title');
+      const bannerSubtitle = document.getElementById('review-banner-subtitle');
+      const finalizeBtn = document.getElementById('btn-finalize-review');
       const reviewProgressBadge = document.getElementById('review-progress-badge');
-      if (reviewProgressBadge) {
-        reviewProgressBadge.innerText = `${reviewedCount} / ${diffCount} Reviewed`;
-        if (reviewedCount === diffCount && diffCount > 0) {
-          reviewProgressBadge.className = 'badge badge-success';
-        } else if (reviewedCount > 0) {
-          reviewProgressBadge.className = 'badge badge-info';
-        } else {
+
+      if (isSample) {
+        if (bannerTitle) bannerTitle.innerHTML = '📌 Authentic Bundled Sample (Read-Only Reference Evidence)';
+        if (bannerSubtitle) bannerSubtitle.innerText = 'Authentic bundled samples are immutable demonstration baselines. To record practitioner review notes, dispositions, or issue revised receipts, clone this sample into a new case.';
+        if (reviewProgressBadge) {
+          reviewProgressBadge.innerText = 'Read-Only Sample';
           reviewProgressBadge.className = 'badge badge-neutral';
+        }
+        if (finalizeBtn) {
+          finalizeBtn.innerText = 'Clone Sample to Review →';
+          finalizeBtn.className = 'btn btn-secondary';
+          finalizeBtn.onclick = cloneCurrentSample;
+        }
+      } else {
+        if (bannerTitle) bannerTitle.innerHTML = '📋 Practitioner Review Lifecycle';
+        if (bannerSubtitle) bannerSubtitle.innerText = 'Record your professional review dispositions and workpaper notes below before issuing the Final Reviewed Evidence Receipt.';
+        // Update review progress
+        let reviewedCount = 0;
+        diffs.forEach(d => {
+          const rev = currentCaseReviews[d.difference_id];
+          if (rev && rev.disposition && rev.disposition !== 'OPEN') {
+            reviewedCount++;
+          }
+        });
+        if (reviewProgressBadge) {
+          reviewProgressBadge.innerText = `${reviewedCount} / ${diffCount} Reviewed`;
+          if (reviewedCount === diffCount && diffCount > 0) {
+            reviewProgressBadge.className = 'badge badge-success';
+          } else if (reviewedCount > 0) {
+            reviewProgressBadge.className = 'badge badge-info';
+          } else {
+            reviewProgressBadge.className = 'badge badge-neutral';
+          }
+        }
+        if (finalizeBtn) {
+          finalizeBtn.innerText = '✓ Finalize Review & Issue Final Receipt →';
+          finalizeBtn.className = 'btn btn-primary';
+          finalizeBtn.onclick = finalizePractitionerReview;
         }
       }
 
@@ -2248,9 +2292,19 @@
       tbody.innerHTML = '';
 
       function getReviewCellHtml(findingId) {
+        if (isSample) {
+          return `
+            <div style="display: flex; flex-direction: column; gap: 4px;">
+              <span class="badge badge-neutral" style="font-size: 0.72rem; align-self: flex-start;">READ-ONLY SAMPLE</span>
+              <button class="btn btn-sm btn-secondary" style="font-size: 0.70rem; padding: 2px 6px; width: fit-content;" onclick="cloneCurrentSample()">
+                Clone to Annotate
+              </button>
+            </div>
+          `;
+        }
         const rev = currentCaseReviews[findingId] || {};
         const disp = rev.disposition || 'OPEN';
-        const note = rev.practitioner_notes || '';
+        const note = rev.note || rev.practitioner_notes || '';
 
         let badgeClass = 'badge-neutral';
         if (disp === 'REVIEWED') badgeClass = 'badge-success';

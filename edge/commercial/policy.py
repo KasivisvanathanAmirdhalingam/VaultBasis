@@ -63,10 +63,10 @@ class CaseWritePolicy:
     def assert_can_mutate(case: Optional[Any], operation_name: str = "mutation"):
         if not case:
             return
-        if getattr(case, "case_kind", "PRODUCTION") == "BUNDLED_SAMPLE":
+        if getattr(case, "case_kind", "PRODUCTION") == "BUNDLED_SAMPLE" or getattr(case, "case_id", "") == "CASE-SAMPLE-2025":
             raise HTTPException(
                 status_code=403,
-                detail=f"Bundled sample cases are immutable demonstration baselines and cannot accept {operation_name}. Please create or clone a production case."
+                detail=f"Authentic bundled sample cases are immutable demonstration baselines and cannot accept {operation_name}. Clone this sample into a new client/evaluation case to make changes."
             )
 
 

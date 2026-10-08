@@ -47,7 +47,8 @@ from edge.receipts.keygen import InstallationKeyManager
 from edge.receipts.signer import ReceiptSigner
 from edge.storage.sqlite_store import SQLiteStore, EvidenceCollisionError
 from edge.system.version import get_system_version
-from schemas.canonical.case import CanonicalCase
+from schemas.canonical.case import CanonicalCase, SourceDocumentMetadata
+from schemas.canonical.transaction import CanonicalTransaction
 
 
 def _resource_base() -> Path:
@@ -697,21 +698,82 @@ def clone_case(case_id: str, req: Optional[CloneCaseRequest] = None):
     new_id = (req.new_case_id if req and req.new_case_id else None) or f"CASE-{uuid.uuid4().hex[:8].upper()}"
     new_client_ref = (req.client_reference if req and req.client_reference else None) or f"Copy of {getattr(source_case, 'client_reference', 'Case')}"
 
+    eval_res = commercial_policy.evaluate_current_license()
+    is_eval = (eval_res.tier in (LicenseTier.TRIAL, LicenseTier.EVALUATION))
+    max_cases = eval_res.max_cases_per_installation or (3 if is_eval else 0)
+    eval_state = db_store.get_installation_evaluation() if is_eval else None
+    since_iso = eval_state.get("activated_at") if (is_eval and eval_state) else None
+
+    cloned_sources = {}
+    cloned_transactions = []
+    source_payloads = []
+
+    for src_id, src_meta in source_case.sources.items():
+        new_src_id = f"SRC-{uuid.uuid4().hex[:6].upper()}_{Path(src_meta.filename).stem}"
+        new_meta = SourceDocumentMetadata(
+            source_id=new_src_id,
+            filename=src_meta.filename,
+            sha256_hash=src_meta.sha256_hash,
+            byte_size=src_meta.byte_size,
+            schema_id=src_meta.schema_id,
+            row_count=src_meta.row_count,
+            ingested_at=now_utc
+        )
+        cloned_sources[new_src_id] = new_meta
+
+        raw_bytes = db_store.get_source_file_bytes(src_id)
+        if raw_bytes is None:
+            if "1099" in src_meta.filename:
+                raw_bytes = SAMPLE_1099DA_CSV
+            else:
+                raw_bytes = SAMPLE_KOINLY_CSV
+
+        txs = []
+        for t in source_case.transactions:
+            if t.source_id == src_id:
+                t_dict = t.model_dump()
+                t_dict["source_id"] = new_src_id
+                t_dict["transaction_id"] = f"{new_src_id}_{t.source_row_reference}"
+                txs.append(CanonicalTransaction(**t_dict))
+        cloned_transactions.extend(txs)
+        source_payloads.append((new_meta, raw_bytes, txs))
+
     cloned_case = CanonicalCase(
         case_id=new_id,
         client_reference=new_client_ref,
         tax_year=source_case.tax_year,
         jurisdiction=source_case.jurisdiction,
-        case_status="CREATED",
+        case_status="SOURCES_INGESTED" if cloned_sources else "CREATED",
         case_kind="PRODUCTION",
         sample_definition_id=None,
         sample_manifest_digest=None,
-        sources=source_case.sources.copy(),
-        transactions=source_case.transactions.copy(),
+        sources=cloned_sources,
+        transactions=cloned_transactions,
         created_at=now_utc,
         updated_at=now_utc
     )
-    db_store.save_case(cloned_case)
+
+    try:
+        db_store.create_case_atomic(
+            case=cloned_case,
+            is_evaluation=is_eval,
+            max_cases=max_cases,
+            since_iso=since_iso
+        )
+    except ValueError:
+        denial = commercial_policy.authorize(CommercialOperation.CREATE_CASE)
+        return JSONResponse(
+            status_code=denial.http_status,
+            content=denial.to_error_dict()
+        )
+
+    # Persist cloned sources and transactions into db_store for the new case
+    for meta, raw_bytes, txs in source_payloads:
+        try:
+            db_store.add_source_and_transactions(new_id, meta, raw_bytes, txs)
+        except EvidenceCollisionError:
+            pass
+
     return CaseSummaryResponse(
         case_id=cloned_case.case_id,
         client_reference=cloned_case.client_reference,
@@ -892,7 +954,9 @@ def get_case(case_id: str):
             "can_upload_source_b": not is_sample and case.receipt_id is None,
             "can_clone": True,
             "can_view_receipt": case.receipt_id is not None,
-            "can_finalize_review": case.receipt_id is not None,
+            "can_finalize_review": case.receipt_id is not None and not is_sample,
+            "can_record_reviews": not is_sample,
+            "is_sample": is_sample,
             "can_restart_sample": is_sample,
         }
     }
@@ -1066,6 +1130,7 @@ def record_finding_review(case_id: str, req: FindingReviewRequest):
     case = db_store.get_case(case_id)
     if not case:
         raise HTTPException(status_code=404, detail=f"Case '{case_id}' not found")
+    CaseWritePolicy.assert_can_mutate(case, "practitioner review annotations")
     valid_dispositions = {"OPEN", "REVIEWED", "FOLLOW_UP_REQUIRED", "LEFT_UNRESOLVED"}
     if req.disposition not in valid_dispositions:
         raise HTTPException(
@@ -1093,6 +1158,7 @@ def finalize_practitioner_review(case_id: str, req: Optional[FinalizeReviewReque
     case = db_store.get_case(case_id)
     if not case or not case.receipt_id:
         raise HTTPException(status_code=400, detail="Case must be reconciled before finalizing review.")
+    CaseWritePolicy.assert_can_mutate(case, "practitioner review finalization")
 
     prelim_receipt = db_store.get_receipt(case.receipt_id)
     if not prelim_receipt:

@@ -217,7 +217,7 @@ class DeterministicReconciliationEngine:
                     source_b_ref="NOT_FOUND",
                     source_b_value=None,
                     variance=str(tx_a.proceeds) if tx_a.proceeds is not None else None,
-                    description=f"Transaction for {tx_a.asset} present in broker Form 1099-DA ({tx_a.source_row_reference}) but missing from tax ledger.",
+                    description=f"Transaction for {tx_a.asset} present in broker Form 1099-DA ({tx_a.source_row_reference}) but missing from tax ledger. Next step: Review source records to confirm if this transaction belongs in the tax year ledger.",
                     rule_reference="VB_US_1099DA_2025_V1",
                     provenance_references=prov_a
                 ))
@@ -242,7 +242,7 @@ class DeterministicReconciliationEngine:
                         source_b_ref=f"{src_b_id}:{tx_b.source_row_reference}",
                         source_b_value=str(tx_b.proceeds),
                         variance=str(proceeds_diff),
-                        description=f"Difference detected: gross proceeds differ by ${proceeds_diff}.",
+                        description=f"Proceeds differ by ${proceeds_diff}. Broker: ${tx_a.proceeds}, Client ledger: ${tx_b.proceeds}. Next step: Review the underlying transaction records and determine which amount, if either, should be used for the engagement.",
                         rule_reference="VB_US_1099DA_2025_V1",
                         provenance_references=prov_both
                     ))
@@ -259,7 +259,7 @@ class DeterministicReconciliationEngine:
                     source_b_ref=f"{src_b_id}:{tx_b.source_row_reference}",
                     source_b_value=str(tx_b.cost_basis) if tx_b.cost_basis is not None else "Not reported",
                     variance=None,
-                    description=f"The broker did not report cost basis for this asset (Form 1099-DA Box 2: non-covered). Your tax ledger records a basis of {tx_b.cost_basis if tx_b.cost_basis is not None else 'unknown'}. Confirm basis from independent supporting records before filing.",
+                    description=f"Broker did not report basis (Box 2 = NO). Client ledger reports basis of ${tx_b.cost_basis if tx_b.cost_basis is not None else '0.00'}. Next step: Review supporting basis documentation before relying on the ledger amount.",
                     rule_reference="VB_US_1099DA_2025_V1",
                     provenance_references=prov_both
                 ))
@@ -276,7 +276,7 @@ class DeterministicReconciliationEngine:
                         source_b_ref=f"{src_b_id}:{tx_b.source_row_reference}",
                         source_b_value=str(tx_b.cost_basis),
                         variance=str(basis_diff),
-                        description=f"Difference detected: basis differs by ${basis_diff}.",
+                        description=f"Cost basis differs by ${basis_diff}. Broker: ${tx_a.cost_basis}, Client ledger: ${tx_b.cost_basis}. Next step: Review supporting basis documentation and resolve the difference using professional judgment.",
                         rule_reference="VB_US_1099DA_2025_V1",
                         provenance_references=prov_both
                     ))
@@ -336,7 +336,7 @@ class DeterministicReconciliationEngine:
                         source_b_ref=f"{src_b_id}:{tx_b.source_row_reference}",
                         source_b_value=tx_b.acquisition_date,
                         variance=None,
-                        description=f"Acquisition date mismatch: {tx_a.acquisition_date} vs {tx_b.acquisition_date}.",
+                        description=f"Acquisition date differs: Broker reports {tx_a.acquisition_date} vs Client ledger reports {tx_b.acquisition_date}. Next step: Verify date from primary acquisition records.",
                         rule_reference="VB_US_1099DA_2025_V1",
                         provenance_references=prov_both
                     ))
@@ -371,7 +371,7 @@ class DeterministicReconciliationEngine:
                     source_b_ref=f"{src_b_id}:{tx_b.source_row_reference}",
                     source_b_value=str(tx_b.proceeds) if tx_b.proceeds is not None else None,
                     variance=str(tx_b.proceeds) if tx_b.proceeds is not None else None,
-                    description=f"Transaction for {tx_b.asset} present in client tax ledger ({tx_b.source_row_reference}) but missing from broker Form 1099-DA.",
+                    description=f"Transaction for {tx_b.asset} present in client tax ledger ({tx_b.source_row_reference}) but not reported on broker Form 1099-DA. Next step: Review source documentation to determine reporting requirements.",
                     rule_reference="VB_US_1099DA_2025_V1",
                     provenance_references=prov_b
                 ))
