@@ -239,7 +239,7 @@ class DeterministicReconciliationEngine:
                     source_b_ref=f"MULTIPLE_CANDIDATES ({len(candidate_matches)})",
                     source_b_value=None,
                     variance=None,
-                    description=f"Multiple possible ledger counterparts ({candidate_refs}) match broker record for {tx_a.asset}. Next step: Review candidate records and resolve lot pairing before finalizing reconciliation.",
+                    description=f"Multiple possible ledger counterparts ({candidate_refs}) match broker record for {tx_a.asset}. Next step: Review candidate records and resolve record pairing before finalizing reconciliation.",
                     rule_reference="VB_US_1099DA_2025_V1",
                     provenance_references=prov_a + cand_provs
                 ))
