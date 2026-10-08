@@ -223,6 +223,28 @@ class DeterministicReconciliationEngine:
                 ))
                 diff_counter += 1
                 continue
+            elif len(candidate_matches) > 1:
+                candidate_refs = ", ".join([f"{src_b_id}:{cand[1].source_row_reference}" for cand in candidate_matches])
+                cand_provs = []
+                for cand in candidate_matches:
+                    cand_provs.extend(build_prov(cand[1], src_b_id))
+                    matched_b_indices.add(cand[0])
+
+                result.material_differences.append(DifferenceRecord(
+                    difference_id=f"DIFF-{diff_counter:03d}",
+                    difference_state="AMBIGUOUS_MATCH",
+                    asset=tx_a.asset,
+                    source_a_ref=f"{src_a_id}:{tx_a.source_row_reference}",
+                    source_a_value=str(tx_a.proceeds) if tx_a.proceeds is not None else None,
+                    source_b_ref=f"MULTIPLE_CANDIDATES ({len(candidate_matches)})",
+                    source_b_value=None,
+                    variance=None,
+                    description=f"Multiple possible ledger counterparts ({candidate_refs}) match broker record for {tx_a.asset}. Next step: Review candidate records and resolve lot pairing before finalizing reconciliation.",
+                    rule_reference="VB_US_1099DA_2025_V1",
+                    provenance_references=prov_a + cand_provs
+                ))
+                diff_counter += 1
+                continue
 
             idx_b, tx_b = candidate_matches[0]
             matched_b_indices.add(idx_b)
@@ -371,7 +393,7 @@ class DeterministicReconciliationEngine:
                     source_b_ref=f"{src_b_id}:{tx_b.source_row_reference}",
                     source_b_value=str(tx_b.proceeds) if tx_b.proceeds is not None else None,
                     variance=str(tx_b.proceeds) if tx_b.proceeds is not None else None,
-                    description=f"Transaction for {tx_b.asset} present in client tax ledger ({tx_b.source_row_reference}) but not reported on broker Form 1099-DA. Next step: Review source documentation to determine reporting requirements.",
+                    description=f"Transaction for {tx_b.asset} present in client tax ledger ({tx_b.source_row_reference}), but no supported counterpart was found in the compared Form 1099-DA source. Next step: Review source documentation and determine whether additional reporting evidence is expected or available.",
                     rule_reference="VB_US_1099DA_2025_V1",
                     provenance_references=prov_b
                 ))
@@ -382,6 +404,8 @@ class DeterministicReconciliationEngine:
         diff_states = [d.difference_state for d in result.material_differences]
         if result.unresolved_items:
             result.outcome_state = "UNRESOLVED_DATA"
+        elif "AMBIGUOUS_MATCH" in diff_states:
+            result.outcome_state = "AMBIGUOUS_MATCH"
         elif "PROCEEDS_DIFFERENCE" in diff_states:
             result.outcome_state = "PROCEEDS_DIFFERENCE"
         elif "BASIS_DIFFERENCE" in diff_states:
