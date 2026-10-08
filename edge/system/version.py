@@ -148,7 +148,7 @@ class SystemVersionInfo(BaseModel):
     Complete immutable system, build, channel, and compatibility metadata.
     """
     product: str = "VaultBasis"
-    version: str = "1.5.0-dev"
+    version: str = "1.5.0-rc3"
     build_sha: str = Field(default_factory=_resolve_build_sha)
     release_channel: ReleaseChannel = Field(default_factory=_resolve_release_channel)
     platform: str = Field(default_factory=_resolve_platform_identifier)

@@ -29,7 +29,7 @@ def client():
 def test_system_version_defaults():
     info = get_system_version()
     assert info.product == "VaultBasis"
-    assert info.version == "1.5.0-dev"
+    assert info.version == "1.5.0-rc3"
     assert len(info.build_sha) >= 7
     assert info.release_channel in (
         ReleaseChannel.DEVELOPMENT,
@@ -92,7 +92,9 @@ def test_api_system_version_endpoint(client):
     assert res.status_code == 200
     data = res.json()
     assert data["product"] == "VaultBasis"
-    assert data["version"] == "1.5.0-dev"
+    # Derive expected version from the canonical source — never hardcode here.
+    # test_system_version_defaults() is the single place that pins the literal.
+    assert data["version"] == get_system_version().version
     assert "build_sha" in data
     assert "release_channel" in data
     assert "platform" in data

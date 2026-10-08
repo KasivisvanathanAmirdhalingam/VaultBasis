@@ -24,6 +24,7 @@ import tempfile
 import time
 import urllib.request
 import zipfile
+import shutil
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -193,7 +194,8 @@ def main() -> int:
 
     # 1. Clean previous candidate outputs (never the sealed RC2 history).
     for p in [REPO / "build" / "VaultBasis", REPO / "dist" / APP_NAME,
-              REPO / "dist" / PACKAGE_NAME, REPO / "dist" / f"{PACKAGE_NAME}.zip"]:
+              REPO / "dist" / PACKAGE_NAME, REPO / "dist" / f"{PACKAGE_NAME}.dmg",
+              REPO / "dist" / f"{PACKAGE_NAME}.zip"]:
         if p.is_symlink() or p.is_file():
             p.unlink()
         elif p.is_dir():
@@ -268,53 +270,56 @@ def main() -> int:
     # This directly tests the PyInstaller output before packaging.
     launch_gate(app_dir, "PRE-ZIP: built .app in dist/")
 
-    # 6. Single-Layer Customer ZIP + hashes + candidate manifest (MMP15-DIST-PKG-UX-001).
-    # system zip -ry is required (not Python zipfile) because the .app bundle contains
-    # symlinks (e.g. python3.13 -> python3__dot__13) that Python zipfile silently drops,
-    # causing ModuleNotFoundError on extraction. -y stores symlinks as symlinks.
-    # We zip directly from inside pkg so customer extraction yields VaultBasis.app at the root.
-    zip_path = REPO / "dist" / f"{PACKAGE_NAME}.zip"
-    subprocess.run(
-        ["zip", "-ry", str(zip_path), ".", "-x", "*.DS_Store"],
-        cwd=pkg,
-        check=True,
-    )
-    artifact_sha = sha256_of(zip_path)
+    # 6. Single-Layer Customer DMG + hashes + candidate manifest (MMP15-DIST-PKG-UX-001).
+    # Create a staging directory for the DMG contents: VaultBasis.app and an Applications shortcut.
+    dmg_stage = REPO / "dist" / f"{PACKAGE_NAME}_dmg_stage"
+    if dmg_stage.exists():
+        shutil.rmtree(dmg_stage)
+    dmg_stage.mkdir(parents=True)
+    shutil.copytree(pkg / APP_NAME, dmg_stage / APP_NAME, symlinks=True)
+    
+    # Create Applications symlink
+    os.symlink("/Applications", dmg_stage / "Applications")
+    
+    dmg_path = REPO / "dist" / f"{PACKAGE_NAME}.dmg"
+    print(f"  [DMG] Building {dmg_path.name} ...")
+    subprocess.run([
+        "hdiutil", "create", "-volname", "VaultBasis", "-srcfolder", str(dmg_stage), "-ov", "-format", "UDZO", str(dmg_path)
+    ], check=True)
+    
+    artifact_sha = sha256_of(dmg_path)
 
-    # 6b. Launch gate — post-ZIP: extract to a fresh temp dir and launch from there.
-    # This tests the actual single-layer customer package.
+    # 6b. Launch gate — post-DMG: mount the DMG, copy app to temp, and launch from there.
+    # This tests the actual customer package.
     with tempfile.TemporaryDirectory(prefix="vb_rc3_extract_") as tmp:
         tmp_path = Path(tmp)
-        with zipfile.ZipFile(zip_path) as zf:
-            # Assert required execute metadata is encoded in the ZIP entries.
-            for info in zf.infolist():
-                if info.filename.endswith("/"):
-                    continue
-                if "/MacOS/" in info.filename and not info.filename.endswith(".dylib"):
-                    unix_mode = (info.external_attr >> 16) & 0xFFFF
-                    assert unix_mode & 0o111, (
-                        f"ZIP entry missing execute bit: {info.filename} "
-                        f"(mode {oct(unix_mode)}) — packaging defect, not a gate repair"
-                    )
-        # Extract with system unzip: -X restores UID/GID/permissions, symlinks preserved.
-        subprocess.run(
-            ["unzip", "-X", "-q", str(zip_path), "-d", str(tmp_path)],
-            check=True,
-        )
-        extracted_app = tmp_path / APP_NAME
-        assert extracted_app.is_dir(), f"extracted single-layer .app missing at {extracted_app}"
-        # Confirm PyInstaller python3.X symlink was preserved — absence means the ZIP
-        # was built without -y.
+        mount_point = tmp_path / "mnt"
+        mount_point.mkdir()
+        
+        print(f"  [DMG] Mounting {dmg_path.name} to {mount_point} ...")
+        subprocess.run([
+            "hdiutil", "attach", str(dmg_path), "-mountpoint", str(mount_point), "-nobrowse", "-quiet"
+        ], check=True)
+        
+        try:
+            extracted_app = tmp_path / APP_NAME
+            shutil.copytree(mount_point / APP_NAME, extracted_app, symlinks=True)
+        finally:
+            print(f"  [DMG] Unmounting {mount_point} ...")
+            subprocess.run(["hdiutil", "detach", str(mount_point), "-quiet"], check=True)
+
+        assert extracted_app.is_dir(), f"extracted .app missing at {extracted_app}"
+        # Confirm PyInstaller python3.X symlink was preserved.
         frameworks = extracted_app / "Contents" / "Frameworks"
         py_symlinks = [p for p in frameworks.iterdir()
                        if p.name.startswith("python3.") and p.is_symlink()]
         assert py_symlinks, (
             f"No python3.X symlink found in extracted Frameworks/ — "
-            f"ZIP was not built with -y (symlinks flag). Packaging defect.\n"
+            f"DMG did not preserve symlinks. Packaging defect.\n"
             f"  Frameworks contents: {[p.name for p in sorted(frameworks.iterdir())]}"
         )
         print(f"  [symlink-assert] Found: {[p.name + ' -> ' + os.readlink(p) for p in py_symlinks]}")
-        launch_gate(extracted_app, "POST-ZIP: extracted .app from single-layer candidate ZIP")
+        launch_gate(extracted_app, "POST-DMG: extracted .app from candidate DMG")
 
 
     # Candidate manifest: honest pre-qualification states. It MUST NOT validate
@@ -326,7 +331,7 @@ def main() -> int:
         "release": {"tag": "RC3-candidate", "commit": commit, "candidate": "RC3-MAC"},
         "platform_artifact": {
             "os": "macos", "architecture": "arm64",
-            "artifact_filename": f"{PACKAGE_NAME}.zip", "sha256": artifact_sha,
+            "artifact_filename": f"{PACKAGE_NAME}.dmg", "sha256": artifact_sha,
         },
         "source_identity": {
             "frozen_commit": commit,
@@ -362,7 +367,7 @@ def main() -> int:
         "qualification": {
             "distribution": "PENDING", "usability": "PENDING", "leakage_gate": "PASS",
             "launch_gate_pre_zip": "PASS",
-            "launch_gate_post_zip": "PASS",
+            "launch_gate_post_dmg": "PASS",
             "result": "CANDIDATE-UNQUALIFIED",
         },
         "publication": {"endpoint": "NONE (do not distribute)", "published_artifact_sha256": artifact_sha},
@@ -373,9 +378,9 @@ def main() -> int:
     manifest_path = REPO / "dist" / f"{PACKAGE_NAME}.manifest.json"
     manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
 
-    print(f"CANDIDATE: {zip_path.name}")
+    print(f"CANDIDATE: {dmg_path.name}")
     print(f"SHA-256:  {artifact_sha}")
-    print(f"SIZE:     {zip_path.stat().st_size / 1e6:.1f} MB")
+    print(f"SIZE:     {dmg_path.stat().st_size / 1e6:.1f} MB")
     return 0
 
 

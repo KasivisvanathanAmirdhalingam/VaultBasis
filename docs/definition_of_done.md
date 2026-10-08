@@ -120,3 +120,74 @@ After completing any slice:
 3. Verify live operational state via `scripts/launch.sh`.
 4. Update `docs/master_tasks_ledger.md` task statuses.
 5. Update `docs/audit/status.md` with latest verification evidence.
+
+---
+
+## 5. Continuous Documentation Discipline Invariant
+
+> **Governing Rule:** No implementation change is considered complete unless code, tests, evidence, and documentation agree in the same change set.
+
+Every task, PR, or code modification must answer four questions before it can be considered **DONE**:
+
+1. **What changed in code or behavior?** (Specific implementation diff and semantic effect)
+2. **Which tests prove it?** (Automated test suites asserting positive and negative paths)
+3. **Which qualification evidence is affected?** (Artifact digests, gate states, proof logs)
+4. **Which documents must be updated because of it?** (Normative specs, index, matrix, runbooks, customer docs)
+
+If documentation is affected and has not been updated in the same change set:
+$$\textbf{Task Status} = \textbf{INCOMPLETE}$$
+*(even if all source tests pass with exit code 0).*
+
+### Pre-Closure Mini-DoD Checklist
+- [ ] Implementation complete
+- [ ] Positive and negative tests complete
+- [ ] Normative documents updated (`docs/reconciliation-semantics-v0.1.md`, schemas, etc.)
+- [ ] Authoritative index updated (`docs/DOCUMENTATION_INDEX.md`)
+- [ ] Traceability matrix updated (`docs/qualification/mmp15_traceability_matrix.md`)
+- [ ] Release claims ledger reviewed/updated (`docs/qualification/mmp15_release_claims_ledger.md`)
+- [ ] Operational runbooks & threat models updated if boundaries altered
+- [ ] Customer guides & IT review package aligned with actual runtime footprint
+- [ ] Release notes updated (`docs/RELEASE_NOTES_1.5.0.md`)
+- [ ] Zero contradictory or stale documentation remains
+
+---
+
+## 6. Mandatory Change Completion Report Template
+
+Every developer status report or PR submission must use this exact reporting format:
+
+```text
+CHANGE COMPLETION REPORT
+
+Code Changed:
+Tests Changed:
+
+Behavior Changed:
+Security Boundary Changed:
+Packaging Changed:
+Commercial Behavior Changed:
+
+Normative Docs Changed:
+Operational Docs Changed:
+Customer Docs Changed:
+Release Notes Changed:
+
+Traceability Updated:
+Claims Ledger Updated:
+Known Limitations Reviewed:
+
+Normative Version Impact:
+Artifact/Evidence Invalidated:
+
+Tests:
+  SOURCE: [PASS / FAIL / SKIP]
+  ARTIFACT: [MAC_PRE_SIGN_PASS / WIN_INCOMPLETE / ...]
+  PHYSICAL: [NOT_RUN / PASS]
+  EXTERNAL: [NOT_RUN / PASS]
+
+Remaining NOT_RUN / INCOMPLETE:
+Canonical Gate Impact:
+Documentation Status: [CURRENT_FOR_PRE_SIGN_SOURCE_BASELINE / INCOMPLETE]
+Documentation Revalidation Trigger: [NONE / SHARED_SOURCE_CHANGE / WINDOWS_ARTIFACT_CREATED / MAC_ARTIFACT_REBUILT / PLATFORM_SIGNING_COMPLETE / PHYSICAL_UAT_COMPLETE / COMMERCIAL_PROVIDER_ACTIVATED / PRODUCTION_PROMOTED]
+Overall Change Status: [IMPLEMENTED / QUALIFIED / INCOMPLETE]
+```

@@ -22,11 +22,11 @@ class KoinlyCapitalGainsParser:
     def parse(cls, data_bytes: bytes, source_id: str, file_hash: str) -> List[CanonicalTransaction]:
         text = data_bytes.decode("utf-8-sig", errors="replace").strip()
         if not text:
-            raise VaultBasisIntakeError("INPUT_EMPTY", "Koinly CSV content is empty")
+            raise VaultBasisIntakeError("INPUT_EMPTY", "The uploaded file is empty. Please export a Capital Gains Report from Koinly: Tax Reports → Capital Gains → Download CSV.")
 
         reader = csv.DictReader(io.StringIO(text))
         if not reader.fieldnames:
-            raise VaultBasisIntakeError("CSV_MALFORMED", "Invalid Koinly CSV: Missing header row")
+            raise VaultBasisIntakeError("CSV_MALFORMED", "The uploaded file could not be parsed as a CSV (no header row found). Please export a Capital Gains Report from Koinly: Tax Reports → Capital Gains → Download CSV.")
 
         # Normalize header lookup
         normalized_headers = {h.strip().lower(): h for h in reader.fieldnames if h}
@@ -39,7 +39,7 @@ class KoinlyCapitalGainsParser:
         if not (date_col and asset_col and proceeds_col and cost_basis_col):
             raise VaultBasisIntakeError(
                 "SCHEMA_REQUIRED_FIELD_MISSING",
-                f"Koinly CSV format unrecognized or drifted. Missing required columns. Headers: {list(reader.fieldnames)}"
+                f"This file does not appear to be a Koinly Capital Gains Report CSV. Expected columns: Date, Asset, Proceeds, Cost basis. To export from Koinly: Tax Reports → Capital Gains → Download CSV. Headers found: {list(reader.fieldnames)}"
             )
 
         amount_col = cls._find_col(normalized_headers, ["amount", "quantity", "units"])

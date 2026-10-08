@@ -57,7 +57,9 @@ QUICKSTART_BANS = [
 
 # Design-token drift tripwire (apps/web-shared/design-tokens-v0.1.json is the
 # versioned source of truth). Each practitioner surface must carry the primary
-# color and body font; independent per-file edits fail loudly here.
+# color (#2563eb) and either the canonical body font (Plus Jakarta Sans, for
+# web/CDN surfaces) or the Edge offline system-font sentinel (system-ui, for
+# the Edge dashboard which must not make outbound CDN calls).
 # apps/web-marketing/index.html uses build-time partial injection; the canonical
 # token surface for all marketing pages is the shared shell partial.
 TOKEN_SURFACES = [
@@ -65,6 +67,11 @@ TOKEN_SURFACES = [
     "VaultBasis_Troubleshooting.html",
     "apps/web-marketing/partials/shell.css",
     "apps/web-verifier/index.html",
+]
+
+# Edge dashboard is an offline surface — it must use system fonts, not CDN fonts.
+# The tripwire checks for the system-ui sentinel instead of Plus Jakarta Sans.
+EDGE_TOKEN_SURFACES = [
     "apps/web-dashboard/index.html",
 ]
 
@@ -99,6 +106,16 @@ def run_checks(repo_root: Path) -> list:
             failures.append(f"TOKEN-DRIFT no primary color in {rel} (see design-tokens-v0.1.json)")
         if "Plus Jakarta Sans" not in text:
             failures.append(f"TOKEN-DRIFT no body font in {rel} (see design-tokens-v0.1.json)")
+
+    for rel in EDGE_TOKEN_SURFACES:
+        p = repo_root / rel
+        if not p.is_file():
+            continue
+        text = p.read_text(encoding="utf-8")
+        if "#2563eb" not in text and "#2563EB" not in text:
+            failures.append(f"TOKEN-DRIFT no primary color in {rel} (see design-tokens-v0.1.json)")
+        if "system-ui" not in text:
+            failures.append(f"TOKEN-DRIFT Edge dashboard must use system-ui font stack (no external CDN) in {rel}")
 
     return failures
 

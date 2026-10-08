@@ -17,7 +17,7 @@ class Form1099DAParser:
     Parses Form 1099-DA representations into CanonicalTransaction objects.
     Preserves unknown acquisition dates and basis according to 2025/2026 transition rules.
     """
-    SCHEMA_ID = "IRS_1099DA_2025_PREVIEW"
+    SCHEMA_ID = "VB-1099DA-2025-SOURCE-V1"
 
     @classmethod
     def parse(cls, data_bytes: bytes, source_id: str, file_hash: str) -> List[CanonicalTransaction]:

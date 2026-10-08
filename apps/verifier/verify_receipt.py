@@ -88,10 +88,10 @@ Verification does NOT constitute:
 class VerificationResult:
     def __init__(self):
         self.is_valid = False
-        self.schema_valid = False
-        self.version_supported = False
-        self.key_fingerprint_valid = False
-        self.signature_valid = False
+        self.schema_valid: Optional[bool] = None
+        self.version_supported: Optional[bool] = None
+        self.key_fingerprint_valid: Optional[bool] = None
+        self.signature_valid: Optional[bool] = None
         self.source_hashes_valid: Optional[bool] = None
         self.receipt_id: Optional[str] = None
         self.outcome_state: Optional[str] = None
@@ -101,6 +101,13 @@ class VerificationResult:
         self.warnings: List[str] = []
 
     def to_dict(self) -> Dict[str, Any]:
+        def _check_str(val: Optional[bool]) -> str:
+            if val is True:
+                return "PASS"
+            if val is False:
+                return "FAIL"
+            return "NOT_PERFORMED"
+
         return {
             "overall_status": "PASS" if self.is_valid else "FAIL",
             "is_valid": self.is_valid,
@@ -109,14 +116,16 @@ class VerificationResult:
             "assurance_level": self.assurance_level,
             "signer_key_id": self.signer_key_id,
             "checks": {
-                "schema_conformance": "PASS" if self.schema_valid else "FAIL",
-                "version_supported": "PASS" if self.version_supported else "FAIL",
-                "key_fingerprint": "PASS" if self.key_fingerprint_valid else "FAIL",
-                "signature_authenticity": "PASS" if self.signature_valid else "FAIL",
+                "schema_conformance": _check_str(self.schema_valid),
+                "version_supported": _check_str(self.version_supported),
+                "key_fingerprint": _check_str(self.key_fingerprint_valid),
+                "signature_authenticity": _check_str(self.signature_valid),
                 "source_hashes": (
                     "PASS" if self.source_hashes_valid is True
-                    else ("FAIL" if self.source_hashes_valid is False else "NOT_ATTACHED")
-                )
+                    else ("FAIL" if self.source_hashes_valid is False else "NOT_PERFORMED")
+                ),
+                "installation_identity": "NOT_AUTHENTICATED",
+                "tax_correctness": "NOT_DETERMINED"
             },
             "errors": self.errors,
             "warnings": self.warnings
@@ -140,9 +149,11 @@ def verify_outcome_receipt(
             jsonschema.validate(instance=receipt_data, schema=schema)
             res.schema_valid = True
         except jsonschema.ValidationError as e:
+            res.schema_valid = False
             res.errors.append(f"Schema validation error: {e.message}")
             return res
         except Exception as e:
+            res.schema_valid = False
             res.errors.append(f"Schema file load failure: {str(e)}")
             return res
     else:
@@ -152,6 +163,7 @@ def verify_outcome_receipt(
     # 2. Version Check
     version = receipt_data.get("receipt_version")
     if version != "v0.1":
+        res.version_supported = False
         res.errors.append(f"Unsupported receipt version: '{version}'. Expected 'v0.1'")
         return res
     res.version_supported = True
@@ -166,10 +178,12 @@ def verify_outcome_receipt(
     try:
         pub_bytes = bytes.fromhex(pub_hex)
         if len(pub_bytes) != 32:
+            res.key_fingerprint_valid = False
             res.errors.append("Invalid Ed25519 public key byte length (expected 32 bytes)")
             return res
         expected_fingerprint = hashlib.sha256(pub_bytes).hexdigest().lower()
-        if expected_fingerprint != res.signer_key_id.lower():
+        if expected_fingerprint != str(res.signer_key_id or "").lower():
+            res.key_fingerprint_valid = False
             res.errors.append(
                 f"Signer key fingerprint mismatch! Declared: {res.signer_key_id}, "
                 f"Calculated: {expected_fingerprint}"
@@ -177,6 +191,7 @@ def verify_outcome_receipt(
             return res
         res.key_fingerprint_valid = True
     except Exception as e:
+        res.key_fingerprint_valid = False
         res.errors.append(f"Failed to process signer public key: {str(e)}")
         return res
 
@@ -185,9 +200,11 @@ def verify_outcome_receipt(
     try:
         sig_bytes = bytes.fromhex(sig_hex)
         if len(sig_bytes) != 64:
+            res.signature_valid = False
             res.errors.append("Invalid Ed25519 signature byte length (expected 64 bytes)")
             return res
     except Exception as e:
+        res.signature_valid = False
         res.errors.append(f"Failed to decode hex signature: {str(e)}")
         return res
 
@@ -199,9 +216,11 @@ def verify_outcome_receipt(
         public_key.verify(sig_bytes, digest)
         res.signature_valid = True
     except InvalidSignature:
+        res.signature_valid = False
         res.errors.append("Ed25519 signature verification FAILED: Receipt payload has been tampered with or corrupted.")
         return res
     except Exception as e:
+        res.signature_valid = False
         res.errors.append(f"Cryptographic error during signature verification: {str(e)}")
         return res
 

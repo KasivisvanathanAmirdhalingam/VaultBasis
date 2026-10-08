@@ -48,14 +48,15 @@ def test_sqlite_pragmas_wal_and_foreign_keys(temp_store):
 def test_schema_migrations_ledger(temp_store):
     """Asserts that schema migrations table is populated sequentially."""
     migrations = temp_store.get_applied_migrations()
-    assert len(migrations) >= 5
+    assert len(migrations) >= 6
     versions = [m["version"] for m in migrations]
-    assert versions == [1, 2, 3, 4, 5]
+    assert versions == [1, 2, 3, 4, 5, 6]
     assert migrations[0]["name"] == "initial_core_schema"
     assert migrations[1]["name"] == "commercial_licensing_schema"
     assert migrations[2]["name"] == "firm_and_workspace_identity"
     assert migrations[3]["name"] == "commercial_audit_log"
     assert migrations[4]["name"] == "installation_evaluation"
+    assert migrations[5]["name"] == "case_finding_reviews"
 
 
 def test_schema_initialization_is_idempotent(temp_store):
@@ -63,7 +64,7 @@ def test_schema_initialization_is_idempotent(temp_store):
     # Re-run init
     temp_store._init_db()
     migrations = temp_store.get_applied_migrations()
-    assert len(migrations) == 5
+    assert len(migrations) == 6
 
 
 def test_foreign_key_cascade_deletion(temp_store):

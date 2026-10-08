@@ -300,7 +300,7 @@
 
       function checkRow(label, key, display) {
         const val = checks[key];
-        const cls = val === 'PASS' ? 'pass' : val === 'FAIL' ? 'fail' : 'info';
+        const cls = val === 'PASS' ? 'pass' : val === 'FAIL' ? 'fail' : (val === 'NOT_PERFORMED' ? 'info' : 'info');
         const text = display || val || '—';
         return `<div class="check-row"><span class="check-label">${label}</span><span class="check-val ${cls}">${text}</span></div>`;
       }
@@ -310,8 +310,8 @@
           <div class="result-header ${overall ? 'pass' : 'fail'}">
             <span class="result-icon">${overall ? '✓' : '✗'}</span>
             <div>
-              <div class="result-title ${overall ? 'pass' : 'fail'}">${overall ? 'PASS — Receipt Valid' : 'FAIL — Receipt Invalid or Tampered'}</div>
-              <div class="result-subtitle">${overall ? 'Payload integrity, contract conformance, and signature are valid.' : 'One or more verification checks failed. Receipt may have been altered.'}</div>
+              <div class="result-title ${overall ? 'pass' : 'fail'}">${overall ? 'PASS — Receipt Integrity Verified' : 'Verification Failed'}</div>
+              <div class="result-subtitle">${overall ? 'Payload integrity, Evidence Contract conformance, and signature are valid.' : (data.errors && data.errors.length > 0 ? data.errors[0] : 'One or more verification checks failed. Receipt may be malformed or altered.')}</div>
             </div>
           </div>
           <div class="checklist">
@@ -319,6 +319,11 @@
             ${checkRow('Evidence Contract Version', 'version_supported')}
             ${checkRow('Receipt Key Self-Consistency', 'key_fingerprint')}
             ${checkRow('Signature Verification', 'signature_authenticity')}
+            ${checkRow('Source Evidence Files', 'source_hashes')}
+            <div class="check-row">
+              <span class="check-label">Originating Installation Identity</span>
+              <span class="check-val info">NOT INDEPENDENTLY AUTHENTICATED</span>
+            </div>
             <div class="check-row">
               <span class="check-label">Tax Correctness</span>
               <span class="check-val not-determined">NOT DETERMINED</span>

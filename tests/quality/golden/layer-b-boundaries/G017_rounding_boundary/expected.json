@@ -1,5 +1,14 @@
 {
-  "outcome_state": "MATCHED",
-  "reason_codes": [],
-  "unresolved_fields": []
+  "outcome_state": "PROCEEDS_DIFFERENCE",
+  "assurance_level": "L2_EVIDENCE_RECONCILED",
+  "material_differences": [
+    {
+      "difference_state": "PROCEEDS_DIFFERENCE",
+      "asset": "BTC",
+      "source_a_value": "22500.004",
+      "source_b_value": "22500.000",
+      "variance": "0.004"
+    }
+  ],
+  "unresolved_items": []
 }

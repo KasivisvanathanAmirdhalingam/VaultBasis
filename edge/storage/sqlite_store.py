@@ -23,7 +23,7 @@ class SQLiteStore:
     online backup/restore, and corruption health checks.
     """
 
-    CURRENT_SCHEMA_VERSION = 5
+    CURRENT_SCHEMA_VERSION = 6
 
     def __init__(self, db_path: Path, synchronous: str = "FULL"):
         self.db_path = Path(db_path)
@@ -187,6 +187,32 @@ class SQLiteStore:
             """)
             now_utc = datetime.now(timezone.utc).isoformat()
             conn.execute("INSERT INTO schema_migrations (version, name, applied_at) VALUES (5, 'installation_evaluation', ?)", (now_utc,))
+
+        # Migration 6: Practitioner Finding Reviews & Receipt Revision Lineage (MMP15-GOLDEN-RESULT-CLOSURE-001)
+        if 6 not in applied_versions:
+            conn.executescript("""
+                CREATE TABLE IF NOT EXISTS case_finding_reviews (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    case_id TEXT NOT NULL,
+                    finding_id TEXT NOT NULL,
+                    disposition TEXT NOT NULL DEFAULT 'OPEN',
+                    note TEXT,
+                    reviewer_reference TEXT,
+                    updated_at TEXT NOT NULL,
+                    FOREIGN KEY (case_id) REFERENCES cases (case_id) ON DELETE CASCADE,
+                    UNIQUE(case_id, finding_id)
+                );
+                CREATE INDEX IF NOT EXISTS idx_case_finding_reviews_case ON case_finding_reviews (case_id);
+            """)
+            cursor.execute("PRAGMA table_info(receipts)")
+            r_cols = [row[1] for row in cursor.fetchall()]
+            if "revision" not in r_cols:
+                cursor.execute("ALTER TABLE receipts ADD COLUMN revision INTEGER DEFAULT 1")
+            if "human_review_state" not in r_cols:
+                cursor.execute("ALTER TABLE receipts ADD COLUMN human_review_state TEXT DEFAULT 'UNREVIEWED'")
+
+            now_utc = datetime.now(timezone.utc).isoformat()
+            conn.execute("INSERT INTO schema_migrations (version, name, applied_at) VALUES (6, 'case_finding_reviews', ?)", (now_utc,))
 
         # Idempotent verification for existing databases
         cursor.execute("PRAGMA table_info(cases)")
@@ -432,25 +458,35 @@ class SQLiteStore:
                 (datetime.now(timezone.utc).isoformat(), case_id)
             )
 
-    def save_receipt(self, receipt_id: str, case_id: str, receipt_dict: Dict[str, Any]):
+    def save_receipt(
+        self,
+        receipt_id: str,
+        case_id: str,
+        receipt_dict: Dict[str, Any],
+        case_status: str = "RECONCILED",
+        revision: int = 1
+    ):
         now_utc = datetime.now(timezone.utc).isoformat()
+        human_review = receipt_dict.get("human_review_state", "UNREVIEWED")
         with self._get_connection() as conn:
             conn.execute("""
-                INSERT OR IGNORE INTO receipts (receipt_id, case_id, receipt_json, created_at)
-                VALUES (?, ?, ?, ?)
+                INSERT OR IGNORE INTO receipts (receipt_id, case_id, receipt_json, created_at, revision, human_review_state)
+                VALUES (?, ?, ?, ?, ?, ?)
             """, (
                 receipt_id,
                 case_id,
                 json.dumps(receipt_dict),
-                now_utc
+                now_utc,
+                revision,
+                human_review
             ))
             conn.execute("""
                 UPDATE cases SET 
                     receipt_id = ?, 
-                    case_status = 'RECEIPT_ISSUED',
+                    case_status = ?,
                     updated_at = ?
                 WHERE case_id = ?
-            """, (receipt_id, now_utc, case_id))
+            """, (receipt_id, case_status, now_utc, case_id))
 
     def get_receipt(self, receipt_id: str) -> Optional[Dict[str, Any]]:
         with self._get_connection() as conn:
@@ -458,6 +494,56 @@ class SQLiteStore:
             if row:
                 return json.loads(row["receipt_json"])
             return None
+
+    def list_receipts_for_case(self, case_id: str) -> List[Dict[str, Any]]:
+        with self._get_connection() as conn:
+            rows = conn.execute(
+                "SELECT receipt_id, created_at, revision, human_review_state, receipt_json FROM receipts WHERE case_id = ? ORDER BY revision DESC, created_at DESC",
+                (case_id,)
+            ).fetchall()
+            results = []
+            for r in rows:
+                data = json.loads(r["receipt_json"])
+                data["revision"] = r["revision"] if "revision" in r.keys() else 1
+                data["human_review_state"] = r["human_review_state"] if "human_review_state" in r.keys() else data.get("human_review_state", "UNREVIEWED")
+                results.append(data)
+            return results
+
+    def save_finding_review(
+        self,
+        case_id: str,
+        finding_id: str,
+        disposition: str,
+        note: Optional[str] = None,
+        reviewer_reference: Optional[str] = None
+    ):
+        now_utc = datetime.now(timezone.utc).isoformat()
+        with self._get_connection() as conn:
+            conn.execute("""
+                INSERT INTO case_finding_reviews (case_id, finding_id, disposition, note, reviewer_reference, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?)
+                ON CONFLICT(case_id, finding_id) DO UPDATE SET
+                    disposition = excluded.disposition,
+                    note = excluded.note,
+                    reviewer_reference = excluded.reviewer_reference,
+                    updated_at = excluded.updated_at;
+            """, (case_id, finding_id, disposition, note, reviewer_reference, now_utc))
+
+    def get_finding_reviews(self, case_id: str) -> Dict[str, Dict[str, Any]]:
+        with self._get_connection() as conn:
+            rows = conn.execute(
+                "SELECT finding_id, disposition, note, reviewer_reference, updated_at FROM case_finding_reviews WHERE case_id = ?",
+                (case_id,)
+            ).fetchall()
+            return {
+                r["finding_id"]: {
+                    "disposition": r["disposition"],
+                    "note": r["note"],
+                    "reviewer_reference": r["reviewer_reference"],
+                    "updated_at": r["updated_at"]
+                }
+                for r in rows
+            }
 
     def delete_receipt(self, receipt_id: str):
         with self._get_connection() as conn:
@@ -793,5 +879,17 @@ class SQLiteStore:
         with self._get_connection() as conn:
             row = conn.execute("SELECT COUNT(*) FROM commercial_audit_log").fetchone()
             return row[0] if row else 0
+
+    def checkpoint_wal(self) -> Dict[str, Any]:
+        """Performs full TRUNCATE checkpoint on SQLite WAL file."""
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            res = cursor.execute("PRAGMA wal_checkpoint(TRUNCATE);").fetchone()
+            return {
+                "busy": res[0] if res else 0,
+                "log": res[1] if res else 0,
+                "checkpointed": res[2] if res else 0,
+            }
+
 
 

@@ -3,6 +3,7 @@ VaultBasis Edge — Local REST API Service
 Conforms to PRD §18.1 (Local REST API), §62.1 (Service Contracts), §21.1 (Zero Egress)
 """
 
+import csv
 import hashlib
 import io
 import json
@@ -19,7 +20,11 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 import os
+import re
+import signal
 import sys
+import threading
+import time
 
 from apps.verifier.verify_receipt import verify_outcome_receipt
 from edge.assurance.reconciliation_engine import DeterministicReconciliationEngine
@@ -108,13 +113,92 @@ commercial_policy = CommercialPolicyService(
 firm_identity_service = FirmIdentityService(db_store, audit_service=commercial_audit_service)
 diagnostic_packager = DiagnosticPackager(db_store, commercial_policy, firm_identity_service)
 
+MAX_UPLOAD_BYTES = 25 * 1024 * 1024  # 25 MB file size limit
+
+
+def sanitize_filename(filename: str) -> str:
+    """Strips path traversal sequences, hostile characters, and Windows reserved names."""
+    normalized = filename.replace('\x00', '').replace('\\', '/')
+    clean = Path(normalized).name
+    clean = re.sub(r'^\.+', '', clean)
+    clean = re.sub(r'[^\w\.\-\_]', '_', clean)
+    stem = Path(clean).stem.upper()
+    if stem in {"CON", "PRN", "AUX", "NUL", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9"}:
+        clean = f"_{clean}"
+    return clean or "unnamed_evidence.csv"
+
+
+def sanitize_csv_cell(value: Any) -> str:
+    """Neutralizes CSV formula injection characters (=, +, -, @, \\t, \\r)."""
+    if value is None:
+        return ""
+    s = str(value)
+    if s and s[0] in ('=', '+', '-', '@', '\t', '\r'):
+        return f"'{s}"
+    return s
 
 
 app = FastAPI(
     title="VaultBasis Edge",
     description="Independent Outcome Verification and Assurance Edge (MMP-1)",
-    version="0.1.0-preview"
+    version=get_system_version().version
 )
+
+import secrets
+
+LOCAL_SESSION_CAPABILITY = secrets.token_hex(16)
+ALLOWED_LOOPBACK_HOSTS = {"127.0.0.1", "localhost", "::1", "[::1]", "testserver", "local"}
+
+
+@app.middleware("http")
+async def security_and_host_validation_middleware(request, call_next):
+    # 1. Host header validation (DNS rebinding protection)
+    raw_host = request.headers.get("host", "")
+    if raw_host.startswith("[") and "]" in raw_host:
+        host_name = raw_host[:raw_host.index("]") + 1].lower()
+    else:
+        host_name = raw_host.split(":")[0].lower() if raw_host else ""
+        
+    if host_name and host_name not in ALLOWED_LOOPBACK_HOSTS:
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={"detail": f"Invalid Host header '{host_name}'. VaultBasis Edge only accepts loopback traffic."}
+        )
+
+    # 2. Origin validation for state-mutating requests (CSRF / Cross-Origin / Hostile File origin defense)
+    if request.method in ("POST", "PUT", "DELETE", "PATCH"):
+        origin = request.headers.get("origin")
+        capability = request.headers.get("x-vaultbasis-capability")
+        has_valid_capability = bool(capability and capability == LOCAL_SESSION_CAPABILITY)
+
+        # Reject Origin: null unless presenting a valid instance-bound capability token
+        if origin == "null" and not has_valid_capability:
+            return JSONResponse(
+                status_code=status.HTTP_403_FORBIDDEN,
+                content={"detail": "Forbidden: 'Origin: null' mutation rejected. Must originate from verified loopback origin or present valid local session capability."}
+            )
+        elif origin and origin != "null":
+            origin_clean = origin.split("://")[-1].split(":")[0].lower()
+            if origin_clean not in ALLOWED_LOOPBACK_HOSTS and not has_valid_capability:
+                return JSONResponse(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    content={"detail": f"Forbidden: Cross-origin mutation request from '{origin}' blocked."}
+                )
+
+    response = await call_next(request)
+
+    # 3. Security Headers
+    response.headers["Content-Security-Policy"] = "default-src 'self' 'unsafe-inline' data:; connect-src 'self' http://127.0.0.1:* http://localhost:*; frame-ancestors 'none';"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "no-referrer"
+
+    # 4. Cache-Control for sensitive API endpoints
+    if request.url.path.startswith("/api/"):
+        response.headers["Cache-Control"] = "no-store, max-age=0, must-revalidate"
+
+    return response
+
 
 # CORS locked to loopback origins only — Edge is a local-only application.
 app.add_middleware(
@@ -147,6 +231,18 @@ class CloneCaseRequest(BaseModel):
 
 class InstallLicenseRequest(BaseModel):
     token: str = Field(..., description="VaultBasis signed commercial license token string (Base64 or JSON envelope)")
+
+
+class FindingReviewRequest(BaseModel):
+    finding_id: str
+    disposition: str = Field("REVIEWED", description="OPEN | REVIEWED | FOLLOW_UP_REQUIRED | LEFT_UNRESOLVED")
+    note: Optional[str] = None
+    reviewer_reference: Optional[str] = None
+
+
+class FinalizeReviewRequest(BaseModel):
+    reviewer_reference: Optional[str] = "Practitioner Review"
+    review_notes: Optional[str] = None
 
 
 class StartEvaluationRequest(BaseModel):
@@ -192,6 +288,7 @@ SAMPLE_KOINLY_CSV = b"""Date,Asset,Amount,Cost basis,Proceeds,Gain / loss,Date a
 # ------------------------------------------------------------------------------
 
 @app.get("/api/health")
+@app.get("/health")
 def health_check():
     sys_ver = get_system_version()
     return {
@@ -253,6 +350,33 @@ def download_diagnostic_bundle():
         media_type="application/zip",
         headers={"Content-Disposition": f"attachment; filename={filename}"},
     )
+
+
+@app.post("/api/system/quit")
+@app.post("/api/system/shutdown")
+def quit_vaultbasis():
+    """
+    Safely terminates the local VaultBasis Edge process.
+    Performs full SQLite WAL checkpoint, flushes pending state, and exits.
+    """
+    try:
+        db_store.checkpoint_wal()
+    except Exception:
+        pass
+
+    def _shutdown_worker():
+        time.sleep(0.25)
+        try:
+            os.kill(os.getpid(), signal.SIGTERM)
+        except Exception:
+            os._exit(0)
+
+    threading.Thread(target=_shutdown_worker, daemon=True).start()
+    return {
+        "status": "SHUTTING_DOWN",
+        "message": "VaultBasis Edge is closing safely. Database checkpointed, sockets closing.",
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    }
 
 
 @app.get("/api/commercial/audit")
@@ -737,6 +861,9 @@ def get_case(case_id: str):
                 "total_evaluated_count": len(receipt_data.get("material_differences", [])) + len(receipt_data.get("unresolved_items", []))
             }
 
+    reviews_data = db_store.get_finding_reviews(case.case_id)
+    receipts_history = db_store.list_receipts_for_case(case.case_id)
+
     # Return structured case details with domain actions
     return {
         "case_id": case.case_id,
@@ -753,6 +880,8 @@ def get_case(case_id: str):
         "receipt_id": case.receipt_id,
         "reconciliation": reconciliation_data,
         "receipt": receipt_data,
+        "reviews": reviews_data,
+        "receipt_history": receipts_history,
         "sources": {k: v.model_dump() for k, v in case.sources.items()},
         "transactions": [t.to_summary_dict() for t in case.transactions],
         "created_at": case.created_at,
@@ -763,6 +892,7 @@ def get_case(case_id: str):
             "can_upload_source_b": not is_sample and case.receipt_id is None,
             "can_clone": True,
             "can_view_receipt": case.receipt_id is not None,
+            "can_finalize_review": case.receipt_id is not None,
             "can_restart_sample": is_sample,
         }
     }
@@ -785,11 +915,18 @@ async def upload_source(
     if not content:
         raise HTTPException(status_code=400, detail="Uploaded file is empty")
 
-    source_id = f"SRC-{uuid.uuid4().hex[:6].upper()}_{Path(file.filename or 'file').stem}"
+    if len(content) > MAX_UPLOAD_BYTES:
+        raise HTTPException(
+            status_code=413,
+            detail=f"File exceeds maximum allowed size of {MAX_UPLOAD_BYTES // (1024 * 1024)} MB."
+        )
+
+    safe_filename = sanitize_filename(file.filename or "evidence.csv")
+    source_id = f"SRC-{uuid.uuid4().hex[:6].upper()}_{Path(safe_filename).stem}"
     try:
         meta, transactions = IntakeDispatcher.ingest_document(
             data_bytes=content,
-            filename=file.filename or "unknown",
+            filename=safe_filename,
             source_id=source_id,
             declared_schema=source_type
         )
@@ -814,7 +951,6 @@ def reconcile_case(case_id: str):
     if not case:
         raise HTTPException(status_code=404, detail=f"Case '{case_id}' not found")
 
-    # Evaluate commercial entitlement before performing reconciliation
     decision = commercial_policy.authorize(
         CommercialOperation.RECONCILE_CASE,
         context={
@@ -828,14 +964,26 @@ def reconcile_case(case_id: str):
             content=decision.to_error_dict()
         )
 
+    if getattr(case, "case_kind", "PRODUCTION") == "BUNDLED_SAMPLE" and case.receipt_id and case.case_status == "RECONCILED":
+        existing_receipt = db_store.get_receipt(case.receipt_id)
+        if existing_receipt:
+            return {
+                "status": "RECEIPT_ALREADY_ISSUED",
+                "case_id": case_id,
+                "outcome_state": case.outcome_state,
+                "assurance_level": case.assurance_level,
+                "receipt_id": case.receipt_id,
+                "reconciliation": DeterministicReconciliationEngine.reconcile_case(case).to_dict(),
+                "receipt": existing_receipt
+            }
+
     if len(case.sources) < 2:
         raise HTTPException(
             status_code=400,
             detail="Reconciliation requires at least two source documents (e.g. Form 1099-DA and Koinly CSV)"
         )
 
-
-    # Compute a manifest hash of the current source set (sorted for determinism).
+    # Compute manifest hash of sources
     current_manifest = hashlib.sha256(
         json.dumps(
             sorted((sid, s.sha256_hash) for sid, s in case.sources.items())
@@ -845,45 +993,29 @@ def reconcile_case(case_id: str):
     # Execute deterministic reconciliation
     recon_result = DeterministicReconciliationEngine.reconcile_case(case)
 
-    # Return existing receipt only if sources are identical to when it was issued.
-    if case.receipt_id:
-        existing_receipt = db_store.get_receipt(case.receipt_id)
-        if existing_receipt:
-            issued_sources = existing_receipt.get("source_hashes", {})
-            issued_manifest = hashlib.sha256(
-                json.dumps(sorted(issued_sources.items())).encode()
-            ).hexdigest()
-            if current_manifest == issued_manifest:
-                return {
-                    "status": "RECEIPT_ALREADY_ISSUED",
-                    "case_id": case_id,
-                    "receipt_id": case.receipt_id,
-                    "outcome_state": case.outcome_state,
-                    "assurance_level": case.assurance_level,
-                    "reconciliation": recon_result.to_dict(),
-                    "receipt": existing_receipt,
-                    "message": "Receipt already exists for this case. View it via /cases/{case_id}/receipt.",
-                }
-
-    # Build Outcome Receipt Payload
+    # Build Outcome Receipt Payload (Preliminary Receipt)
     receipt_id = str(uuid.uuid4())
     source_hashes = {s.source_id: s.sha256_hash for s in case.sources.values()}
     source_schema_ids = {s.source_id: s.schema_id for s in case.sources.values()}
+    sys_ver = get_system_version()
+    revisions = db_store.list_receipts_for_case(case_id)
+    revision_num = len(revisions) + 1
 
     receipt_payload = {
         "receipt_version": "v0.1",
         "receipt_id": receipt_id,
         "case_id": case.case_id,
+        "revision": revision_num,
         "claim_type": "DIGITAL_ASSET_TAX_RECONCILIATION",
         "claimant_type": "TAXPAYER",
-        "producer_reference": "VaultBasis Edge v0.1.0-preview",
+        "producer_reference": f"VaultBasis Edge v{sys_ver.version}",
         "source_ids": list(case.sources.keys()),
         "source_hashes": source_hashes,
         "source_schema_ids": source_schema_ids,
         "canonicalization_version": "v0.1",
-        "ruleset_id": f"US_IRC_1099DA_{case.tax_year}_V1",
-        "engine_version": "0.1.0",
-        "policy_version": "0.1.0",
+        "ruleset_id": f"VB_US_1099DA_{case.tax_year}_V1",
+        "engine_version": sys_ver.version,
+        "policy_version": "1.5.0",
         "assurance_level": recon_result.assurance_level,
         "outcome_state": recon_result.outcome_state,
         "material_differences": [d.to_dict() for d in recon_result.material_differences],
@@ -893,15 +1025,15 @@ def reconcile_case(case_id: str):
         "created_at": datetime.now(timezone.utc).isoformat()
     }
 
-    # Cryptographically sign receipt using local Ed25519 installation key
+    # Cryptographically sign preliminary receipt
     signed_receipt = receipt_signer.sign_receipt(receipt_payload)
 
-    # Persist receipt and update case status
-    db_store.save_receipt(receipt_id, case.case_id, signed_receipt)
+    # Persist receipt and transition case to RECONCILED (Preliminary stage)
+    db_store.save_receipt(receipt_id, case.case_id, signed_receipt, case_status="RECONCILED", revision=revision_num)
     case.outcome_state = recon_result.outcome_state
     case.assurance_level = recon_result.assurance_level
     case.receipt_id = receipt_id
-    case.case_status = "RECEIPT_ISSUED"
+    case.case_status = "RECONCILED"
     db_store.save_case(case)
 
     return {
@@ -910,8 +1042,102 @@ def reconcile_case(case_id: str):
         "outcome_state": recon_result.outcome_state,
         "assurance_level": recon_result.assurance_level,
         "receipt_id": receipt_id,
+        "revision": revision_num,
+        "human_review_state": "UNREVIEWED",
         "reconciliation": recon_result.to_dict(),
         "receipt": signed_receipt
+    }
+
+
+@app.get("/api/cases/{case_id}/reviews")
+def get_case_reviews(case_id: str):
+    case = db_store.get_case(case_id)
+    if not case:
+        raise HTTPException(status_code=404, detail=f"Case '{case_id}' not found")
+    reviews = db_store.get_finding_reviews(case_id)
+    return {
+        "case_id": case_id,
+        "reviews": reviews
+    }
+
+
+@app.post("/api/cases/{case_id}/reviews")
+def record_finding_review(case_id: str, req: FindingReviewRequest):
+    case = db_store.get_case(case_id)
+    if not case:
+        raise HTTPException(status_code=404, detail=f"Case '{case_id}' not found")
+    valid_dispositions = {"OPEN", "REVIEWED", "FOLLOW_UP_REQUIRED", "LEFT_UNRESOLVED"}
+    if req.disposition not in valid_dispositions:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid disposition '{req.disposition}'. Expected one of {valid_dispositions}"
+        )
+    db_store.save_finding_review(
+        case_id=case_id,
+        finding_id=req.finding_id,
+        disposition=req.disposition,
+        note=req.note,
+        reviewer_reference=req.reviewer_reference or "Practitioner Review"
+    )
+    return {
+        "status": "RECORDED",
+        "case_id": case_id,
+        "finding_id": req.finding_id,
+        "disposition": req.disposition,
+        "reviews": db_store.get_finding_reviews(case_id)
+    }
+
+
+@app.post("/api/cases/{case_id}/finalize-review")
+def finalize_practitioner_review(case_id: str, req: Optional[FinalizeReviewRequest] = None):
+    case = db_store.get_case(case_id)
+    if not case or not case.receipt_id:
+        raise HTTPException(status_code=400, detail="Case must be reconciled before finalizing review.")
+
+    prelim_receipt = db_store.get_receipt(case.receipt_id)
+    if not prelim_receipt:
+        raise HTTPException(status_code=404, detail="Preliminary receipt not found.")
+
+    diffs = prelim_receipt.get("material_differences", [])
+    unres = prelim_receipt.get("unresolved_items", [])
+    total_findings = len(diffs) + len(unres)
+
+    final_review_state = "REVIEWED_ACCEPTED" if total_findings == 0 else "REVIEWED_ANNOTATED"
+
+    final_receipt_id = str(uuid.uuid4())
+    revisions = db_store.list_receipts_for_case(case_id)
+    revision_num = len(revisions) + 1
+
+    final_payload = dict(prelim_receipt)
+    final_payload["receipt_id"] = final_receipt_id
+    final_payload["revision"] = revision_num
+    final_payload["prior_receipt_id"] = prelim_receipt.get("receipt_id")
+    final_payload["human_review_state"] = final_review_state
+    final_payload["created_at"] = datetime.now(timezone.utc).isoformat()
+    final_payload.pop("signature", None)
+    final_payload.pop("signer_public_key", None)
+    final_payload.pop("signer_key_id", None)
+
+    signed_final = receipt_signer.sign_receipt(final_payload)
+    db_store.save_receipt(
+        final_receipt_id,
+        case_id,
+        signed_final,
+        case_status="RECEIPT_ISSUED",
+        revision=revision_num
+    )
+    case.case_status = "RECEIPT_ISSUED"
+    case.receipt_id = final_receipt_id
+    db_store.save_case(case)
+
+    return {
+        "status": "REVIEW_FINALIZED",
+        "case_id": case_id,
+        "receipt_id": final_receipt_id,
+        "revision": revision_num,
+        "prior_receipt_id": prelim_receipt.get("receipt_id"),
+        "human_review_state": final_review_state,
+        "receipt": signed_final
     }
 
 
@@ -927,8 +1153,116 @@ def get_receipt(case_id: str):
     return receipt
 
 
+# ------------------------------------------------------------------------------
+# Three-Tier Evidence Export Architecture (MMP15-GOLDEN-RESULT-CLOSURE-001)
+# ------------------------------------------------------------------------------
+
+def _build_findings_csv(case: CanonicalCase, receipt: Dict[str, Any], reviews: Dict[str, Any]) -> str:
+    buf = io.StringIO()
+    writer = csv.writer(buf)
+    writer.writerow(["# VaultBasis Findings Workpaper"])
+    writer.writerow(["# Case ID", sanitize_csv_cell(case.case_id)])
+    writer.writerow(["# Tax Year", sanitize_csv_cell(case.tax_year)])
+    writer.writerow(["# Receipt ID", sanitize_csv_cell(receipt.get("receipt_id", ""))])
+    writer.writerow(["# Outcome State", sanitize_csv_cell(receipt.get("outcome_state", ""))])
+    writer.writerow(["# Human Review State", sanitize_csv_cell(receipt.get("human_review_state", ""))])
+    writer.writerow([])
+    writer.writerow([
+        "Finding_ID",
+        "Finding_Type",
+        "Classification_or_Reason",
+        "Asset",
+        "Source_A_Ref",
+        "Source_A_Value",
+        "Source_B_Ref",
+        "Source_B_Value",
+        "Variance",
+        "Description",
+        "Review_Disposition",
+        "Practitioner_Note",
+        "Reviewer_Ref"
+    ])
+    for d in receipt.get("material_differences", []):
+        f_id = d.get("difference_id", "")
+        rev = reviews.get(f_id, {})
+        writer.writerow([
+            sanitize_csv_cell(f_id),
+            "MATERIAL_DIFFERENCE",
+            sanitize_csv_cell(d.get("difference_state", "")),
+            sanitize_csv_cell(d.get("asset", "")),
+            sanitize_csv_cell(d.get("source_a_ref", "")),
+            sanitize_csv_cell(d.get("source_a_value", "")),
+            sanitize_csv_cell(d.get("source_b_ref", "")),
+            sanitize_csv_cell(d.get("source_b_value", "")),
+            sanitize_csv_cell(d.get("variance", "")),
+            sanitize_csv_cell(d.get("description", "")),
+            sanitize_csv_cell(rev.get("disposition", "OPEN")),
+            sanitize_csv_cell(rev.get("note", "")),
+            sanitize_csv_cell(rev.get("reviewer_reference", ""))
+        ])
+    for u in receipt.get("unresolved_items", []):
+        u_id = u.get("item_id", "")
+        rev = reviews.get(u_id, {})
+        writer.writerow([
+            sanitize_csv_cell(u_id),
+            "UNRESOLVED_ITEM",
+            sanitize_csv_cell(u.get("reason_code", "")),
+            sanitize_csv_cell(u.get("affected_source_id", "")),
+            sanitize_csv_cell(u.get("affected_row_ref", "")),
+            "",
+            "",
+            "",
+            "",
+            sanitize_csv_cell(u.get("description", "")),
+            sanitize_csv_cell(rev.get("disposition", "OPEN")),
+            sanitize_csv_cell(rev.get("note", "")),
+            sanitize_csv_cell(rev.get("reviewer_reference", ""))
+        ])
+    return buf.getvalue()
+
+
+@app.get("/api/cases/{case_id}/export/receipt")
+def export_receipt_only(case_id: str):
+    """Tier 1: Export signed Evidence Receipt JSON only."""
+    case = db_store.get_case(case_id)
+    if not case or not case.receipt_id:
+        raise HTTPException(status_code=404, detail="Case has no receipt to export")
+    receipt = db_store.get_receipt(case.receipt_id)
+    if not receipt:
+        raise HTTPException(status_code=404, detail="Receipt record not found")
+    content = json.dumps(receipt, indent=2).encode("utf-8")
+    filename = f"VaultBasis_Receipt_{case.receipt_id}.json"
+    return Response(
+        content=content,
+        media_type="application/json",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
+
+
+@app.get("/api/cases/{case_id}/export/findings")
+def export_findings_workpaper(case_id: str):
+    """Tier 2: Export Findings Workpaper CSV with practitioner review dispositions."""
+    case = db_store.get_case(case_id)
+    if not case or not case.receipt_id:
+        raise HTTPException(status_code=404, detail="Case has no reconciliation findings to export")
+    receipt = db_store.get_receipt(case.receipt_id)
+    if not receipt:
+        raise HTTPException(status_code=404, detail="Receipt record not found")
+    reviews = db_store.get_finding_reviews(case_id)
+    csv_str = _build_findings_csv(case, receipt, reviews)
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    filename = f"VaultBasis_Findings_{case_id}_{timestamp}.csv"
+    return Response(
+        content=csv_str.encode("utf-8"),
+        media_type="text/csv",
+        headers={"Content-Disposition": f"attachment; filename={filename}"}
+    )
+
+
+@app.get("/api/cases/{case_id}/export/package")
 @app.get("/api/cases/{case_id}/export")
-def export_evidence_bundle(case_id: str):
+def export_full_evidence_package(case_id: str):
+    """Tier 3: Export complete Evidence Package ZIP with manifest, receipt, findings, schema, and sources."""
     case = db_store.get_case(case_id)
     if not case or not case.receipt_id:
         raise HTTPException(status_code=404, detail="Case has no completed receipt to export")
@@ -937,52 +1271,132 @@ def export_evidence_bundle(case_id: str):
     if not receipt:
         raise HTTPException(status_code=404, detail="Receipt record not found")
 
+    reviews = db_store.get_finding_reviews(case_id)
+    findings_csv = _build_findings_csv(case, receipt, reviews)
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    sys_ver = get_system_version()
+
+    manifest_files = []
     zip_buffer = io.BytesIO()
+
     with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:
         # 1. Primary Signed Outcome Receipt
-        zip_file.writestr(
-            "receipt-v0.1.json",
-            json.dumps(receipt, indent=2)
-        )
-        # 2. Normative JSON Schema
+        receipt_bytes = json.dumps(receipt, indent=2).encode("utf-8")
+        receipt_filename = "receipt-v0.1.json"
+        zip_file.writestr(receipt_filename, receipt_bytes)
+        manifest_files.append({
+            "path": receipt_filename,
+            "role": "SIGNED_EVIDENCE_RECEIPT",
+            "sha256": hashlib.sha256(receipt_bytes).hexdigest(),
+            "byte_size": len(receipt_bytes)
+        })
+
+        # 2. Findings Workpaper CSV
+        findings_bytes = findings_csv.encode("utf-8")
+        findings_filename = f"VaultBasis_Findings_{timestamp}.csv"
+        zip_file.writestr(findings_filename, findings_bytes)
+        manifest_files.append({
+            "path": findings_filename,
+            "role": "FINDINGS_WORKPAPER_CSV",
+            "sha256": hashlib.sha256(findings_bytes).hexdigest(),
+            "byte_size": len(findings_bytes)
+        })
+
+        # 3. Normative JSON Schema
         schema_path = RESOURCE_BASE / "schemas" / "receipt" / "receipt-v0.1.json"
         if schema_path.exists():
-            zip_file.writestr("schemas/receipt-v0.1.json", schema_path.read_text(encoding="utf-8"))
-        # 3. Source Evidence Files
+            schema_bytes = schema_path.read_bytes()
+            zip_file.writestr("schemas/receipt-v0.1.json", schema_bytes)
+            manifest_files.append({
+                "path": "schemas/receipt-v0.1.json",
+                "role": "NORMATIVE_EVIDENCE_SCHEMA",
+                "sha256": hashlib.sha256(schema_bytes).hexdigest(),
+                "byte_size": len(schema_bytes)
+            })
+
+        # 4. Standalone Offline Verifier HTML
+        verifier_path = RESOURCE_BASE / "apps" / "edge-offline-verifier" / "index.html"
+        if verifier_path.exists():
+            verifier_bytes = verifier_path.read_bytes()
+            zip_file.writestr("VERIFY.html", verifier_bytes)
+            manifest_files.append({
+                "path": "VERIFY.html",
+                "role": "STANDALONE_OFFLINE_VERIFIER_UI",
+                "sha256": hashlib.sha256(verifier_bytes).hexdigest(),
+                "byte_size": len(verifier_bytes)
+            })
+
+        # 5. Source Evidence Files
         for source_id, s_meta in case.sources.items():
             raw_bytes = db_store.get_source_file_bytes(source_id)
             if raw_bytes:
-                zip_file.writestr(f"evidence/{source_id}_{s_meta.filename}", raw_bytes)
-        # 4. Verification Readme (strictly practitioner guidance and schema instructions; zero implementation code)
-        zip_file.writestr(
-            "VERIFY_INSTRUCTIONS.txt",
-            f"""VAULTBASIS OUTCOME RECEIPT VERIFICATION INSTRUCTIONS
-Case ID: {case.case_id}
-Client: {getattr(case, 'client_reference', 'Sample Client')}
+                src_path = f"evidence/{source_id}_{sanitize_filename(s_meta.filename)}"
+                zip_file.writestr(src_path, raw_bytes)
+                manifest_files.append({
+                    "path": src_path,
+                    "role": "CLIENT_SOURCE_EVIDENCE",
+                    "sha256": s_meta.sha256_hash,
+                    "byte_size": len(raw_bytes)
+                })
+
+        # 6. Verification & Confidentiality Instructions
+        verify_instructions = f"""VAULTBASIS OUTCOME RECEIPT VERIFICATION INSTRUCTIONS
+VAULTBASIS EVIDENCE PACKAGE VERIFICATION & CONFIDENTIALITY NOTICE
+Case Identifier: {case.case_id}
+Tax Year: {case.tax_year}
 Receipt ID: {case.receipt_id}
+Package Exported: {datetime.now(timezone.utc).isoformat()}
 
-HOW TO VERIFY THIS RECEIPT:
+CONFIDENTIALITY & DATA RETENTION NOTICE:
+This export package contains client-provided tax records and transaction evidence.
+Handle according to your firm's confidentiality, record retention, and secure transmission policies.
 
-PRIMARY PRACTITIONER PATH (GUI / Offline Verifier):
-1. Open VaultBasis Edge or navigate to http://127.0.0.1:8000/offline-verifier (or https://vaultbasis.com/verifier).
-2. Select or drag-and-drop 'receipt-v0.1.json' into the verifier window.
-3. Review the automated verification checklist (Schema Conformance, Contract Version, Key Consistency, Signature Verification).
+HOW TO VERIFY THIS EVIDENCE PACKAGE:
+1. Double-click 'VERIFY.html' in this folder to open the self-contained Offline Verifier in any web browser.
+2. Drag and drop '{receipt_filename}' into the verifier.
+3. Confirm that all four integrity checks pass:
+   ✓ JSON Schema Conformance: PASS
+   ✓ Evidence Contract Version: PASS
+   ✓ Receipt Key Self-Consistency: PASS
+   ✓ Signature Integrity: PASS
 
-SECONDARY TECHNICAL AUDIT PATH (Air-gapped Python CLI):
-For independent technical auditors wishing to verify via command line using the standalone verifier utility provided in the VaultBasis distribution or repository:
-1. Run verify_receipt.py against the exported receipt and evidence folder:
-   python3 verify_receipt.py receipt-v0.1.json --evidence-dir evidence/
-
-IMPORTANT REGULATORY & ASSURANCE BOUNDARY:
-VaultBasis performs bounded, deterministic reconciliation of supported sources under declared semantics. It does not assess tax correctness, establish legal compliance, or determine whether source information is complete or accurate. Successful verification confirms that the receipt signature is valid for the declared installation public key and that the signed receipt content has not changed relative to that signature. Verification does not constitute a professional opinion, legal finding, government approval, or endorsement by the IRS or any other government authority. The practitioner remains responsible for professional interpretation and application of applicable law.
+LIMITATIONS & ASSURANCE BOUNDARY:
+VaultBasis performs bounded, deterministic reconciliation under declared semantics.
+It does not assess tax correctness or establish legal compliance. Verification confirms payload
+integrity and cryptographic signature validity. It does not independently authenticate the
+originating installation identity.
 """
-        )
+        zip_file.writestr("VERIFY_INSTRUCTIONS.txt", verify_instructions)
+        manifest_files.append({
+            "path": "VERIFY_INSTRUCTIONS.txt",
+            "role": "VERIFICATION_INSTRUCTIONS",
+            "sha256": hashlib.sha256(verify_instructions.encode("utf-8")).hexdigest(),
+            "byte_size": len(verify_instructions.encode("utf-8"))
+        })
+
+        # 7. Package Manifest JSON
+        manifest_obj = {
+            "package_version": "1.0",
+            "case_id": case.case_id,
+            "receipt_id": case.receipt_id,
+            "revision": receipt.get("revision", 1),
+            "receipt_created_at": receipt.get("created_at"),
+            "package_exported_at": datetime.now(timezone.utc).isoformat(),
+            "product_version": sys_ver.version,
+            "source_commit": sys_ver.build_sha,
+            "ruleset_id": receipt.get("ruleset_id"),
+            "human_review_state": receipt.get("human_review_state"),
+            "outcome_state": receipt.get("outcome_state"),
+            "files": manifest_files
+        }
+        zip_file.writestr("manifest.json", json.dumps(manifest_obj, indent=2))
 
     zip_buffer.seek(0)
+    pkg_filename = f"VaultBasis_Evidence_{case_id}_{timestamp}.zip"
     return StreamingResponse(
         zip_buffer,
         media_type="application/zip",
-        headers={"Content-Disposition": f"attachment; filename=VaultBasis_Evidence_{case_id}.zip"}
+        headers={"Content-Disposition": f"attachment; filename={pkg_filename}"}
     )
 
 

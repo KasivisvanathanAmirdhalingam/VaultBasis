@@ -258,11 +258,14 @@ def test_evidence_bundle_export_allowlist_and_negative_controls():
             "receipt-v0.1.json",
             "schemas/receipt-v0.1.json",
             "VERIFY_INSTRUCTIONS.txt",
+            "VERIFY.html",
+            "manifest.json"
         }
         for name in namelist:
             is_exact = name in allowed_exact
             is_evidence = name.startswith("evidence/")
-            assert is_exact or is_evidence, f"Unexpected member violating Evidence Export allowlist: {name}"
+            is_findings = name.startswith("VaultBasis_Findings_") and name.endswith(".csv")
+            assert is_exact or is_evidence or is_findings, f"Unexpected member violating Evidence Export allowlist: {name}"
 
         # 2. Negative Controls: Absolute ban on Python files and internal directories
         assert "verify_receipt.py" not in namelist, "verify_receipt.py leaked at root of evidence bundle"

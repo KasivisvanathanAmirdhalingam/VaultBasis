@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://vaultbasis.io/schemas/receipt/receipt-v0.1.json",
   "title": "VaultBasis Outcome Receipt v0.1",
-  "description": "Normative schema for an independent outcome verification receipt issued by VaultBasis Edge under Evidence Contract v0.1.",
+  "description": "Normative schema for an independent outcome verification receipt issued by VaultBasis Edge under Evidence Contract v0.1. IMMUTABILITY POLICY: Once any production receipt is issued under this schema version identifier, this schema's normative contract is frozen. Additive or breaking changes require a new schema version (v0.2, ...). Changing this file after production receipts exist invalidates the receipt-verifier contract and creates evidence integrity risk.",
   "type": "object",
   "required": [
     "receipt_version",
@@ -284,6 +284,7 @@
               "PRICE_UNAVAILABLE",
               "BASIS_UNAVAILABLE",
               "DATE_UNAVAILABLE",
+              "TIMEZONE_CONTEXT_MISSING",
               "INVENTORY_DEFICIT",
               "AMBIGUOUS_SOURCE_DATA"
             ]
@@ -413,6 +414,18 @@
         }
       },
       "description": "Legacy shallow provenance trace (RC1)."
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Monotonic revision number of this receipt for the given case."
+    },
+    "prior_receipt_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "description": "Identifier of the predecessor receipt in the revision chain."
     }
   }
 }

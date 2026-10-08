@@ -1,24 +1,31 @@
 {
   "fixture_id": "G017_rounding_boundary",
   "layer": "B",
-  "status": "BLOCKED",
+  "status": "ACTIVE",
   "semantic_spec_version": "0.1",
   "evidence_contract_version": "0.1",
-  "description": "BLOCKED by SEM-ROUND-002",
+  "description": "Sub-cent monetary differences must not be silently coerced to equality; source precision is preserved and exact differences are detected.",
   "inputs": {
     "broker": "broker.csv",
     "ledger": "ledger.csv"
   },
   "expected": {
-    "outcome_state": "MATCHED",
+    "outcome_state": "PROCEEDS_DIFFERENCE",
     "reason_codes": [],
     "unresolved_fields": []
   },
-  "must_not": [],
+  "must_not": [
+    "round_source_values",
+    "apply_implicit_tolerance"
+  ],
   "references": {
-    "semantic_rules": [],
+    "semantic_rules": [
+      "SEM-NUM-001",
+      "SEM-ROUND-001",
+      "SEM-ROUND-002"
+    ],
     "acceptance_gates": [
-      "AC-03"
+      "PROD-GATE-15"
     ]
   }
 }

@@ -8,9 +8,6 @@
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <link rel="manifest" href="/site.webmanifest">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #f8fafc;
@@ -38,7 +35,7 @@
     body {
       background-color: var(--bg);
       color: var(--text);
-      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
@@ -72,7 +69,7 @@
       flex-shrink: 0;
     }
     .brand h1 {
-      font-family: 'Outfit', sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       font-size: 1.35rem;
       font-weight: 800;
       letter-spacing: -0.01em;
@@ -86,7 +83,7 @@
       padding: 2px 8px;
       border-radius: 999px;
       font-size: 0.72rem;
-      font-family: 'JetBrains Mono', monospace;
+      font-family: 'SF Mono', 'Cascadia Mono', 'Consolas', 'Courier New', monospace;
       font-weight: 600;
       white-space: nowrap;
     }
@@ -432,7 +429,7 @@
     .summary-count {
       font-size: 1.8rem;
       font-weight: 800;
-      font-family: 'Outfit', sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     }
     .summary-card.agreed .summary-count { color: var(--success); }
     .summary-card.difference .summary-count { color: var(--warning); }
@@ -475,7 +472,7 @@
       padding: 3px 8px;
       border-radius: 4px;
       font-size: 0.74rem;
-      font-family: 'JetBrains Mono', monospace;
+      font-family: 'SF Mono', 'Cascadia Mono', 'Consolas', 'Courier New', monospace;
       font-weight: 600;
     }
     .badge-success { background: var(--success-bg); color: var(--success); border: 1px solid rgba(5, 150, 105, 0.25); }
@@ -584,7 +581,7 @@
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 1rem;
-      font-family: 'JetBrains Mono', monospace;
+      font-family: 'SF Mono', 'Cascadia Mono', 'Consolas', 'Courier New', monospace;
       font-size: 0.8rem;
       color: #1e3a8a;
       overflow-x: auto;
@@ -727,7 +724,6 @@
       <div>
         <h1>VaultBasis Edge</h1>
       </div>
-      <span class="brand-badge">PREVIEW</span>
       <span class="brand-badge" style="color: #059669; border-color: rgba(5, 150, 105, 0.3);">LOCAL EVIDENCE PROCESSING</span>
       <span class="brand-badge" id="header-entitlement-badge" style="display: none; cursor: pointer; background: #f0fdf4; border-color: #86efac; color: #166534;" onclick="openNewCaseModal()" title="View commercial license status">⚡ Evaluation</span>
     </div>
@@ -736,6 +732,7 @@
       <a href="/offline-verifier" class="nav-btn" target="_blank">Offline Verifier</a>
       <button class="nav-btn" id="nav-btn-help" onclick="showScreen('screen-help')">Help</button>
       <button class="nav-btn primary" onclick="openNewCaseModal()">+ New Case</button>
+      <button class="nav-btn" id="nav-btn-quit" onclick="confirmQuitVaultBasis()" title="Safely close VaultBasis Edge and shutdown local server" style="border-color: #fca5a5; color: #b91c1c;">Quit</button>
     </div>
   </header>
 
@@ -860,7 +857,7 @@
           </div>
           <div class="meta-group">
             <span class="meta-label">Case Identifier</span>
-            <span class="meta-value" id="ctx-case-id" style="font-family: 'JetBrains Mono'; font-size: 0.85rem;">CASE-SAMPLE</span>
+            <span class="meta-value" id="ctx-case-id" style="font-family: 'SF Mono', 'Cascadia Mono', 'Consolas', 'Courier New', monospace; font-size: 0.85rem;">CASE-SAMPLE</span>
           </div>
           <div class="meta-group">
             <span class="meta-label">Chronology</span>
@@ -881,17 +878,17 @@
         <div class="step-divider"></div>
         <div class="step-item" id="step-2">
           <div class="step-num">2</div>
-          <span>Reconciliation</span>
+          <span>Deterministic Reconciliation</span>
         </div>
         <div class="step-divider"></div>
         <div class="step-item" id="step-3">
           <div class="step-num">3</div>
-          <span>Review Findings</span>
+          <span>Practitioner Review</span>
         </div>
         <div class="step-divider"></div>
         <div class="step-item" id="step-4">
           <div class="step-num">4</div>
-          <span>Evidence Receipt</span>
+          <span>Final Evidence Receipt</span>
         </div>
       </div>
 
@@ -959,7 +956,7 @@
           <div>
             <h3 style="font-size: 1.15rem;">Reconciliation Results &amp; Findings</h3>
             <p style="font-size: 0.85rem; color: var(--text-muted);">
-              Review agreements, material differences, and unresolved items across the compared evidence.
+              Review agreements, differences requiring review, and unresolved items across the compared evidence.
             </p>
           </div>
           <span class="badge badge-neutral" id="result-overall-badge">RECONCILED</span>
@@ -967,28 +964,48 @@
 
         <div class="summary-grid">
           <div class="summary-card clickable" id="card-total" onclick="setFindingsTab('all')" title="Click to view all evaluated records">
-            <span class="summary-title">Total Evaluated</span>
+            <span class="summary-title">Comparison Groups</span>
             <span class="summary-count" id="count-total">0</span>
-            <span class="summary-hint">Comparable records evaluated under declared rules</span>
-            <span class="card-filter-action"><span>View All Records</span> <span>↓</span></span>
+            <span class="summary-hint">Evaluated under declared deterministic rules</span>
+            <span class="card-filter-action"><span>View All</span> <span>↓</span></span>
           </div>
           <div class="summary-card agreed clickable" id="card-agreed" onclick="setFindingsTab('agreed')" title="Click to view agreed records">
             <span class="summary-title">Agreed Records</span>
             <span class="summary-count" id="count-agreed">0</span>
-            <span class="summary-hint">Supported information agrees (does not determine tax correctness)</span>
-            <span class="card-filter-action"><span>View Agreed Records</span> <span>↓</span></span>
+            <span class="summary-hint">Supported information agrees identically</span>
+            <span class="card-filter-action"><span>View Agreed</span> <span>↓</span></span>
           </div>
-          <div class="summary-card difference clickable" id="card-diffs" onclick="setFindingsTab('diffs')" title="Click to view material differences">
-            <span class="summary-title">Material Differences</span>
+          <div class="summary-card difference clickable" id="card-diffs" onclick="setFindingsTab('diffs')" title="Click to view differences requiring review">
+            <span class="summary-title">Differences Requiring Review</span>
             <span class="summary-count" id="count-diffs">0</span>
-            <span class="summary-hint">Requires practitioner review to determine appropriate treatment</span>
+            <span class="summary-hint">Requires professional practitioner review</span>
             <span class="card-filter-action"><span>View Differences</span> <span>↓</span></span>
           </div>
           <div class="summary-card unresolved clickable" id="card-unres" onclick="setFindingsTab('unres')" title="Click to view unresolved evidence items">
             <span class="summary-title">Unresolved Items</span>
             <span class="summary-count" id="count-unres">0</span>
-            <span class="summary-hint">Evidence insufficient to establish agreement; follow-up needed</span>
-            <span class="card-filter-action"><span>View Unresolved Items</span> <span>↓</span></span>
+            <span class="summary-hint">Evidence insufficient; practitioner follow-up needed</span>
+            <span class="card-filter-action"><span>View Unresolved</span> <span>↓</span></span>
+          </div>
+        </div>
+
+        <!-- Practitioner Review Workflow Banner -->
+        <div class="card" id="practitioner-review-banner" style="background: #f8fafc; border: 1px solid #cbd5e1; border-left: 4px solid #2563eb; margin-bottom: 1rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+              <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b;" id="review-banner-title">
+                📋 Practitioner Review Lifecycle
+              </div>
+              <div style="font-size: 0.82rem; color: #475569; margin-top: 3px;" id="review-banner-subtitle">
+                Record your professional review dispositions and workpaper notes below before issuing the Final Reviewed Evidence Receipt.
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+              <span class="badge badge-info" id="review-progress-badge">0 / 0 Reviewed</span>
+              <button class="btn btn-primary" id="btn-finalize-review" onclick="finalizePractitionerReview()">
+                ✓ Finalize Review &amp; Issue Final Receipt →
+              </button>
+            </div>
           </div>
         </div>
 
@@ -996,7 +1013,7 @@
         <div class="card" id="findings-table-card">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 8px;">
             <div>
-              <h4 id="findings-table-title" style="font-size: 1rem; color: #b45309; margin: 0;">Material Differences (Requires Attention)</h4>
+              <h4 id="findings-table-title" style="font-size: 1rem; color: #b45309; margin: 0;">Differences Requiring Review</h4>
               <p id="findings-table-subtitle" style="font-size: 0.8rem; color: var(--text-muted); margin: 3px 0 0 0;">Review differences requiring practitioner review to determine appropriate treatment.</p>
             </div>
             <span class="badge badge-warning" id="findings-count-badge">0 Differences</span>
@@ -1011,11 +1028,12 @@
                   <th>Source A (1099-DA)</th>
                   <th>Source B (Ledger)</th>
                   <th>Variance</th>
-                  <th>Finding Why &amp; Explanation</th>
+                  <th>Finding &amp; Explanation</th>
+                  <th>Practitioner Review &amp; Actions</th>
                 </tr>
               </thead>
               <tbody id="differences-table-body">
-                <tr><td colspan="7" style="text-align: center; color: var(--text-muted);">No records found.</td></tr>
+                <tr><td colspan="8" style="text-align: center; color: var(--text-muted);">No records found.</td></tr>
               </tbody>
             </table>
           </div>
@@ -1047,8 +1065,10 @@
             A portable, cryptographically signed artifact preserving the declared reconciliation outcome.
           </p>
         </div>
-        <div style="display: flex; gap: 8px;">
-          <button class="btn btn-success" onclick="downloadExportBundle()">📥 Download Evidence Bundle (.ZIP)</button>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button class="btn btn-secondary" onclick="downloadReceiptOnly()">📜 Download Receipt (.JSON)</button>
+          <button class="btn btn-secondary" onclick="downloadFindingsWorkpaper()">📊 Download Findings Workpaper (.CSV)</button>
+          <button class="btn btn-success" onclick="downloadExportBundle()">📦 Download Full Evidence Package (.ZIP)</button>
         </div>
       </div>
 
@@ -1057,9 +1077,10 @@
           <h3 style="margin-bottom: 1rem; font-size: 1rem;">Receipt Payload &amp; Integrity</h3>
           <table style="font-size: 0.85rem;">
             <tr><td style="color: var(--text-muted);">Receipt ID:</td><td id="rcpt-id" class="badge badge-info">-</td></tr>
+            <tr><td style="color: var(--text-muted);">Review State:</td><td id="rcpt-review-state" class="badge badge-neutral">-</td></tr>
             <tr><td style="color: var(--text-muted);">Outcome State:</td><td id="rcpt-state" class="badge badge-warning">-</td></tr>
             <tr><td style="color: var(--text-muted);">Assurance Level:</td><td id="rcpt-level" class="badge badge-neutral">-</td></tr>
-            <tr><td style="color: var(--text-muted);">Signing Key ID:</td><td id="rcpt-key-id" style="font-family: 'JetBrains Mono'; font-size: 0.75rem;">-</td></tr>
+            <tr><td style="color: var(--text-muted);">Signing Key ID:</td><td id="rcpt-key-id" style="font-family: 'SF Mono', 'Cascadia Mono', 'Consolas', 'Courier New', monospace; font-size: 0.75rem;">-</td></tr>
           </table>
           <div class="boundary-callout" style="margin-top: 1rem;">
             <strong>What this receipt establishes:</strong> Payload integrity and authentic signature under declared schema.<br>
@@ -1080,8 +1101,12 @@
       </div>
 
       <div class="card">
-        <h3 style="margin-bottom: 12px; font-size: 1rem;">Canonical Receipt JSON</h3>
-        <pre id="receipt-json-viewer" class="code-block">Loading receipt...</pre>
+        <details style="cursor: pointer;">
+          <summary style="font-weight: 700; color: #1e293b; font-size: 0.95rem; padding: 4px 0;">
+            Advanced / Technical Details (Canonical Receipt JSON) ▸
+          </summary>
+          <pre id="receipt-json-viewer" class="code-block" style="margin-top: 12px;">Loading receipt...</pre>
+        </details>
       </div>
     </div>
 
@@ -1178,7 +1203,7 @@
         <!-- Inline Token Activation -->
         <div id="modal-token-input-box" style="display: none; margin-top: 12px; padding-top: 12px; border-top: 1px dashed #fde68a;">
           <label style="font-size: 0.78rem; font-weight: 600; color: #78350f; display: block; margin-bottom: 4px;">Paste VaultBasis License Token:</label>
-          <textarea id="input-modal-license-token" rows="3" placeholder="Paste your cryptographically signed license token here..." style="width: 100%; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; resize: vertical;"></textarea>
+          <textarea id="input-modal-license-token" rows="3" placeholder="Paste your cryptographically signed license token here..." style="width: 100%; font-family: 'SF Mono', 'Cascadia Mono', 'Consolas', 'Courier New', monospace; font-size: 0.75rem; padding: 8px; border: 1px solid #d1d5db; border-radius: 4px; resize: vertical;"></textarea>
           <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px;">
             <button class="btn btn-sm btn-primary" onclick="submitModalLicenseToken()">Install License →</button>
           </div>
@@ -1211,6 +1236,42 @@
       <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 1.5rem;">
         <button class="btn" onclick="closeNewCaseModal()">Cancel</button>
         <button class="btn btn-primary" id="btn-submit-create-case" onclick="submitCreateCase()">Create Case →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quit Confirmation Modal -->
+  <div class="modal-backdrop" id="modal-quit" role="dialog" aria-modal="true" aria-labelledby="quit-modal-title" style="display: none;">
+    <div class="modal-card" style="max-width: 460px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+        <h3 id="quit-modal-title" style="font-size: 1.2rem; color: #991b1b; margin: 0;">Quit VaultBasis Edge</h3>
+        <button class="btn btn-secondary" onclick="closeQuitModal()" style="padding: 2px 8px; font-size: 0.9rem;">✕</button>
+      </div>
+      <div style="padding: 1rem 0; font-size: 0.88rem; color: #334155; line-height: 1.5;">
+        <p style="margin-bottom: 0.75rem;">Are you sure you want to quit VaultBasis Edge and shut down the local server?</p>
+        <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: var(--radius); padding: 0.75rem; font-size: 0.82rem; color: #991b1b; line-height: 1.6;">
+          ✓ All active database transactions will be checkpointed to disk.<br>
+          ✓ Local server and network sockets will be safely closed.<br>
+          ✓ No customer evidence or case data will be lost.
+        </div>
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 0.5rem;">
+        <button class="btn btn-secondary" onclick="closeQuitModal()">Cancel</button>
+        <button class="btn" style="background: #dc2626; color: white; border-color: #dc2626;" onclick="executeQuitVaultBasis()">Quit &amp; Shut Down Server</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shutdown Complete Fullscreen Overlay -->
+  <div id="screen-shutdown" style="display: none; position: fixed; inset: 0; background: #0f172a; color: white; z-index: 99999; align-items: center; justify-content: center; text-align: center; padding: 2rem;">
+    <div style="max-width: 480px; background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 2.5rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);">
+      <div style="width: 52px; height: 52px; background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin: 0 auto 1.25rem;">✓</div>
+      <h2 style="font-size: 1.35rem; font-weight: 700; margin-bottom: 0.75rem; color: white;">VaultBasis Has Closed Safely</h2>
+      <p style="font-size: 0.88rem; color: #94a3b8; line-height: 1.6; margin-bottom: 1.5rem;">
+        The local SQLite database has been flushed and checkpointed. The background service and local network sockets have terminated.
+      </p>
+      <div style="font-size: 0.8rem; color: #64748b; border-top: 1px solid #334155; padding-top: 1rem;">
+        You can now safely close this browser window.
       </div>
     </div>
   </div>
@@ -1603,7 +1664,7 @@
         if (c.outcome_state) {
           let badgeClass = 'badge-warning';
           if (c.outcome_state === 'MATCHED') badgeClass = 'badge-success';
-          statusDisplay = `<span style="font-weight:600; color:var(--text-muted); font-size:0.72rem; display:block; margin-bottom:2px;">RECONCILED</span><span class="badge ${badgeClass}">${c.outcome_state}</span>`;
+          statusDisplay = `<span style="font-weight:600; color:var(--text-muted); font-size:0.72rem; display:block; margin-bottom:2px;">RECONCILED</span><span class="badge ${badgeClass}" title="${c.outcome_state}">${diffLabel(c.outcome_state)}</span>`;
           actionLabel = 'Open Case →';
         } else if (c.case_status === 'SOURCES_INGESTED' || c.workflow_status === 'READY_TO_RECONCILE') {
           statusDisplay = `<span class="badge badge-info">READY TO RECONCILE</span>`;
@@ -1639,7 +1700,7 @@
         tr.innerHTML = `
           <td><strong>${clientRef}</strong>${sampleTag}</td>
           <td>${c.tax_year}</td>
-          <td><code style="font-size: 0.8rem; font-family:'JetBrains Mono',monospace;">${c.case_id}</code></td>
+          <td><code style="font-size: 0.8rem; font-family:'SF Mono','Cascadia Mono','Consolas','Courier New',monospace;">${c.case_id}</code></td>
           <td>${statusDisplay}</td>
           <td style="font-size: 0.84rem; color: #475569;">${formattedActivity}</td>
           <td>
@@ -1880,7 +1941,7 @@
           srcAReadiness.innerHTML = `
             <div class="readiness-item"><span class="readiness-icon ready">✓</span> <span><strong>${srcAObj.filename}</strong></span></div>
             <div class="readiness-item"><span class="readiness-icon ready">✓</span> <span>Schema: ${srcAObj.schema_id} (${srcAObj.row_count} rows)</span></div>
-            <div class="readiness-item"><span class="readiness-icon ready">✓</span> <span style="font-family:'JetBrains Mono'; font-size:0.7rem;">SHA-256: ${srcAObj.sha256_hash.slice(0, 16)}…</span></div>
+            <div class="readiness-item"><span class="readiness-icon ready">✓</span> <span style="font-family:'SF Mono','Cascadia Mono','Consolas','Courier New',monospace; font-size:0.7rem;">SHA-256: ${srcAObj.sha256_hash.slice(0, 16)}…</span></div>
           `;
           if (btnUploadSrcA) btnUploadSrcA.innerText = 'Replace Form 1099-DA';
         } else {
@@ -1902,7 +1963,7 @@
           srcBReadiness.innerHTML = `
             <div class="readiness-item"><span class="readiness-icon ready">✓</span> <span><strong>${srcBObj.filename}</strong></span></div>
             <div class="readiness-item"><span class="readiness-icon ready">✓</span> <span>Schema: ${srcBObj.schema_id} (${srcBObj.row_count} rows)</span></div>
-            <div class="readiness-item"><span class="readiness-icon ready">✓</span> <span style="font-family:'JetBrains Mono'; font-size:0.7rem;">SHA-256: ${srcBObj.sha256_hash.slice(0, 16)}…</span></div>
+            <div class="readiness-item"><span class="readiness-icon ready">✓</span> <span style="font-family:'SF Mono','Cascadia Mono','Consolas','Courier New',monospace; font-size:0.7rem;">SHA-256: ${srcBObj.sha256_hash.slice(0, 16)}…</span></div>
           `;
           if (btnUploadSrcB) btnUploadSrcB.innerText = 'Replace Koinly CSV';
         } else {
@@ -1964,6 +2025,8 @@
             currentCaseReconciliation = c.receipt.payload;
           }
 
+          await loadFindingReviews();
+
           if (currentCaseReconciliation) {
             setFindingsTab(currentFindingsTab || (currentCaseReconciliation.material_differences?.length > 0 ? 'diffs' : 'all'));
           }
@@ -1996,6 +2059,141 @@
       renderFindingsView();
     }
 
+    let currentCaseReviews = {};
+
+    async function loadFindingReviews() {
+      if (!currentCaseId) return;
+      try {
+        const res = await fetch(`/api/cases/${currentCaseId}/reviews`);
+        if (res.ok) {
+          const reviews = await res.json();
+          currentCaseReviews = {};
+          reviews.forEach(r => {
+            currentCaseReviews[r.finding_id] = r;
+          });
+        }
+      } catch (err) {
+        console.warn("Could not fetch finding reviews:", err);
+      }
+    }
+
+    async function recordReview(findingId, disposition) {
+      if (!currentCaseId) return;
+      try {
+        const res = await fetch(`/api/cases/${currentCaseId}/reviews`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            finding_id: findingId,
+            disposition: disposition
+          })
+        });
+        if (res.ok) {
+          const updatedReview = await res.json();
+          currentCaseReviews[findingId] = updatedReview;
+          showToast(`Disposition saved: ${disposition}`, 'success');
+          renderFindingsView();
+        } else {
+          showToast('Failed to save review disposition.', 'error');
+        }
+      } catch (err) {
+        showToast('Connection error saving review disposition.', 'error');
+      }
+    }
+
+    async function promptReviewNote(findingId) {
+      if (!currentCaseId) return;
+      const existing = currentCaseReviews[findingId];
+      const existingNote = existing ? existing.practitioner_notes || '' : '';
+      const newNote = prompt("Enter practitioner workpaper note for finding " + findingId + ":", existingNote);
+      if (newNote === null) return; // cancelled
+
+      const currentDisp = existing ? existing.disposition : 'REVIEWED';
+      try {
+        const res = await fetch(`/api/cases/${currentCaseId}/reviews`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            finding_id: findingId,
+            disposition: currentDisp,
+            practitioner_notes: newNote
+          })
+        });
+        if (res.ok) {
+          const updatedReview = await res.json();
+          currentCaseReviews[findingId] = updatedReview;
+          showToast('Practitioner note saved.', 'success');
+          renderFindingsView();
+        } else {
+          showToast('Failed to save note.', 'error');
+        }
+      } catch (err) {
+        showToast('Connection error saving note.', 'error');
+      }
+    }
+
+    async function finalizePractitionerReview() {
+      if (!currentCaseId) return;
+      const btn = document.getElementById('btn-finalize-review');
+      if (btn) { btn.disabled = true; btn.innerText = 'Issuing Final Receipt...'; }
+
+      try {
+        const res = await fetch(`/api/cases/${currentCaseId}/finalize-review`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            reviewer_identity: "Practitioner",
+            notes: "Practitioner completed review of deterministic reconciliation findings."
+          })
+        });
+        if (res.ok) {
+          const receipt = await res.json();
+          showToast(`Final Reviewed Receipt issued (Revision ${receipt.revision}).`, 'success');
+          await refreshCaseDetails();
+          viewReceiptScreen();
+        } else {
+          const err = await res.json();
+          showToast('Could not finalize review: ' + (err.detail || 'Review requirements not met.'), 'error');
+        }
+      } catch (err) {
+        showToast('Connection error finalizing review.', 'error');
+      } finally {
+        if (btn) { btn.disabled = false; btn.innerText = '✓ Finalize Review & Issue Final Receipt →'; }
+      }
+    }
+
+    const DIFFERENCE_LABELS = {
+      'PROCEEDS_DIFFERENCE':         'Proceeds Differ',
+      'BASIS_DIFFERENCE':            'Cost Basis Differs',
+      'ACQUISITION_DATE_DIFFERENCE': 'Acquisition Date Differs',
+      'DISPOSITION_DATE_DIFFERENCE': 'Disposition Date Differs',
+      'MISSING_FROM_1099DA':         'Not on Broker Form',
+      'MISSING_FROM_LEDGER':         'Not in Client Ledger',
+      'AMBIGUOUS_MATCH':             'Ambiguous Match',
+      'AGGREGATED_LINE':             'Aggregated Line',
+      'TRANSFER_RELATED':            'Transfer (Non-Taxable)',
+      'REPORTING_SCOPE_DIFFERENCE':  'Broker Basis Not Reported',
+      'SOURCE_ERROR_SUSPECTED':      'Possible Source Error',
+      'UNRESOLVED_DATA':             'Unresolved Data',
+    };
+    const REASON_LABELS = {
+      'PRECISION_UNRESOLVED':     'Precision Unresolvable',
+      'PRICE_UNAVAILABLE':        'Price Unavailable',
+      'BASIS_UNAVAILABLE':        'Cost Basis Missing',
+      'DATE_UNAVAILABLE':         'Date Missing',
+      'TIMEZONE_CONTEXT_MISSING': 'Date Timezone Ambiguous',
+      'INVENTORY_DEFICIT':        'Inventory Deficit',
+      'AMBIGUOUS_SOURCE_DATA':    'Ambiguous Source Data',
+    };
+    function diffLabel(code) { return DIFFERENCE_LABELS[code] || code; }
+    function reasonLabel(code) { return REASON_LABELS[code] || code; }
+    function diffBadgeHtml(code) {
+      return `<span class="badge badge-warning" title="${code}">${diffLabel(code)}</span>`;
+    }
+    function reasonBadgeHtml(code) {
+      return `<span class="badge badge-unresolved" title="${code}">${reasonLabel(code)}</span>`;
+    }
+
     function renderFindingsView() {
       const recon = currentCaseReconciliation || {};
       const diffs = recon.material_differences || [];
@@ -2018,6 +2216,26 @@
       if (countDiffsEl) countDiffsEl.innerText = diffCount;
       if (countUnresEl) countUnresEl.innerText = unresCount;
 
+      // Update review progress
+      let reviewedCount = 0;
+      diffs.forEach(d => {
+        const rev = currentCaseReviews[d.difference_id];
+        if (rev && rev.disposition && rev.disposition !== 'OPEN') {
+          reviewedCount++;
+        }
+      });
+      const reviewProgressBadge = document.getElementById('review-progress-badge');
+      if (reviewProgressBadge) {
+        reviewProgressBadge.innerText = `${reviewedCount} / ${diffCount} Reviewed`;
+        if (reviewedCount === diffCount && diffCount > 0) {
+          reviewProgressBadge.className = 'badge badge-success';
+        } else if (reviewedCount > 0) {
+          reviewProgressBadge.className = 'badge badge-info';
+        } else {
+          reviewProgressBadge.className = 'badge badge-neutral';
+        }
+      }
+
       const titleEl = document.getElementById('findings-table-title');
       const subtitleEl = document.getElementById('findings-table-subtitle');
       const badgeEl = document.getElementById('findings-count-badge');
@@ -2028,6 +2246,37 @@
 
       if (!tbody) return;
       tbody.innerHTML = '';
+
+      function getReviewCellHtml(findingId) {
+        const rev = currentCaseReviews[findingId] || {};
+        const disp = rev.disposition || 'OPEN';
+        const note = rev.practitioner_notes || '';
+
+        let badgeClass = 'badge-neutral';
+        if (disp === 'REVIEWED') badgeClass = 'badge-success';
+        else if (disp === 'FOLLOW_UP_REQUIRED') badgeClass = 'badge-warning';
+        else if (disp === 'LEFT_UNRESOLVED') badgeClass = 'badge-unresolved';
+
+        return `
+          <div style="display: flex; flex-direction: column; gap: 6px;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span class="badge ${badgeClass}" style="font-size: 0.72rem;">${disp}</span>
+              <select style="font-size: 0.75rem; padding: 2px 4px; border-radius: 4px; border: 1px solid var(--border-accent); background: var(--surface);" onchange="recordReview('${findingId}', this.value)">
+                <option value="OPEN" ${disp === 'OPEN' ? 'selected' : ''}>Mark Open</option>
+                <option value="REVIEWED" ${disp === 'REVIEWED' ? 'selected' : ''}>✓ Mark Reviewed</option>
+                <option value="FOLLOW_UP_REQUIRED" ${disp === 'FOLLOW_UP_REQUIRED' ? 'selected' : ''}>⚠️ Needs Follow-up</option>
+                <option value="LEFT_UNRESOLVED" ${disp === 'LEFT_UNRESOLVED' ? 'selected' : ''}>○ Leave Unresolved</option>
+              </select>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <button class="btn btn-sm" style="font-size: 0.72rem; padding: 2px 6px;" onclick="promptReviewNote('${findingId}')">
+                ${note ? '📝 Edit Note' : '+ Note'}
+              </button>
+              ${note ? `<span style="font-size: 0.72rem; color: #475569; font-style: italic; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${note}">${note}</span>` : ''}
+            </div>
+          </div>
+        `;
+      }
 
       if (currentFindingsTab === 'all') {
         if (titleEl) {
@@ -2041,7 +2290,7 @@
         }
 
         if (totalEvaluated === 0) {
-          tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No evaluated records available.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No evaluated records available.</td></tr>`;
         } else {
           // 1. Agreed records
           agreed.forEach(a => {
@@ -2057,6 +2306,7 @@
                 <div style="font-size: 0.82rem; color: #1e293b;">${a.description || 'Supported information agrees identically.'}</div>
                 <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 3px;">Rule: Form 1099-DA / Tax Ledger Reconciliation</div>
               </td>
+              <td><span style="font-size: 0.75rem; color: #059669;">Agreed (Auto)</span></td>
             `;
             tbody.appendChild(tr);
           });
@@ -2065,15 +2315,16 @@
             const tr = document.createElement('tr');
             tr.innerHTML = `
               <td><code>${d.difference_id}</code></td>
-              <td><span class="badge badge-warning">${d.difference_state}</span></td>
+              <td>${diffBadgeHtml(d.difference_state)}</td>
               <td><strong>${d.asset}</strong></td>
               <td>${d.source_a_value ? (d.source_a_value.startsWith('$') ? d.source_a_value : '$' + d.source_a_value) : '-'}</td>
               <td>${d.source_b_value ? (d.source_b_value.startsWith('$') ? d.source_b_value : '$' + d.source_b_value) : '-'}</td>
               <td>${d.variance ? '<strong style="color:#b45309;">$' + d.variance + '</strong>' : '-'}</td>
               <td>
                 <div style="font-size: 0.82rem; color: #1e293b;">${d.description}</div>
-                <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 3px;">Rule: ${d.rule_id || d.rule_reference || 'US_IRC_1099DA'}</div>
+                <details style="margin-top:4px;"><summary style="font-size:0.7rem;color:var(--text-muted);cursor:pointer;">Advanced</summary><div style="font-size:0.7rem;color:var(--text-muted);padding-top:2px;">Code: ${d.difference_state} · Rule: ${d.rule_id || d.rule_reference || ''}</div></details>
               </td>
+              <td>${getReviewCellHtml(d.difference_id)}</td>
             `;
             tbody.appendChild(tr);
           });
@@ -2082,15 +2333,17 @@
             const tr = document.createElement('tr');
             tr.innerHTML = `
               <td><code>${u.item_id || 'UNRES'}</code></td>
-              <td><span class="badge badge-unresolved">${u.reason_code}</span></td>
+              <td>${reasonBadgeHtml(u.reason_code)}</td>
               <td><strong>${u.affected_source_id || 'Source'}</strong></td>
               <td>-</td>
               <td>-</td>
-              <td><span style="color:#d97706; font-weight:700;">UNRESOLVED</span></td>
+              <td><span style="color:#d97706; font-weight:700;">Unresolved</span></td>
               <td>
                 <div style="font-size: 0.82rem; color: #1e293b;">${u.description}</div>
-                <div style="font-size: 0.72rem; color: #d97706; margin-top: 3px;">Affected Record: <code>${u.affected_row_ref}</code> • Practitioner follow-up recommended</div>
+                <div style="font-size: 0.72rem; color: #d97706; margin-top: 3px;">Affected: <code>${u.affected_row_ref}</code> — Practitioner follow-up required</div>
+                <details style="margin-top:2px;"><summary style="font-size:0.7rem;color:var(--text-muted);cursor:pointer;">Advanced</summary><div style="font-size:0.7rem;color:var(--text-muted);padding-top:2px;">Code: ${u.reason_code}</div></details>
               </td>
+              <td>${getReviewCellHtml(u.item_id)}</td>
             `;
             tbody.appendChild(tr);
           });
@@ -2107,7 +2360,7 @@
         }
 
         if (agreed.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No agreed records detected in this comparison.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No agreed records detected in this comparison.</td></tr>`;
         } else {
           agreed.forEach(a => {
             const tr = document.createElement('tr');
@@ -2122,6 +2375,7 @@
                 <div style="font-size: 0.82rem; color: #1e293b;">${a.description || 'Supported information agrees identically.'}</div>
                 <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 3px;">Rule: Form 1099-DA / Tax Ledger Reconciliation</div>
               </td>
+              <td><span style="font-size: 0.75rem; color: #059669;">Agreed (Auto)</span></td>
             `;
             tbody.appendChild(tr);
           });
@@ -2138,21 +2392,22 @@
         }
 
         if (diffs.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #059669; padding: 1.5rem; font-weight: 600;">✓ All comparable records agree under declared reconciliation rules.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: #059669; padding: 1.5rem; font-weight: 600;">✓ All comparable records agree under declared reconciliation rules.</td></tr>`;
         } else {
           diffs.forEach(d => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
               <td><code>${d.difference_id}</code></td>
-              <td><span class="badge badge-warning">${d.difference_state}</span></td>
+              <td>${diffBadgeHtml(d.difference_state)}</td>
               <td><strong>${d.asset}</strong></td>
               <td>${d.source_a_value ? (d.source_a_value.startsWith('$') ? d.source_a_value : '$' + d.source_a_value) : '-'}</td>
               <td>${d.source_b_value ? (d.source_b_value.startsWith('$') ? d.source_b_value : '$' + d.source_b_value) : '-'}</td>
               <td>${d.variance ? '<strong style="color:#b45309;">$' + d.variance + '</strong>' : '-'}</td>
               <td>
                 <div style="font-size: 0.82rem; color: #1e293b;">${d.description}</div>
-                <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 3px;">Rule: ${d.rule_id || d.rule_reference || 'US_IRC_1099DA'}</div>
+                <details style="margin-top:4px;"><summary style="font-size:0.7rem;color:var(--text-muted);cursor:pointer;">Advanced</summary><div style="font-size:0.7rem;color:var(--text-muted);padding-top:2px;">Code: ${d.difference_state} · Rule: ${d.rule_id || d.rule_reference || ''}</div></details>
               </td>
+              <td>${getReviewCellHtml(d.difference_id)}</td>
             `;
             tbody.appendChild(tr);
           });
@@ -2169,21 +2424,23 @@
         }
 
         if (unres.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #059669; padding: 1.5rem; font-weight: 600;">✓ No unresolved evidence items detected.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: #059669; padding: 1.5rem; font-weight: 600;">✓ No unresolved evidence items detected.</td></tr>`;
         } else {
           unres.forEach(u => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
               <td><code>${u.item_id || 'UNRES'}</code></td>
-              <td><span class="badge badge-unresolved">${u.reason_code}</span></td>
+              <td>${reasonBadgeHtml(u.reason_code)}</td>
               <td><strong>${u.affected_source_id || 'Source'}</strong></td>
               <td>-</td>
               <td>-</td>
-              <td><span style="color:#d97706; font-weight:700;">UNRESOLVED</span></td>
+              <td><span style="color:#d97706; font-weight:700;">Unresolved</span></td>
               <td>
                 <div style="font-size: 0.82rem; color: #1e293b;">${u.description}</div>
-                <div style="font-size: 0.72rem; color: #d97706; margin-top: 3px;">Affected Record: <code>${u.affected_row_ref}</code> • Practitioner follow-up recommended</div>
+                <div style="font-size: 0.72rem; color: #d97706; margin-top: 3px;">Affected: <code>${u.affected_row_ref}</code> — Practitioner follow-up required</div>
+                <details style="margin-top:2px;"><summary style="font-size:0.7rem;color:var(--text-muted);cursor:pointer;">Advanced</summary><div style="font-size:0.7rem;color:var(--text-muted);padding-top:2px;">Code: ${u.reason_code}</div></details>
               </td>
+              <td>${getReviewCellHtml(u.item_id)}</td>
             `;
             tbody.appendChild(tr);
           });
@@ -2198,8 +2455,9 @@
         } else {
           unresDiv.innerHTML = unres.map(u => `
             <div style="background: rgba(217, 119, 6, 0.08); border-left: 3px solid #d97706; border-radius: 4px; padding: 10px 14px; margin-bottom: 8px;">
-              <div style="font-weight: 700; color: #b45309; font-size: 0.85rem;">${u.reason_code}: ${u.description}</div>
-              <div style="font-size: 0.75rem; color: #475569; margin-top: 4px;">Affected Record: <code>${u.affected_row_ref}</code> • Practitioner follow-up recommended</div>
+              <div style="font-weight: 700; color: #b45309; font-size: 0.85rem;">${reasonLabel(u.reason_code)}: ${u.description}</div>
+              <div style="font-size: 0.75rem; color: #475569; margin-top: 4px;">Affected: <code>${u.affected_row_ref}</code> — Practitioner follow-up required</div>
+              <details style="margin-top:3px;"><summary style="font-size:0.7rem;color:var(--text-muted);cursor:pointer;">Advanced</summary><span style="font-size:0.7rem;color:var(--text-muted);">Code: ${u.reason_code}</span></details>
             </div>
           `).join('');
         }
@@ -2268,11 +2526,12 @@
         const data = await res.json();
         const successMsg = data.status === 'RECEIPT_ALREADY_ISSUED' 
           ? "Deterministic reconciliation re-verified." 
-          : "Deterministic reconciliation complete.";
+          : "Deterministic reconciliation complete (Preliminary Receipt issued).";
         showToast(successMsg, "success");
         if (data.reconciliation) {
           currentCaseReconciliation = data.reconciliation;
         }
+        await loadFindingReviews();
         await refreshCaseDetails();
         setFindingsTab(currentCaseReconciliation?.material_differences?.length > 0 ? 'diffs' : 'all');
         document.getElementById('results-narrative-panel')?.scrollIntoView({ behavior: 'smooth' });
@@ -2308,7 +2567,12 @@
           return;
         }
         const receipt = await res.json();
-        document.getElementById('rcpt-id').innerText = receipt.receipt_id;
+        document.getElementById('rcpt-id').innerText = `${receipt.receipt_id} (Rev ${receipt.revision || 1})`;
+        const reviewStateEl = document.getElementById('rcpt-review-state');
+        if (reviewStateEl) {
+          reviewStateEl.innerText = receipt.human_review_state || 'UNREVIEWED';
+          reviewStateEl.className = receipt.human_review_state?.startsWith('REVIEWED') ? 'badge badge-success' : 'badge badge-neutral';
+        }
         document.getElementById('rcpt-state').innerText = receipt.outcome_state;
         document.getElementById('rcpt-level').innerText = receipt.assurance_level;
         document.getElementById('rcpt-key-id').innerText = receipt.signer_key_id;
@@ -2319,9 +2583,19 @@
       }
     }
 
+    function downloadReceiptOnly() {
+      if (!currentCaseId) return;
+      window.location.href = `/api/cases/${currentCaseId}/export/receipt`;
+    }
+
+    function downloadFindingsWorkpaper() {
+      if (!currentCaseId) return;
+      window.location.href = `/api/cases/${currentCaseId}/export/findings`;
+    }
+
     function downloadExportBundle() {
       if (!currentCaseId) return;
-      window.location.href = `/api/cases/${currentCaseId}/export`;
+      window.location.href = `/api/cases/${currentCaseId}/export/package`;
     }
 
     // Global Error & Promise Rejection Handlers
@@ -2332,7 +2606,33 @@
       console.error("[edge-boot] Unhandled Promise Rejection:", e.reason);
     });
 
+    function confirmQuitVaultBasis() {
+      const modal = document.getElementById('modal-quit');
+      if (modal) modal.style.display = 'flex';
+    }
+
+    function closeQuitModal() {
+      const modal = document.getElementById('modal-quit');
+      if (modal) modal.style.display = 'none';
+    }
+
+    async function executeQuitVaultBasis() {
+      closeQuitModal();
+      const shutdownScreen = document.getElementById('screen-shutdown');
+      if (shutdownScreen) {
+        shutdownScreen.style.display = 'flex';
+      }
+      try {
+        await fetch('/api/system/quit', { method: 'POST' });
+      } catch (err) {
+        console.log("VaultBasis server shutdown initiated.");
+      }
+    }
+
     // Explicit Global Window Bindings for Inline Event Handlers
+    window.confirmQuitVaultBasis = confirmQuitVaultBasis;
+    window.closeQuitModal = closeQuitModal;
+    window.executeQuitVaultBasis = executeQuitVaultBasis;
     window.showToast = showToast;
     window.showScreen = showScreen;
     window.openNewCaseModal = openNewCaseModal;
@@ -2352,7 +2652,12 @@
     window.renderFindingsView = renderFindingsView;
     window.restartCurrentSample = restartCurrentSample;
     window.viewReceiptScreen = viewReceiptScreen;
+    window.downloadReceiptOnly = downloadReceiptOnly;
+    window.downloadFindingsWorkpaper = downloadFindingsWorkpaper;
     window.downloadExportBundle = downloadExportBundle;
+    window.recordReview = recordReview;
+    window.promptReviewNote = promptReviewNote;
+    window.finalizePractitionerReview = finalizePractitionerReview;
 
     // Structured Boot Lifecycle
     function bootstrap() {

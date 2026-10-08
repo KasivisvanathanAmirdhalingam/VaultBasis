@@ -40,7 +40,11 @@ def main():
     
     if bundle_zip.is_file():
         with zipfile.ZipFile(bundle_zip, 'r') as zf:
-            zf.extractall(install_dir)
+            for member in zf.infolist():
+                member_path = Path(os.path.normpath(os.path.join(install_dir, member.filename)))
+                if not str(member_path).startswith(str(install_dir.resolve())):
+                    raise ValueError(f"ZIP slip blocked: {member.filename!r} resolves outside install dir")
+                zf.extract(member, install_dir)
     elif (base_dir / "VaultBasis").is_dir():
         shutil.copytree(base_dir / "VaultBasis", install_dir, dirs_exist_ok=True)
     
@@ -68,11 +72,11 @@ def main():
         New-Item -Path $RegPath -Force | Out-Null
     }}
     Set-ItemProperty -Path $RegPath -Name "DisplayName" -Value "VaultBasis Edge"
-    Set-ItemProperty -Path $RegPath -Name "DisplayVersion" -Value "1.5.0"
+    Set-ItemProperty -Path $RegPath -Name "DisplayVersion" -Value "1.5.0-rc3"
     Set-ItemProperty -Path $RegPath -Name "Publisher" -Value "VaultBasis"
     Set-ItemProperty -Path $RegPath -Name "DisplayIcon" -Value "{exe_path},0"
     Set-ItemProperty -Path $RegPath -Name "InstallLocation" -Value "{install_dir}"
-    Set-ItemProperty -Path $RegPath -Name "UninstallString" -Value 'powershell -NoProfile -WindowStyle Hidden -Command "Remove-Item -Recurse -Force \"{install_dir}\"; Remove-Item -Force \"{desktop_shortcut}\" -ErrorAction SilentlyContinue; Remove-Item -Force \"{start_menu_shortcut}\" -ErrorAction SilentlyContinue; Remove-Item -Recurse -Force \"HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\VaultBasis\" -ErrorAction SilentlyContinue"'
+    Set-ItemProperty -Path $RegPath -Name "UninstallString" -Value 'powershell -NoProfile -WindowStyle Hidden -Command "& {{ $d = \"{install_dir}\"; Remove-Item -Force \"$d\\VaultBasis.exe\" -ErrorAction SilentlyContinue; Remove-Item -Recurse -Force \"$d\\_internal\" -ErrorAction SilentlyContinue; Remove-Item -Force \"{desktop_shortcut}\" -ErrorAction SilentlyContinue; Remove-Item -Force \"{start_menu_shortcut}\" -ErrorAction SilentlyContinue; Remove-Item -Recurse -Force \"HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\VaultBasis\" -ErrorAction SilentlyContinue; Add-Type -AssemblyName PresentationFramework; [System.Windows.MessageBox]::Show(\"VaultBasis has been uninstalled. Your evidence cases, receipts, and signing keys in $d have been preserved. You may delete this folder manually if you no longer need them.\", \"VaultBasis Uninstalled\") }}"'
     """
     try:
         subprocess.run(["powershell", "-NoProfile", "-NonInteractive", "-Command", reg_cmd], check=False, capture_output=True)

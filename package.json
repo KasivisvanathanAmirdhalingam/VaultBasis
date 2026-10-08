@@ -1,6 +1,6 @@
 {
   "name": "vaultbasis-web",
-  "version": "0.1.0-preview",
+  "version": "1.5.0-rc3",
   "description": "VaultBasis Public Marketing & Independent Verifier Web Distribution",
   "private": true,
   "scripts": {
