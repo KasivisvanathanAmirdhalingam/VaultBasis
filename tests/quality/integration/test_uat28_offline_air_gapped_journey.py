@@ -56,7 +56,7 @@ def test_uat28_offline_air_gapped_journey():
     5. Source document ingestion (1099-DA & Client Ledger).
     6. Deterministic reconciliation execution.
     7. Preliminary receipt verification (Rev 1).
-    8. Human review recording & annotation.
+    8. Professional review actions and annotation.
     9. Review finalization & Ed25519 signing (Rev 2).
     10. Multi-format artifact export (Receipt JSON, Findings CSV, Evidence Bundle ZIP).
     11. Independent standalone verification of exported receipt with zero runtime daemon dependencies.
