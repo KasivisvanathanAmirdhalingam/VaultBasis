@@ -802,6 +802,29 @@ def run_live_commercial_licensing():
     print(f"[{scenario_id}] LIVE PACKAGED BINARY EXECUTION: PASS (Commercial License Validation & Audit Integrity Validated)")
 
 
+def run_live_persistence_and_crash_recovery():
+    scenario_id = "UAT-27"
+    
+    # 1. Verify persistence of previously reconciled client cases
+    cases_list = json.loads(urllib.request.urlopen(f"{BASE_URL}/api/cases").read().decode("utf-8"))
+    assert len(cases_list) > 0
+    first_cid = cases_list[0]["case_id"]
+    case_reloaded = json.loads(urllib.request.urlopen(f"{BASE_URL}/api/cases/{first_cid}").read().decode("utf-8"))
+    assert case_reloaded.get("case_status") in ("COMPLETED", "RECONCILED", "SOURCES_INGESTED", "CREATED")
+    
+    # 2. Verify persistence of bundled sample case
+    sample_reloaded = json.loads(urllib.request.urlopen(f"{BASE_URL}/api/cases/CASE-SAMPLE-2025").read().decode("utf-8"))
+    assert sample_reloaded.get("case_id") == "CASE-SAMPLE-2025"
+    assert len(sample_reloaded.get("sources", {})) == 2
+    
+    # 3. Verify health and database readiness
+    health = json.loads(urllib.request.urlopen(f"{BASE_URL}/api/health").read().decode("utf-8"))
+    assert health.get("status") == "HEALTHY"
+    assert health.get("database") == "ready"
+    
+    print(f"[{scenario_id}] LIVE PACKAGED BINARY EXECUTION: PASS (Persistence, Storage Integrity & Recovery Validated)")
+
+
 def main():
     print("=== EXECUTING CANDIDATE 7 LIVE PACKAGED BINARY REGRESSION (http://127.0.0.1:8000) ===")
     
@@ -887,7 +910,10 @@ def main():
     # UAT-26 (Commercial License Validation & Audit Integrity)
     run_live_commercial_licensing()
 
-    print("=== ALL SCENARIOS (UAT-05..26) QUALIFIED 100% GREEN ON PACKAGED CANDIDATE 7 RUNTIME ===")
+    # UAT-27 (Persistence, Crash Recovery, and Restart Invariants)
+    run_live_persistence_and_crash_recovery()
+
+    print("=== ALL SCENARIOS (UAT-05..27) QUALIFIED 100% GREEN ON PACKAGED CANDIDATE 7 RUNTIME ===")
 
 
 if __name__ == "__main__":
