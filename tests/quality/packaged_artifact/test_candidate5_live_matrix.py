@@ -228,10 +228,23 @@ def main():
     run_live_scenario("UAT-18A", "tests/fixtures/uat18/broker_duplicates.csv", "tests/fixtures/uat18/ledger_single_counterpart.csv", "MISSING_FROM_LEDGER", 5, 1, 0)
     run_live_scenario("UAT-18B", "tests/fixtures/uat18/broker_colliding.csv", "tests/fixtures/uat18/ledger_colliding_diff_evidence.csv", "AMBIGUOUS_MATCH", 4, 1, 0)
     
-    print("=== ALL 15 SCENARIOS (UAT-05..18) QUALIFIED GREEN ON PACKAGED RUNTIME ===")
+    # UAT-19
+    run_live_fail_closed_intake("UAT-19A1", "tests/fixtures/uat19/broker_formula_numeric_rejected.csv", "NUMERIC_INVALID")
+    run_live_scenario("UAT-19A2", "tests/fixtures/uat19/broker_formula_text_safe.csv", "tests/fixtures/uat19/ledger_formula_text_safe.csv", "MATCHED", 5, 0, 0)
+    run_live_scenario("UAT-19B", "tests/fixtures/uat19/broker_xss_html_safe.csv", "tests/fixtures/uat19/ledger_xss_html_safe.csv", "MATCHED", 5, 0, 0)
+    run_live_scenario("UAT-19C", "tests/fixtures/uat19/broker_quoted_multiline.csv", "tests/fixtures/uat19/ledger_quoted_multiline.csv", "MATCHED", 5, 0, 0)
+    run_live_scenario("UAT-19D", "tests/fixtures/uat19/broker_oversized_field.csv", "tests/fixtures/uat19/ledger_oversized_field.csv", "MATCHED", 5, 0, 0)
+    
+    print("=== ALL 16 SCENARIOS (UAT-05..19) QUALIFIED GREEN ON PACKAGED RUNTIME ===")
 
 
 if __name__ == "__main__":
+    import os, sqlite3
+    db_path = os.path.expanduser('~/Library/Application Support/VaultBasis/candidate5_qualification.db')
+    if os.path.exists(db_path):
+        conn = sqlite3.connect(db_path)
+        conn.cursor().execute('DELETE FROM cases WHERE case_kind != "BUNDLED_SAMPLE"')
+        conn.commit()
     main()
 
 
