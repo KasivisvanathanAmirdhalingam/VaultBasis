@@ -103,7 +103,7 @@ class TestReceiptContractExhaustiveness:
                 "src_koinly_01": "KOINLY_CAPITAL_GAINS_CSV_V1",
             },
             "canonicalization_version": "v0.1",
-            "ruleset_id": "VB_US_1099DA_2025_V1",
+            "ruleset_id": "VB_US_1099DA_2025_R1",
             "engine_version": "1.5.0",
             "policy_version": "1.5.0",
             "assurance_level": "L2_EVIDENCE_RECONCILED",
@@ -119,7 +119,7 @@ class TestReceiptContractExhaustiveness:
                     "source_b_value": "1200.00",
                     "variance": "200.00",
                     "description": "Exhaustiveness test difference record",
-                    "rule_reference": "VB_US_1099DA_2025_V1",
+                    "rule_reference": "VB_US_1099DA_2025_R1",
                     "provenance_references": []
                 }
             ],
@@ -130,7 +130,7 @@ class TestReceiptContractExhaustiveness:
                     "affected_source_id": "src_1099da_01",
                     "affected_row_ref": "Row:1",
                     "description": "Exhaustiveness test unresolved record",
-                    "rule_reference": "VB_US_1099DA_2025_V1",
+                    "rule_reference": "VB_US_1099DA_2025_R1",
                     "provenance_references": []
                 }
             ],

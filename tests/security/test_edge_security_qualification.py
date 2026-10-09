@@ -379,7 +379,7 @@ class TestReceiptRoundTripAndReviewLifecycle:
         prelim_receipt = recon_data["receipt"]
         assert prelim_receipt["revision"] == 1
         assert prelim_receipt["human_review_state"] == "UNREVIEWED"
-        assert prelim_receipt["ruleset_id"] == "VB_US_1099DA_2025_V1"
+        assert prelim_receipt["ruleset_id"] == "VB_US_1099DA_2025_R1"
 
         # Verify preliminary receipt with verifier engine
         ver_result_1 = verify_outcome_receipt(prelim_receipt)

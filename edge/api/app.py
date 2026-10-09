@@ -28,6 +28,7 @@ import time
 
 from apps.verifier.verify_receipt import verify_outcome_receipt
 from edge.assurance.reconciliation_engine import DeterministicReconciliationEngine
+from edge.assurance.rulesets import SUPPORTED_RULESETS
 from edge.commercial.audit import AuditEventType, CommercialAuditService
 from edge.commercial.diagnostics import DiagnosticPackager
 from edge.commercial.identity import (
@@ -1047,6 +1048,16 @@ def reconcile_case(case_id: str):
             detail="Reconciliation requires at least two source documents (e.g. Form 1099-DA and Koinly CSV)"
         )
 
+    # Enforce approved rule pack routing (fail closed if jurisdiction / tax_year is unsupported)
+    normative_jurisdiction = (case.jurisdiction or "").strip().upper()
+    ruleset_key = (normative_jurisdiction, case.tax_year)
+    if ruleset_key not in SUPPORTED_RULESETS:
+        raise HTTPException(
+            status_code=422,
+            detail=f"RULESET_UNSUPPORTED: No approved ruleset available for jurisdiction '{case.jurisdiction}' and tax year {case.tax_year}. Supported combinations: US / 2025 (Ruleset: VB_US_1099DA_2025_R1)."
+        )
+    ruleset_id = SUPPORTED_RULESETS[ruleset_key]
+
     # Compute manifest hash of sources
     current_manifest = hashlib.sha256(
         json.dumps(
@@ -1077,7 +1088,7 @@ def reconcile_case(case_id: str):
         "source_hashes": source_hashes,
         "source_schema_ids": source_schema_ids,
         "canonicalization_version": "v0.1",
-        "ruleset_id": f"VB_US_1099DA_{case.tax_year}_V1",
+        "ruleset_id": ruleset_id,
         "engine_version": sys_ver.version,
         "policy_version": "1.5.0",
         "assurance_level": recon_result.assurance_level,

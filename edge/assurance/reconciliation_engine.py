@@ -20,7 +20,7 @@ class DifferenceRecord:
         source_b_value: Optional[str],
         variance: Optional[str],
         description: str,
-        rule_reference: str = "VB_US_1099DA_2025_V1",
+        rule_reference: str = "VB_US_1099DA_2025_R1",
         provenance_references: Optional[List[Dict[str, Any]]] = None
     ):
         self.difference_id = difference_id
@@ -106,7 +106,7 @@ class DeterministicReconciliationEngine:
                 "affected_source_id": first_src,
                 "affected_row_ref": "Header",
                 "description": "Deterministic reconciliation requires at least two distinct source documents.",
-                "rule_reference": "VB_US_1099DA_2025_V1",
+                "rule_reference": "VB_US_1099DA_2025_R1",
                 "provenance_references": []
             })
             return result
@@ -158,7 +158,7 @@ class DeterministicReconciliationEngine:
                     "affected_source_id": src_a_id,
                     "affected_row_ref": tx_a.source_row_reference,
                     "description": f"Missing required fact for asset {tx_a.asset} in {src_a_id}",
-                    "rule_reference": "VB_US_1099DA_2025_V1",
+                    "rule_reference": "VB_US_1099DA_2025_R1",
                     "provenance_references": prov_a
                 })
 
@@ -184,7 +184,7 @@ class DeterministicReconciliationEngine:
                                 "affected_source_id": src_a_id,
                                 "affected_row_ref": tx_a.source_row_reference,
                                 "description": "Timezone context missing in broker disposition date",
-                                "rule_reference": "VB_US_1099DA_2025_V1",
+                                "rule_reference": "VB_US_1099DA_2025_R1",
                                 "provenance_references": prov_a
                             })
                             dates_match = True
@@ -195,7 +195,7 @@ class DeterministicReconciliationEngine:
                                 "affected_source_id": src_b_id,
                                 "affected_row_ref": tx_b.source_row_reference,
                                 "description": "Timezone context missing in ledger disposition date",
-                                "rule_reference": "VB_US_1099DA_2025_V1",
+                                "rule_reference": "VB_US_1099DA_2025_R1",
                                 "provenance_references": build_prov(tx_b, src_b_id)
                             })
                             dates_match = True
@@ -218,7 +218,7 @@ class DeterministicReconciliationEngine:
                     source_b_value=None,
                     variance=str(tx_a.proceeds) if tx_a.proceeds is not None else None,
                     description=f"Transaction for {tx_a.asset} present in broker Form 1099-DA ({tx_a.source_row_reference}) but missing from tax ledger. Next step: Review source records to confirm if this transaction belongs in the tax year ledger.",
-                    rule_reference="VB_US_1099DA_2025_V1",
+                    rule_reference="VB_US_1099DA_2025_R1",
                     provenance_references=prov_a
                 ))
                 diff_counter += 1
@@ -244,7 +244,7 @@ class DeterministicReconciliationEngine:
                         source_b_value=None,
                         variance=None,
                         description=f"Multiple possible ledger counterparts ({candidate_refs}) match broker record for {tx_a.asset}. Next step: Review candidate records and resolve record pairing before finalizing reconciliation.",
-                        rule_reference="VB_US_1099DA_2025_V1",
+                        rule_reference="VB_US_1099DA_2025_R1",
                         provenance_references=prov_a + cand_provs
                     ))
                     diff_counter += 1
@@ -260,6 +260,7 @@ class DeterministicReconciliationEngine:
             if tx_a.proceeds is not None and tx_b.proceeds is not None:
                 proceeds_diff = abs(tx_a.proceeds - tx_b.proceeds)
                 if proceeds_diff > Decimal("0"):
+                    formatted_diff = format(proceeds_diff, 'f')
                     result.material_differences.append(DifferenceRecord(
                         difference_id=f"DIFF-{diff_counter:03d}",
                         difference_state="PROCEEDS_DIFFERENCE",
@@ -268,9 +269,9 @@ class DeterministicReconciliationEngine:
                         source_a_value=str(tx_a.proceeds),
                         source_b_ref=f"{src_b_id}:{tx_b.source_row_reference}",
                         source_b_value=str(tx_b.proceeds),
-                        variance=str(proceeds_diff),
-                        description=f"Proceeds differ by ${proceeds_diff}. Broker: ${tx_a.proceeds}, Client ledger: ${tx_b.proceeds}. Next step: Review the underlying transaction records and determine which amount, if either, should be used for the engagement.",
-                        rule_reference="VB_US_1099DA_2025_V1",
+                        variance=formatted_diff,
+                        description=f"Proceeds differ by ${formatted_diff}. Broker: ${tx_a.proceeds}, Client ledger: ${tx_b.proceeds}. Next step: Review the underlying transaction records and determine which amount, if either, should be used for the engagement.",
+                        rule_reference="VB_US_1099DA_2025_R1",
                         provenance_references=prov_both
                     ))
                     diff_counter += 1
@@ -287,13 +288,14 @@ class DeterministicReconciliationEngine:
                     source_b_value=str(tx_b.cost_basis) if tx_b.cost_basis is not None else "Not reported",
                     variance=None,
                     description=f"Broker did not report basis (Box 2 = NO). Client ledger reports basis of ${tx_b.cost_basis if tx_b.cost_basis is not None else '0.00'}. Next step: Review supporting basis documentation before relying on the ledger amount.",
-                    rule_reference="VB_US_1099DA_2025_V1",
+                    rule_reference="VB_US_1099DA_2025_R1",
                     provenance_references=prov_both
                 ))
                 diff_counter += 1
             elif tx_a.cost_basis is not None and tx_b.cost_basis is not None:
                 basis_diff = abs(tx_a.cost_basis - tx_b.cost_basis)
                 if basis_diff > Decimal("0"):
+                    formatted_basis_diff = format(basis_diff, 'f')
                     result.material_differences.append(DifferenceRecord(
                         difference_id=f"DIFF-{diff_counter:03d}",
                         difference_state="BASIS_DIFFERENCE",
@@ -302,9 +304,9 @@ class DeterministicReconciliationEngine:
                         source_a_value=str(tx_a.cost_basis),
                         source_b_ref=f"{src_b_id}:{tx_b.source_row_reference}",
                         source_b_value=str(tx_b.cost_basis),
-                        variance=str(basis_diff),
-                        description=f"Cost basis differs by ${basis_diff}. Broker: ${tx_a.cost_basis}, Client ledger: ${tx_b.cost_basis}. Next step: Review supporting basis documentation and resolve the difference using professional judgment.",
-                        rule_reference="VB_US_1099DA_2025_V1",
+                        variance=formatted_basis_diff,
+                        description=f"Cost basis differs by ${formatted_basis_diff}. Broker: ${tx_a.cost_basis}, Client ledger: ${tx_b.cost_basis}. Next step: Review supporting basis documentation and resolve the difference using professional judgment.",
+                        rule_reference="VB_US_1099DA_2025_R1",
                         provenance_references=prov_both
                     ))
                     diff_counter += 1
@@ -318,7 +320,7 @@ class DeterministicReconciliationEngine:
                         "affected_source_id": src_a_id if not tx_a.acquisition_date else src_b_id,
                         "affected_row_ref": tx_a.source_row_reference if not tx_a.acquisition_date else tx_b.source_row_reference,
                         "description": "Acquisition date unavailable in source record.",
-                        "rule_reference": "VB_US_1099DA_2025_V1",
+                        "rule_reference": "VB_US_1099DA_2025_R1",
                         "provenance_references": prov_both
                     })
             elif tx_a.acquisition_date != tx_b.acquisition_date:
@@ -333,7 +335,7 @@ class DeterministicReconciliationEngine:
                             "affected_source_id": src_a_id,
                             "affected_row_ref": tx_a.source_row_reference,
                             "description": "Timezone missing in acquisition date",
-                            "rule_reference": "VB_US_1099DA_2025_V1",
+                            "rule_reference": "VB_US_1099DA_2025_R1",
                             "provenance_references": prov_a
                         })
                         match_dates = True
@@ -344,7 +346,7 @@ class DeterministicReconciliationEngine:
                             "affected_source_id": src_b_id,
                             "affected_row_ref": tx_b.source_row_reference,
                             "description": "Timezone missing in acquisition date",
-                            "rule_reference": "VB_US_1099DA_2025_V1",
+                            "rule_reference": "VB_US_1099DA_2025_R1",
                             "provenance_references": build_prov(tx_b, src_b_id)
                         })
                         match_dates = True
@@ -364,7 +366,7 @@ class DeterministicReconciliationEngine:
                         source_b_value=tx_b.acquisition_date,
                         variance=None,
                         description=f"Acquisition date differs: Broker reports {tx_a.acquisition_date} vs Client ledger reports {tx_b.acquisition_date}. Next step: Verify date from primary acquisition records.",
-                        rule_reference="VB_US_1099DA_2025_V1",
+                        rule_reference="VB_US_1099DA_2025_R1",
                         provenance_references=prov_both
                     ))
                     diff_counter += 1
@@ -399,7 +401,7 @@ class DeterministicReconciliationEngine:
                     source_b_value=str(tx_b.proceeds) if tx_b.proceeds is not None else None,
                     variance=str(tx_b.proceeds) if tx_b.proceeds is not None else None,
                     description=f"Transaction for {tx_b.asset} present in client tax ledger ({tx_b.source_row_reference}), but no supported counterpart was found in the compared Form 1099-DA source. Next step: Review source documentation and determine whether additional reporting evidence is expected or available.",
-                    rule_reference="VB_US_1099DA_2025_V1",
+                    rule_reference="VB_US_1099DA_2025_R1",
                     provenance_references=prov_b
                 ))
                 diff_counter += 1

@@ -1,6 +1,6 @@
 """
-VaultBasis Edge — Packaged Candidate Live Artifact Regression Runner
-Directly executes scenarios UAT-05 through UAT-12 over HTTP against the running packaged binary on http://127.0.0.1:8000.
+VaultBasis Edge — Packaged Candidate 6 Live Artifact Regression Runner
+Directly executes scenarios UAT-05 through UAT-21 (including UAT-20) over HTTP against the running packaged binary on http://127.0.0.1:8000.
 """
 
 import json
@@ -8,8 +8,8 @@ import io
 import zipfile
 from pathlib import Path
 import urllib.request
+import urllib.error
 import urllib.parse
-import mimetypes
 import uuid
 
 
@@ -105,6 +105,9 @@ def run_live_scenario(scenario_id: str, broker_path: str, ledger_path: str, expe
     assert len(recon_data.get("material_differences", [])) == expected_diffs, f"Expected {expected_diffs} diffs, got {len(recon_data.get('material_differences', []))}"
     assert len(recon_data.get("unresolved_items", [])) == expected_unres, f"Expected {expected_unres} unres, got {len(recon_data.get('unresolved_items', []))}"
     
+    receipt = recon_res.get("receipt", {})
+    assert receipt.get("ruleset_id") == "VB_US_1099DA_2025_R1", f"Expected ruleset_id VB_US_1099DA_2025_R1, got {receipt.get('ruleset_id')}"
+
     # 5. Export & Verify Receipt via Local Verification Endpoint
     export_bytes = get_bytes(f"/api/cases/{case_id}/export")
     with zipfile.ZipFile(io.BytesIO(export_bytes)) as z:
@@ -113,6 +116,7 @@ def run_live_scenario(scenario_id: str, broker_path: str, ledger_path: str, expe
         assert receipt_json.get("outcome_state") == expected_state
         assert receipt_json.get("receipt_id") is not None
         assert receipt_json.get("signature") is not None
+        assert receipt_json.get("ruleset_id") == "VB_US_1099DA_2025_R1"
         
         # Verify via local endpoint
         verify_boundary = uuid.uuid4().hex
@@ -174,8 +178,45 @@ def run_live_fail_closed_intake(scenario_id: str, fixture_path: str, expected_co
     print(f"[{scenario_id}] LIVE PACKAGED BINARY EXECUTION: PASS (Failed Closed with {expected_code})")
 
 
+def run_live_regulatory_routing_boundary(scenario_id: str, jurisdiction: str, tax_year: int):
+    case_id = f"CASE-LIVE-PKG-{scenario_id}-{uuid.uuid4().hex[:6]}"
+    
+    # 1. Create Case
+    create_res = post_json("/api/cases", {
+        "case_id": case_id,
+        "client_reference": f"Packaged Binary Live Regulatory Test {scenario_id}",
+        "tax_year": tax_year,
+        "jurisdiction": jurisdiction
+    })
+    assert create_res.get("case_id") == case_id
+    
+    # 2. Ingest standard sources
+    b_bytes = Path("tests/fixtures/uat05/broker_perfect.csv").read_bytes()
+    l_bytes = Path("tests/fixtures/uat05/ledger_perfect.csv").read_bytes()
+    
+    post_multipart(f"/api/cases/{case_id}/sources", files={"file": ("broker.csv", b_bytes)}, form_data={"declared_schema": "AUTO"})
+    post_multipart(f"/api/cases/{case_id}/sources", files={"file": ("ledger.csv", l_bytes)}, form_data={"declared_schema": "AUTO"})
+    
+    # 3. Attempt reconciliation -> Must fail closed with 422 RULESET_UNSUPPORTED
+    try:
+        post_json(f"/api/cases/{case_id}/reconcile", {})
+        raise AssertionError(f"[{scenario_id}] Expected 422 RULESET_UNSUPPORTED but reconciliation succeeded!")
+    except urllib.error.HTTPError as e:
+        assert e.code == 422
+        err_body = json.loads(e.read().decode("utf-8"))
+        assert "RULESET_UNSUPPORTED" in err_body.get("detail", "")
+        print(f"[{scenario_id}] LIVE REGULATORY ROUTING: PASS (Denied with HTTP 422 RULESET_UNSUPPORTED: {err_body.get('detail')})")
+        
+    # 4. Confirm no receipt was issued / export is 404
+    try:
+        get_bytes(f"/api/cases/{case_id}/export")
+        raise AssertionError(f"[{scenario_id}] Expected 404 on export for un-reconciled case")
+    except urllib.error.HTTPError as e:
+        assert e.code == 404
+
+
 def main():
-    print("=== EXECUTING CANDIDATE 5 LIVE PACKAGED BINARY REGRESSION (http://127.0.0.1:8000) ===")
+    print("=== EXECUTING CANDIDATE 6 LIVE PACKAGED BINARY REGRESSION (http://127.0.0.1:8000) ===")
     
     # Health check
     health = json.loads(urllib.request.urlopen(f"{BASE_URL}/api/health").read().decode("utf-8"))
@@ -215,42 +256,43 @@ def main():
     # UAT-15
     run_live_scenario("UAT-15", "tests/fixtures/uat15/broker_norm.csv", "tests/fixtures/uat15/ledger_norm.csv", "MATCHED", 5, 0, 0)
     
-    # UAT-16
+    # UAT-16 (Micro-Variance / Sub-Cent Decimal Precision)
     run_live_scenario("UAT-16", "tests/fixtures/uat16/broker_micro_diff.csv", "tests/fixtures/uat16/ledger_micro_diff.csv", "PROCEEDS_DIFFERENCE", 4, 1, 0)
     
-    # UAT-17
+    # UAT-17 (Fail-Closed Intake Rejections)
     run_live_fail_closed_intake("UAT-17A", "tests/fixtures/uat17/broker_missing_column.csv", "SCHEMA_REQUIRED_FIELD_MISSING")
     run_live_fail_closed_intake("UAT-17B", "tests/fixtures/uat17/broker_invalid_numeric.csv", "NUMERIC_INVALID")
     run_live_fail_closed_intake("UAT-17C", "tests/fixtures/uat17/broker_malformed_row.csv", "CSV_MALFORMED")
     run_live_fail_closed_intake("UAT-17D", "tests/fixtures/uat17/alien_unsupported_schema.csv", "SCHEMA_REQUIRED_FIELD_MISSING")
     
-    # UAT-18
+    # UAT-18 (Duplicate Rows & Colliding Candidates)
     run_live_scenario("UAT-18A", "tests/fixtures/uat18/broker_duplicates.csv", "tests/fixtures/uat18/ledger_single_counterpart.csv", "MISSING_FROM_LEDGER", 5, 1, 0)
     run_live_scenario("UAT-18B", "tests/fixtures/uat18/broker_colliding.csv", "tests/fixtures/uat18/ledger_colliding_diff_evidence.csv", "AMBIGUOUS_MATCH", 4, 1, 0)
     
-    # UAT-19
+    # UAT-19 (Hostile Payload Safety & Neutralization)
     run_live_fail_closed_intake("UAT-19A1", "tests/fixtures/uat19/broker_formula_numeric_rejected.csv", "NUMERIC_INVALID")
     run_live_scenario("UAT-19A2", "tests/fixtures/uat19/broker_formula_text_safe.csv", "tests/fixtures/uat19/ledger_formula_text_safe.csv", "MATCHED", 5, 0, 0)
     run_live_scenario("UAT-19B", "tests/fixtures/uat19/broker_xss_html_safe.csv", "tests/fixtures/uat19/ledger_xss_html_safe.csv", "MATCHED", 5, 0, 0)
     run_live_scenario("UAT-19C", "tests/fixtures/uat19/broker_quoted_multiline.csv", "tests/fixtures/uat19/ledger_quoted_multiline.csv", "MATCHED", 5, 0, 0)
     run_live_scenario("UAT-19D", "tests/fixtures/uat19/broker_oversized_field.csv", "tests/fixtures/uat19/ledger_oversized_field.csv", "MATCHED", 5, 0, 0)
     
-    # UAT-21
+    # UAT-20 (Regulatory Routing & Fail-Closed Unsupported Jurisdictions / Tax Years)
+    run_live_regulatory_routing_boundary("UAT-20A-US2024", "US", 2024)
+    run_live_regulatory_routing_boundary("UAT-20B-US2023", "US", 2023)
+    run_live_regulatory_routing_boundary("UAT-20C-UK2025", "UK", 2025)
+    run_live_regulatory_routing_boundary("UAT-20D-CA2025", "CA", 2025)
+
+    # UAT-21 (Mixed Realistic Case)
     run_live_scenario("UAT-21", "tests/fixtures/uat21/broker_realistic.csv", "tests/fixtures/uat21/ledger_realistic.csv", "UNRESOLVED_DATA", 1, 6, 1)
     
-    print("=== ALL 17 SCENARIOS (UAT-05..19, 21) QUALIFIED GREEN ON PACKAGED RUNTIME ===")
+    print("=== ALL 18 SCENARIOS (UAT-05..21) QUALIFIED 100% GREEN ON PACKAGED CANDIDATE 6 RUNTIME ===")
 
 
 if __name__ == "__main__":
     import os, sqlite3
-    db_path = os.path.expanduser('~/Library/Application Support/VaultBasis/candidate5_qualification.db')
+    db_path = os.path.expanduser('~/Library/Application Support/VaultBasis/candidate6_qualification.db')
     if os.path.exists(db_path):
         conn = sqlite3.connect(db_path)
         conn.cursor().execute('DELETE FROM cases WHERE case_kind != "BUNDLED_SAMPLE"')
         conn.commit()
     main()
-
-
-
-
-

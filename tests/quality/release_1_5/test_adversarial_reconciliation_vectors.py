@@ -292,7 +292,7 @@ class TestAdversarialReconciliationVectors:
             "source_hashes": {s.source_id: s.sha256_hash for s in case.sources.values()},
             "source_schema_ids": {s.source_id: s.schema_id for s in case.sources.values()},
             "canonicalization_version": "v0.1",
-            "ruleset_id": "VB_US_1099DA_2025_V1",
+            "ruleset_id": "VB_US_1099DA_2025_R1",
             "engine_version": "1.5.0",
             "policy_version": "1.5.0",
             "assurance_level": result1.assurance_level,
