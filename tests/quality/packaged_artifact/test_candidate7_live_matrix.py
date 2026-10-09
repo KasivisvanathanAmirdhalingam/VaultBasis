@@ -447,13 +447,146 @@ def main():
     run_live_regulatory_routing_boundary("UAT-20C-UK2025", "UK", 2025)
     run_live_regulatory_routing_boundary("UAT-20D-CA2025", "CA", 2025)
 
+def run_live_preliminary_vs_reviewed_evidence():
+    scenario_id = "UAT-23"
+    case_id = f"CASE-LIVE-PKG-{scenario_id}-{uuid.uuid4().hex[:6]}"
+    
+    # 1. Create Case
+    create_res = post_json("/api/cases", {
+        "case_id": case_id,
+        "client_reference": "Packaged Binary Live Preliminary vs Reviewed UAT-23",
+        "tax_year": 2025,
+        "jurisdiction": "US"
+    })
+    assert create_res.get("case_id") == case_id
+
+    # 2. Ingest Multi-Finding Sources
+    b_bytes = Path("tests/fixtures/uat21/broker_realistic.csv").read_bytes()
+    l_bytes = Path("tests/fixtures/uat21/ledger_realistic.csv").read_bytes()
+    
+    post_multipart(f"/api/cases/{case_id}/sources", files={"file": ("broker_realistic.csv", b_bytes)}, form_data={"declared_schema": "AUTO"})
+    post_multipart(f"/api/cases/{case_id}/sources", files={"file": ("ledger_realistic.csv", l_bytes)}, form_data={"declared_schema": "AUTO"})
+    
+    # 3. Reconcile -> Rev 1 Preliminary Evidence
+    recon_res = post_json(f"/api/cases/{case_id}/reconcile", {})
+    assert recon_res.get("status") == "RECONCILED"
+    assert recon_res.get("revision") == 1
+    assert recon_res.get("human_review_state") == "UNREVIEWED"
+    rev1_receipt = recon_res.get("receipt", {})
+    assert rev1_receipt.get("revision") == 1
+    assert rev1_receipt.get("human_review_state") == "UNREVIEWED"
+    assert rev1_receipt.get("prior_receipt_id") is None
+    
+    # 4. Review & Finalize -> Rev 2 Reviewed Evidence
+    diff_eth = next(d for d in rev1_receipt["material_differences"] if d["asset"] == "ETH")
+    post_json(f"/api/cases/{case_id}/reviews", {
+        "finding_id": diff_eth["difference_id"],
+        "disposition": "REVIEWED",
+        "note": "Fee variance confirmed against broker statement.",
+        "reviewer_reference": "CPA Senior Reviewer #412"
+    })
+    
+    final_res = post_json(f"/api/cases/{case_id}/finalize-review", {})
+    assert final_res.get("status") == "REVIEW_FINALIZED"
+    assert final_res.get("revision") == 2
+    assert final_res.get("human_review_state") == "REVIEWED_ANNOTATED"
+    assert final_res.get("prior_receipt_id") == rev1_receipt["receipt_id"]
+    rev2_receipt = final_res.get("receipt", {})
+    
+    # 5. Semantic Invariance Assertions (Rev 1 vs Rev 2)
+    assert rev1_receipt["source_hashes"] == rev2_receipt["source_hashes"]
+    assert rev1_receipt["ruleset_id"] == rev2_receipt["ruleset_id"] == "VB_US_1099DA_2025_R1"
+    assert rev1_receipt["outcome_state"] == rev2_receipt["outcome_state"] == "UNRESOLVED_DATA"
+    assert len(rev1_receipt["material_differences"]) == len(rev2_receipt["material_differences"]) == 6
+    assert len(rev1_receipt["unresolved_items"]) == len(rev2_receipt["unresolved_items"]) == 1
+    
+    # 6. Predecessor Receipt Retention in Case History
+    case_data = json.loads(urllib.request.urlopen(f"{BASE_URL}/api/cases/{case_id}").read().decode("utf-8"))
+    history = case_data.get("receipt_history", [])
+    assert len(history) == 2
+    assert any(r["revision"] == 1 and r["receipt_id"] == rev1_receipt["receipt_id"] for r in history)
+    assert any(r["revision"] == 2 and r["receipt_id"] == rev2_receipt["receipt_id"] for r in history)
+    
+    print(f"[{scenario_id}] LIVE PACKAGED BINARY EXECUTION: PASS (Preliminary vs Reviewed Evidence Contracts Validated)")
+
+
+def main():
+    print("=== EXECUTING CANDIDATE 7 LIVE PACKAGED BINARY REGRESSION (http://127.0.0.1:8000) ===")
+    
+    # Health check
+    health = json.loads(urllib.request.urlopen(f"{BASE_URL}/api/health").read().decode("utf-8"))
+    print(f"Target Service: {health.get('service')} v{health.get('version')} (Commit: {health.get('source_commit')[:7]})")
+    print(f"Installation Key: {health.get('installation_key_id')[:16]}...")
+    
+    # UAT-05
+    run_live_scenario("UAT-05", "tests/fixtures/uat05/broker_perfect.csv", "tests/fixtures/uat05/ledger_perfect.csv", "MATCHED", 5, 0, 0)
+    
+    # UAT-06
+    run_live_scenario("UAT-06", "tests/fixtures/uat06/broker_proceeds_diff.csv", "tests/fixtures/uat06/ledger_proceeds_diff.csv", "PROCEEDS_DIFFERENCE", 4, 1, 0)
+    
+    # UAT-07
+    run_live_scenario("UAT-07", "tests/fixtures/uat07/broker_basis_diff.csv", "tests/fixtures/uat07/ledger_basis_diff.csv", "BASIS_DIFFERENCE", 4, 1, 0)
+    
+    # UAT-08
+    run_live_scenario("UAT-08", "tests/fixtures/uat08/broker_dual_diff.csv", "tests/fixtures/uat08/ledger_dual_diff.csv", "PROCEEDS_DIFFERENCE", 4, 2, 0)
+    
+    # UAT-09
+    run_live_scenario("UAT-09", "tests/fixtures/uat09/broker_orphan.csv", "tests/fixtures/uat09/ledger_orphan.csv", "MISSING_FROM_LEDGER", 4, 1, 0)
+    
+    # UAT-10
+    run_live_scenario("UAT-10", "tests/fixtures/uat10/broker_orphan_b.csv", "tests/fixtures/uat10/ledger_orphan_b.csv", "MISSING_FROM_1099DA", 4, 1, 0)
+    
+    # UAT-11
+    run_live_scenario("UAT-11", "tests/fixtures/uat11/broker_ambiguous.csv", "tests/fixtures/uat11/ledger_ambiguous.csv", "AMBIGUOUS_MATCH", 4, 1, 0)
+    
+    # UAT-12
+    run_live_scenario("UAT-12", "tests/fixtures/uat12/broker_box2_no.csv", "tests/fixtures/uat12/ledger_box2_no.csv", "REPORTING_SCOPE_DIFFERENCE", 4, 1, 0)
+    
+    # UAT-13
+    run_live_scenario("UAT-13", "tests/fixtures/uat13/broker_zero_basis.csv", "tests/fixtures/uat13/ledger_zero_basis.csv", "MATCHED", 5, 0, 0)
+    
+    # UAT-14
+    run_live_scenario("UAT-14", "tests/fixtures/uat14/broker_missing_basis.csv", "tests/fixtures/uat14/ledger_missing_basis.csv", "UNRESOLVED_DATA", 4, 0, 1)
+    
+    # UAT-15
+    run_live_scenario("UAT-15", "tests/fixtures/uat15/broker_norm.csv", "tests/fixtures/uat15/ledger_norm.csv", "MATCHED", 5, 0, 0)
+    
+    # UAT-16 (Micro-Variance / Sub-Cent Decimal Precision)
+    run_live_scenario("UAT-16", "tests/fixtures/uat16/broker_micro_diff.csv", "tests/fixtures/uat16/ledger_micro_diff.csv", "PROCEEDS_DIFFERENCE", 4, 1, 0)
+    
+    # UAT-17 (Fail-Closed Intake Rejections)
+    run_live_fail_closed_intake("UAT-17A", "tests/fixtures/uat17/broker_missing_column.csv", "SCHEMA_REQUIRED_FIELD_MISSING")
+    run_live_fail_closed_intake("UAT-17B", "tests/fixtures/uat17/broker_invalid_numeric.csv", "NUMERIC_INVALID")
+    run_live_fail_closed_intake("UAT-17C", "tests/fixtures/uat17/broker_malformed_row.csv", "CSV_MALFORMED")
+    run_live_fail_closed_intake("UAT-17D", "tests/fixtures/uat17/alien_unsupported_schema.csv", "SCHEMA_REQUIRED_FIELD_MISSING")
+    
+    # UAT-18 (Duplicate Rows & Colliding Candidates)
+    run_live_scenario("UAT-18A", "tests/fixtures/uat18/broker_duplicates.csv", "tests/fixtures/uat18/ledger_single_counterpart.csv", "MISSING_FROM_LEDGER", 5, 1, 0)
+    run_live_scenario("UAT-18B", "tests/fixtures/uat18/broker_colliding.csv", "tests/fixtures/uat18/ledger_colliding_diff_evidence.csv", "AMBIGUOUS_MATCH", 4, 1, 0)
+    
+    # UAT-19 (Hostile Payload Safety & Neutralization)
+    run_live_fail_closed_intake("UAT-19A1", "tests/fixtures/uat19/broker_formula_numeric_rejected.csv", "NUMERIC_INVALID")
+    run_live_scenario("UAT-19A2", "tests/fixtures/uat19/broker_formula_text_safe.csv", "tests/fixtures/uat19/ledger_formula_text_safe.csv", "MATCHED", 5, 0, 0)
+    run_live_scenario("UAT-19B", "tests/fixtures/uat19/broker_xss_html_safe.csv", "tests/fixtures/uat19/ledger_xss_html_safe.csv", "MATCHED", 5, 0, 0)
+    run_live_scenario("UAT-19C", "tests/fixtures/uat19/broker_quoted_multiline.csv", "tests/fixtures/uat19/ledger_quoted_multiline.csv", "MATCHED", 5, 0, 0)
+    run_live_scenario("UAT-19D", "tests/fixtures/uat19/broker_oversized_field.csv", "tests/fixtures/uat19/ledger_oversized_field.csv", "MATCHED", 5, 0, 0)
+    
+    # UAT-20 (Regulatory Routing & Fail-Closed Unsupported Jurisdictions / Tax Years)
+    run_live_regulatory_routing_boundary("UAT-20A-US2024", "US", 2024)
+    run_live_regulatory_routing_boundary("UAT-20B-US2023", "US", 2023)
+    run_live_regulatory_routing_boundary("UAT-20C-UK2025", "UK", 2025)
+    run_live_regulatory_routing_boundary("UAT-20D-CA2025", "CA", 2025)
+
     # UAT-21 (Mixed Realistic Case)
     run_live_scenario("UAT-21", "tests/fixtures/uat21/broker_realistic.csv", "tests/fixtures/uat21/ledger_realistic.csv", "UNRESOLVED_DATA", 1, 6, 1)
     
     # UAT-22 (Professional Review Lifecycle & Invariants)
     run_live_professional_review_lifecycle()
 
-    print("=== ALL SCENARIOS (UAT-05..22) QUALIFIED 100% GREEN ON PACKAGED CANDIDATE 7 RUNTIME ===")
+    # UAT-23 (Preliminary vs Reviewed Evidence Contracts)
+    run_live_preliminary_vs_reviewed_evidence()
+
+    print("=== ALL SCENARIOS (UAT-05..23) QUALIFIED 100% GREEN ON PACKAGED CANDIDATE 7 RUNTIME ===")
 
 
 if __name__ == "__main__":
@@ -464,4 +597,5 @@ if __name__ == "__main__":
         conn.cursor().execute('DELETE FROM cases WHERE case_kind != "BUNDLED_SAMPLE"')
         conn.commit()
     main()
+
 
