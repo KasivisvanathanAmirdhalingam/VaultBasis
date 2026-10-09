@@ -781,6 +781,27 @@ def run_live_evaluation_capacity_and_expiry():
     print(f"[{scenario_id}] LIVE PACKAGED BINARY EXECUTION: PASS (Evaluation Capacity Boundaries & Monotonic Consumption Validated)")
 
 
+def run_live_commercial_licensing():
+    scenario_id = "UAT-26"
+    
+    bad_token = "eyJwYXlsb2FkIjp7InZlcnNpb24iOiJ2MS4wIiwidGllciI6IkZJUk0ifSwic2lnbmF0dXJlIjoiMDBmZmJhZHNpZyIsImtleV9pZCI6ImsxIn0"
+    bad_res = post_json("/api/commercial/license", {"token": bad_token})
+    assert bad_res.get("status") == "REJECTED"
+    assert bad_res.get("license_state") in ("INVALID_SIGNATURE", "MALFORMED")
+
+    # 2. Verify commercial status and audit log endpoints
+    status_res = json.loads(urllib.request.urlopen(f"{BASE_URL}/api/commercial/status").read().decode("utf-8"))
+    assert "licensed" in status_res
+    assert "entitlement_state" in status_res
+    
+    audit_res = json.loads(urllib.request.urlopen(f"{BASE_URL}/api/commercial/audit").read().decode("utf-8"))
+    assert "events" in audit_res
+    assert "chain_integrity" in audit_res
+    assert audit_res.get("chain_integrity", {}).get("valid") is True
+    
+    print(f"[{scenario_id}] LIVE PACKAGED BINARY EXECUTION: PASS (Commercial License Validation & Audit Integrity Validated)")
+
+
 def main():
     print("=== EXECUTING CANDIDATE 7 LIVE PACKAGED BINARY REGRESSION (http://127.0.0.1:8000) ===")
     
@@ -863,7 +884,10 @@ def main():
     # UAT-25 (Evaluation Capacity Boundaries & Monotonic Consumption)
     run_live_evaluation_capacity_and_expiry()
 
-    print("=== ALL SCENARIOS (UAT-05..25) QUALIFIED 100% GREEN ON PACKAGED CANDIDATE 7 RUNTIME ===")
+    # UAT-26 (Commercial License Validation & Audit Integrity)
+    run_live_commercial_licensing()
+
+    print("=== ALL SCENARIOS (UAT-05..26) QUALIFIED 100% GREEN ON PACKAGED CANDIDATE 7 RUNTIME ===")
 
 
 if __name__ == "__main__":
