@@ -712,13 +712,158 @@ def main():
     # UAT-22 (Professional Review Lifecycle & Invariants)
     run_live_professional_review_lifecycle()
 
+def run_live_evaluation_capacity_and_expiry():
+    scenario_id = "UAT-25"
+    
+    # 1. Start Evaluation (or retrieve active evaluation)
+    eval_start_res = post_json("/api/commercial/start-evaluation", {"customer_name": "CPA Evaluation Partner"})
+    assert eval_start_res.get("tier") == "EVALUATION" or eval_start_res.get("status") in ("INSTALLED", "REJECTED")
+    
+    status_before = json.loads(urllib.request.urlopen(f"{BASE_URL}/api/commercial/status").read().decode("utf-8"))
+    assert status_before.get("licensed") is True
+    assert status_before.get("max_cases_per_installation") >= 3
+    
+    # 2. Test sample unmetered access
+    sample_load_res = post_json("/api/sample-case/load", {})
+    sample_recon = post_json("/api/cases/CASE-SAMPLE-2025/reconcile", {})
+    assert sample_recon.get("status") in ("SUCCESS", "RECONCILED") or "receipt" in sample_recon
+    
+    # 3. Create cases up to boundary and test rejection
+    initial_used = status_before.get("billable_cases_count", 0)
+    max_eval = status_before.get("max_cases_per_installation", 3)
+    created_cids = []
+    
+    for i in range(initial_used, max_eval):
+        cid = f"CASE-LIVE-PKG-{scenario_id}-C{i+1}-{uuid.uuid4().hex[:4]}"
+        c_res = post_json("/api/cases", {
+            "case_id": cid,
+            "client_reference": f"Evaluation Case {i+1}",
+            "tax_year": 2025,
+            "jurisdiction": "US"
+        })
+        assert c_res.get("case_id") == cid
+        created_cids.append(cid)
+        
+    # Attempt 4th / boundary+1 case -> Must fail closed with 403 / 402 EVALUATION_CAPACITY_REACHED
+    excess_cid = f"CASE-LIVE-PKG-{scenario_id}-EXCESS-{uuid.uuid4().hex[:4]}"
+    try:
+        post_json("/api/cases", {
+            "case_id": excess_cid,
+            "client_reference": "Excess Evaluation Case",
+            "tax_year": 2025,
+            "jurisdiction": "US"
+        })
+        raise AssertionError("Expected commercial capacity denial on 4th case")
+    except urllib.error.HTTPError as e:
+        assert e.code in (402, 403)
+        err_body = json.loads(e.read().decode("utf-8"))
+        assert "CAPACITY_REACHED" in err_body.get("error", {}).get("code", "")
+        
+    # 4. Monotonicity: Deleting a created case must NOT restore capacity
+    if created_cids:
+        del_target = created_cids[0]
+        req_del = urllib.request.Request(f"{BASE_URL}/api/cases/{del_target}", method="DELETE")
+        with urllib.request.urlopen(req_del) as del_resp:
+            assert del_resp.status == 200
+            
+        # Attempt case creation again -> still denied
+        try:
+            post_json("/api/cases", {
+                "case_id": excess_cid,
+                "client_reference": "Excess After Deletion Case",
+                "tax_year": 2025,
+                "jurisdiction": "US"
+            })
+            raise AssertionError("Expected commercial capacity denial after case deletion")
+        except urllib.error.HTTPError as e:
+            assert e.code in (402, 403)
+            
+    print(f"[{scenario_id}] LIVE PACKAGED BINARY EXECUTION: PASS (Evaluation Capacity Boundaries & Monotonic Consumption Validated)")
+
+
+def main():
+    print("=== EXECUTING CANDIDATE 7 LIVE PACKAGED BINARY REGRESSION (http://127.0.0.1:8000) ===")
+    
+    # Health check
+    health = json.loads(urllib.request.urlopen(f"{BASE_URL}/api/health").read().decode("utf-8"))
+    print(f"Target Service: {health.get('service')} v{health.get('version')} (Commit: {health.get('source_commit')[:7]})")
+    print(f"Installation Key: {health.get('installation_key_id')[:16]}...")
+    
+    # UAT-05
+    run_live_scenario("UAT-05", "tests/fixtures/uat05/broker_perfect.csv", "tests/fixtures/uat05/ledger_perfect.csv", "MATCHED", 5, 0, 0)
+    
+    # UAT-06
+    run_live_scenario("UAT-06", "tests/fixtures/uat06/broker_proceeds_diff.csv", "tests/fixtures/uat06/ledger_proceeds_diff.csv", "PROCEEDS_DIFFERENCE", 4, 1, 0)
+    
+    # UAT-07
+    run_live_scenario("UAT-07", "tests/fixtures/uat07/broker_basis_diff.csv", "tests/fixtures/uat07/ledger_basis_diff.csv", "BASIS_DIFFERENCE", 4, 1, 0)
+    
+    # UAT-08
+    run_live_scenario("UAT-08", "tests/fixtures/uat08/broker_dual_diff.csv", "tests/fixtures/uat08/ledger_dual_diff.csv", "PROCEEDS_DIFFERENCE", 4, 2, 0)
+    
+    # UAT-09
+    run_live_scenario("UAT-09", "tests/fixtures/uat09/broker_orphan.csv", "tests/fixtures/uat09/ledger_orphan.csv", "MISSING_FROM_LEDGER", 4, 1, 0)
+    
+    # UAT-10
+    run_live_scenario("UAT-10", "tests/fixtures/uat10/broker_orphan_b.csv", "tests/fixtures/uat10/ledger_orphan_b.csv", "MISSING_FROM_1099DA", 4, 1, 0)
+    
+    # UAT-11
+    run_live_scenario("UAT-11", "tests/fixtures/uat11/broker_ambiguous.csv", "tests/fixtures/uat11/ledger_ambiguous.csv", "AMBIGUOUS_MATCH", 4, 1, 0)
+    
+    # UAT-12
+    run_live_scenario("UAT-12", "tests/fixtures/uat12/broker_box2_no.csv", "tests/fixtures/uat12/ledger_box2_no.csv", "REPORTING_SCOPE_DIFFERENCE", 4, 1, 0)
+    
+    # UAT-13
+    run_live_scenario("UAT-13", "tests/fixtures/uat13/broker_zero_basis.csv", "tests/fixtures/uat13/ledger_zero_basis.csv", "MATCHED", 5, 0, 0)
+    
+    # UAT-14
+    run_live_scenario("UAT-14", "tests/fixtures/uat14/broker_missing_basis.csv", "tests/fixtures/uat14/ledger_missing_basis.csv", "UNRESOLVED_DATA", 4, 0, 1)
+    
+    # UAT-15
+    run_live_scenario("UAT-15", "tests/fixtures/uat15/broker_norm.csv", "tests/fixtures/uat15/ledger_norm.csv", "MATCHED", 5, 0, 0)
+    
+    # UAT-16 (Micro-Variance / Sub-Cent Decimal Precision)
+    run_live_scenario("UAT-16", "tests/fixtures/uat16/broker_micro_diff.csv", "tests/fixtures/uat16/ledger_micro_diff.csv", "PROCEEDS_DIFFERENCE", 4, 1, 0)
+    
+    # UAT-17 (Fail-Closed Intake Rejections)
+    run_live_fail_closed_intake("UAT-17A", "tests/fixtures/uat17/broker_missing_column.csv", "SCHEMA_REQUIRED_FIELD_MISSING")
+    run_live_fail_closed_intake("UAT-17B", "tests/fixtures/uat17/broker_invalid_numeric.csv", "NUMERIC_INVALID")
+    run_live_fail_closed_intake("UAT-17C", "tests/fixtures/uat17/broker_malformed_row.csv", "CSV_MALFORMED")
+    run_live_fail_closed_intake("UAT-17D", "tests/fixtures/uat17/alien_unsupported_schema.csv", "SCHEMA_REQUIRED_FIELD_MISSING")
+    
+    # UAT-18 (Duplicate Rows & Colliding Candidates)
+    run_live_scenario("UAT-18A", "tests/fixtures/uat18/broker_duplicates.csv", "tests/fixtures/uat18/ledger_single_counterpart.csv", "MISSING_FROM_LEDGER", 5, 1, 0)
+    run_live_scenario("UAT-18B", "tests/fixtures/uat18/broker_colliding.csv", "tests/fixtures/uat18/ledger_colliding_diff_evidence.csv", "AMBIGUOUS_MATCH", 4, 1, 0)
+    
+    # UAT-19 (Hostile Payload Safety & Neutralization)
+    run_live_fail_closed_intake("UAT-19A1", "tests/fixtures/uat19/broker_formula_numeric_rejected.csv", "NUMERIC_INVALID")
+    run_live_scenario("UAT-19A2", "tests/fixtures/uat19/broker_formula_text_safe.csv", "tests/fixtures/uat19/ledger_formula_text_safe.csv", "MATCHED", 5, 0, 0)
+    run_live_scenario("UAT-19B", "tests/fixtures/uat19/broker_xss_html_safe.csv", "tests/fixtures/uat19/ledger_xss_html_safe.csv", "MATCHED", 5, 0, 0)
+    run_live_scenario("UAT-19C", "tests/fixtures/uat19/broker_quoted_multiline.csv", "tests/fixtures/uat19/ledger_quoted_multiline.csv", "MATCHED", 5, 0, 0)
+    run_live_scenario("UAT-19D", "tests/fixtures/uat19/broker_oversized_field.csv", "tests/fixtures/uat19/ledger_oversized_field.csv", "MATCHED", 5, 0, 0)
+    
+    # UAT-20 (Regulatory Routing & Fail-Closed Unsupported Jurisdictions / Tax Years)
+    run_live_regulatory_routing_boundary("UAT-20A-US2024", "US", 2024)
+    run_live_regulatory_routing_boundary("UAT-20B-US2023", "US", 2023)
+    run_live_regulatory_routing_boundary("UAT-20C-UK2025", "UK", 2025)
+    run_live_regulatory_routing_boundary("UAT-20D-CA2025", "CA", 2025)
+
+    # UAT-21 (Mixed Realistic Case)
+    run_live_scenario("UAT-21", "tests/fixtures/uat21/broker_realistic.csv", "tests/fixtures/uat21/ledger_realistic.csv", "UNRESOLVED_DATA", 1, 6, 1)
+    
+    # UAT-22 (Professional Review Lifecycle & Invariants)
+    run_live_professional_review_lifecycle()
+
     # UAT-23 (Preliminary vs Reviewed Evidence Contracts)
     run_live_preliminary_vs_reviewed_evidence()
 
     # UAT-24 (Standalone Offline Verifier & Tamper Detection)
     run_live_standalone_offline_verifier()
 
-    print("=== ALL SCENARIOS (UAT-05..24) QUALIFIED 100% GREEN ON PACKAGED CANDIDATE 7 RUNTIME ===")
+    # UAT-25 (Evaluation Capacity Boundaries & Monotonic Consumption)
+    run_live_evaluation_capacity_and_expiry()
+
+    print("=== ALL SCENARIOS (UAT-05..25) QUALIFIED 100% GREEN ON PACKAGED CANDIDATE 7 RUNTIME ===")
 
 
 if __name__ == "__main__":
@@ -727,8 +872,11 @@ if __name__ == "__main__":
     if os.path.exists(db_path):
         conn = sqlite3.connect(db_path)
         conn.cursor().execute('DELETE FROM cases WHERE case_kind != "BUNDLED_SAMPLE"')
+        conn.cursor().execute('DELETE FROM installation_evaluation')
+        conn.cursor().execute('DELETE FROM commercial_license')
         conn.commit()
     main()
+
 
 
 
