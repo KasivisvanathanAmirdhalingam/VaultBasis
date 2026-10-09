@@ -107,20 +107,21 @@ To maintain clear boundaries between CPA functional acceptance and technical sys
 ### Performance & Scalability Benchmark Track (`PERF`)
 | Track ID | Scenario Description | Target Workload | SLA / Acceptance Criteria | Status |
 |---|---|---|---|---|
-| **PERF-01** | High-Volume Ingestion & Reconciliation Benchmark | 10,000 Broker rows vs. 10,000 Ledger rows | Reconciles correctly without UI freeze, process crash, memory exhaustion, or decimal precision loss. (*Provisional performance benchmark; baseline to be recorded*). | **READY** |
+| **PERF-01** | High-Volume Ingestion & Reconciliation Benchmark | 10,000 Broker rows vs. 10,000 Ledger rows | Reconciles correctly without UI freeze, process crash, memory exhaustion, or decimal precision loss. | `PENDING — SCHEDULED` |
 
 ### Security & Privacy Observation Track (`SEC`)
 | Track ID | Scenario Description | Observation Method | Acceptance Criteria | Status |
 |---|---|---|---|---|
-| **SEC-01** | Process-Aware Network Egress Audit | OS packet trace (`tcpdump`, Wireshark, `lsof`) during full reconciliation & export lifecycle | No unexpected VaultBasis-owned outbound network traffic from the VaultBasis process tree during defined workflows. Client case files are not uploaded to cloud services. | **PASS (Candidate 7)** |
-| **SEC-02** | Local Filesystem & Key Permissions | OS permission inspection (`stat` / ACLs) on `data/keys/` and database files | Unix/macOS: Private keys restricted to POSIX `0600`. Windows: Private keys restricted to current user security identifier (ACL). | **PASS (Candidate 7)** |
-| **SEC-03** | Hostile Parser & Memory Fuzzing | Malformed, oversized, and recursive CSV inputs | Fail closed cleanly with intake diagnostics; zero unhandled segmentation faults or buffer overflows. | **PASS (Candidate 7)** |
+| **SEC-01** | Process-Aware Network Egress Audit | OS packet trace (`tcpdump`, Wireshark, `lsof`) during full reconciliation & export lifecycle | No unexpected VaultBasis-owned outbound network traffic from the VaultBasis process tree during defined workflows. Client case files are not uploaded to cloud services. | `PENDING — SCHEDULED` |
+| **SEC-02** | Local Filesystem & Key Permissions | OS permission inspection (`stat` / ACLs) on `data/keys/` and database files | Unix/macOS: Private keys restricted to POSIX `0600`. Windows: Private keys restricted to current user security identifier (ACL). Pre-commit Gate 11 verifies source baseline. | **SEC-02 (PRE-SIGN PASS)**<br>*(Final signed-artifact confirmation: PENDING)* |
+| **SEC-03A** | Adversarial Parser Corpus | Formula injection, malformed rows, alien schemas, quoting anomalies, and oversized fields | Fail closed cleanly with intake diagnostics; zero unhandled exceptions or data corruption. | **PASS — CLOSED** |
+| **SEC-03B** | Resource, Package & Filesystem Boundary Qualification | Extreme-size corpus, ZIP safety, path containment, disk/memory pressure behavior | Decompression edge cases, ZIP path safety, and constrained-resource execution verified. | `PENDING — SCHEDULED` |
 
 ### Platform Installation & OS Integration Track (`PLAT`)
 | Track ID | Scenario Description | Environment | Acceptance Criteria | Status |
 |---|---|---|---|---|
-| **PLAT-MAC-01** | macOS Native Application Bundle Lifecycle | macOS 14/15 Apple Silicon | Clean `.dmg` mount, drag to `/Applications`, double-click launch, GUI Quit, clean port release. | **PASS — CLOSED** |
-| **PLAT-WIN-01** | Windows Native Installer & Runtime Lifecycle | Windows 11 x64 (Clean VM) | Clean Setup wizard install, desktop shortcut launch, visible GUI controls, clean exit and uninstall. | **WAITING FOR CANDIDATE** |
+| **PLAT-MAC-01** | macOS Native Application Bundle Lifecycle | macOS 14/15 Apple Silicon | Clean `.dmg` mount, drag to `/Applications`, double-click launch, GUI Quit, clean port release. | **PLAT-MAC-01 (PRE-SIGN NATIVE PASS)**<br>*(Final signed clean-machine Gate 09: PENDING)* |
+| **PLAT-WIN-01** | Windows Native Installer & Runtime Lifecycle | Windows 11 x64 (Clean VM) | Clean Setup wizard install, desktop shortcut launch, visible GUI controls, clean exit and uninstall. | `PENDING — SCHEDULED` *(Waiting for Windows candidate)* |
 
 ---
 

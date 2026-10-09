@@ -354,53 +354,58 @@ PAID_LICENSE_ACTIVATED ──► SECOND_CLIENT_CASE_CREATED (Monetization & Rete
 ## 12. Integrated Master Program Dependency & Authorization Mapping
 
 ```text
-                     CURRENT ACTIVE EXECUTION (NOW)
-                                   │
-        ┌──────────────────────────┴──────────────────────────┐
-        │                                                     │
-   ENGINEERING & QUALIFICATION                           COMMERCIAL & GTM
-        │                                                     │
-  • Windows Candidate (Setup.exe)                       • External Provider / Privacy / Ops:
-  • SEC-01..03 (Egress, File, Limits)                     - DPA where applicable
-  • PERF-01 (10k benchmark)                               - Contractual/terms review where applicable
-  • PLAT-MAC-01 & PLAT-WIN-01                             - Relationship classification
-  • UAT-29 Prep & Execution                               - Data-flow verification
-        │                                                 - MFA / credentials
-        │                                                 - Production readiness
-        │                                                 - Exit/failure plan
-        │                                               • GA_CONTENT_MINIMUM surfaces
-        │                                               • Owned Channels & Social Setup
-        │                                               • Direct CPA/EA Recruitment
-        │                                                     │
-        └──────────────────────────┬──────────────────────────┘
-                                   │
-                           PRE-SIGN MILESTONES
-                                   │
-                       • UAT-29 (Practitioner UX)
-                       • UAT-30 (Cross-Platform Parity)
-                       • SEC-01..03, PERF-01, PLAT
-                                   │
-                              SOURCE FREEZE
-                                   │
-                             CODE SIGNING
-                                   │
-                      FINAL SIGNED ARTIFACT UAT
-                                   │
-                        5–8 CPA/EA PHYSICAL UAT
-                                   │
-                       PROD-GATE-01..18 CLOSURE
-                                   │
-                          DISTRIBUTION_ACTIVE
-                                   │
-        ┌──────────────────────────┴──────────────────────────┐
-        │                                                     │
-        ▼                                                     ▼
-PROD-GATE-01..18 CLOSED                              CPA-001..010 PROGRESSION
-        │                                                     │
-        ▼                                                     ▼
-MMP-2 AUTHORIZATION DECISION                         MARKET VALIDATION EVIDENCE
-                                                              │
-                                                              ▼
-                                                     INFORMS MMP-2 PRIORITIES,
-                                                     SEQUENCING & EXPANSION
+                         CURRENT ACTIVE EXECUTION (NOW)
+                                       │
+       ┌───────────────────────────────┼───────────────────────────────┐
+       │                               │                               │
+  ENGINEERING                        HUMAN                         OPERATIONS
+       │                               │                               │
+ • SEC-01/02/03 pre-sign             • Pre-Sign UAT-29               • Microsoft ID Verification
+ • PERF-01 10k benchmark               + UAT-22 Human Layer          • Paddle Live Onboarding
+ • Windows Candidate (Setup.exe)               │                     • Mailer Provider Selection
+ • PLAT-WIN-01 native lifecycle                │                     • Live SPF/DKIM/DMARC Evidence
+ • PLAT-MAC-01 native lifecycle                │                     • Legal & Terms Alignment
+       │                                       │                     • GTM Channel & Social Setup
+       └───────────────────────┬───────────────┘                               │
+                               │                                               │
+                       UAT-30 PARITY                                           │
+                               │                                               │
+                      PRE-SIGN QUALIFIED                                       │
+                               │                                               │
+                      CLEAN SOURCE FREEZE                                      │
+                               │                                               │
+             ┌─────────────────┴─────────────────┐                             │
+             │                                   │                             │
+        MAC SIGNING                       WINDOWS SIGNING                      │
+     (Apple ID Ready)                 (Needs Microsoft ID)                     │
+             │                                   │                             │
+             └─────────────────┬─────────────────┘                             │
+                               │                                               │
+                     EXACT SIGNED ARTIFACTS                                    │
+                               │                                               │
+                    POST-SIGN QUALIFICATION                                    │
+                               │                                               │
+                  5–8 UNASSISTED PRACTITIONERS                                 │
+                               │                                               │
+                               ├───────────────────────────────────────────────┘
+                               │
+                   PROVIDER / EMAIL / LEGAL READY
+                               │
+                    RELEASE MANIFEST FROZEN
+                               │
+                   PROD-GATE-01..18 CLOSURE
+                               │
+                      DISTRIBUTION_ACTIVE
+                               │
+        ┌──────────────────────┴──────────────────────┐
+        │                                             │
+        ▼                                             ▼
+PROD-GATE-01..18 CLOSED                      CPA-001..010 PROGRESSION
+        │                                             │
+        ▼                                             ▼
+MMP-2 AUTHORIZATION DECISION                 MARKET VALIDATION EVIDENCE
+                                                      │
+                                                      ▼
+                                             INFORMS MMP-2 PRIORITIES,
+                                             SEQUENCING & EXPANSION
 ```
