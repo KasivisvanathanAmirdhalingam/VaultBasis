@@ -743,14 +743,15 @@
         <div>
           <h2>Reconciliation Cases</h2>
           <p style="color: var(--text-muted); font-size: 0.88rem; margin-top: 4px;">
-            Organize digital asset evidence reconciliation by client engagement and tax year.
+            Reconciliation work organized by client and tax year.
           </p>
         </div>
       </div>
 
-      <!-- Sample Teaching Banner -->
-      <div class="card" style="background: linear-gradient(135deg, #f0fdf4 0%, #eff6ff 100%); border-color: #bbf7d0; padding: 1rem 1.25rem; margin-bottom: 1.25rem;">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+      <!-- Sample Teaching Banner (Dismissible Onboarding) -->
+      <div id="sample-teaching-banner" class="card" style="display: none; background: linear-gradient(135deg, #f0fdf4 0%, #eff6ff 100%); border-color: #bbf7d0; padding: 1rem 1.25rem; margin-bottom: 1.25rem; position: relative;">
+        <button type="button" onclick="dismissSampleIntro()" aria-label="Hide getting-started panel" title="Hide getting-started panel" style="position: absolute; top: 8px; right: 10px; background: transparent; border: none; font-size: 1.25rem; line-height: 1; color: #64748b; cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: color 0.15s;" onmouseover="this.style.color='#0f172a'" onmouseout="this.style.color='#64748b'">×</button>
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding-right: 1.5rem;">
           <div style="max-width: 820px;">
             <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px; flex-wrap: wrap;">
               <span class="badge badge-success" style="font-size: 0.7rem; padding: 2px 6px;">RECOMMENDED FOR FIRST-TIME USERS</span>
@@ -1157,6 +1158,19 @@
             <li><a href="https://vaultbasis.com/contact" target="_blank" rel="noopener" style="color: var(--primary);">Contact Support ↗</a></li>
             <li><a href="https://vaultbasis.com/security-disclosure" target="_blank" rel="noopener" style="color: var(--primary);">Report a Security Issue ↗</a></li>
           </ul>
+        </div>
+      </div>
+
+      <!-- Sample Discovery in Help -->
+      <div class="card" style="margin-top: 1.5rem; background: linear-gradient(135deg, #f0fdf4 0%, #eff6ff 100%); border-color: #bbf7d0;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+          <div style="max-width: 760px;">
+            <h3 style="margin-bottom: 0.35rem; font-size: 1rem; color: #0f172a;">Sample Reconciliation Walkthrough</h3>
+            <p style="font-size: 0.85rem; color: #334155; line-height: 1.5; margin: 0;">
+              Explore a complete, immutable Form 1099-DA vs. crypto tax ledger reconciliation scenario at any time.
+            </p>
+          </div>
+          <button class="btn btn-success btn-sm" onclick="exploreSampleCase()">Explore Sample Case →</button>
         </div>
       </div>
     </div>
@@ -1648,7 +1662,14 @@
       tbody.innerHTML = '';
 
       if (cases.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2.5rem;">No matching cases found. Click 'Open Sample Case' or '+ New Case' to begin.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 3rem 1.5rem;">
+          <div style="font-size: 0.95rem; font-weight: 600; color: var(--text); margin-bottom: 4px;">No client cases yet</div>
+          <div style="font-size: 0.85rem; margin-bottom: 1.25rem;">Create a client engagement or explore the bundled sample case.</div>
+          <div style="display: inline-flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+            <button class="btn btn-primary btn-sm" onclick="openNewCaseModal()">+ New Case</button>
+            <button class="btn btn-secondary btn-sm" onclick="exploreSampleCase()">Open Sample Case →</button>
+          </div>
+        </td></tr>`;
         return;
       }
 
@@ -1735,10 +1756,32 @@
     }
 
 
+    function initSampleIntroBanner() {
+      const banner = document.getElementById('sample-teaching-banner');
+      if (!banner) return;
+      try {
+        const dismissed = localStorage.getItem('cases_sample_intro_dismissed') === 'true';
+        banner.style.display = dismissed ? 'none' : 'block';
+      } catch (e) {
+        banner.style.display = 'block';
+      }
+    }
+
+    function dismissSampleIntro() {
+      try {
+        localStorage.setItem('cases_sample_intro_dismissed', 'true');
+      } catch (e) {}
+      const banner = document.getElementById('sample-teaching-banner');
+      if (banner) {
+        banner.style.display = 'none';
+      }
+    }
+
     async function exploreSampleCase() {
       try {
         const res = await fetch('/api/sample-case/load', { method: 'POST' });
         if (res.ok) {
+          dismissSampleIntro();
           await loadCases();
           openCase('CASE-SAMPLE-2025');
           showToast("Sample case loaded. Preloaded evidence is read-only.", "info");
@@ -2711,10 +2754,14 @@
     window.promptReviewNote = promptReviewNote;
     window.finalizePractitionerReview = finalizePractitionerReview;
 
+    window.dismissSampleIntro = dismissSampleIntro;
+    window.initSampleIntroBanner = initSampleIntroBanner;
+
     // Structured Boot Lifecycle
     function bootstrap() {
       console.log("[edge-boot] DOM_READY");
       console.log("[edge-boot] ACTION_BINDINGS_READY");
+      initSampleIntroBanner();
       loadCases();
     }
 
