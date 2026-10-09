@@ -351,61 +351,86 @@ PAID_LICENSE_ACTIVATED ──► SECOND_CLIENT_CASE_CREATED (Monetization & Rete
 
 ---
 
-## 12. Integrated Master Program Dependency & Authorization Mapping
+## 12. Integrated Master Program Dependency & Release Identity Mapping
+
+### A. Authoritative Release Identity Set
+The immutable release manifest (`release-manifest.json`) strictly binds the cryptographic identity of all distributed release components:
+
+```
+├── 1. macOS Release Bundle
+│   ├── Package: VaultBasis-RC3-macOS-arm64.dmg (SHA-256)
+│   └── Executable: VaultBasis.app/Contents/MacOS/VaultBasis (SHA-256 + Developer ID Signature)
+│
+├── 2. Windows Release Bundle
+│   ├── Installer: VaultBasis-Setup-1.5.0-rc3.exe (SHA-256 + Authenticode Timestamped Signature)
+│   └── Executable: VaultBasis.exe (SHA-256 + Authenticode Signature)
+│
+├── 3. Standalone Verifier Artifact
+│   ├── Artifact: apps/verifier/verify_receipt.py (or standalone executable bundle)
+│   ├── Version: v0.1 (Evidence Contract v0.1 conformance)
+│   ├── Standalone SHA-256 Digest
+│   ├── Source Git Commit Binding
+│   └── Public Verification Key Fingerprint Expectation
+│
+├── 4. Software Bill of Materials (SBOM)
+│   └── CycloneDX SBOM: cyclonedx-sbom.json (SHA-256)
+│
+└── 5. Canonical Release Manifest
+    └── release-manifest.json (SHA-256 + Authority Signature)
+```
+
+---
+
+### B. Master Operational Critical Path
 
 ```text
-                         CURRENT ACTIVE EXECUTION (NOW)
-                                       │
-       ┌───────────────────────────────┼───────────────────────────────┐
-       │                               │                               │
-  ENGINEERING                        HUMAN                         OPERATIONS
-       │                               │                               │
- • SEC-01/02/03 pre-sign             • Pre-Sign UAT-29               • Microsoft ID Verification
- • PERF-01 10k benchmark               + UAT-22 Human Layer          • Paddle Live Onboarding
- • Windows Candidate (Setup.exe)               │                     • Mailer Provider Selection
- • PLAT-WIN-01 native lifecycle                │                     • Live SPF/DKIM/DMARC Evidence
- • PLAT-MAC-01 native lifecycle                │                     • Legal & Terms Alignment
-       │                                       │                     • GTM Channel & Social Setup
-       └───────────────────────┬───────────────┘                               │
-                               │                                               │
-                       UAT-30 PARITY                                           │
-                               │                                               │
-                      PRE-SIGN QUALIFIED                                       │
-                               │                                               │
-                      CLEAN SOURCE FREEZE                                      │
-                               │                                               │
-             ┌─────────────────┴─────────────────┐                             │
-             │                                   │                             │
-        MAC SIGNING                       WINDOWS SIGNING                      │
-     (Apple ID Ready)                 (Needs Microsoft ID)                     │
-             │                                   │                             │
-             └─────────────────┬─────────────────┘                             │
-                               │                                               │
-                     EXACT SIGNED ARTIFACTS                                    │
-                               │                                               │
-                    POST-SIGN QUALIFICATION                                    │
-                               │                                               │
-                  5–8 UNASSISTED PRACTITIONERS                                 │
-                               │                                               │
-                               ├───────────────────────────────────────────────┘
-                               │
-                   PROVIDER / EMAIL / LEGAL READY
-                               │
-                    RELEASE MANIFEST FROZEN
-                               │
-                   PROD-GATE-01..18 CLOSURE
-                               │
-                      DISTRIBUTION_ACTIVE
-                               │
-        ┌──────────────────────┴──────────────────────┐
-        │                                             │
-        ▼                                             ▼
-PROD-GATE-01..18 CLOSED                      CPA-001..010 PROGRESSION
-        │                                             │
-        ▼                                             ▼
-MMP-2 AUTHORIZATION DECISION                 MARKET VALIDATION EVIDENCE
-                                                      │
-                                                      ▼
-                                             INFORMS MMP-2 PRIORITIES,
-                                             SEQUENCING & EXPANSION
+NOW
+│
+├── SEC-01 (Process-Aware Network Capture)
+├── SEC-03B (Resource / Package / Filesystem Boundaries)
+├── PERF-01 (10,000-Row Benchmark)
+├── Pre-Sign UAT-29 + UAT-22 Human Layer
+├── Windows Candidate (Setup.exe)
+│      ↓
+│   PLAT-WIN-01 (Native Windows Lifecycle)
+│      ↓
+│   UAT-30 (Deterministic Semantic Parity)
+│
+├── Microsoft Identity Validation ───────────────┐
+├── Paddle Production Activation ─────┐          │
+├── Mailer Production Readiness ──────┤          │
+└── GTM / CPA Recruitment ────────────┤          │
+                                      │          │
+                     PRE-SIGN QUALIFICATION      │
+                              ↓                  │
+                    CLEAN SOURCE FREEZE          │
+                              ↓                  │
+                    ┌─────────┴─────────┐         │
+                    ↓                   ↓         │
+                 MAC SIGN           WINDOWS SIGN ←┘
+             (Apple ID Ready)      (Needs MS ID)
+                    │                   │
+                    └─────────┬─────────┘
+                              ↓
+                    FINAL SIGNED BYTES
+                              ↓
+                   EXACT-ARTIFACT REQUAL
+                              ↓
+              5–8 UNASSISTED PRACTITIONERS
+                              ↓
+                PROVIDER / LEGAL / EMAIL READY
+                              ↓
+                 RELEASE MANIFEST FROZEN
+                              ↓
+                   PROD-GATE-01..18 CLOSED
+                              ↓
+                  DISTRIBUTION_ACTIVE = true
+                              ↓
+             MMP-1.5 PRODUCTION QUALIFICATION COMPLETE
+                              ↓
+                 MMP-2 AUTHORIZATION DECISION
+           (AUTHORIZED / DEFERRED / CONDITIONALLY AUTHORIZED)
+                              ↓
+                   CPA-001..010 PROGRESSION
+                 (Market Validation Evidence)
 ```
