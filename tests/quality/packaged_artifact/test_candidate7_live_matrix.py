@@ -247,6 +247,171 @@ def main():
     # UAT-12
     run_live_scenario("UAT-12", "tests/fixtures/uat12/broker_box2_no.csv", "tests/fixtures/uat12/ledger_box2_no.csv", "REPORTING_SCOPE_DIFFERENCE", 4, 1, 0)
     
+def run_live_professional_review_lifecycle():
+    scenario_id = "UAT-22"
+    case_id = f"CASE-LIVE-PKG-{scenario_id}-{uuid.uuid4().hex[:6]}"
+    
+    # 1. Create Case
+    create_res = post_json("/api/cases", {
+        "case_id": case_id,
+        "client_reference": "Packaged Binary Live Professional Review UAT-22",
+        "tax_year": 2025,
+        "jurisdiction": "US"
+    })
+    assert create_res.get("case_id") == case_id
+    
+    # Negative assertion: Cannot finalize review before reconciliation
+    try:
+        post_json(f"/api/cases/{case_id}/finalize-review", {})
+        raise AssertionError("Expected 400 when finalizing review before reconciliation")
+    except urllib.error.HTTPError as e:
+        assert e.code == 400
+
+    # 2. Ingest Multi-Finding Sources
+    b_bytes = Path("tests/fixtures/uat21/broker_realistic.csv").read_bytes()
+    l_bytes = Path("tests/fixtures/uat21/ledger_realistic.csv").read_bytes()
+    
+    post_multipart(f"/api/cases/{case_id}/sources", files={"file": ("broker_realistic.csv", b_bytes)}, form_data={"declared_schema": "AUTO"})
+    post_multipart(f"/api/cases/{case_id}/sources", files={"file": ("ledger_realistic.csv", l_bytes)}, form_data={"declared_schema": "AUTO"})
+    
+    # 3. Reconcile (Generates Rev 1 Preliminary Receipt)
+    recon_res = post_json(f"/api/cases/{case_id}/reconcile", {})
+    assert recon_res.get("status") == "RECONCILED"
+    assert recon_res.get("revision") == 1
+    assert recon_res.get("human_review_state") == "UNREVIEWED"
+    prelim_receipt = recon_res.get("receipt", {})
+    assert prelim_receipt.get("ruleset_id") == "VB_US_1099DA_2025_R1"
+    assert prelim_receipt.get("outcome_state") == "UNRESOLVED_DATA"
+    assert len(prelim_receipt.get("material_differences", [])) == 6
+    assert len(prelim_receipt.get("unresolved_items", [])) == 1
+    
+    diff_eth = next(d for d in prelim_receipt["material_differences"] if d["asset"] == "ETH")
+    diff_sol = next(d for d in prelim_receipt["material_differences"] if d["asset"] == "SOL")
+    diff_link = next(d for d in prelim_receipt["material_differences"] if d["asset"] == "LINK")
+    unres_ada = prelim_receipt["unresolved_items"][0]
+    
+    # 4. Review Actions
+    # Negative assertion: Invalid disposition rejected
+    try:
+        post_json(f"/api/cases/{case_id}/reviews", {
+            "finding_id": diff_eth["difference_id"],
+            "disposition": "INVALID_DISPOSITION",
+            "note": "Bad test"
+        })
+        raise AssertionError("Expected 400 for invalid disposition")
+    except urllib.error.HTTPError as e:
+        assert e.code == 400
+        
+    # ETH -> REVIEWED
+    post_json(f"/api/cases/{case_id}/reviews", {
+        "finding_id": diff_eth["difference_id"],
+        "disposition": "REVIEWED",
+        "note": "Verified broker exchange settlement statement; fee deducted.",
+        "reviewer_reference": "CPA Senior Reviewer #412"
+    })
+    
+    # SOL -> FOLLOW_UP_REQUIRED
+    post_json(f"/api/cases/{case_id}/reviews", {
+        "finding_id": diff_sol["difference_id"],
+        "disposition": "FOLLOW_UP_REQUIRED",
+        "note": "Requested original staking reward cost basis lot documentation.",
+        "reviewer_reference": "CPA Senior Reviewer #412"
+    })
+    
+    # ADA -> LEFT_UNRESOLVED
+    post_json(f"/api/cases/{case_id}/reviews", {
+        "finding_id": unres_ada["item_id"],
+        "disposition": "LEFT_UNRESOLVED",
+        "note": "Missing acquisition basis from defunct overseas exchange.",
+        "reviewer_reference": "CPA Senior Reviewer #412"
+    })
+    
+    # 5. Invariant Checks
+    case_receipt_check = json.loads(urllib.request.urlopen(f"{BASE_URL}/api/cases/{case_id}/receipt").read().decode("utf-8"))
+    eth_check = next(d for d in case_receipt_check["material_differences"] if d["asset"] == "ETH")
+    assert eth_check["difference_state"] == "PROCEEDS_DIFFERENCE"  # Reviewed != Agreed
+    assert eth_check["variance"] == "199.50"
+    assert eth_check["source_a_value"] == diff_eth["source_a_value"]
+    assert eth_check["source_b_value"] == diff_eth["source_b_value"]
+    
+    # 6. Finalize Review (Generates Rev 2 Reviewed Receipt)
+    final_res = post_json(f"/api/cases/{case_id}/finalize-review", {})
+    assert final_res.get("status") == "REVIEW_FINALIZED"
+    assert final_res.get("revision") == 2
+    assert final_res.get("prior_receipt_id") == prelim_receipt["receipt_id"]
+    assert final_res.get("human_review_state") == "REVIEWED_ANNOTATED"
+    final_receipt = final_res.get("receipt", {})
+    assert final_receipt.get("revision") == 2
+    
+    # 7. Sample Immutability Check
+    try:
+        post_json("/api/cases/CASE-SAMPLE-2025/reviews", {
+            "finding_id": "DIFF-001",
+            "disposition": "REVIEWED",
+            "note": "Illegal edit on sample"
+        })
+        raise AssertionError("Expected 403 on sample case review mutation")
+    except urllib.error.HTTPError as e:
+        assert e.code == 403
+        
+    # 8. Re-finalization monotonic revision increment
+    post_json(f"/api/cases/{case_id}/reviews", {
+        "finding_id": diff_link["difference_id"],
+        "disposition": "REVIEWED",
+        "note": "Additional statement provided."
+    })
+    refinal_res = post_json(f"/api/cases/{case_id}/finalize-review", {})
+    assert refinal_res.get("revision") == 3
+    assert refinal_res.get("prior_receipt_id") == final_receipt["receipt_id"]
+    
+    # 9. Export & Offline Verifier Check
+    zip_bytes = get_bytes(f"/api/cases/{case_id}/export")
+    with zipfile.ZipFile(io.BytesIO(zip_bytes)) as z:
+        exported_receipt = json.loads(z.read("receipt-v0.1.json").decode("utf-8"))
+        assert exported_receipt["revision"] == 3
+        assert exported_receipt["human_review_state"] == "REVIEWED_ANNOTATED"
+        
+        # Verify via offline verifier endpoint
+        ver_res = post_multipart("/api/receipts/verify", files={"file": ("receipt-v0.1.json", z.read("receipt-v0.1.json"))})
+        assert ver_res.get("overall_status") == "PASS"
+        assert ver_res.get("checks", {}).get("signature_authenticity") == "PASS"
+        assert ver_res.get("checks", {}).get("tax_correctness") == "NOT_DETERMINED"
+        
+    print(f"[{scenario_id}] LIVE PACKAGED BINARY EXECUTION: PASS (Professional Review Lifecycle & Invariants Validated)")
+
+
+def main():
+    print("=== EXECUTING CANDIDATE 7 LIVE PACKAGED BINARY REGRESSION (http://127.0.0.1:8000) ===")
+    
+    # Health check
+    health = json.loads(urllib.request.urlopen(f"{BASE_URL}/api/health").read().decode("utf-8"))
+    print(f"Target Service: {health.get('service')} v{health.get('version')} (Commit: {health.get('source_commit')[:7]})")
+    print(f"Installation Key: {health.get('installation_key_id')[:16]}...")
+    
+    # UAT-05
+    run_live_scenario("UAT-05", "tests/fixtures/uat05/broker_perfect.csv", "tests/fixtures/uat05/ledger_perfect.csv", "MATCHED", 5, 0, 0)
+    
+    # UAT-06
+    run_live_scenario("UAT-06", "tests/fixtures/uat06/broker_proceeds_diff.csv", "tests/fixtures/uat06/ledger_proceeds_diff.csv", "PROCEEDS_DIFFERENCE", 4, 1, 0)
+    
+    # UAT-07
+    run_live_scenario("UAT-07", "tests/fixtures/uat07/broker_basis_diff.csv", "tests/fixtures/uat07/ledger_basis_diff.csv", "BASIS_DIFFERENCE", 4, 1, 0)
+    
+    # UAT-08
+    run_live_scenario("UAT-08", "tests/fixtures/uat08/broker_dual_diff.csv", "tests/fixtures/uat08/ledger_dual_diff.csv", "PROCEEDS_DIFFERENCE", 4, 2, 0)
+    
+    # UAT-09
+    run_live_scenario("UAT-09", "tests/fixtures/uat09/broker_orphan.csv", "tests/fixtures/uat09/ledger_orphan.csv", "MISSING_FROM_LEDGER", 4, 1, 0)
+    
+    # UAT-10
+    run_live_scenario("UAT-10", "tests/fixtures/uat10/broker_orphan_b.csv", "tests/fixtures/uat10/ledger_orphan_b.csv", "MISSING_FROM_1099DA", 4, 1, 0)
+    
+    # UAT-11
+    run_live_scenario("UAT-11", "tests/fixtures/uat11/broker_ambiguous.csv", "tests/fixtures/uat11/ledger_ambiguous.csv", "AMBIGUOUS_MATCH", 4, 1, 0)
+    
+    # UAT-12
+    run_live_scenario("UAT-12", "tests/fixtures/uat12/broker_box2_no.csv", "tests/fixtures/uat12/ledger_box2_no.csv", "REPORTING_SCOPE_DIFFERENCE", 4, 1, 0)
+    
     # UAT-13
     run_live_scenario("UAT-13", "tests/fixtures/uat13/broker_zero_basis.csv", "tests/fixtures/uat13/ledger_zero_basis.csv", "MATCHED", 5, 0, 0)
     
@@ -285,7 +450,10 @@ def main():
     # UAT-21 (Mixed Realistic Case)
     run_live_scenario("UAT-21", "tests/fixtures/uat21/broker_realistic.csv", "tests/fixtures/uat21/ledger_realistic.csv", "UNRESOLVED_DATA", 1, 6, 1)
     
-    print("=== ALL 18 SCENARIOS (UAT-05..21) QUALIFIED 100% GREEN ON PACKAGED CANDIDATE 7 RUNTIME ===")
+    # UAT-22 (Professional Review Lifecycle & Invariants)
+    run_live_professional_review_lifecycle()
+
+    print("=== ALL SCENARIOS (UAT-05..22) QUALIFIED 100% GREEN ON PACKAGED CANDIDATE 7 RUNTIME ===")
 
 
 if __name__ == "__main__":
@@ -296,3 +464,4 @@ if __name__ == "__main__":
         conn.cursor().execute('DELETE FROM cases WHERE case_kind != "BUNDLED_SAMPLE"')
         conn.commit()
     main()
+
