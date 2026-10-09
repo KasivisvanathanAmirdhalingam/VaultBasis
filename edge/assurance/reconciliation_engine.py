@@ -144,6 +144,37 @@ class DeterministicReconciliationEngine:
                 "field_names_evaluated": ["asset", "proceeds", "cost_basis", "acquisition_date", "disposition_date"]
             }]
 
+        class _ParsedDate:
+            __slots__ = ("raw", "dt", "tzinfo", "date_val", "is_valid")
+            def __init__(self, raw_str: Optional[str]):
+                self.raw = raw_str
+                if not raw_str:
+                    self.dt = None
+                    self.tzinfo = None
+                    self.date_val = None
+                    self.is_valid = False
+                else:
+                    try:
+                        dt = dateutil_parser.isoparse(raw_str)
+                        self.dt = dt
+                        self.tzinfo = dt.tzinfo
+                        self.date_val = dt.date()
+                        self.is_valid = True
+                    except (ValueError, TypeError):
+                        self.dt = None
+                        self.tzinfo = None
+                        self.date_val = None
+                        self.is_valid = False
+
+        # Pre-parse dates and index txs_b by asset preserving deterministic order
+        txs_b_indexed: Dict[str, List[Tuple[int, CanonicalTransaction, _ParsedDate, _ParsedDate]]] = {}
+        for idx_b, tx_b in enumerate(txs_b):
+            disp_b = _ParsedDate(tx_b.disposition_date)
+            acq_b = _ParsedDate(tx_b.acquisition_date)
+            if tx_b.asset not in txs_b_indexed:
+                txs_b_indexed[tx_b.asset] = []
+            txs_b_indexed[tx_b.asset].append((idx_b, tx_b, disp_b, acq_b))
+
         for tx_a in txs_a:
             comparison_groups += 1
             prov_a = build_prov(tx_a, src_a_id)
@@ -162,50 +193,50 @@ class DeterministicReconciliationEngine:
                     "provenance_references": prov_a
                 })
 
-            # Find all potential matches on asset and date
-            candidate_matches: List[Tuple[int, CanonicalTransaction]] = []
-            for idx_b, tx_b in enumerate(txs_b):
+            disp_a = _ParsedDate(tx_a.disposition_date)
+            acq_a = _ParsedDate(tx_a.acquisition_date)
+
+            # Find all potential matches on asset and date using asset-partitioned index
+            candidate_matches: List[Tuple[int, CanonicalTransaction, _ParsedDate, _ParsedDate]] = []
+            candidates_for_asset = txs_b_indexed.get(tx_a.asset, [])
+
+            for idx_b, tx_b, disp_b, acq_b in candidates_for_asset:
                 if idx_b in matched_b_indices:
                     continue
 
                 dates_match = False
-                if not tx_a.disposition_date or not tx_b.disposition_date:
+                if not disp_a.raw or not disp_b.raw:
                     dates_match = True
-                elif tx_a.disposition_date == tx_b.disposition_date:
+                elif disp_a.raw == disp_b.raw:
                     dates_match = True
-                else:
-                    try:
-                        dt_a = dateutil_parser.isoparse(tx_a.disposition_date)
-                        dt_b = dateutil_parser.isoparse(tx_b.disposition_date)
-                        if dt_a.tzinfo is None and dt_b.tzinfo is not None:
-                            result.unresolved_items.append({
-                                "item_id": f"tz_miss_a_{tx_a.transaction_id}",
-                                "reason_code": "TIMEZONE_CONTEXT_MISSING",
-                                "affected_source_id": src_a_id,
-                                "affected_row_ref": tx_a.source_row_reference,
-                                "description": "Timezone context missing in broker disposition date",
-                                "rule_reference": "VB_US_1099DA_2025_R1",
-                                "provenance_references": prov_a
-                            })
-                            dates_match = True
-                        elif dt_b.tzinfo is None and dt_a.tzinfo is not None:
-                            result.unresolved_items.append({
-                                "item_id": f"tz_miss_b_{tx_a.transaction_id}",
-                                "reason_code": "TIMEZONE_CONTEXT_MISSING",
-                                "affected_source_id": src_b_id,
-                                "affected_row_ref": tx_b.source_row_reference,
-                                "description": "Timezone context missing in ledger disposition date",
-                                "rule_reference": "VB_US_1099DA_2025_R1",
-                                "provenance_references": build_prov(tx_b, src_b_id)
-                            })
-                            dates_match = True
-                        elif dt_a == dt_b or dt_a.date() == dt_b.date():
-                            dates_match = True
-                    except (ValueError, TypeError):
-                        pass
+                elif disp_a.is_valid and disp_b.is_valid:
+                    if disp_a.tzinfo is None and disp_b.tzinfo is not None:
+                        result.unresolved_items.append({
+                            "item_id": f"tz_miss_a_{tx_a.transaction_id}",
+                            "reason_code": "TIMEZONE_CONTEXT_MISSING",
+                            "affected_source_id": src_a_id,
+                            "affected_row_ref": tx_a.source_row_reference,
+                            "description": "Timezone context missing in broker disposition date",
+                            "rule_reference": "VB_US_1099DA_2025_R1",
+                            "provenance_references": prov_a
+                        })
+                        dates_match = True
+                    elif disp_b.tzinfo is None and disp_a.tzinfo is not None:
+                        result.unresolved_items.append({
+                            "item_id": f"tz_miss_b_{tx_a.transaction_id}",
+                            "reason_code": "TIMEZONE_CONTEXT_MISSING",
+                            "affected_source_id": src_b_id,
+                            "affected_row_ref": tx_b.source_row_reference,
+                            "description": "Timezone context missing in ledger disposition date",
+                            "rule_reference": "VB_US_1099DA_2025_R1",
+                            "provenance_references": build_prov(tx_b, src_b_id)
+                        })
+                        dates_match = True
+                    elif disp_a.dt == disp_b.dt or disp_a.date_val == disp_b.date_val:
+                        dates_match = True
 
-                if tx_b.asset == tx_a.asset and dates_match:
-                    candidate_matches.append((idx_b, tx_b))
+                if dates_match:
+                    candidate_matches.append((idx_b, tx_b, disp_b, acq_b))
 
             if len(candidate_matches) == 0:
                 result.material_differences.append(DifferenceRecord(
@@ -226,7 +257,7 @@ class DeterministicReconciliationEngine:
             elif len(candidate_matches) > 1:
                 exact_proceeds_matches = [c for c in candidate_matches if c[1].proceeds is not None and tx_a.proceeds is not None and c[1].proceeds == tx_a.proceeds]
                 if len(exact_proceeds_matches) == 1:
-                    idx_b, tx_b = exact_proceeds_matches[0]
+                    idx_b, tx_b, disp_b, acq_b = exact_proceeds_matches[0]
                 else:
                     candidate_refs = ", ".join([f"{src_b_id}:{cand[1].source_row_reference}" for cand in candidate_matches])
                     cand_provs = []
@@ -250,7 +281,7 @@ class DeterministicReconciliationEngine:
                     diff_counter += 1
                     continue
             else:
-                idx_b, tx_b = candidate_matches[0]
+                idx_b, tx_b, disp_b, acq_b = candidate_matches[0]
 
             matched_b_indices.add(idx_b)
             prov_b = build_prov(tx_b, src_b_id)
@@ -312,23 +343,21 @@ class DeterministicReconciliationEngine:
                     diff_counter += 1
 
             # Acquisition Date comparison
-            if not tx_a.acquisition_date or not tx_b.acquisition_date:
-                if tx_a.acquisition_date or tx_b.acquisition_date:
+            if not acq_a.raw or not acq_b.raw:
+                if acq_a.raw or acq_b.raw:
                     result.unresolved_items.append({
                         "item_id": f"unres_acq_{tx_a.transaction_id}",
                         "reason_code": "DATE_UNAVAILABLE",
-                        "affected_source_id": src_a_id if not tx_a.acquisition_date else src_b_id,
-                        "affected_row_ref": tx_a.source_row_reference if not tx_a.acquisition_date else tx_b.source_row_reference,
+                        "affected_source_id": src_a_id if not acq_a.raw else src_b_id,
+                        "affected_row_ref": tx_a.source_row_reference if not acq_a.raw else tx_b.source_row_reference,
                         "description": "Acquisition date unavailable in source record.",
                         "rule_reference": "VB_US_1099DA_2025_R1",
                         "provenance_references": prov_both
                     })
-            elif tx_a.acquisition_date != tx_b.acquisition_date:
+            elif acq_a.raw != acq_b.raw:
                 match_dates = False
-                try:
-                    dt_a = dateutil_parser.isoparse(tx_a.acquisition_date)
-                    dt_b = dateutil_parser.isoparse(tx_b.acquisition_date)
-                    if dt_a.tzinfo is None and dt_b.tzinfo is not None:
+                if acq_a.is_valid and acq_b.is_valid:
+                    if acq_a.tzinfo is None and acq_b.tzinfo is not None:
                         result.unresolved_items.append({
                             "item_id": f"tz_miss_a_acq_{tx_a.transaction_id}",
                             "reason_code": "TIMEZONE_CONTEXT_MISSING",
@@ -339,7 +368,7 @@ class DeterministicReconciliationEngine:
                             "provenance_references": prov_a
                         })
                         match_dates = True
-                    elif dt_b.tzinfo is None and dt_a.tzinfo is not None:
+                    elif acq_b.tzinfo is None and acq_a.tzinfo is not None:
                         result.unresolved_items.append({
                             "item_id": f"tz_miss_b_acq_{tx_a.transaction_id}",
                             "reason_code": "TIMEZONE_CONTEXT_MISSING",
@@ -350,10 +379,8 @@ class DeterministicReconciliationEngine:
                             "provenance_references": build_prov(tx_b, src_b_id)
                         })
                         match_dates = True
-                    elif dt_a == dt_b or dt_a.date() == dt_b.date():
+                    elif acq_a.dt == acq_b.dt or acq_a.date_val == acq_b.date_val:
                         match_dates = True
-                except (ValueError, TypeError):
-                    pass
 
                 if not match_dates:
                     result.material_differences.append(DifferenceRecord(
