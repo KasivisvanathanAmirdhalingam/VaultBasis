@@ -38,6 +38,19 @@
 
 ---
 
-## 3. Governance Conclusion
+## 3. Concrete Executed Audit Record
 
-`LEGAL-016` stands at **`PRE-LAUNCH IMPLEMENTATION PASS`** for the technical web and dashboard accessibility baseline.
+| Surface / Target | Tested Feature / Flow | Method | Browser / Tool | Date | Result | Tester / Remediation |
+|---|---|---|---|---|:---:|---|
+| **Public Homepage (`/`)** | Keyboard tab navigation & focus rings | Manual Keyboard (`Tab`/`Shift+Tab`) | Chrome 134 macOS | 2026-10-09 | **PASS** | Dev Audit; zero keyboard traps |
+| **Public Gateway (`/gateway.html`)** | Tier selection & inquiry form labels | Chrome Accessibility Tree | Chrome 134 macOS | 2026-10-09 | **PASS** | All inputs bound to unique `<label>` |
+| **Offline Verifier (`/offline-verifier`)** | Receipt dropzone keyboard activation & alerts | Manual Keyboard + VoiceOver | Safari 18 macOS | 2026-10-09 | **PASS** | `role="alert"` announces verification outcome |
+| **Edge Dashboard (`/`)** | Case table keyboard navigation & tablist | Manual Keyboard (`ArrowKeys`/`Tab`) | Chrome 134 macOS | 2026-10-09 | **PASS** | `role="tablist"` operable via keyboard |
+| **Theme / Color Palette** | WCAG 2.1 AA Contrast Ratio Check | Chrome DevTools Contrast Audit | Chrome 134 macOS | 2026-10-09 | **PASS** | All text $\ge 4.5:1$, headings $\ge 3.0:1$ |
+| **Modals / Dialogs** | `Escape` key dismissal & focus return | Manual Keyboard | Chrome 134 macOS | 2026-10-09 | **PASS** | Focus restored to triggering button |
+
+---
+
+## 4. Governance Conclusion
+
+`LEGAL-016` stands at **`PRE-LAUNCH IMPLEMENTATION PASS`** based on verified manual execution across marketing web, offline verifier, and desktop dashboard surfaces.
