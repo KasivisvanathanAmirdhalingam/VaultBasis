@@ -224,11 +224,16 @@ def main():
     run_live_fail_closed_intake("UAT-17C", "tests/fixtures/uat17/broker_malformed_row.csv", "CSV_MALFORMED")
     run_live_fail_closed_intake("UAT-17D", "tests/fixtures/uat17/alien_unsupported_schema.csv", "SCHEMA_REQUIRED_FIELD_MISSING")
     
-    print("=== ALL 13 SCENARIOS (UAT-05..17) QUALIFIED GREEN ON PACKAGED RUNTIME ===")
+    # UAT-18
+    run_live_scenario("UAT-18A", "tests/fixtures/uat18/broker_duplicates.csv", "tests/fixtures/uat18/ledger_single_counterpart.csv", "MISSING_FROM_LEDGER", 5, 1, 0)
+    run_live_scenario("UAT-18B", "tests/fixtures/uat18/broker_colliding.csv", "tests/fixtures/uat18/ledger_colliding_diff_evidence.csv", "AMBIGUOUS_MATCH", 4, 1, 0)
+    
+    print("=== ALL 15 SCENARIOS (UAT-05..18) QUALIFIED GREEN ON PACKAGED RUNTIME ===")
 
 
 if __name__ == "__main__":
     main()
+
 
 
 
