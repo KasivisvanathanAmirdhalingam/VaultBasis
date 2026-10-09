@@ -747,7 +747,6 @@
           </p>
         </div>
         <div style="display: flex; gap: 8px;">
-          <button class="btn btn-primary" onclick="exploreSampleCase()">★ Explore Sample Case</button>
           <button class="btn" onclick="loadCases()">↻ Refresh</button>
         </div>
       </div>
@@ -759,10 +758,10 @@
             <span class="badge badge-success" style="margin-bottom: 6px;">RECOMMENDED FOR FIRST-TIME USERS</span>
             <h3 style="font-size: 1.15rem; color: #0f172a; margin-bottom: 4px;">Explore a Complete Reconciliation Scenario</h3>
             <p style="font-size: 0.85rem; color: #334155; line-height: 1.5;">
-              See how VaultBasis independently compares broker-reported Form 1099-DA evidence against client tax-ledger records. Zero setup or file crafting required.
+              See how VaultBasis independently compares broker-reported Form 1099-DA evidence against client tax-ledger records. No setup or uploads required.
             </p>
           </div>
-          <button class="btn btn-success" onclick="exploreSampleCase()">Launch Sample Case →</button>
+          <button class="btn btn-success" onclick="exploreSampleCase()">Open Sample Case →</button>
         </div>
       </div>
 
@@ -1650,7 +1649,7 @@
       tbody.innerHTML = '';
 
       if (cases.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2.5rem;">No matching cases found. Click 'Explore Sample Case' or '+ New Case' to begin.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2.5rem;">No matching cases found. Click 'Open Sample Case' or '+ New Case' to begin.</td></tr>`;
         return;
       }
 
