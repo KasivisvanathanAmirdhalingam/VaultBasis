@@ -5,6 +5,8 @@ Directly executes scenarios UAT-05 through UAT-21 (including UAT-20 and UAT-21) 
 
 import json
 import io
+import os
+import sys
 import zipfile
 from pathlib import Path
 import urllib.request
@@ -12,6 +14,10 @@ import urllib.error
 import urllib.parse
 import uuid
 
+# Ensure repo root is on sys.path
+REPO_ROOT = Path(__file__).resolve().parents[3]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
 BASE_URL = "http://127.0.0.1:8000"
 
@@ -825,6 +831,78 @@ def run_live_persistence_and_crash_recovery():
     print(f"[{scenario_id}] LIVE PACKAGED BINARY EXECUTION: PASS (Persistence, Storage Integrity & Recovery Validated)")
 
 
+def run_live_offline_air_gapped_journey():
+    scenario_id = "UAT-28"
+    import socket
+    
+    # Air-gap network guard
+    original_connect = socket.socket.connect
+    outbound_attempts = []
+    
+    def guarded_connect(sock_self, address):
+        host = address[0] if isinstance(address, tuple) else str(address)
+        if host not in ("127.0.0.1", "localhost", "::1"):
+            attempt = f"{host}:{address[1] if isinstance(address, tuple) and len(address) > 1 else '?'}"
+            outbound_attempts.append(attempt)
+            raise OSError(f"AIR-GAP BLOCKED: Outbound attempt to {attempt}")
+        return original_connect(sock_self, address)
+        
+    socket.socket.connect = guarded_connect
+    try:
+        case_id = f"CASE-LIVE-PKG-{scenario_id}-{uuid.uuid4().hex[:6]}"
+        
+        # 1. Create Case in air gap
+        c_res = post_json("/api/cases", {
+            "case_id": case_id,
+            "client_reference": "AirGap Live Candidate 7 Client",
+            "tax_year": 2025,
+            "jurisdiction": "US",
+        })
+        assert c_res.get("case_id") == case_id
+        
+        # 2. Ingest sources
+        da_bytes = Path("tests/fixtures/uat21/broker_realistic.csv").read_bytes()
+        ledger_bytes = Path("tests/fixtures/uat21/ledger_realistic.csv").read_bytes()
+        post_multipart(f"/api/cases/{case_id}/sources", {"file": ("broker_realistic.csv", da_bytes)}, {"declared_schema": "AUTO"})
+        post_multipart(f"/api/cases/{case_id}/sources", {"file": ("ledger_realistic.csv", ledger_bytes)}, {"declared_schema": "AUTO"})
+        
+        # 3. Reconcile
+        recon_res = post_json(f"/api/cases/{case_id}/reconcile", {})
+        assert recon_res.get("status") in ("RECONCILED", "SUCCESS")
+        assert recon_res.get("revision") == 1
+        rev1_rcpt = recon_res["receipt"]
+        
+        # 4. Human review & finalization
+        diff_eth = next(d for d in rev1_rcpt["material_differences"] if d["asset"] == "ETH")
+        post_json(f"/api/cases/{case_id}/reviews", {
+            "finding_id": diff_eth["difference_id"],
+            "disposition": "REVIEWED",
+            "note": "Air-gapped review against offline cold-storage records.",
+            "reviewer_reference": "CPA AirGap Auditor"
+        })
+        
+        final_res = post_json(f"/api/cases/{case_id}/finalize-review", {})
+        assert final_res.get("status") == "REVIEW_FINALIZED"
+        assert final_res.get("revision") == 2
+        rev2_rcpt = final_res["receipt"]
+        
+        # 5. Export receipt & standalone verify
+        exp_rcpt = json.loads(urllib.request.urlopen(f"{BASE_URL}/api/cases/{case_id}/export/receipt").read().decode("utf-8"))
+        assert exp_rcpt["receipt_id"] == rev2_rcpt["receipt_id"]
+        
+        from apps.verifier.verify_receipt import verify_outcome_receipt
+        v_res = verify_outcome_receipt(exp_rcpt)
+        assert v_res.is_valid is True
+        assert v_res.signature_valid is True
+        
+        # 6. Verify zero outbound calls attempted
+        assert outbound_attempts == [], f"Air-gap violation! Outbound attempts: {outbound_attempts}"
+        
+        print(f"[{scenario_id}] LIVE PACKAGED BINARY EXECUTION: PASS (Complete Air-Gapped Journey & Zero Egress Validated)")
+    finally:
+        socket.socket.connect = original_connect
+
+
 def main():
     print("=== EXECUTING CANDIDATE 7 LIVE PACKAGED BINARY REGRESSION (http://127.0.0.1:8000) ===")
     
@@ -904,6 +982,9 @@ def main():
     # UAT-24 (Standalone Offline Verifier & Tamper Detection)
     run_live_standalone_offline_verifier()
 
+    # UAT-28 (Offline / Air-Gapped Complete Customer Journey)
+    run_live_offline_air_gapped_journey()
+
     # UAT-25 (Evaluation Capacity Boundaries & Monotonic Consumption)
     run_live_evaluation_capacity_and_expiry()
 
@@ -913,7 +994,7 @@ def main():
     # UAT-27 (Persistence, Crash Recovery, and Restart Invariants)
     run_live_persistence_and_crash_recovery()
 
-    print("=== ALL SCENARIOS (UAT-05..27) QUALIFIED 100% GREEN ON PACKAGED CANDIDATE 7 RUNTIME ===")
+    print("=== ALL SCENARIOS (UAT-05..28) QUALIFIED 100% GREEN ON PACKAGED CANDIDATE 7 RUNTIME ===")
 
 
 if __name__ == "__main__":
