@@ -62,7 +62,13 @@ Every document in the VaultBasis project belongs to one of six explicit authorit
 | [`docs/enterprise/VaultBasis_IT_Deployment_and_Security_Profile.md`](file:///Users/kasivisvanathanamirdhalingam/Downloads/VaultBasis/docs/enterprise/VaultBasis_IT_Deployment_and_Security_Profile.md) | Enterprise IT Security & Deployment Profile | **CUSTOMER-FACING** | v1.5.0-rc3 | **IMPLEMENTATION_ALIGNED** | Security Lead |
 | [`docs/commercial/VaultBasis_Subprocessor_Register.md`](file:///Users/kasivisvanathanamirdhalingam/Downloads/VaultBasis/docs/commercial/VaultBasis_Subprocessor_Register.md) | Subprocessor Register & Zero Data Transfer Policy | **NORMATIVE** | Privacy Policy | **IMPLEMENTATION_ALIGNED** | Compliance Lead |
 
-### 2.4 Commercial & Licensing Policy
+### 2.4 Launch Operations & Go-To-Market Program
+| Document Path | Title / Purpose | Classification | Applies To | Evidence Status | Authority |
+|---|---|---|---|---|---|
+| [`docs/launch/MMP15_LAUNCH_OPS_001_SUBPROCESSOR_READINESS.md`](file:///Users/kasivisvanathanamirdhalingam/Downloads/VaultBasis/docs/launch/MMP15_LAUNCH_OPS_001_SUBPROCESSOR_READINESS.md) | Vendor, Subprocessor & External Dependency Readiness | **NORMATIVE** | Commercial Launch | **IMPLEMENTATION_ALIGNED** | Operations / Compliance |
+| [`docs/launch/MMP15_GTM_LAUNCH_001_COMMERCIAL_MARKET_ENTRY.md`](file:///Users/kasivisvanathanamirdhalingam/Downloads/VaultBasis/docs/launch/MMP15_GTM_LAUNCH_001_COMMERCIAL_MARKET_ENTRY.md) | VaultBasis Commercial Launch & Market Entry Program | **NORMATIVE** | GTM Operations | **IMPLEMENTATION_ALIGNED** | GTM / Founder |
+
+### 2.5 Commercial & Licensing Policy
 | Document Path | Title / Purpose | Classification | Applies To | Evidence Status | Authority |
 |---|---|---|---|---|---|
 | [`docs/commercial/license_token_v1.md`](file:///Users/kasivisvanathanamirdhalingam/Downloads/VaultBasis/docs/commercial/license_token_v1.md) | Offline Ed25519 License Token Specification (v1.0) | **NORMATIVE** | License Protocol v1.0 | **FROZEN (v1.0)** | Commercial Lead |

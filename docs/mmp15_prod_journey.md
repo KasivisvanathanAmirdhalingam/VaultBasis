@@ -259,3 +259,11 @@ The application UI visibly exposes under **About / System Information**:
 > **MMP15-PROD-001 closes only when an unfamiliar practitioner, using a clean supported machine and only public/customer-facing materials, can independently establish product relevance and security trust; obtain an authentic qualified VaultBasis artifact; run bundled evaluation cases; purchase/request and activate a license; ingest realistic production evidence; reconcile a case; export and independently verify signed evidence; restart without losing work; obtain support diagnostics; and understand renewal/support paths without developer intervention.**
 > 
 > **For managed machines: An enterprise IT reviewer can independently determine application publisher identity, privileges, network behavior, data locations, dependencies, security posture and deployment requirements from the provided IT package.**
+
+---
+
+## 10. Governing Launch & GTM Programs
+
+This production journey is executed in strict alignment with two dedicated, parallel launch specifications:
+1. [`docs/launch/MMP15_LAUNCH_OPS_001_SUBPROCESSOR_READINESS.md`](file:///Users/kasivisvanathanamirdhalingam/Downloads/VaultBasis/docs/launch/MMP15_LAUNCH_OPS_001_SUBPROCESSOR_READINESS.md) — *Vendor, Subprocessor & External Dependency Readiness Matrix* (Paddle, Vercel, Email, DNS, Apple, Azure, Support, Privacy DPA Ledger).
+2. [`docs/launch/MMP15_GTM_LAUNCH_001_COMMERCIAL_MARKET_ENTRY.md`](file:///Users/kasivisvanathanamirdhalingam/Downloads/VaultBasis/docs/launch/MMP15_GTM_LAUNCH_001_COMMERCIAL_MARKET_ENTRY.md) — *VaultBasis Commercial Launch & Market Entry Program* (Positioning freeze, ICP taxonomy, Multi-tier channel distribution, Content Asset Bank, AI-Search SEO, 10-to-1 repurposing engine, 5-phase rollout, and full-funnel conversion metrics).
