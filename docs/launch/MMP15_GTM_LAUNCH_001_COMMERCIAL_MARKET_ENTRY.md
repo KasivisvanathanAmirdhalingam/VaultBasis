@@ -19,16 +19,18 @@ This program defines the commercial launch engine for VaultBasis MMP-1.5. It ope
 ┌─────────────────────────────────────────────────────────┐   ┌─────────────────────────────────────────────────────────┐
 │              TRACK 1: TECHNICAL QUALIFICATION           │   │                TRACK 2: GTM & COMMERCIAL LAUNCH         │
 │  • UAT-26..28 (Commercial, Resilience, Air-Gap) [PASS]  │   │  • Positioning & Category Freeze                        │
-│  • Windows Candidate & Cross-Platform Parity (UAT-30)   │   │  • Primary ICP Targeting & Direct Founder Outreach      │
-│  • SEC-01..03, PERF-01, PLAT-MAC/WIN Qualification      │   │  • Multi-Tier Channel Stack (Core vs Supporting)        │
-│  • macOS Notarization & Windows Authenticode Signing    │   │  • Educational Content Asset Bank & AI-Search SEO       │
-│  • Final Signed Artifact Qualification & Gates 01..18   │   │  • 10-to-1 Content Multiplier Engine                    │
+│  • Windows Candidate & Cross-Platform Parity (UAT-30)   │   │  • External Provider / Privacy / Operational Readiness  │
+│  • SEC-01..03, PERF-01, PLAT-MAC/WIN Qualification      │   │  • Primary ICP Targeting & Direct Founder Outreach      │
+│  • Pre-Sign UAT-29 (Practitioner Workflow Validation)   │   │  • Multi-Tier Channel Stack (Core vs Supporting)        │
+│  • macOS Notarization & Windows Authenticode Signing    │   │  • GA_CONTENT_MINIMUM Surfaces & Educational SEO        │
+│  • Post-Sign Physical UAT (5–8 CPAs on Signed Bytes)    │   │  • 10-to-1 Content Multiplier Engine                    │
+│  • Final Signed Artifact Qualification & Gates 01..18   │   │  • Account Readiness & Initial Market Signal Capture    │
 └────────────────────────────┬────────────────────────────┘   └────────────────────────────┬────────────────────────────┘
                              │                                                             │
                              ▼                                                             ▼
              ┌─────────────────────────────────────────────────────────────────────────────────────────────┐
              │               COMMERCIAL ACTIVATION: DISTRIBUTION_ACTIVE (PROD-GATE-18)                     │
-             │   Exact Signed Binaries + Primed Market Channels + 5–8 CPA Physical UAT + CPA-001..010      │
+             │   Exact Signed Binaries + Primed Market Channels + 5–8 CPA Physical UAT + PROD-GATES Closed │
              └─────────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -148,12 +150,30 @@ graph TD
 
 ---
 
-## 5. Launch Content Asset Inventory Bank
+## 5. Launch Content Asset Inventory Bank & GA Minimum Threshold
 
-All core launch assets must be authored and verified prior to public release:
+### A. GA Mandatory Launch Threshold (`GA_CONTENT_MINIMUM`)
+
+The mandatory release-blocking threshold for public distribution requires the following essential surfaces to be complete, verified, and active:
+
+- [ ] **Clear Landing Page:** Value proposition, Form 1099-DA focus, and local-first architecture.
+- [ ] **Transparent Pricing:** Clear tier breakdowns (Practitioner vs. Firm) and case capacities.
+- [ ] **Product Demo:** Visual walkthrough of 1099-DA intake, reconciliation, and review.
+- [ ] **Verification Demo & Guide:** Explanation and guide for the standalone offline verifier CLI.
+- [ ] **Security & Local-Processing Explanation:** Clear data boundaries and local processing details.
+- [ ] **FAQ:** Addressing Box 2 = NO, scope limitations, unsupported years, and air-gapped usage.
+- [ ] **Support Path:** Clear practitioner support routing and SLA expectations.
+- [ ] **Release & Download Verification Page:** Authenticated downloads with cryptographic SHA-256 digests.
+- [ ] **Sufficient Educational Material for Initial Discovery:** Foundational articles on Form 1099-DA reconciliation.
+
+---
+
+### B. Planned Launch Content Inventory (Production Target, Non-Blocking)
+
+The content bank below represents the **planned launch inventory** for broad discoverability and long-tail practitioner education. Fulfilling the entire 8-article and 7-video inventory is a valuable production target, **not a release gate condition blocking distribution** if the software and mandatory `GA_CONTENT_MINIMUM` launch surfaces are ready.
 
 ```
-├── Product Demo & Technical Assets
+├── Product Demo & Technical Assets (Planned: 7 Videos / Guides)
 │   ├── [ASSET-01] 90-Second Product Overview Video
 │   ├── [ASSET-02] 5-Minute CPA Quick-Start Walkthrough Video
 │   ├── [ASSET-03] 10-Minute Full Case Lifecycle & Evidence Package Demo
@@ -162,7 +182,7 @@ All core launch assets must be authored and verified prior to public release:
 │   ├── [ASSET-06] Downloadable Authentic Evidence Package Sample (.zip + .json + .csv)
 │   └── [ASSET-07] Cryptographic SHA-256 Download Verification Sheet
 │
-├── Educational Regulatory Articles (SEO & Answer-Engine Core)
+├── Educational Regulatory Articles (Planned: 8 Articles for SEO & Discovery)
 │   ├── [ART-01] "What is Form 1099-DA? A Practical Guide for Tax Practitioners"
 │   ├── [ART-02] "How CPAs Should Reconcile Form 1099-DA Against Taxpayer Ledgers"
 │   ├── [ART-03] "Form 1099-DA vs. Client Crypto Records: Why They Differ"
@@ -253,20 +273,41 @@ To guarantee that marketing copy never outruns engineering qualification, all pu
 
 ---
 
-## 10. Launch Phasing & Pre-Launch vs. GA Claims Governance
+## 10. Launch Phasing & Two-Stage Human Validation Governance
+
+### A. Two Distinct Human Validation Stages
+
+To guarantee both early usability correction and final release fidelity, human qualification is split into two non-fungible stages:
+
+1. **Pre-Sign UAT-29 (Practitioner Workflow Validation):**
+   - **Timing:** Conducted on active pre-sign baseline (Candidate 7) before source freeze and code signing.
+   - **Participants:** 1 or more qualified CPAs/EAs.
+   - **Purpose:** Identify workflow friction, confusing UI terminology, or operational edge cases while remediations remain relatively inexpensive.
+   - **Core Question:** *"Can a practitioner successfully understand and execute this workflow unassisted?"*
+
+2. **Post-Sign Physical UAT Campaign (Production Bytes Qualification):**
+   - **Timing:** Conducted on exact, signed, notarized release binaries (`release-manifest.json` frozen).
+   - **Participants:** 5–8 unassisted CPAs/EAs across $\ge$ 2 Windows workstations, $\ge$ 2 Apple Silicon Macs, and $\ge$ 1 managed corporate endpoint.
+   - **Purpose:** Verify that the exact bytes intended for distribution operate flawlessly on real customer endpoints without OS security warnings or execution faults.
+   - **Core Question:** *"Can practitioners successfully use the exact production bytes we intend to distribute?"*
+
+---
+
+### B. Launch Phasing & Commercial Progression
 
 ```
 PHASE 0: AUDIENCE & FOUNDATION BUILDING (Now through Signed Baseline)
 ├── Publish technical educational articles on Form 1099-DA challenges.
-├── Engage initial 10 design-partner accounting practices under NDA/feedback agreement.
+├── Engage initial design-partner accounting practices under NDA/feedback agreement.
 ├── Verify local privacy architecture and publish Subprocessor Register.
-└── Complete internal UAT-26..28 qualification on Candidate 7.
+├── Complete pre-sign engineering benchmarks (SEC-01..03, PERF-01, PLAT-MAC/WIN).
+└── Execute Pre-Sign UAT-29 unassisted practitioner workflow session.
 
 PHASE 1: PRE-LAUNCH ACCESS & PILOT INTAKE (2–4 Weeks Before Release)
 ├── Launch public landing page with interactive sample case demo.
 ├── Open qualified CPA evaluation request intake on vaultbasis.com.
-├── Publish the 5 core YouTube explainer videos and educational asset bank.
-└── Schedule 1-on-1 walkthroughs with 15 target firm leaders.
+├── Publish the core explainer videos and educational asset bank.
+└── Schedule 1-on-1 walkthroughs with target firm leaders.
 
 PHASE 2: LAUNCH WEEK COORDINATION (Release Manifest Frozen & DISTRIBUTION_ACTIVE = true)
 ├── Activate production Paddle checkout, transactional mailer, and download auth.
@@ -276,8 +317,9 @@ PHASE 2: LAUNCH WEEK COORDINATION (Release Manifest Frozen & DISTRIBUTION_ACTIVE
 
 PHASE 3: FIRST 30 DAYS — PILOT SUCCESS & MONETIZATION (CPA-001..010 Progression)
 ├── Focus on unassisted onboarding of first 10 paying CPA/EA firms (CPA-001 through CPA-010).
-├── Monitor support queries and time-to-first-reconciliation metrics.
-├── Resolve practitioner friction points and refine review documentation.
+├── Milestone CPA-001: First qualified CPA/EA completes legitimate workflow unassisted, receives useful result, exports/reviews evidence, and chooses to pay.
+├── Milestones CPA-002..010: Prove repeatable commercial conversion across diverse practice sizes.
+├── Informs MMP-2 roadmap priorities, sequencing, and expansion decisions.
 └── Publish first anonymized practitioner workflow case study.
 
 PHASE 4: 30–90 DAYS — SCALE & INSTITUTIONAL PARTNERSHIPS
@@ -309,38 +351,56 @@ PAID_LICENSE_ACTIVATED ──► SECOND_CLIENT_CASE_CREATED (Monetization & Rete
 
 ---
 
-## 12. Integrated Master Program Dependency Mapping (Tracks A through N)
-
-To maximize velocity without sequencing everything behind engineering, all tasks are explicitly mapped by dependency state:
+## 12. Integrated Master Program Dependency & Authorization Mapping
 
 ```text
-┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-│                               PARALLEL TRACKS (EXECUTE CONCURRENTLY NOW)                               │
-│  • Subprocessor & Operations Readiness (MMP15-LAUNCH-OPS-001)                                          │
-│  • Paddle Onboarding & Webhook Integration                                                             │
-│  • Apple & Microsoft Identity Validation                                                               │
-│  • GTM Content Production (Articles, Video Scripts, Sample Bundles)                                    │
-│  • Channel Account Readiness & Social Setup                                                            │
-│  • Direct CPA/EA Founder Recruitment (Scheduling UAT-29 Session)                                       │
-│  • Windows Candidate Packaging & PLAT-WIN-01 Engineering                                               │
-│  • Pre-Sign Security & Performance Benchmarks (SEC-01..03, PERF-01, PLAT-MAC-01)                       │
-├────────────────────────────────────────────────────────────────────────────────────────────────────────┤
-│                          BLOCKING GATES (MUST PRECEDE CODE SIGNING & FREEZE)                           │
-│  • UAT-29 Unassisted CPA Golden Journey & UAT-22 Human Review Layer                                    │
-│  • UAT-30 Cross-Platform Deterministic Parity (macOS ↔ Windows)                                        │
-│  • Clean Pre-Sign Working Tree & Hash Binding                                                          │
-├────────────────────────────────────────────────────────────────────────────────────────────────────────┤
-│                        SIGNING & EXACT ARTIFACT REQUALIFICATION (PHASE D/E)                            │
-│  • macOS Developer ID Application + Hardened Runtime + Notarization + Staple                           │
-│  • Windows Authenticode / Microsoft Trusted Signing + RFC 3161 Timestamp                               │
-│  • Re-qualification of Exact Signed Bytes on Clean Machines                                            │
-│  • Physical UAT Quota: 5–8 Unassisted CPA/EA Participants                                              │
-├────────────────────────────────────────────────────────────────────────────────────────────────────────┤
-│                         FINAL LAUNCH & DISTRIBUTION ACTIVATION (PHASE F)                               │
-│  • Freeze release-manifest.json & Close Canonical Production Gates PROD-GATE-01..18                    │
-│  • Final Owner Sign-Off Ceremony                                                                       │
-│  • Set DISTRIBUTION_ACTIVE = true                                                                      │
-│  • Commercial Progression: CPA-001 through CPA-010                                                     │
-│  • Authorize MMP-2 Implementation                                                                      │
-└────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+                     CURRENT ACTIVE EXECUTION (NOW)
+                                   │
+        ┌──────────────────────────┴──────────────────────────┐
+        │                                                     │
+   ENGINEERING & QUALIFICATION                           COMMERCIAL & GTM
+        │                                                     │
+  • Windows Candidate (Setup.exe)                       • External Provider / Privacy / Ops:
+  • SEC-01..03 (Egress, File, Limits)                     - DPA where applicable
+  • PERF-01 (10k benchmark)                               - Contractual/terms review where applicable
+  • PLAT-MAC-01 & PLAT-WIN-01                             - Relationship classification
+  • UAT-29 Prep & Execution                               - Data-flow verification
+        │                                                 - MFA / credentials
+        │                                                 - Production readiness
+        │                                                 - Exit/failure plan
+        │                                               • GA_CONTENT_MINIMUM surfaces
+        │                                               • Owned Channels & Social Setup
+        │                                               • Direct CPA/EA Recruitment
+        │                                                     │
+        └──────────────────────────┬──────────────────────────┘
+                                   │
+                           PRE-SIGN MILESTONES
+                                   │
+                       • UAT-29 (Practitioner UX)
+                       • UAT-30 (Cross-Platform Parity)
+                       • SEC-01..03, PERF-01, PLAT
+                                   │
+                              SOURCE FREEZE
+                                   │
+                             CODE SIGNING
+                                   │
+                      FINAL SIGNED ARTIFACT UAT
+                                   │
+                        5–8 CPA/EA PHYSICAL UAT
+                                   │
+                       PROD-GATE-01..18 CLOSURE
+                                   │
+                          DISTRIBUTION_ACTIVE
+                                   │
+        ┌──────────────────────────┴──────────────────────────┐
+        │                                                     │
+        ▼                                                     ▼
+PROD-GATE-01..18 CLOSED                              CPA-001..010 PROGRESSION
+        │                                                     │
+        ▼                                                     ▼
+MMP-2 AUTHORIZATION DECISION                         MARKET VALIDATION EVIDENCE
+                                                              │
+                                                              ▼
+                                                     INFORMS MMP-2 PRIORITIES,
+                                                     SEQUENCING & EXPANSION
 ```
