@@ -259,7 +259,12 @@ def main() -> int:
     arch = pe_machine(exe)
     assert arch == "x64", f"wrong-arch Windows binary: {arch} (need x64)"
 
-    # Build Setup Installer (VaultBasis-Setup.exe)
+    with open(REPO / "package.json") as f:
+        version = json.load(f)["version"]
+
+    # Build Setup Installer (VaultBasis-Setup-<version>.exe)
+    setup_name = f"VaultBasis-Setup-{version}"
+    setup_filename = f"{setup_name}.exe"
     installer_zip = REPO / "build" / "vaultbasis_app.zip"
     installer_zip.parent.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(installer_zip, "w", zipfile.ZIP_DEFLATED) as zf:
@@ -269,26 +274,24 @@ def main() -> int:
 
     installer_cmd = [
         sys.executable, "-m", "PyInstaller", "--clean", "--noconfirm",
-        "--name", "VaultBasis-Setup", "--onefile", "--windowed",
+        "--name", setup_name, "--onefile", "--windowed",
         "--icon", str(REPO / "apps" / "web-dashboard" / "favicon.ico"),
         "--add-data", f"{installer_zip}{os.pathsep}.",
         str(REPO / "scripts" / "installer_windows.py")
     ]
     sh(*installer_cmd)
-    setup_exe = REPO / "dist" / "VaultBasis-Setup.exe"
-    assert setup_exe.is_file(), "VaultBasis-Setup.exe missing in installer output"
+    setup_exe = REPO / "dist" / setup_filename
+    assert setup_exe.is_file(), f"{setup_filename} missing in installer output"
 
     pkg = REPO / "dist" / PACKAGE_NAME
     pkg.mkdir(parents=True)
     # Copy setup installer and onedir bundle into package
-    shutil.copy2(setup_exe, pkg / "VaultBasis-Setup.exe")
+    shutil.copy2(setup_exe, pkg / setup_filename)
     shutil.copytree(exe.parent, pkg / "VaultBasis", dirs_exist_ok=True)
     guides = {
         "VaultBasis_Practitioner_Quick_Start.html": "VaultBasis-Quick-Start.html",
         "VaultBasis_Troubleshooting.html": "VaultBasis-Troubleshooting.html",
     }
-    with open(REPO / "package.json") as f:
-        version = json.load(f)["version"]
     doc_hashes = {}
     for src_name, dst_name in guides.items():
         src = REPO / src_name
@@ -328,6 +331,8 @@ def main() -> int:
             if f.is_file():
                 z.write(f, arcname=str(f.relative_to(pkg)))
     artifact_sha = sha256_of(zip_path)
+    exe_sha = sha256_of(exe)
+    setup_sha = sha256_of(setup_exe)
 
     # Launch gate — post-ZIP: extract to fresh temp dir and launch from there.
     with tempfile.TemporaryDirectory(prefix="vb_rc3_extract_") as tmp:
@@ -347,6 +352,8 @@ def main() -> int:
         "platform_artifact": {
             "os": "windows", "architecture": "x64",
             "artifact_filename": f"{PACKAGE_NAME}.zip", "sha256": artifact_sha,
+            "installer_filename": setup_filename, "installer_sha256": setup_sha,
+            "installed_exe_filename": "VaultBasis.exe", "installed_exe_sha256": exe_sha,
         },
         "source_identity": {
             "frozen_commit": commit,
@@ -393,9 +400,13 @@ def main() -> int:
     (REPO / "dist" / f"{PACKAGE_NAME}.manifest.json").write_text(
         json.dumps(manifest, indent=2) + "\n")
 
-    print(f"CANDIDATE: {zip_path.name}")
-    print(f"SHA-256:  {artifact_sha}")
-    print(f"SIZE:     {zip_path.stat().st_size / 1e6:.1f} MB")
+    print(f"CANDIDATE:              {zip_path.name}")
+    print(f"ZIP SHA-256:            {artifact_sha}")
+    print(f"INSTALLER:              {setup_filename}")
+    print(f"INSTALLER SHA-256:      {setup_sha}")
+    print(f"INSTALLED EXE:          VaultBasis.exe")
+    print(f"INSTALLED EXE SHA-256:  {exe_sha}")
+    print(f"SIZE:                   {zip_path.stat().st_size / 1e6:.1f} MB")
     return 0
 
 
