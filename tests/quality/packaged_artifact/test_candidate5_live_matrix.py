@@ -139,8 +139,43 @@ def run_live_scenario(scenario_id: str, broker_path: str, ledger_path: str, expe
     print(f"[{scenario_id}] LIVE PACKAGED BINARY EXECUTION: PASS (Outcome: {expected_state})")
 
 
+def run_live_fail_closed_intake(scenario_id: str, fixture_path: str, expected_code: str):
+    case_id = f"CASE-LIVE-PKG-{scenario_id}-{uuid.uuid4().hex[:6]}"
+    
+    # 1. Create Case
+    create_res = post_json("/api/cases", {
+        "case_id": case_id,
+        "client_reference": f"Packaged Binary Live Test {scenario_id}",
+        "tax_year": 2025,
+        "jurisdiction": "US"
+    })
+    assert create_res.get("case_id") == case_id
+    
+    # 2. Ingest corrupted file -> must fail closed (422)
+    b_bytes = Path(fixture_path).read_bytes()
+    try:
+        post_multipart(
+            f"/api/cases/{case_id}/sources",
+            files={"file": (Path(fixture_path).name, b_bytes)},
+            form_data={"declared_schema": "AUTO"}
+        )
+        raise AssertionError(f"[{scenario_id}] Expected 422 HTTP error but request succeeded")
+    except urllib.error.HTTPError as e:
+        assert e.code == 422
+        err_body = json.loads(e.read().decode("utf-8"))
+        assert expected_code in err_body.get("detail", "")
+        
+    # 3. Assert Case State remains uncontaminated
+    case_req = urllib.request.Request(f"{BASE_URL}/api/cases/{case_id}", method="GET")
+    with urllib.request.urlopen(case_req) as c_resp:
+        case_data = json.loads(c_resp.read().decode("utf-8"))
+        assert len(case_data.get("sources", [])) == 0
+
+    print(f"[{scenario_id}] LIVE PACKAGED BINARY EXECUTION: PASS (Failed Closed with {expected_code})")
+
+
 def main():
-    print("=== EXECUTING CANDIDATE 4 LIVE PACKAGED BINARY REGRESSION (http://127.0.0.1:8000) ===")
+    print("=== EXECUTING CANDIDATE 5 LIVE PACKAGED BINARY REGRESSION (http://127.0.0.1:8000) ===")
     
     # Health check
     health = json.loads(urllib.request.urlopen(f"{BASE_URL}/api/health").read().decode("utf-8"))
@@ -183,11 +218,18 @@ def main():
     # UAT-16
     run_live_scenario("UAT-16", "tests/fixtures/uat16/broker_micro_diff.csv", "tests/fixtures/uat16/ledger_micro_diff.csv", "PROCEEDS_DIFFERENCE", 4, 1, 0)
     
-    print("=== ALL 12 SCENARIOS (UAT-05..16) QUALIFIED GREEN ON PACKAGED RUNTIME ===")
+    # UAT-17
+    run_live_fail_closed_intake("UAT-17A", "tests/fixtures/uat17/broker_missing_column.csv", "SCHEMA_REQUIRED_FIELD_MISSING")
+    run_live_fail_closed_intake("UAT-17B", "tests/fixtures/uat17/broker_invalid_numeric.csv", "NUMERIC_INVALID")
+    run_live_fail_closed_intake("UAT-17C", "tests/fixtures/uat17/broker_malformed_row.csv", "CSV_MALFORMED")
+    run_live_fail_closed_intake("UAT-17D", "tests/fixtures/uat17/alien_unsupported_schema.csv", "SCHEMA_REQUIRED_FIELD_MISSING")
+    
+    print("=== ALL 13 SCENARIOS (UAT-05..17) QUALIFIED GREEN ON PACKAGED RUNTIME ===")
 
 
 if __name__ == "__main__":
     main()
+
 
 
 

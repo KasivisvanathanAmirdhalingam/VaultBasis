@@ -1,0 +1,4 @@
+patient_id,blood_pressure,heart_rate,oxygen_level,diagnosis_code
+P-10023,120/80,72,98,ICD10-J45
+P-10024,140/90,85,95,ICD10-I10
+P-10025,115/75,68,99,ICD10-E11
