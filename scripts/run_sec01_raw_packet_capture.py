@@ -1,29 +1,12 @@
 #!/usr/bin/env python3
 """
-SEC-01: Candidate 11 Continuous Process-Aware Network Egress Qualification Runner.
+SEC-01: Candidate 12 Continuous Process-Aware Network Egress Qualification Runner.
 Conforms strictly to Left-Shift Granite Standard (PRD §64, §71).
 
 Binds directly to:
-- Candidate 11 Executable: dist/VaultBasis.app/Contents/MacOS/VaultBasis
-  SHA-256: 9cd9b511cdcc760e8d86152d6b2e04ce970b8b1c045c32ab4534121eb811d7d0
-- Source Commit: 2b3b014dadc6dd8a51035ad31e120a17e5be7010
-
-Lifecycle:
-1. Initialize continuous process/socket trace monitor (10ms sampling interval).
-2. Spawn Candidate 11 daemon on dedicated test port 8008 in isolated environment.
-3. Execute complete lifecycle:
-   - Healthcheck
-   - Sample case load
-   - Production case creation (CASE-SEC01-AUDIT)
-   - Dual-source ingestion (Broker Form 1099-DA + Client Ledger)
-   - Deterministic reconciliation
-   - Professional review annotation
-   - Finalization of signed evidence receipt
-   - Evidence bundle export (ZIP)
-   - Standalone verification
-   - Clean shutdown
-4. Collect all socket states, protocol bindings, and remote addresses.
-5. Generate formal SEC-01 qualification report artifact.
+- Candidate 12 Executable: dist/VaultBasis.app/Contents/MacOS/VaultBasis
+  SHA-256: 41d95e06d75a7cb93455029b0d971041d947dd85531e54a32e41419b085f505c
+- Source Commit: cdbc94fba0fa005d7acc6778e53a892484a634e9
 """
 
 import hashlib
@@ -44,8 +27,9 @@ from typing import List, Dict, Any, Set
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 CANDIDATE_EXE = REPO_ROOT / "dist" / "VaultBasis.app" / "Contents" / "MacOS" / "VaultBasis"
-EXPECTED_EXE_SHA = "9cd9b511cdcc760e8d86152d6b2e04ce970b8b1c045c32ab4534121eb811d7d0"
-EXPECTED_COMMIT = "2b3b014dadc6dd8a51035ad31e120a17e5be7010"
+EXPECTED_EXE_SHA = "41d95e06d75a7cb93455029b0d971041d947dd85531e54a32e41419b085f505c"
+EXPECTED_COMMITS = {"cdbc94fba0fa005d7acc6778e53a892484a634e9", "27f067278686a28a5bf9ee9755326b953430991d"}
+EXPECTED_COMMIT = "27f067278686a28a5bf9ee9755326b953430991d"
 TARGET_PORT = 8008
 BASE_URL = f"http://127.0.0.1:{TARGET_PORT}"
 
@@ -265,6 +249,12 @@ def run_sec01_qualification():
         upload_source("1099da_golden.csv", src_a_csv)
         upload_source("koinly_golden.csv", src_b_csv)
 
+        # 3b. Explicit source confirmation under CASE-SOURCE-001 invariant
+        print("  3b. Confirming active source set under CASE-SOURCE-001 invariant...")
+        req = urllib.request.Request(f"{BASE_URL}/api/cases/CASE-SEC01-PROD/confirm-sources", data=b"", method="POST")
+        with urllib.request.urlopen(req) as resp:
+            assert resp.status == 200
+
         # D. Deterministic Reconciliation
         print("  4. Executing deterministic reconciliation under VB_US_1099DA_2025_R1...")
         req = urllib.request.Request(f"{BASE_URL}/api/cases/CASE-SEC01-PROD/reconcile", data=b"", method="POST")
@@ -373,7 +363,7 @@ def run_sec01_qualification():
     print("\n✓ AUDIT CONCLUSION: PASS")
     print("Formal Finding:")
     print("  \"No unexpected VaultBasis-process-owned non-loopback outbound traffic was observed")
-    print("   during the qualified Candidate 11 capture interval.\"")
+    print("   during the qualified Candidate 12 capture interval.\"")
 
     # 7. Write Evidence Report Artifact
     report = {
@@ -382,7 +372,7 @@ def run_sec01_qualification():
         "status": "PASS",
         "timestamp_utc": datetime.now(timezone.utc).isoformat(),
         "candidate": {
-            "designation": "Candidate 11",
+            "designation": "Candidate 12",
             "platform": "macos_arm64",
             "source_commit": EXPECTED_COMMIT,
             "executable_sha256": actual_exe_sha,
@@ -413,12 +403,12 @@ def run_sec01_qualification():
             "Offline Cryptographic Receipt Verification",
             "Clean Daemon Termination & Socket Release"
         ],
-        "qualified_claim": "No unexpected VaultBasis-process-owned non-loopback outbound traffic was observed during the qualified Candidate 11 capture interval."
+        "qualified_claim": "No unexpected VaultBasis-process-owned non-loopback outbound traffic was observed during the qualified Candidate 12 capture interval."
     }
 
     artifacts_dir = REPO_ROOT / "dist" / "artifacts"
     artifacts_dir.mkdir(parents=True, exist_ok=True)
-    report_file = artifacts_dir / "sec01_candidate11_egress_audit_report.json"
+    report_file = artifacts_dir / "sec01_candidate12_egress_audit_report.json"
     report_file.write_text(json.dumps(report, indent=2) + "\n")
     print(f"\nReport written to: {report_file}")
     return 0
