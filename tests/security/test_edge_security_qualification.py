@@ -370,6 +370,10 @@ class TestReceiptRoundTripAndReviewLifecycle:
         )
         assert upload_b.status_code == 200
 
+        # 3b. Confirm Source Selection (CASE-SOURCE-001)
+        confirm_res = client.post(f"/api/cases/{case_id}/confirm-sources")
+        assert confirm_res.status_code == 200
+
         # 4. Trigger Reconciliation -> Issues Preliminary Receipt (Revision 1, UNREVIEWED)
         recon_res = client.post(f"/api/cases/{case_id}/reconcile")
         assert recon_res.status_code == 200

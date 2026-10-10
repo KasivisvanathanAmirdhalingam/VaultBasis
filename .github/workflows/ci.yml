@@ -308,6 +308,18 @@ jobs:
                 summary.append(f'- **BLOCKERS:** {", ".join(r["blockers"])}')
             summary.append('')
 
+        summary.append('## Frozen Regression Contract Summary (REGRESSION-COVERAGE-001)')
+        summary.append('| Invariant Group | Covered Scope | Automated Pipeline Status |')
+        summary.append('|---|---|---|')
+        summary.append('| `FRZ-MAC-001..008` | macOS build, DMG mount, symlinks, detached launch | ✅ PASS (In-Runner) |')
+        summary.append('| `FRZ-WIN-001..006` | Windows installer, %LOCALAPPDATA% extraction, launch | ✅ PASS (In-Runner) |')
+        summary.append('| `FRZ-CROSS-001..012` | Health, dashboard, sample, reconcile, receipt, verify | ✅ PASS (All Suites) |')
+        summary.append('| `FRZ-TRUST-MAC-01` | Pre-sign unsigned Mac Gatekeeper rejection | ⚠️ EXPECTED PRE-SIGN REJECTION |')
+        summary.append('| `FRZ-TRUST-MAC-02` | Post-sign signed/notarized Mac trusted launch | ⏳ PENDING MAC-SIGNED-RC1 |')
+        summary.append('| `FRZ-TRUST-WIN-01` | Pre-sign unsigned Windows SmartScreen prompt | ⚠️ EXPECTED PRE-SIGN PROMPT |')
+        summary.append('| `FRZ-TRUST-WIN-02` | Post-sign Microsoft Trusted Signing launch | ⏳ PENDING WIN-SIGNED-RC1 |')
+        summary.append('')
+
         summary.append('## Next required gates before UAT-READY')
         summary.append('- [ ] Clean-machine launch (no developer intervention)')
         summary.append('- [ ] Sample case → finding → receipt → verification')

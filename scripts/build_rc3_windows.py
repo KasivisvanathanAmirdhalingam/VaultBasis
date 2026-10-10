@@ -345,6 +345,25 @@ def main() -> int:
         launch_gate(extracted_exe, "POST-ZIP: extracted VaultBasis.exe from single-layer candidate ZIP")
         launch_gate(extracted_exe, "POST-ZIP (GUI Mode): extracted VaultBasis.exe from single-layer candidate ZIP", disconnected_stdio=True)
 
+    # Launch gate — Setup installer execution & %LOCALAPPDATA% installation verification:
+    # (FRZ-WIN-002, FRZ-WIN-003, FRZ-WIN-004, FRZ-WIN-005)
+    print(f"\n[INSTALLER-GATE] Executing setup installer: {setup_exe.name} ...")
+    local_app_data = os.environ.get("LOCALAPPDATA") or os.path.expanduser("~\\AppData\\Local")
+    installed_exe = Path(local_app_data) / "VaultBasis" / "VaultBasis.exe"
+    if installed_exe.exists():
+        try:
+            installed_exe.unlink()
+        except Exception:
+            pass
+    subprocess.run([str(setup_exe)], check=True, timeout=120)
+    assert installed_exe.is_file(), f"Setup installer did not place VaultBasis.exe at {installed_exe}"
+    print(f"  PASS: Setup installer extracted cleanly to {installed_exe}")
+    # Terminate any background instance spawned by installer before running isolated launch gate
+    subprocess.run(["taskkill", "/F", "/IM", "VaultBasis.exe"], check=False, capture_output=True)
+    time.sleep(2)
+    launch_gate(installed_exe, "INSTALLED-EXE: installed VaultBasis.exe under %LOCALAPPDATA%")
+    launch_gate(installed_exe, "INSTALLED-EXE (GUI Mode): installed VaultBasis.exe under %LOCALAPPDATA%", disconnected_stdio=True)
+
 
     manifest = {
         "manifest_version": "v0.1",
