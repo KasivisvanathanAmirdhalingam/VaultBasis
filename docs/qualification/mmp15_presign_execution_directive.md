@@ -70,7 +70,7 @@ $$\text{Open Defect Ticket} \longrightarrow \text{Identify Affected Artifact} \l
 |                                (scripts/installer_windows.py)                                                     |
 | OPERATING STATE              : ENGINEERING FREEZE EFFECTIVE | PRODUCT CHANGE AUTH: NONE                           |
 | 11 PRE-COMMIT GATES          : 11 / 11 GREEN (357-359 automated tests passed across all suites)                   |
-| PRE-SIGN BARRIERS            : 0 / 6 CLOSED (PLAT-WIN-01B, WIN SHA, UAT-30, SEC-01 PCAP, UAT-29, UAT-22)        |
+| PRE-SIGN BARRIERS            : 0 / 5 CLOSED (PLAT-WIN-01B, WIN SHA, UAT-30, SEC-01 PCAP, UAT-22)                 |
 +-------------------------------------------------------------------------------------------------------------------+
 ```
 
@@ -84,7 +84,7 @@ $$\text{Open Defect Ticket} \longrightarrow \text{Identify Affected Artifact} \l
 - **Re-run Affected Qualification:** **REQUIRED — COMPLETED** (All 11 pre-commit gates 100% green on CI and local).
 
 ### Governance Record: `CASE-CAP-UX-001` (Commercial UX Completion of CASE-CAP-001 — Final Adjudication)
-- **Authorization:** Authorized narrow commercial-comprehension amendment prior to UAT-29 unassisted validation.
+- **Authorization:** Authorized narrow commercial-comprehension amendment prior to post-sign unassisted validation.
 - **Scope:** Edge web dashboard (`apps/web-dashboard/index.html`), marketing portal (`apps/web-marketing/`), and catalog schemas. Zero engine, SQLite database, or pricing logic drift.
 - **Adjudicated Scope Decisions:**
   1. **Always-visible case meter in top nav:** Plan tier, monotonic usage (`billable_cases_count / max_cases_per_installation`), accessible `role="progressbar" aria-valuemin="0" aria-valuemax="10" aria-valuenow="6"` attributes, compact label (`6 / 10 cases used`), and tooltip (`1 case = 1 client + 1 tax year · X new cases remain this annual term`).
@@ -95,7 +95,7 @@ $$\text{Open Defect Ticket} \longrightarrow \text{Identify Affected Artifact} \l
 - **Candidate Lineage Transition:**
   - `Candidate 12`: Historical frozen regression baseline (superseded for pre-sign release use once Candidate 13 is fully packaged and qualified).
   - `Candidate 13` (macOS) & `WIN-CANDIDATE-04` (Windows): Release candidate targets incorporating `CASE-CAP-UX-001`.
-  - Physical and human pre-sign gates (`UAT-29`, `PLAT-WIN-01B`, `SEC-01`, `UAT-22`) target Candidate 13 / WIN-CANDIDATE-04.
+  - Physical and human pre-sign gates (`PLAT-WIN-01B`, `SEC-01`, `UAT-22`) target Candidate 13 / WIN-CANDIDATE-04.
 
 ---
 
@@ -115,20 +115,16 @@ When operator completes physical execution on WIN-CANDIDATE-04, record:
 - Bound claim: *No unexpected VaultBasis-process-owned non-loopback outbound traffic was observed during the qualified Candidate 13 capture interval.*
 - Close `SEC-01 = PASS`.
 
-### C. Unassisted Practitioner Validation (`UAT-29`)
-- External CPA/EA runs unassisted session on Candidate 13 using standard customer guides only.
-- Ingest participant environment, timestamps, and zero-intervention record $\rightarrow$ Close `UAT-29 = PASS`.
-
-### D. Human Review Lifecycle Validation (`UAT-22`)
+### C. Human Review Lifecycle Validation (`UAT-22`)
 - Execute practitioner review workflow on Candidate 13 (review state transitions, findings dispositions, immutable deterministic truth).
 - Ingest review session evidence $\rightarrow$ Close `UAT-22 = PASS`.
 
-### E. Counsel Determinations (`LEGAL-001..003, 008, 009, 011..013, 015`)
+### D. Counsel Determinations (`LEGAL-001..003, 008, 009, 011..013, 015`)
 - Map counsel advice into legal ledger records.
 - If technical modification required $\rightarrow$ open `LEGAL-###-REMEDIATION-###`.
 - If accepted $\rightarrow$ close counsel dependencies without over-claiming.
 
-### F. Commercial & External Providers
+### E. Commercial & External Providers
 - **Microsoft Trusted Signing:** Await organizational identity validation; bind certificate profile to signing pipeline.
 - **Paddle Production:** Verify live credentials, webhook HMAC validation, replay protection, and zero-tax-data transmission $\rightarrow$ Close `LEGAL-004` & `LEGAL-012` live milestones.
 - **Mailer DNS:** Verify SPF, DKIM, DMARC, and zero-tax-data in emails $\rightarrow$ Close `PROD-GATE-12`.
@@ -138,21 +134,19 @@ When operator completes physical execution on WIN-CANDIDATE-04, record:
 
 ## 5. Formal Pre-Sign Authorization Gate
 
-Signing is authorized **only** when all six prerequisites are satisfied:
+Signing is authorized **only** when all five prerequisites are satisfied:
 
 ```text
 [ ] PLAT-WIN-01B PASS (Physical Windows session complete on WIN-CANDIDATE-04)
 [ ] Installed Windows VaultBasis.exe SHA-256 captured & bound
 [ ] WIN-CANDIDATE-04 UAT-30 applicability confirmed via runtime equivalence
 [ ] SEC-01 raw continuous packet capture PASS (sudo tcpdump pcap on macOS on Candidate 13)
-[ ] UAT-29 first qualified unassisted practitioner PASS (on Candidate 13)
 [ ] UAT-22 human review lifecycle PASS (on Candidate 13)
 
 ===> CONVENE FORMAL MMP1.5 PRE-SIGN AUTHORIZATION REVIEW
 ===> Authorize Production Signing:
      - Candidate 13     -> MAC-SIGNED-RC1 (Apple Developer ID + Notarization + Stapling)
      - WIN-CANDIDATE-04 -> WIN-SIGNED-RC1 (Microsoft Trusted Signing + RFC 3161 Timestamp)
-```
 ```
 
 ---
@@ -162,7 +156,8 @@ Signing is authorized **only** when all six prerequisites are satisfied:
 Signed artifacts receive new immutable cryptographic identities and undergo mandatory post-sign qualification:
 - Clean-machine install & launch
 - Final SBOM & license notice reconciliation
-- 5–8 unassisted practitioner validation campaign
+- **`UAT-29` Zero-Intervention Clean-Download Acceptance**: External CPA/EA conducts first unassisted zero-terminal session on exact signed/notarized customer bytes (`MAC-SIGNED-RC1`).
+- Final 5–8 unassisted practitioner validation campaign
 - Live checkout & web gateway verification
 - Final closure of `PROD-GATE-01..17`
 - Formal `PROD-GATE-18` Final Launch Authorization $\rightarrow$ `DISTRIBUTION_ACTIVE`.
