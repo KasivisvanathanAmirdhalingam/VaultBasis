@@ -56,15 +56,32 @@ $$\text{Open Defect Ticket} \longrightarrow \text{Identify Affected Artifact} \l
 
 ---
 
-## 3. Four-Way Provenance Invariants
+## 3. Four-Way Provenance Invariants & Qualification Harness Corrections
 
-1. **PRODUCT SOURCE STATE:** Mode 3 Remediated (`CASE-CAP-001`, `CASE-SOURCE-001` resolved; awaiting final commit SHA binding).
-2. **PACKAGING TOOLING SHA:** `76a284aedd47a3e37359a4aafd898ad0601e097f` (Emits canonical `VaultBasis-Setup-1.5.0-rc3.exe` via `scripts/installer_windows.py`).
-3. **CANDIDATE QUALIFICATION HARNESS:** 515 passed, 3 skipped, 0 failed in 13.93s (`evidence/test_execution_mode3_remediation.log`, SHA-256: `b99904f10202b4b3a005fdfffbb00bdcc8ac21d806ea7fa27ad020bc97fc4818`).
-   - *Skipped 1:* `G018_exact_duplicate` — pending duplicate semantics indexing in golden corpus.
-   - *Skipped 2:* `G019_conflicting_duplicate` — pending conflicting duplicate resolution in golden corpus.
-   - *Skipped 3:* `test_live_web_catalog_smoke.py` — `VAULTBASIS_LIVE_URL` unset in local offline environment.
-4. **CURRENT GOVERNANCE LEDGER HEAD:** Operating under strict Mode 1 Evidence Ingestion freeze.
+```text
++-------------------------------------------------------------------------------------------------------------------+
+| PROVENANCE BOUNDARY SEPARATION                                                                                    |
++-------------------------------------------------------------------------------------------------------------------+
+| PRODUCT SOURCE COMMIT        : cdbc94fba0fa005d7acc6778e53a892484a634e9                                           |
+|                                (Authoritative runtime code for Candidate 12 & WIN-CANDIDATE-03)                   |
+| QUALIFICATION HARNESS HEAD   : 5f6df64469b384c16bf47804090757fbb61bfb9f                                           |
+|                                (Harness diagnostic reporting & fuzz test fail-closed invariant)                   |
+| PACKAGING TOOLING SHA        : 76a284aedd47a3e37359a4aafd898ad0601e097f                                           |
+|                                (scripts/installer_windows.py)                                                     |
+| OPERATING STATE              : ENGINEERING FREEZE EFFECTIVE | PRODUCT CHANGE AUTH: NONE                           |
+| 11 PRE-COMMIT GATES          : 11 / 11 GREEN (357-359 automated tests passed across all suites)                   |
+| PRE-SIGN BARRIERS            : 0 / 6 CLOSED (PLAT-WIN-01B, WIN SHA, UAT-30, SEC-01 PCAP, UAT-29, UAT-22)        |
++-------------------------------------------------------------------------------------------------------------------+
+```
+
+### Governance Record: `QUAL-HARNESS-001`
+- **Issue:** Validation gate `GATE-07` masked failing test identity due to summary column truncation, and license token fuzz invariant excluded a legitimate fail-closed terminal state (`UNSUPPORTED_VERSION`).
+- **Scope:** Qualification harness + unit test suite only (`scripts/run_validation_gates.py`, `tests/unit/test_mmp15_license_engine.py`).
+- **Product Runtime Changed:** **NO** (Zero changes to packaged runtime, UI, schemas, policies, or database engine).
+- **Candidate Bytes Changed:** **NO** (Candidate 12 and WIN-CANDIDATE-03 binaries remain unaltered).
+- **Disposition:** **HARNESS CORRECTION ACCEPTED**.
+- **Rebuild Candidate 12:** **NOT REQUIRED** (Candidate 12 remains frozen at product source `cdbc94fba0fa005d7acc6778e53a892484a634e9`).
+- **Re-run Affected Qualification:** **REQUIRED — COMPLETED** (All 11 pre-commit gates 100% green on CI and local).
 
 ---
 
