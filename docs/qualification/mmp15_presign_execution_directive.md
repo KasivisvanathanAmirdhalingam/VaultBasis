@@ -83,6 +83,18 @@ $$\text{Open Defect Ticket} \longrightarrow \text{Identify Affected Artifact} \l
 - **Rebuild Candidate 12:** **NOT REQUIRED** (Candidate 12 remains frozen at product source `cdbc94fba0fa005d7acc6778e53a892484a634e9`).
 - **Re-run Affected Qualification:** **REQUIRED — COMPLETED** (All 11 pre-commit gates 100% green on CI and local).
 
+### Governance Record: `CASE-CAP-UX-001` (Commercial UX Completion of CASE-CAP-001)
+- **Authorization:** Authorized scope for commercial UX completion prior to UAT-29 unassisted validation.
+- **Scope:** Edge web dashboard (`apps/web-dashboard/index.html`) only. Zero engine, database, or pricing logic changes.
+- **Implemented Capabilities:**
+  1. Always-visible horizontal case meter in top navigation displaying plan tier, monotonic usage (`billable_cases / max_cases`), visual progress bar, and hover tooltip explaining `1 case = 1 client + 1 tax year`.
+  2. 4-state New Case modal: Capacity Available (with after-creation preview), Last Slot Warning (`⚡ Final Case Allowance`), Limit Reached Explanatory Card (`[Back to Cases]` / `[View Upgrade Options ↗]`), and Expired/Unlicensed Gate.
+  3. Deletion warning modal explicitly confirming that deleting a local case does not restore the consumed annual allowance.
+  4. Alternative source status badges refined to `(Superseded)` and `(Not selected)`.
+  5. Consistent customer terminology: `client tax-year case(s)`.
+- **Validation:** 11/11 Validation Gates PASS (359 automated tests green). Zero test regressions.
+- **Lineage:** Candidate 12 (`cdbc94f...`) preserved for historical reference; Candidate 13 (`cea63d6...`) incorporates `CASE-CAP-UX-001`.
+
 ---
 
 ## 4. Operational Ingestion & Closure Handlers
