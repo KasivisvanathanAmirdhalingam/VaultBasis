@@ -28,7 +28,7 @@ Unlike SaaS compliance platforms that require uploading confidential taxpayer tr
 | **Network Listeners** | Loopback interface only (`127.0.0.1:8000` default, dynamic ephemeral fallback) |
 | **Outbound Network Access** | **Zero required outbound connections during case reconciliation or receipt verification.** |
 | **Background Services / Daemons** | **None.** Process terminates fully upon window close; zero persistent system daemons. |
-| **Registry / System Modifications**| **Zero.** No kernel drivers, system-wide proxies, browser extensions, or scheduled tasks. |
+| **Registry / System Modifications**| **Per-user HKCU Installed Apps / uninstall registration only.** No system-wide registry changes, drivers, services, scheduled tasks, firewall rules, or PATH modification. |
 
 ---
 
