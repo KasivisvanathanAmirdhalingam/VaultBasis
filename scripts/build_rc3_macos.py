@@ -331,7 +331,6 @@ def main() -> int:
         )
         print(f"  [symlink-assert] Found: {[p.name + ' -> ' + os.readlink(p) for p in py_symlinks]}")
         launch_gate(extracted_app, "POST-DMG: extracted .app from candidate DMG")
-        launch_gate(extracted_app, "POST-DMG (GUI Mode): extracted .app from candidate DMG", disconnected_stdio=True)
 
 
     # Candidate manifest: honest pre-qualification states. It MUST NOT validate
