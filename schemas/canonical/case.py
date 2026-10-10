@@ -17,6 +17,7 @@ class SourceDocumentMetadata(BaseModel):
     schema_id: str = Field(..., description="Adapter schema identifier (e.g. KOINLY_CAPITAL_GAINS_CSV_V1)")
     row_count: int = Field(0, description="Number of parsed transaction rows")
     ingested_at: str = Field(..., description="ISO 8601 UTC timestamp")
+    source_status: str = Field("ACTIVE", description="ACTIVE | INACTIVE | SUPERSEDED")
 
 
 class CanonicalCase(BaseModel):
@@ -58,5 +59,10 @@ class CanonicalCase(BaseModel):
     assurance_level: Optional[str] = Field(None, description="Assurance level (L1 - L5)")
     receipt_id: Optional[str] = Field(None, description="ID of signed outcome receipt once generated")
     
+    source_revision: int = Field(1, description="Monotonically increasing evidence revision")
+    confirmed_source_set_hash: Optional[str] = Field(None, description="SHA-256 hash of active broker and ledger sources at confirmation")
+    confirmed_source_revision: Optional[int] = Field(None, description="Source revision at confirmation")
+    confirmed_at: Optional[str] = Field(None, description="ISO 8601 UTC timestamp of practitioner confirmation")
+
     created_at: str = Field(..., description="ISO 8601 UTC creation timestamp")
     updated_at: str = Field(..., description="ISO 8601 UTC last modified timestamp")

@@ -309,6 +309,9 @@ def test_uat26_paid_commercial_licensing_full_lifecycle():
         policy_bound.install_license_token(boundary_token)
 
         # Create 3 cases
+        eval_bound = policy_bound.evaluate_current_license(current_time=now_utc)
+        ent_period_id = f"{eval_bound.customer_id}:{eval_bound.not_before[:10]}_{eval_bound.expires_at[:10]}"
+
         for idx in range(1, 4):
             auth_c = policy_bound.authorize(CommercialOperation.CREATE_CASE, current_time=now_utc)
             assert auth_c.allowed is True
@@ -325,6 +328,8 @@ def test_uat26_paid_commercial_licensing_full_lifecycle():
                 ),
                 is_evaluation=False,
                 max_cases=3,
+                entitlement_period_id=ent_period_id,
+                customer_id=eval_bound.customer_id,
             )
 
         # 4th case blocked
@@ -334,12 +339,11 @@ def test_uat26_paid_commercial_licensing_full_lifecycle():
         assert auth_4th.reason_code == CommercialDenialCode.CASE_CAPACITY_REACHED
         assert "reached the case limit" in auth_4th.message or "case limit" in auth_4th.message.lower()
 
-        # Deleting a case does NOT refund slot
+        # Deleting a case does NOT refund slot (CASE-CAP-001 anti-delete invariant)
         boundary_store.delete_case("CASE-PAID-01")
-        # In SQLiteStore, monotonic case count tracks total created cases
         auth_after_del = policy_bound.authorize(CommercialOperation.CREATE_CASE, current_time=now_utc)
-        # Note: In SQLiteStore, active non-sample case count is 2, but billable case consumption policy check
-        # ensures capacity respects total historical operations under commercial rules.
+        assert auth_after_del.allowed is False
+        assert auth_after_del.reason_code == CommercialDenialCode.CASE_CAPACITY_REACHED
 
         # -------------------------------------------------------------
         # 8. Subcase 26H: Monotonic Upgrade Lineage & Downgrade Prevention

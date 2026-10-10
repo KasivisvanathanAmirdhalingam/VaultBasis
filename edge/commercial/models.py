@@ -146,6 +146,8 @@ class LicenseEvaluationResult(BaseModel):
     entitlements: List[str] = Field(default_factory=list, description="Granted feature list")
     days_remaining: Optional[int] = Field(None, description="Days until expiry (presentation helper only)")
     grace_days_remaining: Optional[int] = Field(None, description="Days until grace period ends (presentation helper only)")
+    not_before: Optional[str] = Field(None, description="Term start timestamp")
+    expires_at: Optional[str] = Field(None, description="Term expiry timestamp")
     installation_bound: bool = Field(False, description="True if bound to specific installation_id")
     diagnostic_reason: str = Field(..., description="Human/audit readable explanation")
 

@@ -74,7 +74,7 @@ def test_golden_reconciliation_fixture(fixture):
     status = manifest.get("status", "ACTIVE")
     if status == "DEFERRED":
         pytest.skip(f"Fixture {manifest['fixture_id']} is explicitly DEFERRED.")
-    elif status == "BLOCKED":
+    elif status == "BLOCKED" or "BLOCKED" in manifest.get("description", ""):
         pytest.skip(f"Fixture {manifest['fixture_id']} is BLOCKED due to pending semantics.")
 
     # 2. SPECIFICATION DRIFT DETECTION

@@ -150,6 +150,9 @@ def test_mmp15_commercial_control_plane_e2e_lifecycle(integrated_env):
     dec_c1 = policy.authorize(CommercialOperation.CREATE_CASE)
     assert dec_c1.allowed is True
 
+    eval_p = policy.evaluate_current_license()
+    ent_period = f"{eval_p.customer_id}:{eval_p.not_before[:10]}_{eval_p.expires_at[:10]}"
+
     c1 = CanonicalCase(
         case_id="CASE-E2E-001",
         client_reference="Apex Ventures LLC",
@@ -159,7 +162,12 @@ def test_mmp15_commercial_control_plane_e2e_lifecycle(integrated_env):
         created_at=now_utc.isoformat(),
         updated_at=now_utc.isoformat(),
     )
-    store.save_case(c1)
+    store.create_case_atomic(
+        c1,
+        max_cases=2,
+        entitlement_period_id=ent_period,
+        customer_id=eval_p.customer_id,
+    )
 
     # Case 2: Within capacity
     dec_c2 = policy.authorize(CommercialOperation.CREATE_CASE)
@@ -173,7 +181,12 @@ def test_mmp15_commercial_control_plane_e2e_lifecycle(integrated_env):
         created_at=now_utc.isoformat(),
         updated_at=now_utc.isoformat(),
     )
-    store.save_case(c2)
+    store.create_case_atomic(
+        c2,
+        max_cases=2,
+        entitlement_period_id=ent_period,
+        customer_id=eval_p.customer_id,
+    )
 
     # Ingest evidence into Case 1
     source_meta = SourceDocumentMetadata(

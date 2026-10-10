@@ -183,6 +183,8 @@ def evaluate_license_envelope(
             entitlements=payload.entitlements,
             days_remaining=days_remaining,
             grace_days_remaining=grace_days_remaining,
+            not_before=payload.not_before,
+            expires_at=payload.expires_at,
             installation_bound=installation_bound,
             diagnostic_reason=f"License not yet active (valid starting {payload.not_before})",
         )
@@ -199,6 +201,8 @@ def evaluate_license_envelope(
             entitlements=payload.entitlements,
             days_remaining=days_remaining,
             grace_days_remaining=grace_days_remaining,
+            not_before=payload.not_before,
+            expires_at=payload.expires_at,
             installation_bound=installation_bound,
             diagnostic_reason=f"License active under tier '{payload.tier.value}' ({days_remaining} days remaining)",
         )
@@ -215,6 +219,8 @@ def evaluate_license_envelope(
             entitlements=payload.entitlements,
             days_remaining=days_remaining,
             grace_days_remaining=grace_days_remaining,
+            not_before=payload.not_before,
+            expires_at=payload.expires_at,
             installation_bound=installation_bound,
             diagnostic_reason=(
                 f"License in administrative grace period until {payload.grace_until} "
@@ -234,6 +240,8 @@ def evaluate_license_envelope(
         entitlements=payload.entitlements,
         days_remaining=days_remaining,
         grace_days_remaining=grace_days_remaining,
+        not_before=payload.not_before,
+        expires_at=payload.expires_at,
         installation_bound=installation_bound,
         diagnostic_reason=f"License expired on {payload.expires_at} (grace ended {payload.grace_until})",
     )

@@ -455,8 +455,18 @@ class CommercialPolicyService:
         eval_state = self.store.get_installation_evaluation() if self.store else None
         since_iso = eval_state.get("activated_at") if (is_eval and eval_state) else None
         monotonic_eval_cases = self.store.count_evaluation_cases_created() if (is_eval and self.store) else 0
-        live_billable = self.store.count_billable_cases(since_iso=since_iso) if self.store else 0
-        billable_cases = max(monotonic_eval_cases, live_billable) if is_eval else live_billable
+
+        entitlement_period_id = None
+        if not is_eval and eval_res.customer_id and eval_res.not_before and eval_res.expires_at:
+            entitlement_period_id = f"{eval_res.customer_id}:{eval_res.not_before[:10]}_{eval_res.expires_at[:10]}"
+
+        if is_eval:
+            live_billable = self.store.count_billable_cases(since_iso=since_iso) if self.store else 0
+            billable_cases = max(monotonic_eval_cases, live_billable)
+        elif entitlement_period_id:
+            billable_cases = self.store.count_billable_cases(entitlement_period_id=entitlement_period_id) if self.store else 0
+        else:
+            billable_cases = self.store.count_billable_cases() if self.store else 0
         max_cases = eval_res.max_cases_per_installation or (3 if is_eval else 0)
 
         if eval_res.is_active:
@@ -669,8 +679,18 @@ class CommercialPolicyService:
         is_eval = (eval_res.tier in (LicenseTier.TRIAL, LicenseTier.EVALUATION))
         since_iso = eval_state.get("activated_at") if (is_eval and eval_state) else None
         monotonic_eval_cases = self.store.count_evaluation_cases_created() if (is_eval and self.store) else 0
-        live_billable = self.store.count_billable_cases(since_iso=since_iso) if self.store else 0
-        billable_count = max(monotonic_eval_cases, live_billable) if is_eval else live_billable
+
+        entitlement_period_id = None
+        if not is_eval and eval_res.customer_id and eval_res.not_before and eval_res.expires_at:
+            entitlement_period_id = f"{eval_res.customer_id}:{eval_res.not_before[:10]}_{eval_res.expires_at[:10]}"
+
+        if is_eval:
+            live_billable = self.store.count_billable_cases(since_iso=since_iso) if self.store else 0
+            billable_count = max(monotonic_eval_cases, live_billable)
+        elif entitlement_period_id:
+            billable_count = self.store.count_billable_cases(entitlement_period_id=entitlement_period_id) if self.store else 0
+        else:
+            billable_count = self.store.count_billable_cases() if self.store else 0
         max_cases = eval_res.max_cases_per_installation or (3 if is_eval else 0)
 
         # Capacity Check for case creation

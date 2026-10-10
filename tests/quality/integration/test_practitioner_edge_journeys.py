@@ -163,6 +163,7 @@ def test_journey_b_paid_client_case_lifecycle(test_client):
     assert src_a_res.status_code == 200, src_a_res.text
 
     # Reconcile should fail with only 1 source
+    client.post("/api/cases/CASE-CLIENT-001/confirm-sources")
     recon_fail = client.post("/api/cases/CASE-CLIENT-001/reconcile")
     assert recon_fail.status_code == 400
 
@@ -175,6 +176,7 @@ def test_journey_b_paid_client_case_lifecycle(test_client):
     assert src_b_res.status_code == 200, src_b_res.text
 
     # 5. Run Deterministic Reconciliation
+    client.post("/api/cases/CASE-CLIENT-001/confirm-sources")
     recon_res = client.post("/api/cases/CASE-CLIENT-001/reconcile")
     assert recon_res.status_code == 200, recon_res.text
     recon_data = recon_res.json()

@@ -38,6 +38,7 @@ def test_uat20_regulatory_routing_and_unsupported_boundaries():
     client.post(f"/api/cases/{case_us_2025}/sources", files={"file": ("broker.csv", broker_bytes, "text/csv")}, data={"declared_schema": "AUTO"})
     client.post(f"/api/cases/{case_us_2025}/sources", files={"file": ("ledger.csv", ledger_bytes, "text/csv")}, data={"declared_schema": "AUTO"})
 
+    client.post(f"/api/cases/{case_us_2025}/confirm-sources")
     r_recon_valid = client.post(f"/api/cases/{case_us_2025}/reconcile")
     assert r_recon_valid.status_code == 200
     valid_data = r_recon_valid.json()
@@ -55,6 +56,7 @@ def test_uat20_regulatory_routing_and_unsupported_boundaries():
     client.post(f"/api/cases/{case_us_2024}/sources", files={"file": ("broker.csv", broker_bytes, "text/csv")}, data={"declared_schema": "AUTO"})
     client.post(f"/api/cases/{case_us_2024}/sources", files={"file": ("ledger.csv", ledger_bytes, "text/csv")}, data={"declared_schema": "AUTO"})
 
+    client.post(f"/api/cases/{case_us_2024}/confirm-sources")
     r_recon_us2024 = client.post(f"/api/cases/{case_us_2024}/reconcile")
     assert r_recon_us2024.status_code == 422
     assert "RULESET_UNSUPPORTED" in r_recon_us2024.json()["detail"]
@@ -75,6 +77,7 @@ def test_uat20_regulatory_routing_and_unsupported_boundaries():
     client.post(f"/api/cases/{case_us_2023}/sources", files={"file": ("broker.csv", broker_bytes, "text/csv")}, data={"declared_schema": "AUTO"})
     client.post(f"/api/cases/{case_us_2023}/sources", files={"file": ("ledger.csv", ledger_bytes, "text/csv")}, data={"declared_schema": "AUTO"})
 
+    client.post(f"/api/cases/{case_us_2023}/confirm-sources")
     r_recon_us2023 = client.post(f"/api/cases/{case_us_2023}/reconcile")
     assert r_recon_us2023.status_code == 422
     assert "RULESET_UNSUPPORTED" in r_recon_us2023.json()["detail"]
@@ -90,6 +93,7 @@ def test_uat20_regulatory_routing_and_unsupported_boundaries():
     client.post(f"/api/cases/{case_uk_2025}/sources", files={"file": ("broker.csv", broker_bytes, "text/csv")}, data={"declared_schema": "AUTO"})
     client.post(f"/api/cases/{case_uk_2025}/sources", files={"file": ("ledger.csv", ledger_bytes, "text/csv")}, data={"declared_schema": "AUTO"})
 
+    client.post(f"/api/cases/{case_uk_2025}/confirm-sources")
     r_recon_uk2025 = client.post(f"/api/cases/{case_uk_2025}/reconcile")
     assert r_recon_uk2025.status_code == 422
     assert "RULESET_UNSUPPORTED" in r_recon_uk2025.json()["detail"]
@@ -106,6 +110,7 @@ def test_uat20_regulatory_routing_and_unsupported_boundaries():
     client.post(f"/api/cases/{case_ca_2025}/sources", files={"file": ("broker.csv", broker_bytes, "text/csv")}, data={"declared_schema": "AUTO"})
     client.post(f"/api/cases/{case_ca_2025}/sources", files={"file": ("ledger.csv", ledger_bytes, "text/csv")}, data={"declared_schema": "AUTO"})
 
+    client.post(f"/api/cases/{case_ca_2025}/confirm-sources")
     r_recon_ca2025 = client.post(f"/api/cases/{case_ca_2025}/reconcile")
     assert r_recon_ca2025.status_code == 422
     assert "RULESET_UNSUPPORTED" in r_recon_ca2025.json()["detail"]

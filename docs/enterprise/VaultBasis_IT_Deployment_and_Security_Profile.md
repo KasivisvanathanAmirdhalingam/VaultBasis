@@ -23,7 +23,7 @@ Unlike SaaS compliance platforms that require uploading confidential taxpayer tr
 | **Supported Operating Systems** | Windows 10/11 (64-bit), macOS 13+ (Ventura, Sonoma, Sequoia) |
 | **Installation Footprint** | ~120 MB self-contained binary distribution |
 | **Execution Privileges** | **Standard User Space Only** (No Administrator / root elevation required) |
-| **Installation Location** | Windows: `%LOCALAPPDATA%\Programs\VaultBasis\` or extracted standalone folder<br>macOS: `/Applications/VaultBasis.app` or `~/Applications/VaultBasis.app` |
+| **Installation Location** | Windows: `%LOCALAPPDATA%\VaultBasis\` or extracted standalone folder<br>macOS: `/Applications/VaultBasis.app` or `~/Applications/VaultBasis.app` |
 | **Application Data Location** | Windows: `%LOCALAPPDATA%\VaultBasis\`<br>macOS: `~/Library/Application Support/VaultBasis/` |
 | **Network Listeners** | Loopback interface only (`127.0.0.1:8000` default, dynamic ephemeral fallback) |
 | **Outbound Network Access** | **Zero required outbound connections during case reconciliation or receipt verification.** |
@@ -108,8 +108,8 @@ VaultBasis adheres strictly to the principle of least privilege:
 ### Microsoft Intune / Defender for Endpoint Allowlisting
 - **Rule Type:** Publisher Rule (Recommended) or Path Rule.
 - **Publisher Name:** `CN=VaultBasis LLC, O=VaultBasis LLC, L=New York, S=NY, C=US` (Exact DN from certificate).
-- **File Path:** `%LOCALAPPDATA%\Programs\VaultBasis\VaultBasis.exe`.
-- **Silent Install Flags:** `VaultBasis-Setup.exe /S /D=%LOCALAPPDATA%\Programs\VaultBasis`.
+- **File Path:** `%LOCALAPPDATA%\VaultBasis\VaultBasis.exe`.
+- **Silent Install Flags:** `VaultBasis-Setup-1.5.0-rc3.exe` (user-space self-extractor into `%LOCALAPPDATA%\VaultBasis`).
 
 ### Jamf Pro / macOS MDM Configuration
 - **Payload:** Application Restriction / Gatekeeper Bypass Exception.

@@ -122,6 +122,7 @@ def test_uat28_offline_air_gapped_journey():
         assert r_src_ledger.json()["status"] == "INGESTED"
 
         # 6. Reconcile -> Generates Rev 1 (Preliminary Receipt)
+        client.post(f"/api/cases/{case_id}/confirm-sources")
         r_recon = client.post(f"/api/cases/{case_id}/reconcile")
         assert r_recon.status_code == 200
         recon_res = r_recon.json()

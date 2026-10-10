@@ -56,6 +56,7 @@ def test_uat09_missing_from_ledger_orphan():
     assert r_src_b.status_code == 200
 
     # Reconcile
+    client.post(f"/api/cases/{case_id}/confirm-sources")
     r_recon = client.post(f"/api/cases/{case_id}/reconcile")
     assert r_recon.status_code == 200
     recon_data = r_recon.json().get("reconciliation", {})

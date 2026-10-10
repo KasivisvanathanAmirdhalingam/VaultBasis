@@ -66,6 +66,7 @@ BTC,2025-11-20,18400.00,2025-02-11,12100.00,YES
     assert up2_res.status_code == 200
 
     # Step 4: Reconcile
+    client.post("/api/cases/CASE-CPA-2025-SMITH/confirm-sources")
     recon_res = client.post("/api/cases/CASE-CPA-2025-SMITH/reconcile")
     assert recon_res.status_code == 200
     recon = recon_res.json()
@@ -172,6 +173,7 @@ def test_atdd_negative_control_single_source_rejected(client):
     csv_1099 = b"Property,Date sold,Proceeds,Date acquired,Cost basis,Box 2\nBTC,2025-11-20,1000.00,2025-01-01,800.00,YES\n"
     client.post(f"/api/cases/{case_id}/sources", files={"file": ("1099.csv", csv_1099, "text/csv")})
 
+    client.post(f"/api/cases/{case_id}/confirm-sources")
     recon_res = client.post(f"/api/cases/{case_id}/reconcile")
     assert recon_res.status_code == 400
     assert "at least two source documents" in recon_res.json()["detail"]
@@ -208,6 +210,7 @@ ETH,2025-10-15,3500.00,2025-01-10,2500.00,YES
     client.post("/api/cases/CASE-MATCHED-DEMO/sources", files={"file": ("1099.csv", csv_1099, "text/csv")})
     client.post("/api/cases/CASE-MATCHED-DEMO/sources", files={"file": ("koinly.csv", csv_koinly, "text/csv")})
 
+    client.post("/api/cases/CASE-MATCHED-DEMO/confirm-sources")
     recon_res = client.post("/api/cases/CASE-MATCHED-DEMO/reconcile")
     assert recon_res.status_code == 200
     data = recon_res.json()
@@ -236,6 +239,7 @@ SOL,2025-08-14,4500.00,2025-01-10,,NO
     client.post(f"/api/cases/{case_id}/sources", files={"file": ("1099_unreported.csv", csv_1099, "text/csv")})
     client.post(f"/api/cases/{case_id}/sources", files={"file": ("koinly_report.csv", csv_koinly, "text/csv")})
 
+    client.post(f"/api/cases/{case_id}/confirm-sources")
     recon_res = client.post(f"/api/cases/{case_id}/reconcile")
     assert recon_res.status_code == 200
     data = recon_res.json()
@@ -272,6 +276,7 @@ def test_atdd_zip_bundle_complete_standalone_reverification(client, tmp_path):
     csv_koinly = b"Date,Asset,Amount,Cost basis,Proceeds,Gain / loss,Date acquired\n2025-05-01,BTC,1.0,10000.00,12000.00,2000.00,2024-05-01\n"
     client.post(f"/api/cases/{case_id}/sources", files={"file": ("1099.csv", csv_1099, "text/csv")})
     client.post(f"/api/cases/{case_id}/sources", files={"file": ("koinly.csv", csv_koinly, "text/csv")})
+    client.post(f"/api/cases/{case_id}/confirm-sources")
     client.post(f"/api/cases/{case_id}/reconcile")
 
     # Download ZIP bundle
@@ -340,6 +345,7 @@ SOL,2025-08-14,4500.00,2025-01-10,,NO
     client.post(f"/api/cases/{case_id}/sources", files={"file": ("1099.csv", csv_1099, "text/csv")})
     client.post(f"/api/cases/{case_id}/sources", files={"file": ("koinly.csv", csv_koinly, "text/csv")})
 
+    client.post(f"/api/cases/{case_id}/confirm-sources")
     recon_res = client.post(f"/api/cases/{case_id}/reconcile")
     assert recon_res.status_code == 200
     data = recon_res.json()
@@ -374,6 +380,7 @@ AVAX,2025-09-10,9950.00,2025-01-01,8000.00,YES
     client.post(f"/api/cases/{case_id}/sources", files={"file": ("1099_avax.csv", csv_1099, "text/csv")})
     client.post(f"/api/cases/{case_id}/sources", files={"file": ("koinly_avax.csv", csv_koinly, "text/csv")})
 
+    client.post(f"/api/cases/{case_id}/confirm-sources")
     recon_res = client.post(f"/api/cases/{case_id}/reconcile")
     assert recon_res.status_code == 200
     data = recon_res.json()
@@ -409,6 +416,7 @@ BTC,2025-06-15,10000.00,2025-02-01,8000.00,YES
     client.post(f"/api/cases/{case_id}/sources", files={"file": ("1099_lots.csv", csv_1099, "text/csv")})
     client.post(f"/api/cases/{case_id}/sources", files={"file": ("koinly_lots.csv", csv_koinly, "text/csv")})
 
+    client.post(f"/api/cases/{case_id}/confirm-sources")
     recon_res = client.post(f"/api/cases/{case_id}/reconcile")
     assert recon_res.status_code == 200
     data = recon_res.json()
@@ -445,6 +453,7 @@ def test_atdd_high_volume_batch_reconciliation_journey(client):
     client.post(f"/api/cases/{case_id}/sources", files={"file": ("1099_batch.csv", csv_1099, "text/csv")})
     client.post(f"/api/cases/{case_id}/sources", files={"file": ("koinly_batch.csv", csv_koinly, "text/csv")})
 
+    client.post(f"/api/cases/{case_id}/confirm-sources")
     recon_res = client.post(f"/api/cases/{case_id}/reconcile")
     assert recon_res.status_code == 200
     data = recon_res.json()
@@ -473,6 +482,7 @@ BTC,2025-11-20,20000.00,2025-02-11,15000.00,YES
     client.post(f"/api/cases/{case_id}/sources", files={"file": ("coinbase.csv", csv_1099, "text/csv")})
     client.post(f"/api/cases/{case_id}/sources", files={"file": ("ledger.csv", csv_koinly, "text/csv")})
 
+    client.post(f"/api/cases/{case_id}/confirm-sources")
     recon_res = client.post(f"/api/cases/{case_id}/reconcile")
     assert recon_res.status_code == 200
     receipt = recon_res.json()["receipt"]
@@ -503,8 +513,10 @@ def test_atdd_idempotent_re_reconciliation_journey(client):
     client.post(f"/api/cases/{case_id}/sources", files={"file": ("koinly.csv", csv_koinly, "text/csv")})
 
     # Run 1
+    client.post(f"/api/cases/{case_id}/confirm-sources")
     r1 = client.post(f"/api/cases/{case_id}/reconcile").json()
     # Run 2
+    client.post(f"/api/cases/{case_id}/confirm-sources")
     r2 = client.post(f"/api/cases/{case_id}/reconcile").json()
 
     assert r1["outcome_state"] == r2["outcome_state"] == "MATCHED"

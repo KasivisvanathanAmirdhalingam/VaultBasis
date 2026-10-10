@@ -54,6 +54,7 @@ def test_bdd_ac02_bounded_reconciliation_result(client):
     client.post("/api/cases/CASE-BDD-AC02/sources", files={"file": ("koinly.csv", src_koinly, "text/csv")})
 
     # WHEN the case runs
+    client.post("/api/cases/CASE-BDD-AC02/confirm-sources")
     recon_res = client.post("/api/cases/CASE-BDD-AC02/reconcile")
     assert recon_res.status_code == 200
     data = recon_res.json()
@@ -118,6 +119,7 @@ def test_bdd_ac05_receipt_is_generated_and_signed(client):
     client.post("/api/cases/CASE-BDD-AC05/sources", files={"file": ("b.csv", src_b, "text/csv")})
 
     # WHEN the receipt is generated
+    client.post("/api/cases/CASE-BDD-AC05/confirm-sources")
     recon = client.post("/api/cases/CASE-BDD-AC05/reconcile").json()
     receipt = recon["receipt"]
 
@@ -140,6 +142,7 @@ def test_bdd_ac06_independent_verifier_confirms_receipt(client):
     src_b = b"Date,Asset,Amount,Cost basis,Proceeds,Gain / loss,Date acquired\n2025-02-01,ETH,1.0,800.00,1000.00,200.00,2024-02-01\n"
     client.post("/api/cases/CASE-BDD-AC06/sources", files={"file": ("a.csv", src_a, "text/csv")})
     client.post("/api/cases/CASE-BDD-AC06/sources", files={"file": ("b.csv", src_b, "text/csv")})
+    client.post("/api/cases/CASE-BDD-AC06/confirm-sources")
     recon = client.post("/api/cases/CASE-BDD-AC06/reconcile").json()
 
     # WHEN verified offline without VaultBasis cloud services
@@ -178,6 +181,7 @@ def test_bdd_tampered_receipt_sub_cent_change_fails_verification(client):
     src_b = b"Date,Asset,Amount,Cost basis,Proceeds,Gain / loss,Date acquired\n2025-02-01,ETH,1.0,800.00,1000.00,200.00,2024-02-01\n"
     client.post("/api/cases/CASE-BDD-TAMPER-01/sources", files={"file": ("a.csv", src_a, "text/csv")})
     client.post("/api/cases/CASE-BDD-TAMPER-01/sources", files={"file": ("b.csv", src_b, "text/csv")})
+    client.post("/api/cases/CASE-BDD-TAMPER-01/confirm-sources")
     recon = client.post("/api/cases/CASE-BDD-TAMPER-01/reconcile").json()
     receipt = dict(recon["receipt"])
 
@@ -203,6 +207,7 @@ def test_bdd_tampered_outcome_state_fails_verification(client):
     src_b = b"Date,Asset,Amount,Cost basis,Proceeds,Gain / loss,Date acquired\n2025-02-01,BTC,1.0,4000.00,5000.00,1000.00,2024-02-01\n"
     client.post("/api/cases/CASE-BDD-TAMPER-02/sources", files={"file": ("a.csv", src_a, "text/csv")})
     client.post("/api/cases/CASE-BDD-TAMPER-02/sources", files={"file": ("b.csv", src_b, "text/csv")})
+    client.post("/api/cases/CASE-BDD-TAMPER-02/confirm-sources")
     recon = client.post("/api/cases/CASE-BDD-TAMPER-02/reconcile").json()
     receipt = dict(recon["receipt"])
     assert receipt["outcome_state"] == "BASIS_DIFFERENCE"
@@ -230,7 +235,9 @@ def test_bdd_idempotent_reconciliation(client):
     client.post("/api/cases/CASE-BDD-IDEM-01/sources", files={"file": ("b.csv", src_b, "text/csv")})
 
     # WHEN reconciled multiple times
+    client.post("/api/cases/CASE-BDD-IDEM-01/confirm-sources")
     recon1 = client.post("/api/cases/CASE-BDD-IDEM-01/reconcile").json()
+    client.post("/api/cases/CASE-BDD-IDEM-01/confirm-sources")
     recon2 = client.post("/api/cases/CASE-BDD-IDEM-01/reconcile").json()
 
     # THEN outcome states and material differences are strictly identical
@@ -272,6 +279,7 @@ def test_bdd_ac_outcome_state_acquisition_date_difference(client):
     client.post(f"/api/cases/{case_id}/sources", files={"file": ("a.csv", src_a, "text/csv")})
     client.post(f"/api/cases/{case_id}/sources", files={"file": ("b.csv", src_b, "text/csv")})
 
+    client.post(f"/api/cases/{case_id}/confirm-sources")
     recon = client.post(f"/api/cases/{case_id}/reconcile").json()
     assert recon["outcome_state"] == "ACQUISITION_DATE_DIFFERENCE"
     diffs = recon["reconciliation"]["material_differences"]
@@ -296,6 +304,7 @@ def test_bdd_ac_outcome_state_missing_from_1099da(client):
     client.post(f"/api/cases/{case_id}/sources", files={"file": ("a.csv", src_a, "text/csv")})
     client.post(f"/api/cases/{case_id}/sources", files={"file": ("b.csv", src_b, "text/csv")})
 
+    client.post(f"/api/cases/{case_id}/confirm-sources")
     recon = client.post(f"/api/cases/{case_id}/reconcile").json()
     diffs = recon["reconciliation"]["material_differences"]
     missing_diff = next((d for d in diffs if d["asset"] == "SOL"), None)
@@ -320,6 +329,7 @@ DOGE,2025-03-02,500.00,2024-03-01,200.00,YES
     client.post(f"/api/cases/{case_id}/sources", files={"file": ("a.csv", src_a, "text/csv")})
     client.post(f"/api/cases/{case_id}/sources", files={"file": ("b.csv", src_b, "text/csv")})
 
+    client.post(f"/api/cases/{case_id}/confirm-sources")
     recon = client.post(f"/api/cases/{case_id}/reconcile").json()
     diffs = recon["reconciliation"]["material_differences"]
     doge_diff = next((d for d in diffs if d["asset"] == "DOGE"), None)
@@ -339,6 +349,7 @@ def test_bdd_ac_receipt_schema_structural_validation_failure(client):
     src_b = b"Date,Asset,Amount,Cost basis,Proceeds,Gain / loss,Date acquired\n2025-01-01,BTC,1.0,800.00,1000.00,200.00,2024-01-01\n"
     client.post(f"/api/cases/{case_id}/sources", files={"file": ("a.csv", src_a, "text/csv")})
     client.post(f"/api/cases/{case_id}/sources", files={"file": ("b.csv", src_b, "text/csv")})
+    client.post(f"/api/cases/{case_id}/confirm-sources")
     receipt = client.post(f"/api/cases/{case_id}/reconcile").json()["receipt"]
 
     corrupted_receipt = dict(receipt)
@@ -362,6 +373,7 @@ def test_bdd_ac_tampered_signer_public_key_fingerprint_mismatch(client):
     src_b = b"Date,Asset,Amount,Cost basis,Proceeds,Gain / loss,Date acquired\n2025-01-01,ETH,1.0,800.00,1000.00,200.00,2024-01-01\n"
     client.post(f"/api/cases/{case_id}/sources", files={"file": ("a.csv", src_a, "text/csv")})
     client.post(f"/api/cases/{case_id}/sources", files={"file": ("b.csv", src_b, "text/csv")})
+    client.post(f"/api/cases/{case_id}/confirm-sources")
     receipt = client.post(f"/api/cases/{case_id}/reconcile").json()["receipt"]
 
     # Substitute public key with another 32-byte hex key
@@ -394,6 +406,7 @@ def test_bdd_ac_zero_egress_no_outbound_socket_calls(monkeypatch, client):
         m.setattr(socket.socket, "connect", blocked_connect)
         client.post(f"/api/cases/{case_id}/sources", files={"file": ("a.csv", src_a, "text/csv")})
         client.post(f"/api/cases/{case_id}/sources", files={"file": ("b.csv", src_b, "text/csv")})
+        client.post(f"/api/cases/{case_id}/confirm-sources")
         recon = client.post(f"/api/cases/{case_id}/reconcile").json()
         assert recon["outcome_state"] == "MATCHED"
 

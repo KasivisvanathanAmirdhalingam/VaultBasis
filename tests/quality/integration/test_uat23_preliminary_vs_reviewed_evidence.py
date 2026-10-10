@@ -61,6 +61,7 @@ def test_uat23_preliminary_vs_reviewed_evidence_contracts():
     assert r_src_b.status_code == 200
 
     # 3. Reconcile -> Generates Rev 1 (Preliminary Receipt)
+    client.post(f"/api/cases/{case_id}/confirm-sources")
     r_recon = client.post(f"/api/cases/{case_id}/reconcile")
     assert r_recon.status_code == 200
     recon_res = r_recon.json()

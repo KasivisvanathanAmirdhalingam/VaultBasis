@@ -81,6 +81,7 @@ def test_uat19a2_formula_text_preserved_and_sanitized_in_export():
     assert r_src_b.json()["status"] == "INGESTED"
 
     # Reconcile -> all 5 match identically
+    client.post(f"/api/cases/{case_id}/confirm-sources")
     r_recon = client.post(f"/api/cases/{case_id}/reconcile")
     assert r_recon.status_code == 200
     recon = r_recon.json()["reconciliation"]
@@ -127,6 +128,7 @@ def test_uat19b_xss_html_payloads_preserved_safely():
         files={"file": ("ledger_xss_html_safe.csv", ledger_bytes, "text/csv")},
         data={"declared_schema": "AUTO"}
     )
+    client.post(f"/api/cases/{case_id}/confirm-sources")
     r_recon = client.post(f"/api/cases/{case_id}/reconcile")
     assert r_recon.status_code == 200
     assert r_recon.json()["reconciliation"]["outcome_state"] == "MATCHED"
@@ -156,6 +158,7 @@ def test_uat19c_rfc4180_quoted_commas_and_newlines():
         files={"file": ("ledger_quoted_multiline.csv", ledger_bytes, "text/csv")},
         data={"declared_schema": "AUTO"}
     )
+    client.post(f"/api/cases/{case_id}/confirm-sources")
     r_recon = client.post(f"/api/cases/{case_id}/reconcile")
     assert r_recon.status_code == 200
     assert r_recon.json()["reconciliation"]["outcome_state"] == "MATCHED"
@@ -185,6 +188,7 @@ def test_uat19d_oversized_field_handling():
         files={"file": ("ledger_oversized_field.csv", ledger_bytes, "text/csv")},
         data={"declared_schema": "AUTO"}
     )
+    client.post(f"/api/cases/{case_id}/confirm-sources")
     r_recon = client.post(f"/api/cases/{case_id}/reconcile")
     assert r_recon.status_code == 200
     assert r_recon.json()["reconciliation"]["outcome_state"] == "MATCHED"

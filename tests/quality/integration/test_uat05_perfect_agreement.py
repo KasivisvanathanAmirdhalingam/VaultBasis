@@ -53,6 +53,10 @@ def test_uat05_perfect_agreement_reconciliation():
     )
     assert r_src_b.status_code == 200
 
+    # Confirm Sources (CASE-SOURCE-001)
+    r_conf = client.post(f"/api/cases/{case_id}/confirm-sources")
+    assert r_conf.status_code == 200
+
     # Reconcile
     r_recon = client.post(f"/api/cases/{case_id}/reconcile")
     assert r_recon.status_code == 200

@@ -11,7 +11,7 @@ import uuid
 import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -27,7 +27,11 @@ import threading
 import time
 
 from apps.verifier.verify_receipt import verify_outcome_receipt
-from edge.assurance.reconciliation_engine import DeterministicReconciliationEngine
+from edge.assurance.reconciliation_engine import (
+    DeterministicReconciliationEngine,
+    classify_source_role,
+    compute_source_set_hash,
+)
 from edge.assurance.rulesets import SUPPORTED_RULESETS
 from edge.commercial.audit import AuditEventType, CommercialAuditService
 from edge.commercial.diagnostics import DiagnosticPackager
@@ -648,12 +652,18 @@ def create_case(req: CreateCaseRequest):
     eval_state = db_store.get_installation_evaluation() if is_eval else None
     since_iso = eval_state.get("activated_at") if (is_eval and eval_state) else None
 
+    entitlement_period_id = None
+    if not is_eval and eval_res.customer_id and eval_res.not_before and eval_res.expires_at:
+        entitlement_period_id = f"{eval_res.customer_id}:{eval_res.not_before[:10]}_{eval_res.expires_at[:10]}"
+
     try:
         db_store.create_case_atomic(
             case=case,
             is_evaluation=is_eval,
             max_cases=max_cases,
-            since_iso=since_iso
+            since_iso=since_iso,
+            entitlement_period_id=entitlement_period_id,
+            customer_id=eval_res.customer_id
         )
     except ValueError as e:
         denial = commercial_policy.authorize(CommercialOperation.CREATE_CASE)
@@ -754,12 +764,18 @@ def clone_case(case_id: str, req: Optional[CloneCaseRequest] = None):
         updated_at=now_utc
     )
 
+    entitlement_period_id = None
+    if not is_eval and eval_res.customer_id and eval_res.not_before and eval_res.expires_at:
+        entitlement_period_id = f"{eval_res.customer_id}:{eval_res.not_before[:10]}_{eval_res.expires_at[:10]}"
+
     try:
         db_store.create_case_atomic(
             case=cloned_case,
             is_evaluation=is_eval,
             max_cases=max_cases,
-            since_iso=since_iso
+            since_iso=since_iso,
+            entitlement_period_id=entitlement_period_id,
+            customer_id=eval_res.customer_id
         )
     except ValueError:
         denial = commercial_policy.authorize(CommercialOperation.CREATE_CASE)
@@ -947,6 +963,10 @@ def get_case(case_id: str):
         "receipt_history": receipts_history,
         "sources": {k: v.model_dump() for k, v in case.sources.items()},
         "transactions": [t.to_summary_dict() for t in case.transactions],
+        "source_revision": getattr(case, "source_revision", 1) or 1,
+        "confirmed_source_set_hash": getattr(case, "confirmed_source_set_hash", None),
+        "confirmed_source_revision": getattr(case, "confirmed_source_revision", None),
+        "confirmed_at": getattr(case, "confirmed_at", None),
         "created_at": case.created_at,
         "updated_at": case.updated_at,
         "actions": {
@@ -957,6 +977,10 @@ def get_case(case_id: str):
             "can_view_receipt": case.receipt_id is not None,
             "can_finalize_review": case.receipt_id is not None and not is_sample,
             "can_record_reviews": not is_sample,
+            "is_source_confirmed": bool(
+                getattr(case, "confirmed_source_set_hash", None)
+                and getattr(case, "confirmed_source_revision", None) == getattr(case, "source_revision", 1)
+            ),
             "is_sample": is_sample,
             "can_restart_sample": is_sample,
         }
@@ -998,6 +1022,14 @@ async def upload_source(
     except Exception as e:
         raise HTTPException(status_code=422, detail=f"Intake parser failure: {str(e)}")
 
+    # CASE-SOURCE-001 Lifecycle: First source of role is ACTIVE; additional same-role is INACTIVE.
+    role = classify_source_role(meta, source_id)
+    has_active_same_role = any(
+        getattr(s_meta, "source_status", "ACTIVE") == "ACTIVE" and classify_source_role(s_meta, s_id) == role
+        for s_id, s_meta in case.sources.items()
+    )
+    meta.source_status = "INACTIVE" if has_active_same_role else "ACTIVE"
+
     try:
         db_store.add_source_and_transactions(case_id, meta, content, transactions)
     except EvidenceCollisionError as e:
@@ -1007,6 +1039,119 @@ async def upload_source(
         "case_id": case_id,
         "source": meta.model_dump(),
         "parsed_rows": len(transactions)
+    }
+
+
+@app.post("/api/cases/{case_id}/sources/{source_id}/select")
+def select_case_source(case_id: str, source_id: str):
+    case = db_store.get_case(case_id)
+    if not case:
+        raise HTTPException(status_code=404, detail=f"Case '{case_id}' not found")
+    if source_id not in case.sources:
+        raise HTTPException(status_code=404, detail=f"Source '{source_id}' not found in case '{case_id}'")
+
+    CaseWritePolicy.assert_can_mutate(case, "source selection")
+
+    target_meta = case.sources[source_id]
+    target_role = classify_source_role(target_meta, source_id)
+
+    # Transition existing ACTIVE source of the same role to SUPERSEDED
+    for s_id, s_meta in case.sources.items():
+        if s_id != source_id and classify_source_role(s_meta, s_id) == target_role:
+            if getattr(s_meta, "source_status", "ACTIVE") == "ACTIVE":
+                db_store.set_source_status(case_id, s_id, "SUPERSEDED")
+
+    # Set target source to ACTIVE (explicit re-selection allowed even if previously SUPERSEDED)
+    db_store.set_source_status(case_id, source_id, "ACTIVE")
+
+    updated_case = db_store.get_case(case_id)
+    return {
+        "status": "SELECTED",
+        "case_id": case_id,
+        "source_id": source_id,
+        "role": target_role,
+        "new_status": "ACTIVE",
+        "source_revision": updated_case.source_revision if updated_case else 1
+    }
+
+
+def get_active_source_roles(case: CanonicalCase) -> Tuple[List[str], List[str]]:
+    active_sources = {
+        sid: meta for sid, meta in case.sources.items()
+        if getattr(meta, "source_status", "ACTIVE") == "ACTIVE"
+    }
+    broker_sids = [sid for sid, meta in active_sources.items() if classify_source_role(meta, sid) == "BROKER"]
+    ledger_sids = [sid for sid, meta in active_sources.items() if classify_source_role(meta, sid) == "LEDGER"]
+
+    if len(active_sources) == 2 and (len(broker_sids) != 1 or len(ledger_sids) != 1):
+        sids = list(active_sources.keys())
+        if any(k in sids[0].upper() or k in (active_sources[sids[0]].filename or "").upper() for k in ("BROKER", "1099", "SRC_1", "SRC_A", "DA")):
+            broker_sids = [sids[0]]
+            ledger_sids = [sids[1]]
+        elif any(k in sids[1].upper() or k in (active_sources[sids[1]].filename or "").upper() for k in ("BROKER", "1099", "SRC_1", "SRC_A", "DA")):
+            broker_sids = [sids[1]]
+            ledger_sids = [sids[0]]
+        else:
+            broker_sids = [sids[0]]
+            ledger_sids = [sids[1]]
+
+    return broker_sids, ledger_sids
+
+
+@app.post("/api/cases/{case_id}/confirm-sources")
+def confirm_case_sources(case_id: str):
+    case = db_store.get_case(case_id)
+    if not case:
+        raise HTTPException(status_code=404, detail=f"Case '{case_id}' not found")
+
+    CaseWritePolicy.assert_can_mutate(case, "source confirmation")
+
+    active_broker_sources, active_ledger_sources = get_active_source_roles(case)
+
+    if len(active_broker_sources) != 1 or len(active_ledger_sources) != 1:
+        reasons = []
+        if len(active_broker_sources) == 0:
+            reasons.append("No active broker source selected")
+        elif len(active_broker_sources) > 1:
+            reasons.append(f"Ambiguous active broker sources ({len(active_broker_sources)} active)")
+        if len(active_ledger_sources) == 0:
+            reasons.append("No active tax ledger source selected")
+        elif len(active_ledger_sources) > 1:
+            reasons.append(f"Ambiguous active tax ledger sources ({len(active_ledger_sources)} active)")
+        raise HTTPException(
+            status_code=400,
+            detail=f"Source confirmation requires exactly one active broker source and one active tax ledger source ({'; '.join(reasons)})."
+        )
+
+    b_meta = case.sources[active_broker_sources[0]]
+    l_meta = case.sources[active_ledger_sources[0]]
+
+    source_set_hash = compute_source_set_hash(
+        broker_id=b_meta.source_id,
+        broker_hash=b_meta.sha256_hash,
+        ledger_id=l_meta.source_id,
+        ledger_hash=l_meta.sha256_hash
+    )
+    now_utc = datetime.now(timezone.utc).isoformat()
+
+    db_store.save_source_confirmation(
+        case_id=case_id,
+        source_set_hash=source_set_hash,
+        source_revision=case.source_revision,
+        confirmed_at=now_utc
+    )
+
+    return {
+        "status": "CONFIRMED",
+        "case_id": case_id,
+        "confirmed_source_set_hash": source_set_hash,
+        "confirmed_source_revision": case.source_revision,
+        "confirmed_at": now_utc,
+        "active_sources": {
+            "broker": b_meta.source_id,
+            "ledger": l_meta.source_id
+        },
+        "wording_version": "v1.0"
     }
 
 
@@ -1048,6 +1193,64 @@ def reconcile_case(case_id: str):
             detail="Reconciliation requires at least two source documents (e.g. Form 1099-DA and Koinly CSV)"
         )
 
+    active_broker_sources, active_ledger_sources = get_active_source_roles(case)
+
+    # Pre-confirm bundled authentic sample case if pristine
+    if (
+        getattr(case, "case_kind", "PRODUCTION") == "BUNDLED_SAMPLE"
+        and len(active_broker_sources) == 1
+        and len(active_ledger_sources) == 1
+        and not case.confirmed_source_set_hash
+    ):
+        b_meta = case.sources[active_broker_sources[0]]
+        l_meta = case.sources[active_ledger_sources[0]]
+        sample_hash = compute_source_set_hash(b_meta.source_id, b_meta.sha256_hash, l_meta.source_id, l_meta.sha256_hash)
+        now_sample_utc = datetime.now(timezone.utc).isoformat()
+        db_store.save_source_confirmation(case_id, sample_hash, case.source_revision, now_sample_utc)
+        case = db_store.get_case(case_id)
+
+    if len(active_broker_sources) != 1 or len(active_ledger_sources) != 1:
+        return JSONResponse(
+            status_code=412,
+            content={
+                "detail": {
+                    "code": "CONFIRMATION_REQUIRED",
+                    "message": "Reconciliation requires exactly one active broker source and one active tax ledger source.",
+                    "active_broker_count": len(active_broker_sources),
+                    "active_ledger_count": len(active_ledger_sources)
+                }
+            }
+        )
+
+    b_meta = case.sources[active_broker_sources[0]]
+    l_meta = case.sources[active_ledger_sources[0]]
+    current_source_set_hash = compute_source_set_hash(
+        broker_id=b_meta.source_id,
+        broker_hash=b_meta.sha256_hash,
+        ledger_id=l_meta.source_id,
+        ledger_hash=l_meta.sha256_hash
+    )
+
+    if (
+        not case.confirmed_source_set_hash
+        or case.confirmed_source_set_hash != current_source_set_hash
+        or case.confirmed_source_revision is None
+        or case.confirmed_source_revision != case.source_revision
+    ):
+        return JSONResponse(
+            status_code=412,
+            content={
+                "detail": {
+                    "code": "CONFIRMATION_REQUIRED",
+                    "message": "Practitioner source confirmation is required before reconciliation. Current evidence selection has not been confirmed or has changed since last confirmation.",
+                    "current_source_revision": case.source_revision,
+                    "confirmed_source_revision": case.confirmed_source_revision,
+                    "current_source_set_hash": current_source_set_hash,
+                    "confirmed_source_set_hash": case.confirmed_source_set_hash
+                }
+            }
+        )
+
     # Enforce approved rule pack routing (fail closed if jurisdiction / tax_year is unsupported)
     normative_jurisdiction = (case.jurisdiction or "").strip().upper()
     ruleset_key = (normative_jurisdiction, case.tax_year)
@@ -1068,10 +1271,11 @@ def reconcile_case(case_id: str):
     # Execute deterministic reconciliation
     recon_result = DeterministicReconciliationEngine.reconcile_case(case)
 
-    # Build Outcome Receipt Payload (Preliminary Receipt)
+    # Build Outcome Receipt Payload (Preliminary Receipt) - binds exact active sources
     receipt_id = str(uuid.uuid4())
-    source_hashes = {s.source_id: s.sha256_hash for s in case.sources.values()}
-    source_schema_ids = {s.source_id: s.schema_id for s in case.sources.values()}
+    active_source_ids = [b_meta.source_id, l_meta.source_id]
+    active_source_hashes = {b_meta.source_id: b_meta.sha256_hash, l_meta.source_id: l_meta.sha256_hash}
+    active_source_schema_ids = {b_meta.source_id: b_meta.schema_id, l_meta.source_id: l_meta.schema_id}
     sys_ver = get_system_version()
     revisions = db_store.list_receipts_for_case(case_id)
     revision_num = len(revisions) + 1
@@ -1084,9 +1288,9 @@ def reconcile_case(case_id: str):
         "claim_type": "DIGITAL_ASSET_TAX_RECONCILIATION",
         "claimant_type": "TAXPAYER",
         "producer_reference": f"VaultBasis Edge v{sys_ver.version}",
-        "source_ids": list(case.sources.keys()),
-        "source_hashes": source_hashes,
-        "source_schema_ids": source_schema_ids,
+        "source_ids": active_source_ids,
+        "source_hashes": active_source_hashes,
+        "source_schema_ids": active_source_schema_ids,
         "canonicalization_version": "v0.1",
         "ruleset_id": ruleset_id,
         "engine_version": sys_ver.version,

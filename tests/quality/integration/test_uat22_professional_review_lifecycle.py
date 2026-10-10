@@ -73,6 +73,7 @@ def test_uat22_professional_review_lifecycle_and_invariants():
     assert case_state_2["case_status"] == "SOURCES_INGESTED"
 
     # 3. State: RECONCILED (Preliminary Receipt Issued, Revision 1)
+    client.post(f"/api/cases/{case_id}/confirm-sources")
     r_recon = client.post(f"/api/cases/{case_id}/reconcile")
     assert r_recon.status_code == 200
     recon_res = r_recon.json()

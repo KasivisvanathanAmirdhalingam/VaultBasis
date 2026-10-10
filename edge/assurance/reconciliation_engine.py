@@ -87,6 +87,39 @@ def compute_record_content_hash(tx: CanonicalTransaction) -> str:
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
+def classify_source_role(meta: Any, sid: str = "") -> str:
+    """
+    Classifies a source document into its normative reconciliation role:
+    'BROKER' (Form 1099-DA broker statement) or 'LEDGER' (Client tax ledger).
+    """
+    schema = (getattr(meta, "schema_id", "") or "").upper()
+    sid_up = (sid or getattr(meta, "source_id", "") or "").upper()
+    fname_up = (getattr(meta, "filename", "") or "").upper()
+
+    # Prioritize explicit ledger indicators
+    if any(k in sid_up or k in fname_up for k in ("LEDGER", "KOINLY", "COINTRACKER", "TAX_REPORT", "TAX-REPORT", "CLIENT_REPORT")):
+        return "LEDGER"
+    if any(k in schema for k in ("KOINLY", "COINTRACKER", "GENERIC_TAX", "TAX_LEDGER")):
+        return "LEDGER"
+
+    # Prioritize explicit broker indicators
+    if any(k in sid_up or k in fname_up for k in ("BROKER", "1099", "1099DA", "1099-DA")):
+        return "BROKER"
+    if "1099" in schema or "BROKER" in schema:
+        return "BROKER"
+
+    return "LEDGER"
+
+
+def compute_source_set_hash(broker_id: str, broker_hash: str, ledger_id: str, ledger_hash: str) -> str:
+    """
+    Computes cryptographic digest of active source pair for practitioner confirmation.
+    SHA-256(broker_id + broker_hash + ledger_id + ledger_hash)
+    """
+    raw = f"{broker_id}:{broker_hash}:{ledger_id}:{ledger_hash}".encode("utf-8")
+    return hashlib.sha256(raw).hexdigest()
+
+
 class DeterministicReconciliationEngine:
     """
     Executes bounded, deterministic comparison between Form 1099-DA broker reports and tax ledger records.
@@ -111,17 +144,56 @@ class DeterministicReconciliationEngine:
             })
             return result
 
-        # Bind source roles explicitly by schema / naming convention rather than insertion order
-        broker_sources = [sid for sid, meta in case.sources.items() if "1099" in (meta.schema_id or "").upper() or "BROKER" in (meta.schema_id or "").upper() or "1099" in sid.upper()]
-        ledger_sources = [sid for sid, meta in case.sources.items() if "KOINLY" in (meta.schema_id or "").upper() or "LEDGER" in (meta.schema_id or "").upper() or "TAX" in sid.upper() or "COINTRACKER" in (meta.schema_id or "").upper()]
+        # Filter strictly for ACTIVE sources (CASE-SOURCE-001)
+        active_sources = {
+            sid: meta for sid, meta in case.sources.items()
+            if getattr(meta, "source_status", "ACTIVE") == "ACTIVE"
+        }
 
-        if broker_sources and ledger_sources:
-            src_a_id = broker_sources[0]
-            src_b_id = ledger_sources[0]
-        else:
-            all_sids = list(case.sources.keys())
-            src_a_id = all_sids[0]
-            src_b_id = all_sids[1]
+        active_broker_sources = [sid for sid, meta in active_sources.items() if classify_source_role(meta, sid) == "BROKER"]
+        active_ledger_sources = [sid for sid, meta in active_sources.items() if classify_source_role(meta, sid) == "LEDGER"]
+
+        # If exactly 2 active sources and heuristic couldn't cleanly separate into 1 broker and 1 ledger
+        if len(active_sources) == 2 and (len(active_broker_sources) != 1 or len(active_ledger_sources) != 1):
+            sids = list(active_sources.keys())
+            if any(k in sids[0].upper() or k in (active_sources[sids[0]].filename or "").upper() for k in ("BROKER", "1099", "SRC_1", "SRC_A", "DA")):
+                active_broker_sources = [sids[0]]
+                active_ledger_sources = [sids[1]]
+            elif any(k in sids[1].upper() or k in (active_sources[sids[1]].filename or "").upper() for k in ("BROKER", "1099", "SRC_1", "SRC_A", "DA")):
+                active_broker_sources = [sids[1]]
+                active_ledger_sources = [sids[0]]
+            else:
+                active_broker_sources = [sids[0]]
+                active_ledger_sources = [sids[1]]
+
+        # Fail-closed invariant: Exactly one ACTIVE broker and one ACTIVE ledger source required
+        if len(active_broker_sources) != 1 or len(active_ledger_sources) != 1:
+            result.outcome_state = "UNRESOLVED_DATA"
+            reasons = []
+            if len(active_broker_sources) == 0:
+                reasons.append("No active broker source selected")
+            elif len(active_broker_sources) > 1:
+                reasons.append(f"Ambiguous active broker sources ({len(active_broker_sources)} active)")
+            if len(active_ledger_sources) == 0:
+                reasons.append("No active tax ledger source selected")
+            elif len(active_ledger_sources) > 1:
+                reasons.append(f"Ambiguous active tax ledger sources ({len(active_ledger_sources)} active)")
+
+            desc = "; ".join(reasons) + ". Exactly one active broker and one active tax ledger source must be selected."
+            first_src = list(case.sources.keys())[0] if case.sources else "none"
+            result.unresolved_items.append({
+                "item_id": "unres_ambiguous_source_selection",
+                "reason_code": "AMBIGUOUS_SOURCE_SELECTION",
+                "affected_source_id": first_src,
+                "affected_row_ref": "Header",
+                "description": desc,
+                "rule_reference": "VB_US_1099DA_2025_R1",
+                "provenance_references": []
+            })
+            return result
+
+        src_a_id = active_broker_sources[0]
+        src_b_id = active_ledger_sources[0]
 
         txs_a = [t for t in case.transactions if t.source_id == src_a_id]
         txs_b = [t for t in case.transactions if t.source_id == src_b_id]

@@ -23,7 +23,7 @@ class SQLiteStore:
     online backup/restore, and corruption health checks.
     """
 
-    CURRENT_SCHEMA_VERSION = 6
+    CURRENT_SCHEMA_VERSION = 7
 
     def __init__(self, db_path: Path, synchronous: str = "FULL"):
         self.db_path = Path(db_path)
@@ -214,6 +214,51 @@ class SQLiteStore:
             now_utc = datetime.now(timezone.utc).isoformat()
             conn.execute("INSERT INTO schema_migrations (version, name, applied_at) VALUES (6, 'case_finding_reviews', ?)", (now_utc,))
 
+        # Migration 7: Monotonic Commercial Case Activations & Active Source Selection (MMP15-MODE3-REMEDIATION-001)
+        if 7 not in applied_versions:
+            conn.executescript("""
+                CREATE TABLE IF NOT EXISTS commercial_case_activations (
+                    case_id TEXT NOT NULL,
+                    entitlement_period_id TEXT NOT NULL,
+                    customer_id TEXT NOT NULL,
+                    activated_at TEXT NOT NULL,
+                    PRIMARY KEY (case_id, entitlement_period_id)
+                );
+                CREATE INDEX IF NOT EXISTS idx_commercial_case_activations_period ON commercial_case_activations (entitlement_period_id);
+            """)
+
+            cursor.execute("PRAGMA table_info(sources)")
+            s_cols = [row[1] for row in cursor.fetchall()]
+            if "source_status" not in s_cols:
+                cursor.execute("ALTER TABLE sources ADD COLUMN source_status TEXT NOT NULL DEFAULT 'ACTIVE'")
+
+            cursor.execute("PRAGMA table_info(cases)")
+            c_cols = [row[1] for row in cursor.fetchall()]
+            if "source_revision" not in c_cols:
+                cursor.execute("ALTER TABLE cases ADD COLUMN source_revision INTEGER NOT NULL DEFAULT 1")
+            if "confirmed_source_set_hash" not in c_cols:
+                cursor.execute("ALTER TABLE cases ADD COLUMN confirmed_source_set_hash TEXT")
+            if "confirmed_source_revision" not in c_cols:
+                cursor.execute("ALTER TABLE cases ADD COLUMN confirmed_source_revision INTEGER")
+            if "confirmed_at" not in c_cols:
+                cursor.execute("ALTER TABLE cases ADD COLUMN confirmed_at TEXT")
+
+            # Migration for existing cases: Fail-closed if multiple sources of same role exist
+            case_ids = [r[0] for r in cursor.execute("SELECT case_id FROM cases").fetchall()]
+            for cid in case_ids:
+                src_rows = cursor.execute("SELECT source_id, schema_id FROM sources WHERE case_id = ?", (cid,)).fetchall()
+                broker_sids = [r[0] for r in src_rows if "1099" in (r[1] or "").upper() or "BROKER" in (r[1] or "").upper()]
+                ledger_sids = [r[0] for r in src_rows if "KOINLY" in (r[1] or "").upper() or "LEDGER" in (r[1] or "").upper() or "COINTRACKER" in (r[1] or "").upper()]
+                if len(broker_sids) > 1:
+                    for bsid in broker_sids:
+                        cursor.execute("UPDATE sources SET source_status = 'INACTIVE' WHERE source_id = ?", (bsid,))
+                if len(ledger_sids) > 1:
+                    for lsid in ledger_sids:
+                        cursor.execute("UPDATE sources SET source_status = 'INACTIVE' WHERE source_id = ?", (lsid,))
+
+            now_utc = datetime.now(timezone.utc).isoformat()
+            conn.execute("INSERT INTO schema_migrations (version, name, applied_at) VALUES (7, 'commercial_case_activations_and_source_selection', ?)", (now_utc,))
+
         # Idempotent verification for existing databases
         cursor.execute("PRAGMA table_info(cases)")
         existing_cols = [row[1] for row in cursor.fetchall()]
@@ -226,6 +271,19 @@ class SQLiteStore:
                 cursor.execute("ALTER TABLE cases ADD COLUMN sample_definition_id TEXT")
             if "sample_manifest_digest" not in existing_cols:
                 cursor.execute("ALTER TABLE cases ADD COLUMN sample_manifest_digest TEXT")
+            if "source_revision" not in existing_cols:
+                cursor.execute("ALTER TABLE cases ADD COLUMN source_revision INTEGER NOT NULL DEFAULT 1")
+            if "confirmed_source_set_hash" not in existing_cols:
+                cursor.execute("ALTER TABLE cases ADD COLUMN confirmed_source_set_hash TEXT")
+            if "confirmed_source_revision" not in existing_cols:
+                cursor.execute("ALTER TABLE cases ADD COLUMN confirmed_source_revision INTEGER")
+            if "confirmed_at" not in existing_cols:
+                cursor.execute("ALTER TABLE cases ADD COLUMN confirmed_at TEXT")
+
+        cursor.execute("PRAGMA table_info(sources)")
+        s_cols = [row[1] for row in cursor.fetchall()]
+        if s_cols and "source_status" not in s_cols:
+            cursor.execute("ALTER TABLE sources ADD COLUMN source_status TEXT NOT NULL DEFAULT 'ACTIVE'")
 
         cursor.execute("PRAGMA table_info(installation_evaluation)")
         eval_cols = [row[1] for row in cursor.fetchall()]
@@ -242,14 +300,19 @@ class SQLiteStore:
         case_kind = getattr(case, "case_kind", "PRODUCTION") or "PRODUCTION"
         sample_def_id = getattr(case, "sample_definition_id", None)
         sample_digest = getattr(case, "sample_manifest_digest", None)
+        source_rev = getattr(case, "source_revision", 1) or 1
+        conf_hash = getattr(case, "confirmed_source_set_hash", None)
+        conf_rev = getattr(case, "confirmed_source_revision", None)
+        conf_at = getattr(case, "confirmed_at", None)
         with self._get_connection() as conn:
             conn.execute("""
                 INSERT INTO cases (
                     case_id, client_reference, tax_year, jurisdiction, case_status,
                     outcome_state, assurance_level, receipt_id, created_at, updated_at,
-                    case_kind, sample_definition_id, sample_manifest_digest
+                    case_kind, sample_definition_id, sample_manifest_digest,
+                    source_revision, confirmed_source_set_hash, confirmed_source_revision, confirmed_at
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(case_id) DO UPDATE SET
                     client_reference=excluded.client_reference,
                     case_status=excluded.case_status,
@@ -259,7 +322,11 @@ class SQLiteStore:
                     updated_at=excluded.updated_at,
                     case_kind=excluded.case_kind,
                     sample_definition_id=excluded.sample_definition_id,
-                    sample_manifest_digest=excluded.sample_manifest_digest;
+                    sample_manifest_digest=excluded.sample_manifest_digest,
+                    source_revision=excluded.source_revision,
+                    confirmed_source_set_hash=excluded.confirmed_source_set_hash,
+                    confirmed_source_revision=excluded.confirmed_source_revision,
+                    confirmed_at=excluded.confirmed_at;
             """, (
                 case.case_id,
                 client_ref,
@@ -273,25 +340,50 @@ class SQLiteStore:
                 now_utc,
                 case_kind,
                 sample_def_id,
-                sample_digest
+                sample_digest,
+                source_rev,
+                conf_hash,
+                conf_rev,
+                conf_at
             ))
+            if case_kind == "PRODUCTION" and case.case_id != "CASE-SAMPLE-2025":
+                token_row = conn.execute("SELECT token_text FROM commercial_license WHERE id = 1").fetchone()
+                if token_row and token_row["token_text"]:
+                    try:
+                        from edge.commercial.engine import evaluate_license_token
+                        eval_res = evaluate_license_token(token_row["token_text"])
+                        if eval_res.is_active and eval_res.customer_id and eval_res.not_before and eval_res.expires_at:
+                            p_id = f"{eval_res.customer_id}:{eval_res.not_before[:10]}_{eval_res.expires_at[:10]}"
+                            conn.execute("""
+                                INSERT OR IGNORE INTO commercial_case_activations
+                                (case_id, entitlement_period_id, customer_id, activated_at)
+                                VALUES (?, ?, ?, ?)
+                            """, (case.case_id, p_id, eval_res.customer_id, now_utc))
+                    except Exception:
+                        pass
 
     def create_case_atomic(
         self,
         case: CanonicalCase,
         is_evaluation: bool = False,
         max_cases: int = 0,
-        since_iso: Optional[str] = None
+        since_iso: Optional[str] = None,
+        entitlement_period_id: Optional[str] = None,
+        customer_id: Optional[str] = None,
     ) -> CanonicalCase:
         """
         Atomically checks capacity limits and persists a new case in a single SQLite transaction.
-        Increments the monotonic evaluation case counter in the same transaction for evaluation cases.
+        Increments monotonic activation counters within the same transaction to prevent deletion loops.
         """
         now_utc = datetime.now(timezone.utc).isoformat()
         client_ref = getattr(case, "client_reference", "Sample Client") or "Sample Client"
         case_kind = getattr(case, "case_kind", "PRODUCTION") or "PRODUCTION"
         sample_def_id = getattr(case, "sample_definition_id", None)
         sample_digest = getattr(case, "sample_manifest_digest", None)
+        source_rev = getattr(case, "source_revision", 1) or 1
+        conf_hash = getattr(case, "confirmed_source_set_hash", None)
+        conf_rev = getattr(case, "confirmed_source_revision", None)
+        conf_at = getattr(case, "confirmed_at", None)
 
         with self._get_connection() as conn:
             if is_evaluation:
@@ -303,41 +395,57 @@ class SQLiteStore:
                     INSERT INTO cases (
                         case_id, client_reference, tax_year, jurisdiction, case_status,
                         outcome_state, assurance_level, receipt_id, created_at, updated_at,
-                        case_kind, sample_definition_id, sample_manifest_digest
+                        case_kind, sample_definition_id, sample_manifest_digest,
+                        source_revision, confirmed_source_set_hash, confirmed_source_revision, confirmed_at
                     )
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """, (
                     case.case_id, client_ref, case.tax_year, case.jurisdiction, case.case_status,
                     case.outcome_state, case.assurance_level, case.receipt_id, case.created_at,
-                    now_utc, case_kind, sample_def_id, sample_digest
+                    now_utc, case_kind, sample_def_id, sample_digest,
+                    source_rev, conf_hash, conf_rev, conf_at
                 ))
                 conn.execute("UPDATE installation_evaluation SET cases_created_count = cases_created_count + 1 WHERE id = 1")
             else:
                 if max_cases > 0:
-                    if since_iso:
+                    if entitlement_period_id:
+                        a_row = conn.execute(
+                            "SELECT COUNT(*) FROM commercial_case_activations WHERE entitlement_period_id = ?",
+                            (entitlement_period_id,)
+                        ).fetchone()
+                        count = a_row[0] if a_row else 0
+                    elif since_iso:
                         c_row = conn.execute(
                             "SELECT COUNT(*) FROM cases WHERE (case_kind IS NULL OR case_kind != 'BUNDLED_SAMPLE') AND created_at >= ?",
                             (since_iso,)
                         ).fetchone()
+                        count = c_row[0] if c_row else 0
                     else:
                         c_row = conn.execute(
                             "SELECT COUNT(*) FROM cases WHERE (case_kind IS NULL OR case_kind != 'BUNDLED_SAMPLE')"
                         ).fetchone()
-                    count = c_row[0] if c_row else 0
+                        count = c_row[0] if c_row else 0
                     if count >= max_cases:
                         raise ValueError(f"Plan capacity reached ({count}/{max_cases})")
                 conn.execute("""
                     INSERT INTO cases (
                         case_id, client_reference, tax_year, jurisdiction, case_status,
                         outcome_state, assurance_level, receipt_id, created_at, updated_at,
-                        case_kind, sample_definition_id, sample_manifest_digest
+                        case_kind, sample_definition_id, sample_manifest_digest,
+                        source_revision, confirmed_source_set_hash, confirmed_source_revision, confirmed_at
                     )
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """, (
                     case.case_id, client_ref, case.tax_year, case.jurisdiction, case.case_status,
                     case.outcome_state, case.assurance_level, case.receipt_id, case.created_at,
-                    now_utc, case_kind, sample_def_id, sample_digest
+                    now_utc, case_kind, sample_def_id, sample_digest,
+                    source_rev, conf_hash, conf_rev, conf_at
                 ))
+                if entitlement_period_id:
+                    conn.execute("""
+                        INSERT OR IGNORE INTO commercial_case_activations (case_id, entitlement_period_id, customer_id, activated_at)
+                        VALUES (?, ?, ?, ?)
+                    """, (case.case_id, entitlement_period_id, customer_id or "UNKNOWN", now_utc))
         return case
 
     def get_case(self, case_id: str) -> Optional[CanonicalCase]:
@@ -348,6 +456,7 @@ class SQLiteStore:
 
             sources = {}
             for s_row in conn.execute("SELECT * FROM sources WHERE case_id = ?", (case_id,)).fetchall():
+                src_status = s_row["source_status"] if "source_status" in s_row.keys() and s_row["source_status"] else "ACTIVE"
                 sources[s_row["source_id"]] = SourceDocumentMetadata(
                     source_id=s_row["source_id"],
                     filename=s_row["filename"],
@@ -355,7 +464,8 @@ class SQLiteStore:
                     byte_size=s_row["byte_size"],
                     schema_id=s_row["schema_id"],
                     row_count=s_row["row_count"],
-                    ingested_at=s_row["ingested_at"]
+                    ingested_at=s_row["ingested_at"],
+                    source_status=src_status
                 )
 
             transactions = []
@@ -366,6 +476,10 @@ class SQLiteStore:
             case_kind = row["case_kind"] if "case_kind" in row.keys() and row["case_kind"] else "PRODUCTION"
             sample_def_id = row["sample_definition_id"] if "sample_definition_id" in row.keys() else None
             sample_digest = row["sample_manifest_digest"] if "sample_manifest_digest" in row.keys() else None
+            source_rev = row["source_revision"] if "source_revision" in row.keys() and row["source_revision"] is not None else 1
+            conf_hash = row["confirmed_source_set_hash"] if "confirmed_source_set_hash" in row.keys() else None
+            conf_rev = row["confirmed_source_revision"] if "confirmed_source_revision" in row.keys() else None
+            conf_at = row["confirmed_at"] if "confirmed_at" in row.keys() else None
             return CanonicalCase(
                 case_id=row["case_id"],
                 client_reference=client_ref,
@@ -380,6 +494,10 @@ class SQLiteStore:
                 receipt_id=row["receipt_id"],
                 sources=sources,
                 transactions=transactions,
+                source_revision=source_rev,
+                confirmed_source_set_hash=conf_hash,
+                confirmed_source_revision=conf_rev,
+                confirmed_at=conf_at,
                 created_at=row["created_at"],
                 updated_at=row["updated_at"]
             )
@@ -391,7 +509,7 @@ class SQLiteStore:
             for r in rows:
                 c = dict(r)
                 src_rows = conn.execute(
-                    "SELECT source_id, schema_id, filename FROM sources WHERE case_id = ?",
+                    "SELECT source_id, schema_id, filename, source_status FROM sources WHERE case_id = ?",
                     (c["case_id"],)
                 ).fetchall()
                 c["sources_summary"] = [dict(s) for s in src_rows]
@@ -409,6 +527,8 @@ class SQLiteStore:
         raw_bytes: bytes,
         transactions: List[CanonicalTransaction]
     ):
+        status = getattr(meta, "source_status", "ACTIVE") or "ACTIVE"
+        now_utc = datetime.now(timezone.utc).isoformat()
         with self._get_connection() as conn:
             existing_source = conn.execute(
                 "SELECT source_id FROM sources WHERE source_id = ?", (meta.source_id,)
@@ -419,8 +539,8 @@ class SQLiteStore:
                     "Existing evidence cannot be overwritten. Upload the source under a new case."
                 )
             conn.execute("""
-                INSERT INTO sources (source_id, case_id, filename, sha256_hash, byte_size, schema_id, row_count, raw_content, ingested_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO sources (source_id, case_id, filename, sha256_hash, byte_size, schema_id, row_count, raw_content, ingested_at, source_status)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 meta.source_id,
                 case_id,
@@ -430,7 +550,8 @@ class SQLiteStore:
                 meta.schema_id,
                 meta.row_count,
                 raw_bytes,
-                meta.ingested_at
+                meta.ingested_at,
+                status
             ))
 
             for tx in transactions:
@@ -454,9 +575,29 @@ class SQLiteStore:
                 ))
 
             conn.execute(
-                "UPDATE cases SET case_status = 'SOURCES_INGESTED', updated_at = ? WHERE case_id = ?",
-                (datetime.now(timezone.utc).isoformat(), case_id)
+                "UPDATE cases SET case_status = 'SOURCES_INGESTED', source_revision = source_revision + 1, updated_at = ? WHERE case_id = ?",
+                (now_utc, case_id)
             )
+
+    def set_source_status(self, case_id: str, source_id: str, status: str) -> None:
+        if status not in ("ACTIVE", "INACTIVE", "SUPERSEDED"):
+            raise ValueError(f"Invalid source status '{status}'")
+        now_utc = datetime.now(timezone.utc).isoformat()
+        with self._get_connection() as conn:
+            conn.execute("UPDATE sources SET source_status = ? WHERE case_id = ? AND source_id = ?", (status, case_id, source_id))
+            conn.execute("UPDATE cases SET source_revision = source_revision + 1, updated_at = ? WHERE case_id = ?", (now_utc, case_id))
+
+    def save_source_confirmation(self, case_id: str, source_set_hash: str, source_revision: int, confirmed_at: str) -> None:
+        now_utc = datetime.now(timezone.utc).isoformat()
+        with self._get_connection() as conn:
+            conn.execute("""
+                UPDATE cases SET
+                    confirmed_source_set_hash = ?,
+                    confirmed_source_revision = ?,
+                    confirmed_at = ?,
+                    updated_at = ?
+                WHERE case_id = ?
+            """, (source_set_hash, source_revision, confirmed_at, now_utc, case_id))
 
     def save_receipt(
         self,
@@ -556,12 +697,27 @@ class SQLiteStore:
                 return row["raw_content"]
             return None
 
-    def count_billable_cases(self, sample_case_ids: Optional[Set[str]] = None, since_iso: Optional[str] = None) -> int:
+    def count_billable_cases(
+        self,
+        sample_case_ids: Optional[Set[str]] = None,
+        since_iso: Optional[str] = None,
+        entitlement_period_id: Optional[str] = None
+    ) -> int:
         """
         Returns count of persistent practitioner-created production cases.
         Explicitly excludes bundled sample cases and test fixtures from capacity metering.
         Optionally filters by cases created since a specific ISO timestamp (e.g. evaluation activation).
+        If entitlement_period_id is provided, returns monotonic activation count for that commercial period.
         """
+        if entitlement_period_id:
+            with self._get_connection() as conn:
+                cursor = conn.execute(
+                    "SELECT COUNT(*) FROM commercial_case_activations WHERE entitlement_period_id = ?",
+                    (entitlement_period_id,)
+                )
+                row = cursor.fetchone()
+                return row[0] if row else 0
+
         excluded = sample_case_ids or {"CASE-SAMPLE-2025"}
         placeholders = ",".join("?" for _ in excluded)
         params: List[Any] = list(excluded)

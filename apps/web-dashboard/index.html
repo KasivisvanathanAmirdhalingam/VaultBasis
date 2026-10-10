@@ -1252,6 +1252,44 @@
     </div>
   </div>
 
+  <!-- Practitioner Source Confirmation Modal (CASE-SOURCE-001) -->
+  <div class="modal-backdrop" id="modal-confirm-sources" role="dialog" aria-modal="true" aria-labelledby="confirm-sources-title" style="display: none;">
+    <div class="modal-card" style="max-width: 580px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+        <h3 id="confirm-sources-title" style="font-size: 1.25rem; margin: 0; color: var(--text-main);">Confirm Evidence for Reconciliation</h3>
+        <button class="btn btn-secondary" onclick="closeConfirmSourcesModal()" style="padding: 2px 8px; font-size: 0.9rem;">✕</button>
+      </div>
+
+      <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; margin-bottom: 1.25rem;">
+        <div style="font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 8px;">
+          Active Evidence Pair to be Reconciled
+        </div>
+        <div id="confirm-modal-active-sources-list" style="display: flex; flex-direction: column; gap: 8px;">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+
+      <!-- Professional Practitioner Responsibility & Scope Notice -->
+      <div style="background: #fffbeb; border: 1px solid #fef3c7; border-left: 4px solid #f59e0b; border-radius: var(--radius); padding: 14px; margin-bottom: 1.25rem; font-size: 0.86rem; color: #78350f; line-height: 1.5;">
+        <p style="margin: 0 0 8px 0; font-weight: 600;">
+          Before continuing, make sure the selected client ledger reflects the relevant wallets, accounts, and supported crypto activity you intend to include for this engagement and tax year.
+        </p>
+        <p style="margin: 0; font-size: 0.82rem; color: #92400e;">
+          VaultBasis does not independently discover missing wallets, accounts, transactions, or tax records.
+        </p>
+      </div>
+
+      <div id="confirm-sources-error" style="display: none; background: #fef2f2; border: 1px solid #fecaca; border-left: 4px solid #dc2626; border-radius: var(--radius); padding: 10px 12px; margin-bottom: 1rem; font-size: 0.82rem; color: #991b1b;"></div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 1rem;">
+        <button class="btn" onclick="closeConfirmSourcesModal()">Review Selection</button>
+        <button class="btn btn-primary" id="btn-submit-confirm-and-reconcile" onclick="submitConfirmAndReconcile()">
+          ⚡ Confirm Evidence &amp; Reconcile →
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Quit Confirmation Modal -->
   <div class="modal-backdrop" id="modal-quit" role="dialog" aria-modal="true" aria-labelledby="quit-modal-title" style="display: none;">
     <div class="modal-card" style="max-width: 460px;">
@@ -1314,6 +1352,7 @@
 
   <script>
     let currentCaseId = null;
+    let currentCaseData = null;
     let allLoadedCases = [];
     let currentFilterStatus = 'all';
 
@@ -1921,6 +1960,7 @@
           return;
         }
         const c = await res.json();
+        currentCaseData = c;
 
         document.getElementById('ctx-client').innerText = c.client_reference || "Sample Client";
         document.getElementById('ctx-tax-year').innerText = c.tax_year;
@@ -1970,21 +2010,40 @@
 
         const sources = Object.values(c.sources || {});
         
-        // Source A readiness
+        // Broker Evidence (Source A)
+        const brokerSources = sources.filter(s => s.schema_id.includes('1099') || s.filename.toLowerCase().includes('1099'));
+        const srcAObj = brokerSources.find(s => s.source_status === 'ACTIVE') || (brokerSources.length > 0 ? brokerSources[0] : null);
+        const otherBrokerSources = brokerSources.filter(s => s !== srcAObj);
+        
         const srcABadge = document.getElementById('src-a-badge');
         const srcAReadiness = document.getElementById('src-a-readiness');
         const btnUploadSrcA = document.getElementById('btn-upload-src-a');
-        const srcAObj = sources.find(s => s.schema_id.includes('1099') || s.filename.toLowerCase().includes('1099'));
         
+        let altBrokerHtml = '';
+        if (otherBrokerSources.length > 0 && !isSample) {
+          altBrokerHtml = `
+            <div style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--border); font-size: 0.78rem;">
+              <div style="font-weight: 600; color: var(--text-muted); margin-bottom: 6px;">Alternative Broker Evidence:</div>
+              ${otherBrokerSources.map(s => `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; background: #f8fafc; padding: 4px 6px; border-radius: 4px;">
+                  <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 170px;" title="${s.filename}">${s.filename} <strong style="font-size:0.7rem; color:${s.source_status === 'SUPERSEDED' ? '#94a3b8' : '#eab308'};">(${s.source_status || 'INACTIVE'})</strong></span>
+                  <button class="btn btn-secondary" style="font-size: 0.68rem; padding: 2px 6px;" onclick="selectSource('${s.source_id}')">Select as Active</button>
+                </div>
+              `).join('')}
+            </div>
+          `;
+        }
+
         if (srcAObj) {
           srcABadge.className = 'badge badge-success';
-          srcABadge.innerText = 'READY';
+          srcABadge.innerText = srcAObj.source_status === 'ACTIVE' ? 'ACTIVE' : 'READY';
           srcAReadiness.innerHTML = `
-            <div class="readiness-item"><span class="readiness-icon ready">✓</span> <span><strong>${srcAObj.filename}</strong></span></div>
+            <div class="readiness-item"><span class="readiness-icon ready">✓</span> <span><strong>${srcAObj.filename}</strong> <span class="badge badge-success" style="font-size: 0.65rem; padding: 1px 4px;">ACTIVE</span></span></div>
             <div class="readiness-item"><span class="readiness-icon ready">✓</span> <span>Schema: ${srcAObj.schema_id} (${srcAObj.row_count} rows)</span></div>
             <div class="readiness-item"><span class="readiness-icon ready">✓</span> <span style="font-family:'SF Mono','Cascadia Mono','Consolas','Courier New',monospace; font-size:0.7rem;">SHA-256: ${srcAObj.sha256_hash.slice(0, 16)}…</span></div>
+            ${altBrokerHtml}
           `;
-          if (btnUploadSrcA) btnUploadSrcA.innerText = 'Replace Form 1099-DA';
+          if (btnUploadSrcA) btnUploadSrcA.innerText = '+ Upload Additional Broker File';
         } else {
           srcABadge.className = 'badge badge-neutral';
           srcABadge.innerText = 'PENDING';
@@ -1992,21 +2051,40 @@
           if (btnUploadSrcA) btnUploadSrcA.innerText = '+ Upload Form 1099-DA';
         }
 
-        // Source B readiness
+        // Tax-Ledger Evidence (Source B)
+        const ledgerSources = sources.filter(s => (s.schema_id.includes('KOINLY') || s.filename.toLowerCase().includes('koinly') || s.schema_id.includes('GENERIC')) && !brokerSources.includes(s));
+        const srcBObj = ledgerSources.find(s => s.source_status === 'ACTIVE') || (ledgerSources.length > 0 ? ledgerSources[0] : null);
+        const otherLedgerSources = ledgerSources.filter(s => s !== srcBObj);
+
         const srcBBadge = document.getElementById('src-b-badge');
         const srcBReadiness = document.getElementById('src-b-readiness');
         const btnUploadSrcB = document.getElementById('btn-upload-src-b');
-        const srcBObj = sources.find(s => (s.schema_id.includes('KOINLY') || s.filename.toLowerCase().includes('koinly') || s.schema_id.includes('GENERIC')) && s !== srcAObj);
         
+        let altLedgerHtml = '';
+        if (otherLedgerSources.length > 0 && !isSample) {
+          altLedgerHtml = `
+            <div style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--border); font-size: 0.78rem;">
+              <div style="font-weight: 600; color: var(--text-muted); margin-bottom: 6px;">Alternative Ledger Evidence:</div>
+              ${otherLedgerSources.map(s => `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; background: #f8fafc; padding: 4px 6px; border-radius: 4px;">
+                  <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 170px;" title="${s.filename}">${s.filename} <strong style="font-size:0.7rem; color:${s.source_status === 'SUPERSEDED' ? '#94a3b8' : '#eab308'};">(${s.source_status || 'INACTIVE'})</strong></span>
+                  <button class="btn btn-secondary" style="font-size: 0.68rem; padding: 2px 6px;" onclick="selectSource('${s.source_id}')">Select as Active</button>
+                </div>
+              `).join('')}
+            </div>
+          `;
+        }
+
         if (srcBObj) {
           srcBBadge.className = 'badge badge-success';
-          srcBBadge.innerText = 'READY';
+          srcBBadge.innerText = srcBObj.source_status === 'ACTIVE' ? 'ACTIVE' : 'READY';
           srcBReadiness.innerHTML = `
-            <div class="readiness-item"><span class="readiness-icon ready">✓</span> <span><strong>${srcBObj.filename}</strong></span></div>
+            <div class="readiness-item"><span class="readiness-icon ready">✓</span> <span><strong>${srcBObj.filename}</strong> <span class="badge badge-success" style="font-size: 0.65rem; padding: 1px 4px;">ACTIVE</span></span></div>
             <div class="readiness-item"><span class="readiness-icon ready">✓</span> <span>Schema: ${srcBObj.schema_id} (${srcBObj.row_count} rows)</span></div>
             <div class="readiness-item"><span class="readiness-icon ready">✓</span> <span style="font-family:'SF Mono','Cascadia Mono','Consolas','Courier New',monospace; font-size:0.7rem;">SHA-256: ${srcBObj.sha256_hash.slice(0, 16)}…</span></div>
+            ${altLedgerHtml}
           `;
-          if (btnUploadSrcB) btnUploadSrcB.innerText = 'Replace Koinly CSV';
+          if (btnUploadSrcB) btnUploadSrcB.innerText = '+ Upload Additional Ledger File';
         } else {
           srcBBadge.className = 'badge badge-neutral';
           srcBBadge.innerText = 'PENDING';
@@ -2600,8 +2678,103 @@
       event.target.value = '';
     }
 
-    async function triggerReconciliation() {
+    function openConfirmSourcesModal() {
+      const modalList = document.getElementById('confirm-modal-active-sources-list');
+      if (modalList && currentCaseData && currentCaseData.sources) {
+        const activeSources = Object.values(currentCaseData.sources).filter(s => s.source_status === 'ACTIVE');
+        if (activeSources.length === 0) {
+          modalList.innerHTML = `<div style="font-size:0.8rem; color:#ef4444; padding:6px 0;">No active sources currently selected. Please ensure one broker and one ledger file are active.</div>`;
+        } else {
+          modalList.innerHTML = activeSources.map(s => `
+            <div style="background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <div style="font-weight: 600; font-size: 0.85rem; color: #1e293b;">${s.filename}</div>
+                <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">
+                  <span>Schema: ${s.schema_id}</span> · <span>${s.row_count} rows</span>
+                </div>
+                <div style="font-family:'SF Mono','Cascadia Mono','Consolas','Courier New',monospace; font-size: 0.68rem; color: #94a3b8; margin-top: 2px;">
+                  SHA-256: ${s.sha256_hash.slice(0, 16)}…
+                </div>
+              </div>
+              <span class="badge badge-success" style="font-size: 0.72rem; padding: 2px 8px;">ACTIVE</span>
+            </div>
+          `).join('');
+        }
+      }
+      const errBox = document.getElementById('confirm-sources-error');
+      if (errBox) { errBox.style.display = 'none'; errBox.innerText = ''; }
+      const modal = document.getElementById('modal-confirm-sources');
+      if (modal) modal.style.display = 'flex';
+    }
+
+    function closeConfirmSourcesModal() {
+      const modal = document.getElementById('modal-confirm-sources');
+      if (modal) modal.style.display = 'none';
+      const errBox = document.getElementById('confirm-sources-error');
+      if (errBox) { errBox.style.display = 'none'; errBox.innerText = ''; }
+    }
+
+    async function submitConfirmAndReconcile() {
       if (!currentCaseId) return;
+      const btn = document.getElementById('btn-submit-confirm-and-reconcile');
+      const errBox = document.getElementById('confirm-sources-error');
+      if (errBox) { errBox.style.display = 'none'; errBox.innerText = ''; }
+      btn.disabled = true;
+      btn.innerText = 'Confirming...';
+
+      try {
+        const confirmRes = await fetch(`/api/cases/${currentCaseId}/confirm-sources`, {
+          method: 'POST'
+        });
+        if (!confirmRes.ok) {
+          const errData = await confirmRes.json().catch(() => ({}));
+          throw new Error(errData.detail || "Failed to record source confirmation.");
+        }
+        closeConfirmSourcesModal();
+        await triggerReconciliation(true);
+      } catch (err) {
+        if (errBox) {
+          errBox.innerText = err.message || "Failed to confirm sources.";
+          errBox.style.display = 'block';
+        } else {
+          showToast(err.message, 'error');
+        }
+      } finally {
+        btn.disabled = false;
+        btn.innerText = '⚡ Confirm Evidence & Reconcile →';
+      }
+    }
+
+    async function selectSource(sourceId) {
+      if (!currentCaseId || !sourceId) return;
+      try {
+        const res = await fetch(`/api/cases/${currentCaseId}/sources/${sourceId}/select`, {
+          method: 'POST'
+        });
+        if (res.ok) {
+          showToast("Source activated. Prior active source marked SUPERSEDED.", "success");
+          await refreshCaseDetails();
+        } else {
+          const err = await res.json().catch(() => ({}));
+          showToast("Selection error: " + (err.detail || "Unable to select source"), "error");
+        }
+      } catch (err) {
+        showToast("Connection failure selecting source.", "error");
+      }
+    }
+
+    async function triggerReconciliation(bypassConfirmation = false) {
+      if (!currentCaseId) return;
+      const isSample = (currentCaseData?.case_kind === 'BUNDLED_SAMPLE' || currentCaseId === 'CASE-SAMPLE-2025');
+
+      if (!bypassConfirmation && !isSample) {
+        const isConfirmed = currentCaseData?.actions?.is_source_confirmed;
+        if (!isConfirmed) {
+          openConfirmSourcesModal();
+          return;
+        }
+      }
+
       const btn = document.getElementById('btn-run-recon');
       const originalText = btn.innerText;
       btn.innerText = '⚡ Reconciling deterministically...';
@@ -2610,6 +2783,13 @@
       try {
         const res = await fetch(`/api/cases/${currentCaseId}/reconcile`, { method: 'POST' });
         if (!res.ok) {
+          if (res.status === 412) {
+            openConfirmSourcesModal();
+            showToast("Practitioner confirmation of active evidence required before reconciliation.", "warning");
+            btn.innerText = originalText;
+            btn.disabled = false;
+            return;
+          }
           let err = {};
           try { err = await res.json(); } catch(e) {}
           const errorMsg = (err.error && err.error.message) || err.detail || err.message || "Reconciliation preconditions not met. Please verify evidence sources are ready.";

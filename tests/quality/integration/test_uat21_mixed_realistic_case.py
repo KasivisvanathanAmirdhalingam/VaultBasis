@@ -56,6 +56,7 @@ def test_uat21_comprehensive_mixed_realistic_case():
     assert r_src_b.json()["status"] == "INGESTED"
 
     # Reconcile
+    client.post(f"/api/cases/{case_id}/confirm-sources")
     r_recon = client.post(f"/api/cases/{case_id}/reconcile")
     assert r_recon.status_code == 200
     recon = r_recon.json()["reconciliation"]

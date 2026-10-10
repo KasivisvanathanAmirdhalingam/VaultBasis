@@ -67,6 +67,7 @@ def test_uat17_malformed_corrupted_and_unsupported_intake():
         assert len(case_data.get("sources", [])) == 0, f"Case contaminated with partial sources in {subcase_id}"
 
         # 4. Assert reconciliation fails closed (cannot reconcile un-ingested case)
+        client.post(f"/api/cases/{case_id}/confirm-sources")
         r_recon = client.post(f"/api/cases/{case_id}/reconcile")
         assert r_recon.status_code in (400, 422)
 

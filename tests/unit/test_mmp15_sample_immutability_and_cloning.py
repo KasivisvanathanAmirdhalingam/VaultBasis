@@ -142,7 +142,11 @@ def test_sample_cloning_lifecycle_and_mutation(clean_commercial_env, client):
     assert persisted.sample_manifest_digest is None
     assert store.count_billable_cases() == 1
 
-    # 4. Reconcile cloned case
+    # 4. Confirm sources and reconcile cloned case (CASE-SOURCE-001)
+    res_conf = client.post("/api/cases/CASE-CLIENT-001/confirm-sources")
+    assert res_conf.status_code == 200
+    assert res_conf.json()["status"] == "CONFIRMED"
+
     res_recon = client.post("/api/cases/CASE-CLIENT-001/reconcile")
     assert res_recon.status_code == 200
     recon_json = res_recon.json()

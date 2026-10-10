@@ -152,6 +152,16 @@ def test_fastapi_e2e_endpoints(sample_1099da_csv, sample_koinly_csv):
     assert res_up2.status_code == 200
     assert res_up2.json()["parsed_rows"] == 2
 
+    # 4.5 Verify 412 Precondition Failed when unconfirmed (CASE-SOURCE-001)
+    res_unconf = client.post("/api/cases/CASE-E2E-TEST/reconcile")
+    assert res_unconf.status_code == 412
+    assert res_unconf.json()["detail"]["code"] == "CONFIRMATION_REQUIRED"
+
+    # Confirm active sources
+    res_conf = client.post("/api/cases/CASE-E2E-TEST/confirm-sources")
+    assert res_conf.status_code == 200
+    assert res_conf.json()["status"] == "CONFIRMED"
+
     # 5. Trigger Reconciliation
     res_recon = client.post("/api/cases/CASE-E2E-TEST/reconcile")
     assert res_recon.status_code == 200
