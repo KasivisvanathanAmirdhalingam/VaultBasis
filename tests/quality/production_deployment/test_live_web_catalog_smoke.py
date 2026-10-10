@@ -36,13 +36,13 @@ FORBIDDEN_PATTERNS = [
 
 REQUIRED_SUBSTRINGS = [
     "3-Day Evaluation",
-    "Up to 3 evaluation client cases",
+    "Up to 3 evaluation client tax-year cases",
     "Practitioner",
     "$499",
-    "Up to 10 client cases",
+    "Up to 10 client tax-year cases",
     "Firm",
     "$1,499",
-    "Up to 50 client cases",
+    "Up to 50 client tax-year cases",
     "Enterprise",
     "Custom / high-volume case capacity",
 ]
