@@ -310,6 +310,17 @@ def main() -> int:
         f"Installer: PENDING (real installer required before qualification)\n"
     )
 
+    # Customer-distribution layout (PKG-UX-001 / FRZ-PKG-UX-001):
+    # Installer directly at root of customer package, zero nested archives.
+    cust_win = REPO / "dist" / "customer-win"
+    if cust_win.exists():
+        shutil.rmtree(cust_win)
+    cust_win.mkdir(parents=True)
+    shutil.copy2(setup_exe, cust_win / setup_filename)
+    for src_name, dst_name in guides.items():
+        shutil.copy2(REPO / src_name, cust_win / dst_name)
+    shutil.copy2(pkg / "RELEASE.txt", cust_win / "RELEASE.txt")
+
     bad_name_tokens = ["macos", "preview-macos", "rc1", "vaultbasis-rc1", ".app", "info.plist"]
     forbidden_names = [p for p in pkg.rglob("*")
                        if any(t in p.name.lower() for t in bad_name_tokens)]

@@ -1,0 +1,4 @@
+# Installed Executable SHA-256 Record
+# Command: Get-FileHash "$env:LOCALAPPDATA\VaultBasis\VaultBasis.exe" -Algorithm SHA256
+
+Status: AWAITING_OPERATOR_CAPTURE

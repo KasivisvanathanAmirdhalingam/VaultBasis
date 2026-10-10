@@ -103,13 +103,13 @@ jobs:
             target: macos-arm64
             artifact_name: vaultbasis-rc3-candidate-macos-arm64
             customer_name: VaultBasis-RC3-macOS-arm64
-            pkg_folder: VaultBasis-RC3-macOS-arm64
+            customer_path: dist/VaultBasis-RC3-macOS-arm64.dmg
             script: scripts/build_rc3_macos.py
           - os: windows-2022
             target: windows-x64
             artifact_name: vaultbasis-rc3-candidate-windows-x64
             customer_name: VaultBasis-RC3-Windows-x64
-            pkg_folder: VaultBasis-RC3-Windows-x64
+            customer_path: dist/customer-win/*
             script: scripts/build_rc3_windows.py
     steps:
     - name: Checkout repository
@@ -149,7 +149,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: ${{ matrix.customer_name }}
-        path: dist/${{ matrix.pkg_folder }}/*
+        path: ${{ matrix.customer_path }}
         retention-days: 7
 
     - name: Upload Pipeline Artifacts (Candidate ZIP + Manifest for automated inspection)

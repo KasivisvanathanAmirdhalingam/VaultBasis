@@ -1,0 +1,9 @@
+Windows edition: 
+Version: 
+OS build: 
+CPU architecture: x64
+Management state: 
+Date/time of test: 
+Artifact ID: 11671546711
+Candidate: WIN-CANDIDATE-04
+Source commit: 6cb896f1be2386aca99d3c107ad052f3edfc66e1
