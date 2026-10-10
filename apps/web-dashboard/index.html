@@ -761,13 +761,13 @@
       </div>
       <span class="brand-badge" style="color: #059669; border-color: rgba(5, 150, 105, 0.3);">LOCAL EVIDENCE PROCESSING</span>
       <!-- Case Capacity Meter (CASE-CAP-UX-001) -->
-      <div id="header-capacity-meter" style="display: none;" onclick="openNewCaseModal()" title="1 case = 1 client + 1 tax year. Click to view allowance details.">
+      <div id="header-capacity-meter" style="display: none;" onclick="openNewCaseModal()" title="1 case = 1 client + 1 tax year · Click to view allowance details">
         <div style="display: flex; flex-direction: column; gap: 2px;">
           <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 0.72rem;">
             <span id="meter-plan-label" style="font-weight: 700; color: #1e293b;">Practitioner</span>
-            <span id="meter-usage-text" style="color: #475569; font-family: 'SF Mono', 'Cascadia Mono', 'Consolas', 'Courier New', monospace; font-size: 0.7rem; font-weight: 600;">6 / 10 cases</span>
+            <span id="meter-usage-text" style="color: #475569; font-family: 'SF Mono', 'Cascadia Mono', 'Consolas', 'Courier New', monospace; font-size: 0.7rem; font-weight: 600;">6 / 10 cases used</span>
           </div>
-          <div class="meter-progress-track">
+          <div class="meter-progress-track" role="progressbar" id="meter-progress-track" aria-valuemin="0" aria-valuemax="10" aria-valuenow="6" aria-label="6 of 10 client tax-year cases used">
             <div id="meter-progress-fill" class="meter-progress-bar" style="width: 60%;"></div>
           </div>
         </div>
@@ -871,7 +871,6 @@
           <button class="btn btn-secondary" id="btn-restart-sample" onclick="restartCurrentSample()" style="display: none;">↺ Restart Sample</button>
           <button class="btn btn-primary" id="btn-run-recon" onclick="triggerReconciliation()" disabled title="Add both evidence sources to run reconciliation">⚡ Run Deterministic Reconciliation</button>
           <button class="btn btn-success" id="btn-view-receipt" onclick="viewReceiptScreen()" style="display: none;">📜 View Evidence Receipt</button>
-          <button class="btn btn-secondary btn-sm" id="btn-delete-case" onclick="promptDeleteCase(currentCaseId)" style="display: none; color: #dc2626;" title="Delete this local case">🗑 Delete Case</button>
         </div>
       </div>
 
@@ -1349,33 +1348,6 @@
     </div>
   </div>
 
-  <!-- Delete Case Confirmation Modal (CASE-CAP-UX-001) -->
-  <div class="modal-backdrop" id="modal-delete-case" role="dialog" aria-modal="true" aria-labelledby="delete-case-title" style="display: none;">
-    <div class="modal-card" style="max-width: 480px;">
-      <h3 id="delete-case-title" style="font-size: 1.2rem; margin-bottom: 0.5rem; color: #991b1b;">Delete this local case?</h3>
-      <div style="background: #fef2f2; border: 1px solid #fecaca; border-left: 4px solid #dc2626; border-radius: 6px; padding: 12px 14px; margin-bottom: 1rem; font-size: 0.85rem; color: #991b1b; line-height: 1.5;">
-        <p style="margin: 0 0 6px 0; font-weight: 600;">
-          This removes the case from your local case list.
-        </p>
-        <p style="margin: 0 0 6px 0;">
-          <strong>Deleting a production case does not restore the annual case allowance already used for it.</strong>
-        </p>
-        <p style="margin: 0; font-size: 0.8rem; color: #7f1d1d;">
-          Export any evidence receipts or findings you need before deleting.
-        </p>
-      </div>
-      <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 12px; margin-bottom: 1.25rem; font-size: 0.82rem;">
-        <div><span style="color: #64748b;">Client:</span> <strong id="delete-modal-client">—</strong></div>
-        <div><span style="color: #64748b;">Tax Year:</span> <strong id="delete-modal-year">—</strong></div>
-        <div><span style="color: #64748b;">Case ID:</span> <code id="delete-modal-case-id" style="font-size: 0.78rem;">—</code></div>
-      </div>
-      <div style="display: flex; justify-content: flex-end; gap: 8px;">
-        <button class="btn" onclick="closeDeleteCaseModal()">Cancel</button>
-        <button class="btn btn-danger" id="btn-confirm-delete-case" onclick="submitDeleteCase()">Delete Local Case</button>
-      </div>
-    </div>
-  </div>
-
   <!-- Practitioner Source Confirmation Modal (CASE-SOURCE-001) -->
   <div class="modal-backdrop" id="modal-confirm-sources" role="dialog" aria-modal="true" aria-labelledby="confirm-sources-title" style="display: none;">
     <div class="modal-card" style="max-width: 580px;">
@@ -1563,14 +1535,21 @@
       const planLabel = document.getElementById('meter-plan-label');
       const usageText = document.getElementById('meter-usage-text');
       const progressFill = document.getElementById('meter-progress-fill');
+      const track = document.getElementById('meter-progress-track');
       if (!meter) return;
 
       if (!commStatus || !commStatus.licensed) {
         meter.style.display = 'inline-flex';
-        meter.title = 'Click to start 3-day evaluation or import license';
+        meter.title = '1 case = 1 client + 1 tax year · 3 evaluation cases remain';
         if (planLabel) { planLabel.innerText = '⚡ Start Evaluation'; planLabel.style.color = '#92400e'; }
-        if (usageText) { usageText.innerText = '0 / 3 cases'; usageText.style.color = '#92400e'; }
+        if (usageText) { usageText.innerText = '0 / 3 cases used'; usageText.style.color = '#92400e'; }
         if (progressFill) { progressFill.style.width = '0%'; progressFill.style.background = '#f59e0b'; }
+        if (track) {
+          track.setAttribute('aria-valuemin', '0');
+          track.setAttribute('aria-valuemax', '3');
+          track.setAttribute('aria-valuenow', '0');
+          track.setAttribute('aria-label', '0 of 3 evaluation client tax-year cases used');
+        }
         return;
       }
 
@@ -1581,31 +1560,44 @@
       const remaining = Math.max(0, max - used);
       const pct = Math.min(100, Math.round((used / max) * 100));
 
+      if (track) {
+        track.setAttribute('aria-valuemin', '0');
+        track.setAttribute('aria-valuemax', String(max));
+        track.setAttribute('aria-valuenow', String(used));
+        track.setAttribute('aria-label', `${used} of ${max} client tax-year cases used`);
+      }
+
       if (commStatus.entitlement_state === 'EXPIRED_EVALUATION' || commStatus.entitlement_state === 'EXPIRED_PAID_LICENSE') {
         const tierName = commStatus.tier || (isEval ? 'Evaluation' : 'Practitioner');
         if (planLabel) { planLabel.innerText = `${tierName} · Expired`; planLabel.style.color = '#64748b'; }
-        if (usageText) { usageText.innerText = `${used} / ${max} cases`; usageText.style.color = '#64748b'; }
+        if (usageText) { usageText.innerText = `${used} / ${max} cases used`; usageText.style.color = '#64748b'; }
         if (progressFill) { progressFill.style.width = `${pct}%`; progressFill.style.background = '#94a3b8'; }
-        meter.title = 'License term expired. Existing cases remain available to review and export.';
+        meter.title = `1 case = 1 client + 1 tax year · Term expired (${used} of ${max} cases used)`;
         return;
       }
 
       if (isEval) {
         const days = commStatus.days_remaining ? (commStatus.days_remaining === 1 ? '1d left' : `${commStatus.days_remaining}d left`) : '72h left';
         if (planLabel) { planLabel.innerText = `Evaluation · ${days}`; planLabel.style.color = '#166534'; }
-        if (usageText) { usageText.innerText = `${used} / ${max} cases`; usageText.style.color = '#15803d'; }
+        if (usageText) { usageText.innerText = `${used} / ${max} cases used`; usageText.style.color = '#15803d'; }
         if (progressFill) {
           progressFill.style.width = `${pct}%`;
           progressFill.style.background = used >= max ? '#d97706' : '#059669';
         }
-        meter.title = `1 case = 1 client + 1 tax year. ${remaining} evaluation client tax-year case${remaining === 1 ? '' : 's'} remain.`;
+        if (used >= max) {
+          meter.title = `1 case = 1 client + 1 tax year · Evaluation allowance reached (${used} of ${max} used)`;
+        } else if (remaining === 1) {
+          meter.title = `1 case = 1 client + 1 tax year · 1 evaluation case remains`;
+        } else {
+          meter.title = `1 case = 1 client + 1 tax year · ${remaining} evaluation cases remain`;
+        }
         return;
       }
 
-      // Paid active
+      // Paid active (Practitioner / Firm / Enterprise)
       const tierName = commStatus.tier || 'Practitioner';
       if (planLabel) { planLabel.innerText = tierName; planLabel.style.color = '#1e293b'; }
-      if (usageText) { usageText.innerText = `${used} / ${max} cases`; usageText.style.color = '#475569'; }
+      if (usageText) { usageText.innerText = `${used} / ${max} cases used`; usageText.style.color = '#475569'; }
 
       if (progressFill) {
         progressFill.style.width = `${pct}%`;
@@ -1619,11 +1611,11 @@
       }
 
       if (used >= max) {
-        meter.title = `Annual case allowance used (${used} of ${max} used). 1 case = 1 client + 1 tax year. Existing cases remain accessible.`;
+        meter.title = `1 case = 1 client + 1 tax year · Annual case allowance reached (${used} of ${max} used)`;
       } else if (remaining === 1) {
-        meter.title = `1 case = 1 client + 1 tax year. 1 new client tax-year case remains in this annual term.`;
+        meter.title = `1 case = 1 client + 1 tax year · 1 new case remains this annual term`;
       } else {
-        meter.title = `1 case = 1 client + 1 tax year. ${remaining} new client tax-year cases remain in this annual term.`;
+        meter.title = `1 case = 1 client + 1 tax year · ${remaining} new cases remain this annual term`;
       }
     }
 
@@ -2029,10 +2021,7 @@
           <td>${statusDisplay}</td>
           <td style="font-size: 0.84rem; color: #475569;">${formattedActivity}</td>
           <td>
-            <div style="display: inline-flex; gap: 6px; align-items: center;">
-              <button class="btn btn-sm" onclick="openCase('${c.case_id}')">${actionLabel}</button>
-              ${!isSample ? `<button class="btn btn-sm" style="color: #64748b; padding: 4px 8px; font-size: 0.78rem;" onclick="promptDeleteCase('${c.case_id}')" title="Delete local case">🗑</button>` : ''}
-            </div>
+            <button class="btn btn-sm" onclick="openCase('${c.case_id}')">${actionLabel}</button>
           </td>
         `;
         tbody.appendChild(tr);
@@ -2167,7 +2156,7 @@
           if (errCode === 'CASE_CAPACITY_REACHED' || (res.status === 402 && rawMsg.includes('case limit')) || rawMsg.includes('CASE_CAPACITY_REACHED')) {
             const maxCases = (currentCommercialStatus && currentCommercialStatus.max_cases_per_installation) || 10;
             const tier = (currentCommercialStatus && currentCommercialStatus.tier) || 'Practitioner';
-            userMsg = `Annual client-case allowance reached. Your ${tier} plan includes up to ${maxCases} new client tax-year cases per annual term. Existing cases remain available to review, reconcile and export.`;
+            userMsg = `Your annual client-case allowance has been used. Your ${tier} plan includes up to ${maxCases} new client tax-year cases per annual term. Existing cases remain available to review, reconcile, and export.`;
           } else if (res.status === 402 || res.status === 403 || errCode === 'ENTITLEMENT_REQUIRED') {
             userMsg = (errData.error && errData.error.message) || 'Active commercial license or Evaluation required to create client cases. Please install a valid license token in Settings or explore the Free Sample Case.';
           }
@@ -3192,58 +3181,6 @@
       }
     }
 
-    let pendingDeleteCaseId = null;
-
-    function promptDeleteCase(caseId) {
-      if (caseId === 'CASE-SAMPLE-2025') {
-        showToast('Sample case is bundled and immutable.', 'info');
-        return;
-      }
-      const caseObj = allLoadedCases.find(c => c.case_id === caseId) || (currentCaseData && currentCaseData.case ? currentCaseData.case : null);
-      pendingDeleteCaseId = caseId;
-      const clientEl = document.getElementById('delete-modal-client');
-      const yearEl = document.getElementById('delete-modal-year');
-      const idEl = document.getElementById('delete-modal-case-id');
-      if (clientEl) clientEl.innerText = (caseObj && caseObj.client_reference) || 'Client';
-      if (yearEl) yearEl.innerText = (caseObj && caseObj.tax_year) || '2025';
-      if (idEl) idEl.innerText = caseId;
-
-      const modal = document.getElementById('modal-delete-case');
-      if (modal) modal.style.display = 'flex';
-    }
-
-    function closeDeleteCaseModal() {
-      const modal = document.getElementById('modal-delete-case');
-      if (modal) modal.style.display = 'none';
-      pendingDeleteCaseId = null;
-    }
-
-    async function submitDeleteCase() {
-      if (!pendingDeleteCaseId) return;
-      const caseIdToDelete = pendingDeleteCaseId;
-      const btn = document.getElementById('btn-confirm-delete-case');
-      if (btn) { btn.disabled = true; btn.innerText = 'Deleting...'; }
-
-      try {
-        const res = await fetch(`/api/cases/${caseIdToDelete}`, { method: 'DELETE' });
-        if (res.ok) {
-          closeDeleteCaseModal();
-          showToast(`Case ${caseIdToDelete} deleted. Annual case allowance is preserved.`, 'info');
-          await loadCases();
-          await checkGlobalCommercialStatus();
-          showScreen('screen-cases');
-        } else {
-          const errData = await res.json().catch(() => ({}));
-          showToast(errData.detail || 'Unable to delete case.', 'error');
-        }
-      } catch (err) {
-        console.error("Delete case error:", err);
-        showToast('Connection error deleting case.', 'error');
-      } finally {
-        if (btn) { btn.disabled = false; btn.innerText = 'Delete Local Case'; }
-      }
-    }
-
     // Explicit Global Window Bindings for Inline Event Handlers
     window.confirmQuitVaultBasis = confirmQuitVaultBasis;
     window.closeQuitModal = closeQuitModal;
@@ -3252,9 +3189,6 @@
     window.showScreen = showScreen;
     window.openNewCaseModal = openNewCaseModal;
     window.closeNewCaseModal = closeNewCaseModal;
-    window.promptDeleteCase = promptDeleteCase;
-    window.closeDeleteCaseModal = closeDeleteCaseModal;
-    window.submitDeleteCase = submitDeleteCase;
     window.setStatusFilter = setStatusFilter;
     window.filterCases = filterCases;
     window.renderCaseTable = renderCaseTable;

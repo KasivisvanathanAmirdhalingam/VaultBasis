@@ -40,11 +40,11 @@
       "period": "/ year",
       "termDays": 365,
       "caseCapacity": 10,
-      "caseCapacityFormatted": "Up to 10 client tax-year cases / annual term",
+      "caseCapacityFormatted": "Up to 10 new client tax-year cases per annual term",
       "isSelfServe": true,
       "description": "For individual CPAs, EAs and tax professionals handling digital-asset returns.",
       "features": [
-        "Up to 10 client tax-year cases / annual term",
+        "Up to 10 new client tax-year cases per annual term",
         "Full VaultBasis capabilities",
         "Signed Evidence Receipts",
         "Existing locally stored cases remain available after expiry"
@@ -65,12 +65,12 @@
       "period": "/ year",
       "termDays": 365,
       "caseCapacity": 50,
-      "caseCapacityFormatted": "Up to 50 client tax-year cases / annual term",
+      "caseCapacityFormatted": "Up to 50 new client tax-year cases per annual term",
       "isSelfServe": true,
       "isFeatured": true,
       "description": "For CPA and tax firms handling a larger client portfolio across engagements.",
       "features": [
-        "Up to 50 client tax-year cases / annual term",
+        "Up to 50 new client tax-year cases per annual term",
         "Full VaultBasis capabilities",
         "Signed Evidence Receipts",
         "Existing locally stored cases remain available after expiry"

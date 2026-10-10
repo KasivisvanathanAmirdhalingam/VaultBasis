@@ -63,10 +63,10 @@ def test_public_marketing_source_positive_invariants():
     assert "Up to 3 evaluation client tax-year cases" in index_html
     assert "Practitioner" in index_html
     assert "$499" in index_html
-    assert "Up to 10 client tax-year cases" in index_html
+    assert "Up to 10 new client tax-year cases" in index_html
     assert "Firm" in index_html
     assert "$1,499" in index_html
-    assert "Up to 50 client tax-year cases" in index_html
+    assert "Up to 50 new client tax-year cases" in index_html
     assert "Enterprise" in index_html
     assert "Custom / high-volume case capacity" in index_html
 

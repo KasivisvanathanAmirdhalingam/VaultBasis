@@ -83,42 +83,44 @@ $$\text{Open Defect Ticket} \longrightarrow \text{Identify Affected Artifact} \l
 - **Rebuild Candidate 12:** **NOT REQUIRED** (Candidate 12 remains frozen at product source `cdbc94fba0fa005d7acc6778e53a892484a634e9`).
 - **Re-run Affected Qualification:** **REQUIRED — COMPLETED** (All 11 pre-commit gates 100% green on CI and local).
 
-### Governance Record: `CASE-CAP-UX-001` (Commercial UX Completion of CASE-CAP-001)
-- **Authorization:** Authorized scope for commercial UX completion prior to UAT-29 unassisted validation.
-- **Scope:** Edge web dashboard (`apps/web-dashboard/index.html`) only. Zero engine, database, or pricing logic changes.
-- **Implemented Capabilities:**
-  1. Always-visible horizontal case meter in top navigation displaying plan tier, monotonic usage (`billable_cases / max_cases`), visual progress bar, and hover tooltip explaining `1 case = 1 client + 1 tax year`.
-  2. 4-state New Case modal: Capacity Available (with after-creation preview), Last Slot Warning (`⚡ Final Case Allowance`), Limit Reached Explanatory Card (`[Back to Cases]` / `[View Upgrade Options ↗]`), and Expired/Unlicensed Gate.
-  3. Deletion warning modal explicitly confirming that deleting a local case does not restore the consumed annual allowance.
-  4. Alternative source status badges refined to `(Superseded)` and `(Not selected)`.
-  5. Consistent customer terminology: `client tax-year case(s)`.
-- **Validation:** 11/11 Validation Gates PASS (359 automated tests green). Zero test regressions.
-- **Lineage:** Candidate 12 (`cdbc94f...`) preserved for historical reference; Candidate 13 (`cea63d6...`) incorporates `CASE-CAP-UX-001`.
+### Governance Record: `CASE-CAP-UX-001` (Commercial UX Completion of CASE-CAP-001 — Final Adjudication)
+- **Authorization:** Authorized narrow commercial-comprehension amendment prior to UAT-29 unassisted validation.
+- **Scope:** Edge web dashboard (`apps/web-dashboard/index.html`), marketing portal (`apps/web-marketing/`), and catalog schemas. Zero engine, SQLite database, or pricing logic drift.
+- **Adjudicated Scope Decisions:**
+  1. **Always-visible case meter in top nav:** Plan tier, monotonic usage (`billable_cases_count / max_cases_per_installation`), accessible `role="progressbar" aria-valuemin="0" aria-valuemax="10" aria-valuenow="6"` attributes, compact label (`6 / 10 cases used`), and tooltip (`1 case = 1 client + 1 tax year · X new cases remain this annual term`).
+  2. **4-state New Case modal:** Capacity Available (with after-creation preview), Final Slot Warning (`⚡ Final Case Allowance`), Limit Reached Explanatory Card (with zero-egress `<a href="https://vaultbasis.com/pricing" target="_blank">` navigation and `[Back to Cases]`), and Expired/Unlicensed Gate.
+  3. **Friendly error translation:** `CASE_CAPACITY_REACHED` translated to: *"Your annual client-case allowance has been used. Existing cases remain available to review, reconcile, and export."*
+  4. **Delete Case Action Scope Discipline:** Newly introduced Delete Case buttons and modals removed to avoid workflow expansion. Canonical rule preserved in copy: *"Deleting an existing case does not restore its annual case allowance."*
+  5. **Marketing standardization:** Standardized to *"Up to 10/50 new client tax-year cases per annual term"* and canonical definition *"1 case = 1 client + 1 tax year"*.
+- **Candidate Lineage Transition:**
+  - `Candidate 12`: Historical frozen regression baseline (superseded for pre-sign release use once Candidate 13 is fully packaged and qualified).
+  - `Candidate 13` (macOS) & `WIN-CANDIDATE-04` (Windows): Release candidate targets incorporating `CASE-CAP-UX-001`.
+  - Physical and human pre-sign gates (`UAT-29`, `PLAT-WIN-01B`, `SEC-01`, `UAT-22`) target Candidate 13 / WIN-CANDIDATE-04.
 
 ---
 
 ## 4. Operational Ingestion & Closure Handlers
 
 ### A. Windows Physical Session (`PLAT-WIN-01B`) & Installed Executable SHA
-When operator completes physical execution on WIN-CANDIDATE-03, record:
+When operator completes physical execution on WIN-CANDIDATE-04, record:
 - Installed `VaultBasis.exe` SHA-256 via `Get-FileHash "$env:LOCALAPPDATA\VaultBasis\VaultBasis.exe" -Algorithm SHA256`.
 - 19-point physical UX checklist results.
 - **Runtime Equivalence Disposition:**
-  - Verify UAT-30 cross-platform fact parity against Candidate 12.
-- **Closure:** If all pass $\rightarrow$ `WIN-CANDIDATE-03 = ACTIVE PRE-SIGN WINDOWS BASELINE`, `PLAT-WIN-01 = PRE-SIGN PASS`.
+  - Verify UAT-30 cross-platform fact parity against Candidate 13.
+- **Closure:** If all pass $\rightarrow$ `WIN-CANDIDATE-04 = ACTIVE PRE-SIGN WINDOWS BASELINE`, `PLAT-WIN-01 = PRE-SIGN PASS`.
 
 ### B. Raw Egress Packet Capture (`SEC-01`)
-- Founder executes `sudo tcpdump` on macOS covering Candidate 12.
-- Ingest `sec01_candidate12_capture.pcap`, metadata JSON, and analysis JSON.
-- Bound claim: *No unexpected VaultBasis-process-owned non-loopback outbound traffic was observed during the qualified Candidate 12 capture interval.*
+- Founder executes `sudo tcpdump` on macOS covering Candidate 13.
+- Ingest `sec01_candidate13_capture.pcap`, metadata JSON, and analysis JSON.
+- Bound claim: *No unexpected VaultBasis-process-owned non-loopback outbound traffic was observed during the qualified Candidate 13 capture interval.*
 - Close `SEC-01 = PASS`.
 
 ### C. Unassisted Practitioner Validation (`UAT-29`)
-- External CPA/EA runs unassisted session using standard customer guides only.
+- External CPA/EA runs unassisted session on Candidate 13 using standard customer guides only.
 - Ingest participant environment, timestamps, and zero-intervention record $\rightarrow$ Close `UAT-29 = PASS`.
 
 ### D. Human Review Lifecycle Validation (`UAT-22`)
-- Execute practitioner review workflow (review state transitions, findings dispositions, immutable deterministic truth).
+- Execute practitioner review workflow on Candidate 13 (review state transitions, findings dispositions, immutable deterministic truth).
 - Ingest review session evidence $\rightarrow$ Close `UAT-22 = PASS`.
 
 ### E. Counsel Determinations (`LEGAL-001..003, 008, 009, 011..013, 015`)
@@ -139,17 +141,17 @@ When operator completes physical execution on WIN-CANDIDATE-03, record:
 Signing is authorized **only** when all six prerequisites are satisfied:
 
 ```text
-[ ] PLAT-WIN-01B PASS (Physical Windows session complete on WIN-CANDIDATE-03)
+[ ] PLAT-WIN-01B PASS (Physical Windows session complete on WIN-CANDIDATE-04)
 [ ] Installed Windows VaultBasis.exe SHA-256 captured & bound
-[ ] WIN-CANDIDATE-03 UAT-30 applicability confirmed via runtime equivalence
-[ ] SEC-01 raw continuous packet capture PASS (sudo tcpdump pcap on macOS on Candidate 12)
-[ ] UAT-29 first qualified unassisted practitioner PASS
-[ ] UAT-22 human review lifecycle PASS
+[ ] WIN-CANDIDATE-04 UAT-30 applicability confirmed via runtime equivalence
+[ ] SEC-01 raw continuous packet capture PASS (sudo tcpdump pcap on macOS on Candidate 13)
+[ ] UAT-29 first qualified unassisted practitioner PASS (on Candidate 13)
+[ ] UAT-22 human review lifecycle PASS (on Candidate 13)
 
 ===> CONVENE FORMAL MMP1.5 PRE-SIGN AUTHORIZATION REVIEW
 ===> Authorize Production Signing:
-     - Candidate 12     -> MAC-SIGNED-RC1 (Apple Developer ID + Notarization + Stapling)
-     - WIN-CANDIDATE-03 -> WIN-SIGNED-RC1 (Microsoft Trusted Signing + RFC 3161 Timestamp)
+     - Candidate 13     -> MAC-SIGNED-RC1 (Apple Developer ID + Notarization + Stapling)
+     - WIN-CANDIDATE-04 -> WIN-SIGNED-RC1 (Microsoft Trusted Signing + RFC 3161 Timestamp)
 ```
 ```
 

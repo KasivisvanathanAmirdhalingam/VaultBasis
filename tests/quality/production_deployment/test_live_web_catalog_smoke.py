@@ -39,10 +39,10 @@ REQUIRED_SUBSTRINGS = [
     "Up to 3 evaluation client tax-year cases",
     "Practitioner",
     "$499",
-    "Up to 10 client tax-year cases",
+    "Up to 10 new client tax-year cases",
     "Firm",
     "$1,499",
-    "Up to 50 client tax-year cases",
+    "Up to 50 new client tax-year cases",
     "Enterprise",
     "Custom / high-volume case capacity",
 ]
