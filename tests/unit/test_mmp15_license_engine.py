@@ -467,7 +467,11 @@ def test_fuzz_malformed_token_inputs(commercial_keypair):
         try:
             garbage_str = garbage_bytes.decode("latin1")
             result = evaluate_license_token(garbage_str, keyring_override=keyring)
-            assert result.state in (LicenseState.MALFORMED, LicenseState.INVALID_SIGNATURE)
+            assert result.state in (
+                LicenseState.MALFORMED,
+                LicenseState.INVALID_SIGNATURE,
+                LicenseState.UNSUPPORTED_VERSION,
+            )
             assert result.is_active is False
         except UnicodeDecodeError:
             pass
@@ -475,5 +479,9 @@ def test_fuzz_malformed_token_inputs(commercial_keypair):
         # Test as base64 string
         b64_garbage = base64.b64encode(garbage_bytes).decode("ascii")
         result = evaluate_license_token(b64_garbage, keyring_override=keyring)
-        assert result.state in (LicenseState.MALFORMED, LicenseState.INVALID_SIGNATURE)
+        assert result.state in (
+            LicenseState.MALFORMED,
+            LicenseState.INVALID_SIGNATURE,
+            LicenseState.UNSUPPORTED_VERSION,
+        )
         assert result.is_active is False

@@ -196,12 +196,35 @@ def run_pytest_gate(
             duration_sec=dur,
         )
     else:
-        # Extract first failure line
-        first_fail = "Test assertion failed"
+        # Extract failure lines and print full diagnostic to console
+        failures = []
         for line in output.splitlines():
-            if line.startswith("FAILED "):
-                first_fail = line.replace("FAILED ", "").strip()
-                break
+            if line.startswith("FAILED ") or line.startswith("ERROR "):
+                failures.append(line.strip())
+
+        first_fail = (
+            failures[0].replace("FAILED ", "").replace("ERROR ", "").strip()
+            if failures
+            else "Test assertion failed"
+        )
+
+        if failures:
+            print(
+                f"\n{RED}❌ GATE FAILURE: {gate_id} ({category}) — {len(failures)} failure(s) detected:{RESET}",
+                file=sys.stderr,
+            )
+            for f_line in failures[:10]:
+                print(f"  • {f_line}", file=sys.stderr)
+            if len(failures) > 10:
+                print(f"  ... and {len(failures) - 10} more", file=sys.stderr)
+            print("", file=sys.stderr)
+
+        # In summary table, prioritize showing the failing test identifier directly
+        cause_summary = (
+            first_fail[:42]
+            if first_fail != "Test assertion failed"
+            else potential_cause_hint
+        )
 
         return GateResult(
             gate_id=gate_id,
@@ -211,7 +234,7 @@ def run_pytest_gate(
             expected=expected_desc,
             actual=f"{failed} failures, {passed} passed",
             status="FAIL",
-            potential_cause=f"{potential_cause_hint}: {first_fail[:50]}",
+            potential_cause=cause_summary,
             duration_sec=dur,
         )
 
